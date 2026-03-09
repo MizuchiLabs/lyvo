@@ -1,9 +1,10 @@
-import { ChevronRight, GithubIcon } from "lucide-react";
+import { ChevronRight, Menu } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { GitHubIcon } from "./GitHubIcon";
 import { cn } from "../lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "./ui/sheet";
-import { Menu } from "lucide-react";
 import { useState } from "react";
+import { SITE } from "../config";
 
 interface SidebarProps {
   categories: Record<string, any[]>;
@@ -12,8 +13,8 @@ interface SidebarProps {
 
 export function SidebarNav({ categories, currentPath }: SidebarProps) {
   return (
-    <>
-      <div className="w-full flex-1 overflow-y-auto px-4 py-4">
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      <div className="scrollbar-none flex-1 overflow-y-auto px-4 py-4">
         {Object.entries(categories).map(([category, items]) => {
           const isCategoryActive = items.some((doc) => {
             const href = `/docs/${doc.id}`;
@@ -36,7 +37,7 @@ export function SidebarNav({ categories, currentPath }: SidebarProps) {
                     size={16}
                   />
                 </summary>
-                <div className="mt-1 ml-2 flex flex-col gap-1 border-l border-border/70 pl-4 text-sm">
+                <div className="mt-1 ml-4 flex flex-col gap-1 border-l border-border/70 pl-2 text-sm">
                   {items.map((doc) => {
                     const href = `/docs/${doc.id}`;
                     const isActive = currentPath === href || currentPath === href + "/";
@@ -61,24 +62,24 @@ export function SidebarNav({ categories, currentPath }: SidebarProps) {
           );
         })}
       </div>
-      <div className="mt-auto p-2 pb-4 border-t border-border/40">
+      <div className="mt-auto shrink-0 border-t border-border/40 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <a
-              href="https://github.com"
+              href={SITE.github}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               title="GitHub"
             >
-              <GithubIcon className="h-5 w-5" />
+              <GitHubIcon className="text-foreground" />
               <span className="sr-only">GitHub</span>
             </a>
           </div>
           <ThemeToggle />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -97,11 +98,24 @@ export function MobileSidebar({ categories, currentPath }: SidebarProps) {
           </button>
         }
       />
-      <SheetContent side="left" className="flex w-[80vw] flex-col p-0 sm:w-80">
-        <SheetHeader className="border-b border-border/40 p-4 text-left">
-          <SheetTitle className="font-bold">Lyvo Docs</SheetTitle>
+      <SheetContent
+        side="left"
+        className="flex w-72 flex-col rounded-none! border-r border-border/40 p-0"
+      >
+        <SheetHeader className="flex h-14 shrink-0 flex-row items-center border-b border-border/40 px-6 py-0 text-left">
+          <SheetTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
+            {(SITE.logo.type === "logo" || SITE.logo.type === "both") && (
+              <img
+                src={`/src/assets/${SITE.logo.src}`}
+                alt={`${SITE.title} Logo`}
+                width={SITE.logo.width}
+                height={SITE.logo.height}
+              />
+            )}
+            {(SITE.logo.type === "text" || SITE.logo.type === "both") && <span>{SITE.title}</span>}
+          </SheetTitle>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto pl-4">
+        <div className="flex flex-1 flex-col overflow-hidden">
           <SidebarNav categories={categories} currentPath={currentPath} />
         </div>
       </SheetContent>

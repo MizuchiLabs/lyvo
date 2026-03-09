@@ -2,17 +2,17 @@
 
 Lyvo is a highly polished, minimalistic, and modern documentation generator built on top of [Astro](https://astro.build/). It draws inspiration from beautiful documentation tools like Fumadocs and Mintlify, providing a solid foundation to build your own custom documentation sites quickly.
 
-## ✨ Features
+## Features
 
-- ⚡️ **Blazing Fast**: Powered by Astro and Vite for instant load times.
-- 🎨 **Modern Design**: Clean typography and UI inspired by modern developer tools.
-- 🌙 **Dark Mode**: Fully supported out of the box with a slick theme toggle.
-- 🔎 **Full Text Search**: Built-in blazing fast search powered by Pagefind.
-- 🧩 **Rich Components**: Includes `Tabs`, `Steps`, `Callout`, and `CodeBlock` components.
-- 💅 **shadcn/ui**: Easy to extend and maintain, leveraging Tailwind CSS v4 and React.
-- 📝 **MDX Support**: Write content using MDX for ultimate flexibility.
+- **Blazing Fast**: Powered by Astro and Vite for instant load times.
+- **Modern Design**: Clean typography and UI inspired by modern developer tools.
+- **Dark Mode**: Fully supported out of the box with a slick theme toggle.
+- **Full Text Search**: Built-in blazing fast search powered by Pagefind.
+- **Rich Components**: Includes `Tabs`, `Steps`, `Callout`, and `CodeBlock` components.
+- **shadcn/ui**: Easy to extend and maintain, leveraging Tailwind CSS v4 and React.
+- **MDX Support**: Write content using MDX for ultimate flexibility.
 
-## 🚀 Getting Started
+## Getting Started
 
 1. **Clone the repository** (or use it as a template)
 2. **Install dependencies**:
@@ -25,7 +25,7 @@ Lyvo is a highly polished, minimalistic, and modern documentation generator buil
    ```
 4. **View your site** at `http://localhost:4321`
 
-## 🛠️ Usage
+## Usage
 
 ### Folder Structure
 
@@ -48,7 +48,7 @@ order: 1
 ---
 ```
 
-## 🧩 Components
+## Components
 
 Lyvo comes with a few essential components specifically tailored for documentation:
 
@@ -57,7 +57,7 @@ Lyvo comes with a few essential components specifically tailored for documentati
 - `<Callout />`: Useful for warnings, info, or tips (success, danger, warning, default).
 - `<CodeBlock />`: Beautiful code highlighting with a copy-to-clipboard button.
 
-## 📦 Building for Production
+## Building for Production
 
 ```bash
 pnpm build
@@ -65,10 +65,10 @@ pnpm build
 
 This command builds your Astro project and subsequently indexes the static output with `pagefind` to enable search.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issues, and feature requests are welcome!
 
-## 📄 License
+## License
 
 MIT

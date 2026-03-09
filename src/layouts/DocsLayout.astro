@@ -5,6 +5,7 @@ import { ChevronRight, AlignLeft } from 'lucide-react';
 import { getCollection } from 'astro:content';
 import Search from '../components/Search';
 import { SidebarNav, MobileSidebar } from '../components/Sidebar';
+import { SITE } from '../config';
 
 interface Props {
 	title: string;
@@ -40,7 +41,7 @@ const currentPath = Astro.url.pathname;
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>{title} - Docs</title>
+		<title>{title} - {SITE.title}</title>
 		<ClientRouter />
 		<script is:inline>
 			function applyTheme() {
@@ -71,23 +72,51 @@ const currentPath = Astro.url.pathname;
 	>
 		{/* MOBILE HEADER */}
 		<header
-			class="flex h-14 shrink-0 items-center justify-between border-b border-border/40 bg-background px-4 md:hidden"
+			class="flex h-14 shrink-0 items-center gap-2 border-b border-border/40 bg-background px-4 md:hidden"
 		>
 			<MobileSidebar client:load categories={categories} currentPath={currentPath} />
-
-			<div class="w-56">
+			<a href="/" class="flex items-center gap-2 text-lg font-bold tracking-tight">
+				{
+					(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
+						<img
+							src={`/src/assets/${SITE.logo.src}`}
+							alt={`${SITE.title} Logo`}
+							width={SITE.logo.width}
+							height={SITE.logo.height}
+						/>
+					)
+				}
+				{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
+			</a>
+			<div class="ml-auto w-40 sm:w-56">
 				<Search client:load />
 			</div>
 		</header>
 
 		{/* DESKTOP SIDEBAR  */}
-		<aside class="hidden w-65 flex-col px-4 md:flex lg:w-70">
+		<aside class="hidden w-72 shrink-0 flex-col md:flex">
 			{/* App Header / Logo */}
-			<div class="flex h-16 shrink-0 items-center px-4">
-				<a href="/" class="text-lg font-bold tracking-tight">Acme Docs</a>
+			<div class="flex h-14 shrink-0 items-center px-6">
+				<a href="/" class="flex items-center gap-3 text-lg font-bold tracking-tight">
+					{
+						(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
+							<img
+								src={`/src/assets/${SITE.logo.src}`}
+								alt={`${SITE.title} Logo`}
+								width={SITE.logo.width}
+								height={SITE.logo.height}
+							/>
+						)
+					}
+					{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
+				</a>
 			</div>
-			<Search client:load />
-			<SidebarNav client:load categories={categories} currentPath={currentPath} />
+			<div class="px-4 pt-2 pb-2">
+				<Search client:load />
+			</div>
+			<div class="flex flex-1 flex-col overflow-hidden">
+				<SidebarNav client:load categories={categories} currentPath={currentPath} />
+			</div>
 		</aside>
 
 		{/* MAIN CONTENT WRAPPER */}
@@ -98,7 +127,7 @@ const currentPath = Astro.url.pathname;
 			{/* THE SCROLLABLE CONTENT BLOCK */}
 			<main
 				id="main-scroll-area"
-				class="relative no-scrollbar flex-1 overflow-y-auto bg-muted/20 md:rounded-2xl md:border md:border-border/50 md:shadow-sm"
+				class="relative no-scrollbar flex-1 overflow-y-auto bg-muted/20 md:rounded-2xl md:shadow-sm"
 			>
 				{/* Inner container to constrain text width so it's readable on ultra-wides */}
 				<div

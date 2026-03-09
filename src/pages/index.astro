@@ -1,8 +1,10 @@
 ---
 import { Button } from '../components/ui/button.tsx';
-import '../styles/global.css';
-import { ArrowRight, BookText, GithubIcon } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { GitHubIcon } from '../components/GitHubIcon.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
+import '../styles/global.css';
+import { SITE } from '../config.ts';
 ---
 
 <!doctype html>
@@ -10,7 +12,7 @@ import ThemeToggle from '../components/ThemeToggle.tsx';
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<title>Lyvo - Modern Documentation Generator</title>
+		<title>{SITE.title} - Modern Documentation Generator</title>
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<script is:inline>
 			// Theme setup
@@ -37,14 +39,23 @@ import ThemeToggle from '../components/ThemeToggle.tsx';
 	<body class="min-h-screen bg-background font-sans text-foreground antialiased">
 		<div class="relative flex min-h-screen flex-col">
 			<header
-				class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+				class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
 			>
 				<div
 					class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
 				>
-					<div class="flex items-center space-x-2 font-bold">
-						<BookText className="h-5 w-5 text-primary" />
-						<span>Lyvo Docs</span>
+					<div class="flex items-center gap-2 text-lg font-bold">
+						{
+							(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
+								<img
+									src={`/src/assets/${SITE.logo.src}`}
+									alt={`${SITE.title} Logo`}
+									width={SITE.logo.width}
+									height={SITE.logo.height}
+								/>
+							)
+						}
+						{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
 					</div>
 					<div class="flex items-center space-x-4">
 						<ThemeToggle client:load />
@@ -65,9 +76,8 @@ import ThemeToggle from '../components/ThemeToggle.tsx';
 					<div
 						class="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 					>
-						✨ Welcome to Lyvo
+						✨ Welcome to {SITE.title}
 					</div>
-
 					<h1
 						class="mb-6 text-4xl font-extrabold tracking-tight text-balance text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
 					>
@@ -89,13 +99,13 @@ import ThemeToggle from '../components/ThemeToggle.tsx';
 								Get Started <ArrowRight className="h-4 w-4" />
 							</Button>
 						</a>
-						<a href="https://github.com" target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+						<a href={SITE.github} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
 							<Button
 								variant="outline"
 								size="lg"
 								className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
 							>
-								<GithubIcon className="h-4 w-4" /> View on GitHub
+								<GitHubIcon className="text-foreground" /> View on GitHub
 							</Button>
 						</a>
 					</div>

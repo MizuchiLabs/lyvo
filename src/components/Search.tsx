@@ -50,7 +50,7 @@ export default function Search() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="relative inline-flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:pr-12 md:w-56 self-center"
+        className="relative inline-flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:pr-12"
       >
         <span className="inline-flex">Search...</span>
         <kbd className="pointer-events-none absolute top-1/2 right-1.5 hidden h-5 -translate-y-1/2 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
