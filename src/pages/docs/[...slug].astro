@@ -1,6 +1,13 @@
 ---
 import { getCollection, render } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import Callout from '../../components/Callout.tsx';
+import CodeBlockWrapper from '../../components/CodeBlockWrapper.astro';
+import { Step, Steps } from '../../components/Steps.tsx';
+import Tabs from '../../components/Tabs.tsx';
 
 export async function getStaticPaths() {
   const docs = await getCollection('docs');
@@ -13,45 +20,191 @@ export async function getStaticPaths() {
 const { entry, docs } = Astro.props;
 const { Content, headings } = await render(entry);
 
+const components = {
+  Callout,
+  pre: CodeBlockWrapper,
+  Steps,
+  Step,
+  Tabs,
+};
+
 // Sort docs for Prev/Next
 const sortedDocs = [...docs].sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
-const currentIndex = sortedDocs.findIndex(d => d.id === entry.id);
+const currentIndex = sortedDocs.findIndex((d) => d.id === entry.id);
 const prevDoc = currentIndex > 0 ? sortedDocs[currentIndex - 1] : null;
 const nextDoc = currentIndex < sortedDocs.length - 1 ? sortedDocs[currentIndex + 1] : null;
 
 // Build TOC
-const filteredHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// Last updated
+let lastUpdated = '';
+try {
+	const filePath = path.join(process.cwd(), 'src/content/docs', entry.id);
+	const stats = fs.statSync(filePath);
+	lastUpdated = new Intl.DateTimeFormat('en-US', {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric'
+	}).format(stats.mtime);
+} catch (e) {
+	// Ignore
+}
 ---
 
 <DocsLayout title={entry.data.title} description={entry.data.description}>
-  <Content />
+	{
+		lastUpdated && (
+			<div slot="last-updated" class="mt-4 text-sm text-muted-foreground">
+				Last updated on {lastUpdated}
+			</div>
+		)
+	}
 
-  <ul slot="toc" class="m-0 list-none text-muted-foreground">
-    {filteredHeadings.map(heading => (
-      <li class={`mt-0 pt-2 ${heading.depth === 3 ? 'pl-4' : ''}`}>
-        <a 
-          href={`#${heading.slug}`} 
-          class="inline-block no-underline transition-colors hover:text-foreground"
-        >
-          {heading.text}
-        </a>
-      </li>
-    ))}
-  </ul>
+	<Content components={components} />
 
-  <div slot="footer" class="flex flex-row items-center justify-between mt-12 mb-8 border-t border-border pt-8">
-    {prevDoc ? (
-      <a href={`/docs/${prevDoc.id}`} class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
-        {prevDoc.data.title}
-      </a>
-    ) : <div></div>}
+	<ul slot="toc" class="relative z-10 m-0 list-none text-muted-foreground">
+		{
+			filteredHeadings.map((heading) => (
+				<li class="mt-0 pt-2">
+					<a
+						href={`#${heading.slug}`}
+						class={`toc-link -ml-[1px] inline-block border-l-2 border-transparent pl-4 text-sm no-underline transition-colors hover:text-foreground ${heading.depth === 3 ? 'ml-2' : ''}`}
+					>
+						{heading.text}
+					</a>
+				</li>
+			))
+		}
+	</ul>
 
-    {nextDoc ? (
-      <a href={`/docs/${nextDoc.id}`} class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 ml-auto">
-        {nextDoc.data.title}
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 h-4 w-4"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-    ) : <div></div>}
-  </div>
+	<div
+		slot="footer"
+		class="mt-12 mb-8 grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2"
+	>
+		{
+			prevDoc ? (
+				<a
+					href={`/docs/${prevDoc.id}`}
+					class="group flex flex-col justify-center rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+				>
+					<div class="mb-2 flex items-center text-sm font-medium text-muted-foreground">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1"
+						>
+							<path d="m15 18-6-6 6-6" />
+						</svg>
+						Previous
+					</div>
+					<div class="text-lg font-semibold">{prevDoc.data.title}</div>
+					{prevDoc.data.description && (
+						<div class="mt-1 line-clamp-1 text-sm text-muted-foreground">
+							{prevDoc.data.description}
+						</div>
+					)}
+				</a>
+			) : (
+				<div />
+			)
+		}
+
+		{
+			nextDoc ? (
+				<a
+					href={`/docs/${nextDoc.id}`}
+					class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-6 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+				>
+					<div class="mb-2 flex items-center justify-end text-sm font-medium text-muted-foreground">
+						Next
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+						>
+							<path d="m9 18 6-6-6-6" />
+						</svg>
+					</div>
+					<div class="text-lg font-semibold">{nextDoc.data.title}</div>
+					{nextDoc.data.description && (
+						<div class="mt-1 line-clamp-1 text-sm text-muted-foreground">
+							{nextDoc.data.description}
+						</div>
+					)}
+				</a>
+			) : (
+				<div />
+			)
+		}
+	</div>
 </DocsLayout>
+
+<script>
+	function initScrollspy() {
+		const headings = document.querySelectorAll('article h2, article h3');
+		if (!headings.length) return;
+
+		let activeId = '';
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						activeId = entry.target.getAttribute('id');
+						updateToc();
+					}
+				});
+			},
+			{ rootMargin: '-10% 0px -70% 0px' }
+		);
+
+		headings.forEach((heading) => observer.observe(heading));
+
+		function updateToc() {
+			if (!activeId) return;
+			const activeLink = document.querySelector(`.toc-link[href="#${activeId}"]`);
+			if (activeLink) {
+				document.querySelectorAll('.toc-link').forEach((link) => {
+					link.classList.remove('text-foreground', 'border-foreground', 'font-medium');
+					link.classList.add('text-muted-foreground', 'border-transparent');
+				});
+				activeLink.classList.remove('text-muted-foreground', 'border-transparent');
+				activeLink.classList.add('text-foreground', 'border-foreground', 'font-medium');
+			}
+		}
+
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (window.innerHeight + Math.round(window.scrollY) >= document.body.offsetHeight - 50) {
+					const lastHeading = headings[headings.length - 1];
+					if (lastHeading) {
+						activeId = lastHeading.getAttribute('id');
+						updateToc();
+					}
+				}
+			},
+			{ passive: true }
+		);
+	}
+
+	// Run on initial load
+	initScrollspy();
+	// Run on Astro view transitions if they were enabled (good practice)
+	document.addEventListener('astro:page-load', initScrollspy);
+</script>
