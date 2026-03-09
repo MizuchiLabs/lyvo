@@ -1,0 +1,88 @@
+---
+title: Components
+description: A showcase of the available custom components.
+order: 3
+category: Components
+---
+
+import Callout from '../../components/Callout.tsx';
+import { Steps, Step } from '../../components/Steps.tsx';
+import Tabs from '../../components/Tabs.tsx';
+
+# Custom Components
+
+This documentation boilerplate includes a set of custom MDX components styled to match the Shadcn aesthetic.
+
+## Callouts
+
+You can use callouts to draw attention to important information.
+
+<Callout type="default" title="Note">
+This is a standard default callout.
+</Callout>
+
+<Callout type="warning" title="Warning">
+Make sure you read this before proceeding.
+</Callout>
+
+<Callout type="danger" title="Danger">
+This action is destructive and cannot be undone.
+</Callout>
+
+<Callout type="success" title="Success">
+Your installation was completed successfully.
+</Callout>
+
+## Code Blocks
+
+Code blocks automatically get syntax highlighting via `rehype-pretty-code` and Shiki. They also feature a beautiful copy button!
+
+```tsx showLineNumbers
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Clicked {count} times
+    </button>
+  );
+}
+```
+
+## Steps
+
+You can use the `<Steps>` and `<Step>` components to create beautiful vertical tutorials.
+
+<Steps>
+
+<Step title="Create a new file">
+Create a new file in your `src/content/docs` directory.
+</Step>
+
+<Step title="Add frontmatter">
+Add the required `title` and `description` to the top of the file.
+</Step>
+
+<Step title="Write some content">
+Start writing your markdown or MDX content right below the frontmatter.
+</Step>
+
+</Steps>
+
+## Images
+
+Astro automatically optimizes images you drop into your markdown files out of the box using Vite and its native image service.
+
+![Astro background image](../../assets/background.svg)
+
+## Tabs
+
+Tabs are useful for displaying different code snippets or instructions for different platforms.
+
+<Tabs client:load items={[
+  { label: 'npm', value: 'npm', content: 'npm install my-package' },
+  { label: 'pnpm', value: 'pnpm', content: 'pnpm add my-package' },
+  { label: 'yarn', value: 'yarn', content: 'yarn add my-package' },
+]} />
