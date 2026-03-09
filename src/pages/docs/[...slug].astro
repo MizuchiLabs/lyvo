@@ -3,29 +3,28 @@ import { getCollection, render } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 import fs from 'node:fs';
 import path from 'node:path';
-
 import Callout from '../../components/Callout.tsx';
 import CodeBlockWrapper from '../../components/CodeBlockWrapper.astro';
 import { Step, Steps } from '../../components/Steps.tsx';
 import Tabs from '../../components/Tabs.tsx';
 
 export async function getStaticPaths() {
-  const docs = await getCollection('docs');
-  return docs.map(entry => ({
-    params: { slug: entry.id },
-    props: { entry, docs },
-  }));
+	const docs = await getCollection('docs');
+	return docs.map((entry) => ({
+		params: { slug: entry.id },
+		props: { entry, docs }
+	}));
 }
 
 const { entry, docs } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const components = {
-  Callout,
-  pre: CodeBlockWrapper,
-  Steps,
-  Step,
-  Tabs,
+	Callout,
+	pre: CodeBlockWrapper,
+	Steps,
+	Step,
+	Tabs
 };
 
 // Sort docs for Prev/Next
@@ -63,30 +62,111 @@ try {
 
 	<Content components={components} />
 
-	<ul slot="toc" class="relative z-10 m-0 list-none text-muted-foreground">
-		{
-			filteredHeadings.map((heading) => (
-				<li class="mt-0 pt-2">
-					<a
-						href={`#${heading.slug}`}
-						class={`toc-link -ml-[1px] inline-block border-l-2 border-transparent pl-4 text-sm no-underline transition-colors hover:text-foreground ${heading.depth === 3 ? 'ml-2' : ''}`}
-					>
-						{heading.text}
-					</a>
-				</li>
-			))
-		}
-	</ul>
+	<div slot="toc" class="toc-container relative z-10 text-muted-foreground select-none">
+		<div class="relative z-10 flex w-full flex-col">
+			{
+				filteredHeadings.map((heading, i) => {
+					const upper = filteredHeadings[i - 1]?.depth ?? heading.depth;
+					const lower = filteredHeadings[i + 1]?.depth ?? heading.depth;
+
+					const getLineOffset = (depth: number) => (depth >= 3 ? 12 : 0);
+					const getPadding = (depth: number) => (depth >= 3 ? 'pl-7' : 'pl-4');
+
+					const offset = getLineOffset(heading.depth);
+					const upperOffset = getLineOffset(upper);
+					const lowerOffset = getLineOffset(lower);
+
+					return (
+						<a
+							href={`#${heading.slug}`}
+							data-id={heading.slug}
+							class={`toc-link group relative py-1.5 text-sm no-underline transition-colors hover:text-foreground ${getPadding(heading.depth)}`}
+						>
+							{offset !== upperOffset && (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 16 16"
+									class="pointer-events-none absolute -top-1.5 left-0 h-4 w-4"
+								>
+									<line
+										x1={upperOffset}
+										y1="0"
+										x2={offset}
+										y2="12"
+										class="stroke-border"
+										stroke-width="1"
+									/>
+								</svg>
+							)}
+							<div
+								class={`absolute w-px bg-border transition-colors group-hover:bg-foreground/50 ${offset !== upperOffset ? 'top-1.5' : 'top-0'} ${offset !== lowerOffset ? 'bottom-1.5' : 'bottom-0'} pointer-events-none`}
+								style={`left: ${offset}px`}
+							/>
+							<span class="relative z-10">{heading.text}</span>
+						</a>
+					);
+				})
+			}
+		</div>
+
+		<div
+			class="toc-highlight-layer pointer-events-none absolute top-0 left-0 z-20 flex h-full w-full flex-col transition-all duration-300 ease-out"
+			style="clip-path: inset(0 0 100% 0);"
+			aria-hidden="true"
+		>
+			{
+				filteredHeadings.map((heading, i) => {
+					const upper = filteredHeadings[i - 1]?.depth ?? heading.depth;
+					const lower = filteredHeadings[i + 1]?.depth ?? heading.depth;
+
+					const getLineOffset = (depth: number) => (depth >= 3 ? 12 : 0);
+					const getPadding = (depth: number) => (depth >= 3 ? 'pl-7' : 'pl-4');
+
+					const offset = getLineOffset(heading.depth);
+					const upperOffset = getLineOffset(upper);
+					const lowerOffset = getLineOffset(lower);
+
+					return (
+						<div class={`relative py-1.5 text-sm ${getPadding(heading.depth)}`}>
+							{offset !== upperOffset && (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 16 16"
+									class="absolute -top-1.5 left-0 h-4 w-4"
+								>
+									{/* Thickened stroke so the active diagonal pops nicely */}
+									<line
+										x1={upperOffset}
+										y1="0"
+										x2={offset}
+										y2="12"
+										class="stroke-foreground"
+										stroke-width="1.5"
+									/>
+								</svg>
+							)}
+							<div
+								class={`absolute w-px bg-foreground ${offset !== upperOffset ? 'top-1.5' : 'top-0'} ${offset !== lowerOffset ? 'bottom-1.5' : 'bottom-0'}`}
+								style={`left: ${offset}px`}
+							/>
+							{/* Transparent text perfectly mimics the height of the real links in case they wrap into two lines */}
+							<span class="text-transparent select-none">{heading.text}</span>
+						</div>
+					);
+				})
+			}
+		</div>
+	</div>
 
 	<div
 		slot="footer"
-		class="mt-12 mb-8 grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2"
+		class="mt-12 grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2"
 	>
 		{
 			prevDoc ? (
 				<a
 					href={`/docs/${prevDoc.id}`}
-					class="group flex flex-col justify-center rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+					class="group flex flex-col justify-center rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
 				>
 					<div class="mb-2 flex items-center text-sm font-medium text-muted-foreground">
 						<svg
@@ -121,7 +201,7 @@ try {
 			nextDoc ? (
 				<a
 					href={`/docs/${nextDoc.id}`}
-					class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-6 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+					class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-5 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
 				>
 					<div class="mb-2 flex items-center justify-end text-sm font-medium text-muted-foreground">
 						Next
@@ -160,41 +240,69 @@ try {
 		if (!headings.length) return;
 
 		let activeId = '';
+		const mainScrollArea = document.querySelector('#main-scroll-area');
+		const container = document.querySelector('.toc-container') as HTMLElement | null;
+		const highlightLayer = document.querySelector('.toc-highlight-layer') as HTMLElement | null;
 
 		const observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-						activeId = entry.target.getAttribute('id');
+						activeId = entry.target.getAttribute('id') || '';
 						updateToc();
 					}
 				});
 			},
-			{ rootMargin: '-10% 0px -70% 0px' }
+			{ root: mainScrollArea, rootMargin: '-10% 0px -70% 0px' }
 		);
 
 		headings.forEach((heading) => observer.observe(heading));
 
+		if (!activeId && headings.length > 0) {
+			activeId = headings[0].getAttribute('id') || '';
+			// Use setTimeout to allow DOM/styles to settle before calculating clip-path
+			setTimeout(updateToc, 50);
+		}
+
 		function updateToc() {
-			if (!activeId) return;
-			const activeLink = document.querySelector(`.toc-link[href="#${activeId}"]`);
+			if (!activeId || !container || !highlightLayer) return;
+
+			const activeLink = document.querySelector(`.toc-link[data-id="${activeId}"]`);
+
 			if (activeLink) {
+				// Update text colors for the base layer
 				document.querySelectorAll('.toc-link').forEach((link) => {
-					link.classList.remove('text-foreground', 'border-foreground', 'font-medium');
-					link.classList.add('text-muted-foreground', 'border-transparent');
+					link.classList.remove('text-foreground', 'font-medium');
+					link.classList.add('text-muted-foreground');
 				});
-				activeLink.classList.remove('text-muted-foreground', 'border-transparent');
-				activeLink.classList.add('text-foreground', 'border-foreground', 'font-medium');
+				activeLink.classList.remove('text-muted-foreground');
+				activeLink.classList.add('text-foreground', 'font-medium');
+
+				// Calculate position for the clipping mask
+				const containerRect = container.getBoundingClientRect();
+				const linkRect = activeLink.getBoundingClientRect();
+
+				// Get the top and bottom offsets relative to the TOC container
+				const topInset = linkRect.top - containerRect.top;
+				const bottomInset = containerRect.bottom - linkRect.bottom;
+
+				// Slide the window down to perfectly frame only the active section of the Highlight Layer
+				highlightLayer.style.clipPath = `inset(${topInset}px 0 ${bottomInset}px 0)`;
 			}
 		}
 
-		window.addEventListener(
+		mainScrollArea?.addEventListener(
 			'scroll',
-			() => {
-				if (window.innerHeight + Math.round(window.scrollY) >= document.body.offsetHeight - 50) {
+			(e) => {
+				const target = e.target as HTMLElement;
+				const isScrollable = target.scrollHeight > target.clientHeight;
+				const isAtBottom =
+					target.clientHeight + Math.round(target.scrollTop) >= target.scrollHeight - 50;
+
+				if (isScrollable && isAtBottom) {
 					const lastHeading = headings[headings.length - 1];
 					if (lastHeading) {
-						activeId = lastHeading.getAttribute('id');
+						activeId = lastHeading.getAttribute('id') || '';
 						updateToc();
 					}
 				}
@@ -203,8 +311,6 @@ try {
 		);
 	}
 
-	// Run on initial load
 	initScrollspy();
-	// Run on Astro view transitions if they were enabled (good practice)
 	document.addEventListener('astro:page-load', initScrollspy);
 </script>

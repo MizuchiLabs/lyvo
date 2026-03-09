@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
-import { Command } from "cmdk";
-import { Search as SearchIcon } from "lucide-react";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./ui/command";
 
 export default function Search() {
   const [open, setOpen] = useState(false);
@@ -26,7 +33,9 @@ export default function Search() {
       }
       try {
         // @ts-ignore
-        const pagefind = await import(window.location.origin + "/pagefind/pagefind.js");
+        const pagefind = await import(
+          /* @vite-ignore */ window.location.origin + "/pagefind/pagefind.js"
+        );
         const searchRes = await pagefind.search(query);
         const data = await Promise.all(searchRes.results.slice(0, 5).map((r: any) => r.data()));
         setResults(data);
@@ -41,66 +50,49 @@ export default function Search() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-between whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+        className="relative inline-flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:pr-12 md:w-56 self-center"
       >
-        <span className="hidden lg:inline-flex">Search documentation...</span>
-        <span className="inline-flex lg:hidden">Search...</span>
-        <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+        <span className="inline-flex">Search...</span>
+        <kbd className="pointer-events-none absolute top-1/2 right-1.5 hidden h-5 -translate-y-1/2 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </button>
 
-      {open && <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm" />}
-      <Command.Dialog
-        open={open}
-        onOpenChange={setOpen}
-        label="Search Docs"
-        className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-border bg-background text-foreground shadow-2xl sm:w-full outline-none"
-      >
-        <div className="flex items-center border-b border-border px-3">
-          <SearchIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-          <Command.Input
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <Command>
+          <CommandInput
             value={query}
             onValueChange={setQuery}
             placeholder="Search documentation..."
-            className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
           />
-        </div>
+          <CommandList>
+            <CommandEmpty>{query ? "No results found." : "Type to search..."}</CommandEmpty>
 
-        <Command.List className="max-h-[300px] overflow-y-auto overflow-x-hidden p-2">
-          <Command.Empty className="py-6 text-center text-sm">
-            {query ? "No results found." : "Type to search..."}
-          </Command.Empty>
-
-          {results.length > 0 && (
-            <Command.Group
-              heading="Results"
-              className="px-2 py-1.5 text-xs font-medium text-muted-foreground"
-            >
-              {results.map((res) => (
-                <Command.Item
-                  key={res.url}
-                  value={res.meta.title}
-                  onSelect={() => {
-                    window.location.href = res.url;
-                    setOpen(false);
-                  }}
-                  className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-[selected=true]:bg-accent aria-[selected=true]:text-accent-foreground data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50"
-                >
-                  <div className="flex flex-col gap-1 w-full text-foreground">
-                    <span className="font-medium text-sm">{res.meta.title}</span>
-                    <span
-                      className="text-xs text-muted-foreground line-clamp-1"
-                      dangerouslySetInnerHTML={{ __html: res.excerpt }}
-                    />
-                  </div>
-                </Command.Item>
-              ))}
-            </Command.Group>
-          )}
-        </Command.List>
-      </Command.Dialog>
+            {results.length > 0 && (
+              <CommandGroup heading="Results">
+                {results.map((res) => (
+                  <CommandItem
+                    key={res.url}
+                    value={res.meta.title}
+                    onSelect={() => {
+                      window.location.href = res.url;
+                      setOpen(false);
+                    }}
+                  >
+                    <div className="flex w-full flex-col gap-1 text-foreground">
+                      <span className="text-sm font-medium">{res.meta.title}</span>
+                      <span
+                        className="line-clamp-1 text-xs text-muted-foreground"
+                        dangerouslySetInnerHTML={{ __html: res.excerpt }}
+                      />
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </>
   );
 }
-

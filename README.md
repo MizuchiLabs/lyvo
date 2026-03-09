@@ -1,46 +1,74 @@
-# Astro Starter Kit: Basics
+# Lyvo - Modern Astro Documentation Template
 
-```sh
-pnpm create astro@latest -- --template basics
+Lyvo is a highly polished, minimalistic, and modern documentation generator built on top of [Astro](https://astro.build/). It draws inspiration from beautiful documentation tools like Fumadocs and Mintlify, providing a solid foundation to build your own custom documentation sites quickly.
+
+## ✨ Features
+
+- ⚡️ **Blazing Fast**: Powered by Astro and Vite for instant load times.
+- 🎨 **Modern Design**: Clean typography and UI inspired by modern developer tools.
+- 🌙 **Dark Mode**: Fully supported out of the box with a slick theme toggle.
+- 🔎 **Full Text Search**: Built-in blazing fast search powered by Pagefind.
+- 🧩 **Rich Components**: Includes `Tabs`, `Steps`, `Callout`, and `CodeBlock` components.
+- 💅 **shadcn/ui**: Easy to extend and maintain, leveraging Tailwind CSS v4 and React.
+- 📝 **MDX Support**: Write content using MDX for ultimate flexibility.
+
+## 🚀 Getting Started
+
+1. **Clone the repository** (or use it as a template)
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+3. **Start the development server**:
+   ```bash
+   pnpm dev
+   ```
+4. **View your site** at `http://localhost:4321`
+
+## 🛠️ Usage
+
+### Folder Structure
+
+- `src/content/docs/`: Your markdown/mdx content lives here. Create folders to organize.
+- `src/components/`: Reusable UI components.
+- `src/layouts/`: Base and Docs layouts.
+
+### Adding New Pages
+
+Simply create a new `.md` or `.mdx` file in `src/content/docs/`. The layout will automatically pick it up and add it to the sidebar based on its category frontmatter property.
+
+**Example Frontmatter:**
+
+```yaml
+---
+title: Introduction
+description: Welcome to Lyvo.
+category: Getting Started
+order: 1
+---
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🧩 Components
 
-## 🚀 Project Structure
+Lyvo comes with a few essential components specifically tailored for documentation:
 
-Inside of your Astro project, you'll see the following folders and files:
+- `<Tabs />`: Great for code snippets or switchable content.
+- `<Steps />`: To guide users through sequential instructions.
+- `<Callout />`: Useful for warnings, info, or tips (success, danger, warning, default).
+- `<CodeBlock />`: Beautiful code highlighting with a copy-to-clipboard button.
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+## 📦 Building for Production
+
+```bash
+pnpm build
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+This command builds your Astro project and subsequently indexes the static output with `pagefind` to enable search.
 
-## 🧞 Commands
+## 🤝 Contributing
 
-All commands are run from the root of the project, from a terminal:
+Contributions, issues, and feature requests are welcome!
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## 📄 License
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+MIT
