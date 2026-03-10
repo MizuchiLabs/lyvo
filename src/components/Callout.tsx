@@ -45,7 +45,7 @@ export default function Callout({ type = "default", title, children }: CalloutPr
       <Icon className={cn("mt-0.5 mr-3 h-5 w-5 shrink-0", types[type].iconClass)} />
       <div className="w-full min-w-0">
         {title && <h5 className="mb-1 leading-none font-semibold tracking-tight">{title}</h5>}
-        <div className="text-sm leading-relaxed opacity-90 [&>p]:my-0 [&>p+p]:mt-2">{children}</div>
+        <div className="text-sm leading-relaxed opacity-90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{children}</div>
       </div>
     </div>
   );

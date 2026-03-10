@@ -45,7 +45,7 @@ export default function Tabs({ items }: { items: Tab[] }) {
 						{typeof tab.content === 'string' ? (
 							<div className="overflow-x-auto font-mono text-sm text-foreground">{tab.content}</div>
 						) : (
-							<div>{tab.content}</div>
+							<div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{tab.content}</div>
 						)}
 					</div>
 				))}

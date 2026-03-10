@@ -4,6 +4,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 interface AccordionProps {
   items: {
@@ -16,18 +17,18 @@ interface AccordionProps {
 
 export default function Accordion({ items, className }: AccordionProps) {
   return (
-    <div className="not-prose">
-      <AccordionRoot className={className}>
-        {items.map((item, i) => {
-          const value = item.value || `item-${i}`;
-          return (
-            <AccordionItem key={value} value={value}>
-              <AccordionTrigger className="font-semibold text-md">{item.title}</AccordionTrigger>
-              <AccordionContent>{item.content}</AccordionContent>
-            </AccordionItem>
-          );
-        })}
-      </AccordionRoot>
-    </div>
+    <AccordionRoot className={cn("my-4 not-prose", className)}>
+      {items.map((item, i) => {
+        const value = item.value || `item-${i}`;
+        return (
+          <AccordionItem key={value} value={value}>
+            <AccordionTrigger className="text-base font-medium">{item.title}</AccordionTrigger>
+            <AccordionContent className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+              {item.content}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </AccordionRoot>
   );
 }
