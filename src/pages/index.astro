@@ -1,7 +1,6 @@
 ---
 import { Button } from '@/components/ui/button.tsx';
 import { ArrowRight } from 'lucide-react';
-import { GitHubIcon } from '@/components/GitHubIcon.tsx';
 import ThemeToggle from '@/components/ThemeToggle.tsx';
 import '@/styles/global.css';
 import { SITE } from '@/config.ts';
@@ -99,13 +98,14 @@ import { SITE } from '@/config.ts';
 								Get Started <ArrowRight className="h-4 w-4" />
 							</Button>
 						</a>
-						<a href={SITE.github} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+
+						<a href={SITE.repo.url} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
 							<Button
 								variant="outline"
 								size="lg"
 								className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
 							>
-								<GitHubIcon className="text-foreground" /> View on GitHub
+								View on {SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}
 							</Button>
 						</a>
 					</div>

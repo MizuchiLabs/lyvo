@@ -1,8 +1,7 @@
 ---
-import { getCollection, render } from 'astro:content';
-import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
+import { render } from 'astro:content';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import fs from 'node:fs';
-import path from 'node:path';
 import Callout from '@/components/Callout.tsx';
 import CodeBlockWrapper from '@/components/CodeBlockWrapper.astro';
 import { File, FileTree } from '@/components/FileTree.tsx';
@@ -14,6 +13,8 @@ import Table from '@/components/Table.astro';
 import TabsWrapper from '@/components/TabsWrapper.astro';
 import { SITE } from '@/config.ts';
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import EditPageLink from '@/components/EditPageLink';
+import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
 	const docs = await getCollection('docs');
@@ -49,25 +50,11 @@ const nextDoc = currentIndex < sortedDocs.length - 1 ? sortedDocs[currentIndex +
 // Build TOC
 const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
-// Find the correct file extension and path
-const possibleExtensions = ['.md', '.mdx', '.mdoc'];
-let actualFilePath = '';
-let githubFilePath = `${entry.id}.md`; // Fallback
-
-for (const ext of possibleExtensions) {
-	const p = path.join(process.cwd(), 'src/content/docs', `${entry.id}${ext}`);
-	if (fs.existsSync(p)) {
-		actualFilePath = p;
-		githubFilePath = `${entry.id}${ext}`;
-		break;
-	}
-}
-
 // Last updated
 let lastUpdated = '';
 try {
-	if (actualFilePath) {
-		const stats = fs.statSync(actualFilePath);
+	if (entry.filePath) {
+		const stats = fs.statSync(entry.filePath);
 		lastUpdated = new Intl.DateTimeFormat('en-US', {
 			month: 'short',
 			day: 'numeric',
@@ -81,22 +68,16 @@ try {
 
 <DocsLayout title={entry.data.title} description={entry.data.description}>
 	{
-		SITE.github && (
-			<a
-				slot="header-actions"
-				href={`${SITE.github}/tree/main/src/content/docs/${githubFilePath}`}
-				target="_blank"
-				rel="noreferrer"
-				class="inline-flex h-9 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
-			>
-				<Pencil size={16} />
-				Edit Page
-			</a>
+		SITE.enableEdit && (
+			<div slot="edit-button">
+				<EditPageLink filePath={entry.filePath} />
+			</div>
 		)
 	}
 	{
 		lastUpdated && (
-			<div slot="last-updated" class="mt-4 text-sm text-muted-foreground">
+			<div slot="last-updated" class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+				<Calendar size={16} />
 				Last updated on {lastUpdated}
 			</div>
 		)

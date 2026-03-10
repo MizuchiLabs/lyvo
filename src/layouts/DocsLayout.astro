@@ -73,8 +73,12 @@ const currentPath = Astro.url.pathname;
 	</head>
 
 	<body
-		class="flex h-screen w-full flex-col overflow-hidden font-sans text-foreground antialiased md:flex-row"
+		class="flex h-screen w-full flex-col overflow-hidden bg-background font-sans text-foreground antialiased md:flex-row"
 	>
+		{/* SPACER FOR LARGE SCREENS to keep sidebar aligned with a 1536px container */}
+		<div class="hidden shrink-0 md:block" style="width: max(0px, calc((100vw - 1536px) / 2));">
+		</div>
+
 		{/* MOBILE HEADER */}
 		<header
 			class="flex h-14 shrink-0 items-center gap-2 border-b border-border/40 bg-background px-4 md:hidden"
@@ -100,7 +104,6 @@ const currentPath = Astro.url.pathname;
 
 		{/* DESKTOP SIDEBAR  */}
 		<aside class="hidden w-72 shrink-0 flex-col md:flex">
-			{/* App Header / Logo */}
 			<div class="flex h-14 shrink-0 items-center px-6">
 				<a href="/" class="flex items-center gap-3 text-lg font-bold tracking-tight">
 					{
@@ -116,27 +119,20 @@ const currentPath = Astro.url.pathname;
 					{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
 				</a>
 			</div>
-			<div class="px-4 pt-2 pb-2">
-				<Search client:load />
-			</div>
 			<div class="flex flex-1 flex-col overflow-hidden">
 				<SidebarNav client:load categories={categories} currentPath={currentPath} />
 			</div>
 		</aside>
 
-		{/* MAIN CONTENT WRAPPER */}
-		{
-			/* On mobile, it's just full width. On desktop, it gets padding and rounded corners to look like a floating app surface. */
-		}
+		{/* Main Content */}
 		<div class="flex h-full flex-1 flex-col overflow-hidden md:py-3 md:pr-3">
-			{/* THE SCROLLABLE CONTENT BLOCK */}
 			<main
 				id="main-scroll-area"
-				class="no-scrollbar relative flex-1 overflow-y-auto bg-muted/20 md:rounded-2xl md:shadow-sm"
+				class="no-scrollbar relative flex-1 overflow-y-auto bg-muted/30 md:rounded-2xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
 			>
-				{/* Sticky Breadcrumbs Header */}
+				{/* Breadcrumbs Header */}
 				<div
-					class="sticky top-0 z-30 flex items-center justify-between border-b border-border py-3 pr-4 pl-6 backdrop-blur-md"
+					class="sticky top-0 z-30 flex min-h-14 items-center justify-between border-b border-border/40 bg-muted/40 px-6 backdrop-blur-md"
 				>
 					<div class="flex items-center space-x-1 text-sm text-muted-foreground">
 						<a
@@ -147,39 +143,46 @@ const currentPath = Astro.url.pathname;
 						<ChevronRight size={16} />
 						<div class="font-medium text-foreground">{title}</div>
 					</div>
-					<slot name="header-actions" />
+					<div class="flex items-center gap-4">
+						<div class="hidden w-64 md:block">
+							<Search client:load />
+						</div>
+						<slot name="header-actions" />
+					</div>
 				</div>
 
 				{/* Inner container to constrain text width so it's readable on ultra-wides */}
-				<div class="mx-auto flex max-w-300 flex-col xl:flex-row xl:gap-12">
+				<div class="mx-auto flex max-w-6xl flex-col xl:flex-row xl:gap-12">
 					{/* Article Body */}
-					<div class="mx-auto w-full min-w-0 flex-1 px-6 py-8">
-						<div class="space-y-2">
-							<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
-							{description && <p class="text-lg text-muted-foreground">{description}</p>}
+					<div class="mx-auto w-full min-w-0 flex-1 py-8">
+						<div class="flex items-center justify-between space-y-2">
+							<div class="space-y-2">
+								<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
+								{description && <p class="text-lg text-muted-foreground">{description}</p>}
+							</div>
+							<slot name="edit-button" />
 						</div>
 
 						<slot name="last-updated" />
 
-						<div class="pt-8 pb-4">
-							<article
-								data-pagefind-body
-								class="prose max-w-none prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-a:font-medium prose-a:underline prose-a:underline-offset-4 prose-pre:border prose-pre:border-border/50"
-							>
-								<slot />
-							</article>
-						</div>
+						<article
+							data-pagefind-body
+							class="prose max-w-none py-8 prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-a:font-medium prose-a:underline prose-a:underline-offset-4 prose-pre:border prose-pre:border-border/50"
+						>
+							<slot />
+						</article>
 
 						{/* Next/Prev Navigation */}
 						<slot name="footer" />
 					</div>
 
 					{/* TOC (Desktop) */}
-					<div class="hidden w-60 shrink-0 text-sm xl:block">
-						{/* Sticky inside the scrolling main container */}
-						<div class="no-scrollbar sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto pb-8">
+					<div class="hidden w-64 shrink-0 text-sm xl:block">
+						<div
+							class="no-scrollbar sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4 pb-8"
+						>
 							<div class="space-y-4">
-								<p class="flex items-center gap-2 font-medium text-foreground">
+								<p class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
 									<AlignLeft size={16} />
 									On this page
 								</p>
