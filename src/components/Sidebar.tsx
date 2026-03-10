@@ -9,6 +9,7 @@ import { SITE } from "../config";
 import { cn } from "../lib/utils";
 import ThemeToggle from "./ThemeToggle";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Image } from "astro:assets";
 
 interface SidebarProps {
   categories: Record<string, any[]>;
@@ -175,7 +176,7 @@ export function MobileSidebar({ categories, currentPath }: SidebarProps) {
         <SheetHeader className="flex h-14 shrink-0 flex-row items-center border-b border-border/40 px-6 py-0 text-left">
           <SheetTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
             {(SITE.logo.type === "logo" || SITE.logo.type === "both") && (
-              <img
+              <Image
                 src={`/src/assets/${SITE.logo.src}`}
                 alt={`${SITE.title} Logo`}
                 width={SITE.logo.width}

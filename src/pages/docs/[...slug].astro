@@ -11,6 +11,7 @@ import Link from '@/components/Link.astro';
 import { Step, Steps } from '@/components/Steps.tsx';
 import Table from '@/components/Table.astro';
 import TabsWrapper from '@/components/TabsWrapper.astro';
+import AccordionWrapper from '@/components/AccordionWrapper.astro';
 import { SITE } from '@/config.ts';
 import DocsLayout from '@/layouts/DocsLayout.astro';
 import EditPageLink from '@/components/EditPageLink';
@@ -38,7 +39,8 @@ const components = {
 	Tabs: TabsWrapper,
 	FileTree,
 	Folder: FolderWrapper,
-	File
+	File,
+	Accordion: AccordionWrapper
 };
 
 // Sort docs for Prev/Next

@@ -1,0 +1,93 @@
+---
+import { Button } from '@/components/ui/button.tsx';
+import { ArrowLeft, Home } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle.tsx';
+import Layout from '@/layouts/Layout.astro';
+import { SITE } from '@/config.ts';
+import { Image } from 'astro:assets';
+---
+
+<Layout title={`404: Page Not Found - ${SITE.title}`}>
+	<div class="relative flex min-h-screen flex-col">
+		<header
+			class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
+		>
+			<div
+				class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
+			>
+				<a
+					href="/"
+					class="flex items-center gap-2 text-lg font-bold transition-opacity hover:opacity-80"
+				>
+					{
+						(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
+							<Image
+								src={`/src/assets/${SITE.logo.src}`}
+								alt={`${SITE.title} Logo`}
+								width={SITE.logo.width}
+								height={SITE.logo.height}
+							/>
+						)
+					}
+					{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
+				</a>
+				<div class="flex items-center space-x-4">
+					<ThemeToggle client:load />
+				</div>
+			</div>
+		</header>
+
+		<main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
+			<!-- Background effects -->
+			<div
+				class="absolute inset-0 -z-10 h-full w-full bg-background [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"
+			>
+			</div>
+
+			<div
+				class="container mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center md:px-6 md:py-32"
+			>
+				<div
+					class="mb-6 inline-flex items-center rounded-full border border-destructive/20 bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+				>
+					Error 404
+				</div>
+				<h1
+					class="mb-4 text-6xl font-extrabold tracking-tight text-balance text-foreground sm:text-7xl md:text-8xl lg:text-9xl"
+				>
+					<span
+						class="bg-linear-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-cyan-400"
+						>404</span
+					>
+				</h1>
+
+				<h2 class="mb-6 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+					Page not found
+				</h2>
+
+				<p class="mb-10 max-w-2xl text-lg text-balance text-muted-foreground sm:text-xl">
+					Sorry, we couldn't find the page you're looking for. It might have been moved or doesn't
+					exist.
+				</p>
+
+				<div class="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row">
+					<button onclick="history.back()" class="w-full sm:w-auto">
+						<Button
+							variant="outline"
+							size="lg"
+							className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
+						>
+							<ArrowLeft className="h-4 w-4" /> Go Back
+						</Button>
+					</button>
+
+					<a href="/" class="w-full sm:w-auto">
+						<Button size="lg" className="w-full gap-2 rounded-full px-8 font-medium sm:w-auto">
+							<Home className="h-4 w-4" /> Back to Home
+						</Button>
+					</a>
+				</div>
+			</div>
+		</main>
+	</div>
+</Layout>

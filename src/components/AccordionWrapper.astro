@@ -1,0 +1,18 @@
+---
+import AccordionComponent from './Accordion.tsx';
+
+interface AccordionItem {
+	title: string;
+	content: any;
+	value?: string;
+}
+
+interface Props {
+	items: AccordionItem[];
+	className?: string;
+}
+
+const props = Astro.props;
+---
+
+<AccordionComponent client:load {...props} />

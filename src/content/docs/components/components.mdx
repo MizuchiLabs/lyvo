@@ -4,8 +4,6 @@ description: A comprehensive guide to the custom MDX components available in Lyv
 order: 1
 ---
 
-import { AccordionDemo } from "@/components/AccordionDemo.tsx";
-
 Lyvo Docs provides a rich set of custom components to make your documentation beautiful and interactive. Thanks to MDX, you can use these components directly within your markdown files without needing to import them (except where noted).
 
 ## Callouts
@@ -142,25 +140,6 @@ Display project directory structures cleanly with interactive, collapsible folde
 
 ---
 
-## Accordions
-
-Accordions are great for FAQs or hiding large blocks of secondary information.
-
-<Callout type="warning" title="Import Required">
-  Because Accordions rely on complex React context, you must explicitly import them at the top of
-  your `.mdx` file and use the `client:load` directive.
-</Callout>
-
-```mdx
-import { AccordionDemo } from "@/components/AccordionDemo.tsx";
-
-<AccordionDemo client:load />
-```
-
-<AccordionDemo client:load />
-
----
-
 ## Standard Elements
 
 Lyvo Docs automatically upgrades standard markdown elements too.
@@ -184,3 +163,27 @@ External links like [GitHub](https://github.com) automatically receive a trailin
 Images use Astro's native image optimization pipeline automatically. Just use standard markdown syntax: `![Alt Text](@/assets/image.svg)`.
 
 ![Alt Text](@/assets/background.svg)
+
+---
+
+## Accordion
+
+Use accordions to display a list of high-level options that can expand/collapse to reveal more information.
+
+```mdx
+<Accordion
+  items={[
+    { title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
+    { title: "Is it styled?", content: "Yes. It comes with default styles that match the rest of the documentation." },
+    { title: "Is it animated?", content: "Yes. It's animated by default, but you can disable it if you prefer." },
+  ]}
+/>
+```
+
+<Accordion
+  items={[
+    { title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
+    { title: "Is it styled?", content: "Yes. It comes with default styles that match the rest of the documentation." },
+    { title: "Is it animated?", content: "Yes. It's animated by default, but you can disable it if you prefer." },
+  ]}
+/>
