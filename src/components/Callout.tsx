@@ -1,4 +1,4 @@
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 import { Info, AlertTriangle, XCircle, CheckCircle2 } from 'lucide-react';
 
 interface CalloutProps {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 
 interface Tab {
 	label: string;
@@ -26,7 +26,7 @@ export default function Tabs({ items }: { items: Tab[] }) {
 					>
 						{tab.label}
 						{activeTab === tab.value && (
-							<span className="absolute right-0 bottom-[-1px] left-0 h-[2px] bg-primary" />
+							<span className="absolute right-0 -bottom-px left-0 h-0.5 bg-primary" />
 						)}
 					</button>
 				))}

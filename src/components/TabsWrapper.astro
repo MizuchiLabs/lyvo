@@ -1,0 +1,17 @@
+---
+import TabsComponent from './Tabs.tsx';
+
+interface Tab {
+	label: string;
+	value: string;
+	content: any; // React.ReactNode
+}
+
+interface Props {
+	items: Tab[];
+}
+
+const props = Astro.props;
+---
+
+<TabsComponent client:load {...props} />

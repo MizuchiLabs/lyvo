@@ -1,21 +1,19 @@
 ---
 import { getCollection, render } from 'astro:content';
-import DocsLayout from '../../layouts/DocsLayout.astro';
+import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
 import fs from 'node:fs';
 import path from 'node:path';
-import Callout from '../../components/Callout.tsx';
-import CodeBlockWrapper from '../../components/CodeBlockWrapper.astro';
-import { Step, Steps } from '../../components/Steps.tsx';
-import Tabs from '../../components/Tabs.tsx';
-import { SITE } from '../../config.ts';
-import { FileTree, Folder, File } from '../../components/FileTree.tsx';
-import {
-	Accordion,
-	AccordionItem,
-	AccordionTrigger,
-	AccordionContent
-} from '../../components/ui/accordion.tsx';
-import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
+import Callout from '@/components/Callout.tsx';
+import CodeBlockWrapper from '@/components/CodeBlockWrapper.astro';
+import { File, FileTree } from '@/components/FileTree.tsx';
+import FolderWrapper from '@/components/FolderWrapper.astro';
+import ImageWrapper from '@/components/ImageWrapper.astro';
+import Link from '@/components/Link.astro';
+import { Step, Steps } from '@/components/Steps.tsx';
+import Table from '@/components/Table.astro';
+import TabsWrapper from '@/components/TabsWrapper.astro';
+import { SITE } from '@/config.ts';
+import DocsLayout from '@/layouts/DocsLayout.astro';
 
 export async function getStaticPaths() {
 	const docs = await getCollection('docs');
@@ -29,18 +27,17 @@ const { entry, docs } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const components = {
-	Callout,
 	pre: CodeBlockWrapper,
+	a: Link,
+	table: Table,
+	img: ImageWrapper,
+	Callout,
 	Steps,
 	Step,
-	Tabs,
+	Tabs: TabsWrapper,
 	FileTree,
-	Folder,
-	File,
-	Accordion,
-	AccordionItem,
-	AccordionTrigger,
-	AccordionContent
+	Folder: FolderWrapper,
+	File
 };
 
 // Sort docs for Prev/Next

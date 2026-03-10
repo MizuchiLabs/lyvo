@@ -1,0 +1,29 @@
+---
+import { Image } from 'astro:assets';
+
+const { alt, title, src, ...props } = Astro.props;
+const isStringSrc = typeof src === 'string';
+---
+
+<figure class="my-8 flex flex-col items-center justify-center space-y-3">
+	{
+		isStringSrc ? (
+			<img
+				class="rounded-xl border border-border/50 bg-muted/20 shadow-sm"
+				src={src}
+				alt={alt || ''}
+				title={title}
+				{...props}
+			/>
+		) : (
+			<Image
+				class="rounded-xl border border-border/50 bg-muted/20 shadow-sm"
+				src={src}
+				alt={alt || ''}
+				title={title}
+				{...props}
+			/>
+		)
+	}
+	{alt && <figcaption class="text-sm text-muted-foreground">{alt}</figcaption>}
+</figure>

@@ -1,43 +1,87 @@
 ---
 title: Getting Started
-description: Welcome to your new beautiful documentation site.
-order: 1
+description: How to install, run, and start building with Lyvo Docs.
+order: 2
 category: Overview
 ---
 
-# Getting Started
+Getting up and running with Lyvo Docs is incredibly straightforward. It uses standard web tooling like `pnpm` and `Astro`.
 
-Welcome to your new documentation site! This site is built with Astro, Tailwind CSS, and styled to be clean and minimal.
+## Prerequisites
 
-## Features
+Before you begin, ensure you have the following installed:
 
-- Fast and lightweight
-- MDX support out of the box
-- Beautiful typography via `@tailwindcss/typography`
-- Simple and elegant design inspired by Fumadocs and Mintlify
+- **Node.js** (v18 or higher)
+- A package manager like **pnpm** (recommended), **npm**, or **yarn**
 
-### Examples1
+## Installation
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+To create a new project using Lyvo Docs, clone the repository and install the dependencies:
 
-### Examples2
+```bash showLineNumbers
+# Clone the template
+git clone https://github.com/mizuchilabs/lyvo.git my-docs
+cd my-docs
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+# Install dependencies
+pnpm install
+```
 
-### Examples2
+## Running the Development Server
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+Once the dependencies are installed, you can start the local development server:
 
-### Examples2
+```bash
+pnpm dev
+```
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+The server will start at `http://localhost:4321/`. Open this URL in your browser to see your documentation site live. Any changes you make to the `.mdx` files will be reflected instantly!
 
-### Examples2
+## Project Structure
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+Here is a quick overview of the file structure. Lyvo Docs keeps it minimal so you can find exactly what you are looking for.
 
-### Examples2
+<FileTree>
+	<Folder name="src" defaultOpen>
+		<Folder name="assets">
+			<File name="logo.svg" />
+		</Folder>
+		<Folder name="components" defaultOpen>
+			<Folder name="ui">
+				<File name="accordion.tsx" />
+				<File name="button.tsx" />
+			</Folder>
+			<File name="Callout.tsx" />
+			<File name="Sidebar.tsx" />
+		</Folder>
+		<Folder name="content" defaultOpen>
+			<Folder name="docs" defaultOpen>
+				<File name="getting-started.mdx" />
+			</Folder>
+		</Folder>
+		<Folder name="layouts">
+			<File name="DocsLayout.astro" />
+		</Folder>
+		<Folder name="pages">
+			<File name="index.astro" />
+		</Folder>
+		<File name="config.ts" />
+	</Folder>
+	<File name="astro.config.mjs" />
+	<File name="package.json" />
+	<File name="tailwind.config.mjs" />
+</FileTree>
 
-## Why this boilerplate?
+## Building for Production
 
-Because sometimes you just need a beautiful, static site that is easy to deploy and has no complex state management for docs.
+When you are ready to deploy your site, run the build command:
+
+```bash
+pnpm build
+```
+
+This will generate a highly optimized, static version of your site in the `dist` directory. The build process also automatically runs **Pagefind** to generate the search index. You can preview the production build using:
+
+```bash
+pnpm preview
+```
