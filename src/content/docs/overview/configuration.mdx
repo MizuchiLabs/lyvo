@@ -1,0 +1,92 @@
+---
+title: Configuration
+description: Learn how to customize the theme, colors, and site metadata.
+order: 2
+---
+
+Lyvo Docs is designed to be easily customized. Since you have full access to the source code, you can tweak anything, but the most common configuration options are consolidated for your convenience.
+
+## Site Metadata (`src/config.ts`)
+
+The primary configuration file for your site is `src/config.ts`. Here you can configure the global properties of your documentation.
+
+```ts title="src/config.ts"
+export const SITE = {
+  title: "Lyvo Docs",
+  description: "A modern, minimalistic documentation theme for Astro.",
+  github: "https://github.com/mizuchilabs/lyvo",
+  logo: {
+    type: "both", // "text", "logo", or "both"
+    src: "logo.svg", // Name of the file inside src/assets/
+    width: 28,
+    height: 28,
+  },
+};
+```
+
+### GitHub Link
+
+If you provide a valid GitHub repository URL in the `github` property, Lyvo Docs will automatically:
+
+1. Add a GitHub icon link to the top navigation bar.
+2. Enable the **"Edit Page"** button on every documentation page, pointing directly to the corresponding `.mdx` file in your repository!
+
+## Theming & Colors
+
+Lyvo Docs uses standard Shadcn CSS variables for theming, located in `src/styles/global.css`.
+
+You can easily change the primary accent colors, background colors, and border styles by modifying these HSL variables. The theme natively supports both light and dark modes!
+
+```css title="src/styles/global.css"
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  /* ... */
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    /* ... */
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    /* ... */
+  }
+}
+```
+
+### Adding New Fonts
+
+The template comes pre-configured with **Manrope**, and **Victor Mono** via the Astro Fonts API (`fontProviders.fontsource()`).
+
+If you want to change the typography:
+
+1. Open `astro.config.mjs` and add your desired font to the `fonts` array:
+   ```js
+   fonts: [
+     {
+       name: "Roboto",
+       cssVariable: "--font-roboto",
+       provider: fontProviders.fontsource(),
+     }
+   ]
+   ```
+2. In `src/layouts/DocsLayout.astro` and `src/layouts/Layout.astro`, import the font using the `Font` component:
+   ```astro
+   import { Font } from 'astro:assets';
+   
+   <Font cssVariable="--font-roboto" preload />
+   ```
+3. Update the CSS variable in `src/styles/global.css`:
+   ```css
+   --font-sans: var(--font-roboto, ui-sans-serif, system-ui, sans-serif);
+   ```

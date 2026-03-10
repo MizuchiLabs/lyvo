@@ -2,7 +2,6 @@
 title: Writing Content
 description: Learn how to author and organize your documentation pages using MDX and Frontmatter.
 order: 2
-category: Components
 ---
 
 Lyvo Docs utilizes Astro's Content Collections to manage your documentation. This provides type-safe frontmatter, automatic routing, and excellent performance.
@@ -16,7 +15,6 @@ Every `.mdx` file inside the `src/content/docs` directory requires a frontmatter
 title: My Page Title
 description: A short summary of what this page covers.
 order: 3
-category: Advanced
 ---
 ```
 
@@ -27,16 +25,15 @@ category: Advanced
 | `title`       | `string` | **Required.** The main title of the page, displayed at the top and in the sidebar.                                             |
 | `description` | `string` | _Optional._ A brief subtitle displayed below the title and used for the meta `<meta name="description">` tag.                  |
 | `order`       | `number` | _Optional._ Determines the sorting order of the pages in the sidebar and Next/Previous navigation. Lower numbers appear first. |
-| `category`    | `string` | _Optional._ Groups the page under a specific heading in the sidebar. Defaults to "General" if omitted.                         |
 
 ## Routing and Folders
 
-The URL of your documentation page is determined by the file's name.
+The URL of your documentation page is determined by the file's path.
 
 - `src/content/docs/introduction.mdx` becomes `/docs/introduction`
-- `src/content/docs/components.mdx` becomes `/docs/components`
+- `src/content/docs/components/components.mdx` becomes `/docs/components/components`
 
-You can create subfolders inside `src/content/docs` if you wish, but the routing is currently flattened in the sidebar by the `category` frontmatter property, regardless of physical folder structure. This makes organizing files easier!
+You can create subfolders inside `src/content/docs` to automatically categorize your pages. The folder name will be used as the category name in the sidebar (e.g., `getting-started` becomes "Getting Started"). Files directly in `src/content/docs` will appear at the root level of the sidebar.
 
 ## Auto-Imported Components
 

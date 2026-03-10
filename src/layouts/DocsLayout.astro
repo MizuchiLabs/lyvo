@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 import Search from '@/components/Search';
 import { SidebarNav, MobileSidebar } from '@/components/Sidebar';
 import { SITE } from '@/config';
+import { Image, Font } from 'astro:assets';
 
 interface Props {
 	title: string;
@@ -20,7 +21,15 @@ docs.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
 
 const categories = docs.reduce(
 	(acc, doc) => {
-		const cat = doc.data.category || 'General';
+		const parts = doc.id.split('/');
+		let cat = 'root';
+		if (parts.length > 1) {
+			cat = parts[0];
+			cat = cat
+				.split('-')
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(' ');
+		}
 		if (!acc[cat]) {
 			acc[cat] = [];
 		}
@@ -47,6 +56,9 @@ const currentPath = Astro.url.pathname;
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} - {SITE.title}</title>
+		<Font cssVariable="--font-sans-default" preload />
+		<Font cssVariable="--font-serif-default" preload />
+		<Font cssVariable="--font-mono-default" preload />
 		<ClientRouter />
 		<script is:inline>
 			function applyTheme() {
@@ -87,7 +99,7 @@ const currentPath = Astro.url.pathname;
 			<a href="/" class="flex items-center gap-2 text-lg font-bold tracking-tight">
 				{
 					(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
-						<img
+						<Image
 							src={`/src/assets/${SITE.logo.src}`}
 							alt={`${SITE.title} Logo`}
 							width={SITE.logo.width}
@@ -103,12 +115,12 @@ const currentPath = Astro.url.pathname;
 		</header>
 
 		{/* DESKTOP SIDEBAR  */}
-		<aside class="hidden w-72 shrink-0 flex-col md:flex">
-			<div class="flex h-14 shrink-0 items-center px-6">
+		<aside class="hidden w-72 shrink-0 flex-col space-y-6 md:flex">
+			<div class="flex shrink-0 items-center px-6 pt-6 pb-2">
 				<a href="/" class="flex items-center gap-3 text-lg font-bold tracking-tight">
 					{
 						(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
-							<img
+							<Image
 								src={`/src/assets/${SITE.logo.src}`}
 								alt={`${SITE.title} Logo`}
 								width={SITE.logo.width}

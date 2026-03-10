@@ -15,5 +15,6 @@ export const SITE = {
     width: 28,
     height: 28,
   },
-  enableEdit: true,
+  enableEdit: true, // Enable edit page button
+  categoryOrder: ["Overview", "Components"], // Sort order for sidebar categories
 };

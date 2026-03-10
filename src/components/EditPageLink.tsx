@@ -1,6 +1,5 @@
 import { SITE } from "../config";
 import { Pencil } from "lucide-react";
-import { Button } from "./ui/button";
 
 // Helper function to build the correct edit URL based on the platform
 function getEditUrl(filePath: string, branch: string = "main") {
@@ -37,12 +36,10 @@ export default function EditPageLink({ filePath, branch = "main" }: EditPageLink
       href={editUrl}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
+      className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline border border-border/80 px-4 py-2 rounded-lg"
     >
-      <Button variant="ghost">
-        <Pencil size={16} />
-        <span>Edit page</span>
-      </Button>
+      <Pencil size={16} className="mr-0.5" />
+      <span>Edit page</span>
     </a>
   );
 }

@@ -8,7 +8,6 @@ const docs = defineCollection({
     title: z.string(),
     description: z.string().optional(),
     order: z.number().optional(),
-    category: z.string().default("General"),
   }),
 });
 

@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
@@ -14,6 +14,24 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss(), svgr()],
   },
+
+  fonts: [
+    {
+      name: "Manrope",
+      cssVariable: "--font-sans-default",
+      provider: fontProviders.fontsource(),
+    },
+    {
+      name: "Space Grotesk",
+      cssVariable: "--font-serif-default",
+      provider: fontProviders.fontsource(),
+    },
+    {
+      name: "Victor Mono",
+      cssVariable: "--font-mono-default",
+      provider: fontProviders.fontsource(),
+    },
+  ],
 
   integrations: [
     react(),
