@@ -1,63 +1,63 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
-import tailwindcss from '@tailwindcss/vite';
-import react from '@astrojs/react';
-import mdx from '@astrojs/mdx';
-import rehypePrettyCode from 'rehype-pretty-code';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import tailwindcss from "@tailwindcss/vite";
+import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
+import rehypePrettyCode from "rehype-pretty-code";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 // https://astro.build/config
 export default defineConfig({
-	vite: {
-		plugins: [tailwindcss()]
-	},
+  vite: {
+    plugins: [tailwindcss()],
+  },
 
-	integrations: [
-		react(),
-		mdx({
-			syntaxHighlight: false,
-			rehypePlugins: [
-				rehypeSlug,
-				[
-					rehypeAutolinkHeadings,
-					{
-						behavior: 'append',
-						properties: {
-							className: ['subheading-anchor'],
-							ariaLabel: 'Link to section'
-						},
-						content: {
-							type: 'element',
-							tagName: 'span',
-							properties: { className: ['anchor-icon'] },
-							children: []
-						}
-					}
-				],
-				[
-					rehypePrettyCode,
-					{
-						theme: 'github-dark-dimmed',
-						/** @param {any} node */
-						onVisitLine(node) {
-							// Prevent lines from collapsing in empty lines
-							if (node.children.length === 0) {
-								node.children = [{ type: 'text', value: ' ' }];
-							}
-						},
-						/** @param {any} node */
-						onVisitHighlightedLine(node) {
-							node.properties.className.push('line--highlighted');
-						},
-						/** @param {any} node */
-						onVisitHighlightedWord(node) {
-							node.properties.className = ['word--highlighted'];
-						}
-					}
-				]
-			]
-		})
-	]
+  integrations: [
+    react(),
+    mdx({
+      syntaxHighlight: false,
+      rehypePlugins: [
+        rehypeSlug,
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: "append",
+            properties: {
+              className: ["subheading-anchor"],
+              ariaLabel: "Link to section",
+            },
+            content: {
+              type: "element",
+              tagName: "span",
+              properties: { className: ["anchor-icon"] },
+              children: [],
+            },
+          },
+        ],
+        [
+          rehypePrettyCode,
+          {
+            theme: "github-dark-dimmed",
+            /** @param {any} node */
+            onVisitLine(node) {
+              // Prevent lines from collapsing in empty lines
+              if (node.children.length === 0) {
+                node.children = [{ type: "text", value: " " }];
+              }
+            },
+            /** @param {any} node */
+            onVisitHighlightedLine(node) {
+              node.properties.className.push("line--highlighted");
+            },
+            /** @param {any} node */
+            onVisitHighlightedWord(node) {
+              node.properties.className = ["word--highlighted"];
+            },
+          },
+        ],
+      ],
+    }),
+  ],
 });

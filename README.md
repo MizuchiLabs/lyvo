@@ -1,4 +1,12 @@
-# Lyvo - Modern Astro Documentation Template
+<p align="center">
+<img src="./.github/logo.svg" width="80">
+<br><br>
+<img alt="GitHub Tag" src="https://img.shields.io/github/v/tag/MizuchiLabs/lyvo?label=Version">
+<img alt="GitHub License" src="https://img.shields.io/github/license/MizuchiLabs/lyvo">
+<img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/MizuchiLabs/lyvo">
+</p>
+
+# Lyvo
 
 Lyvo is a highly polished, minimalistic, and modern documentation generator built on top of [Astro](https://astro.build/). It draws inspiration from beautiful documentation tools like Fumadocs and Mintlify, providing a solid foundation to build your own custom documentation sites quickly.
 
@@ -65,10 +73,10 @@ pnpm build
 
 This command builds your Astro project and subsequently indexes the static output with `pagefind` to enable search.
 
-## Contributing
-
-Contributions, issues, and feature requests are welcome!
-
 ## License
 
-MIT
+MIT License - see [LICENSE](LICENSE) for details
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
