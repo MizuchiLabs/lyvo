@@ -127,20 +127,24 @@ const currentPath = Astro.url.pathname;
 			{/* THE SCROLLABLE CONTENT BLOCK */}
 			<main
 				id="main-scroll-area"
-				class="relative no-scrollbar flex-1 overflow-y-auto bg-muted/20 md:rounded-2xl md:shadow-sm"
+				class="no-scrollbar relative flex-1 overflow-y-auto bg-muted/20 md:rounded-2xl md:shadow-sm"
 			>
-				{/* Inner container to constrain text width so it's readable on ultra-wides */}
+				{/* Sticky Breadcrumbs Header */}
 				<div
-					class="mx-auto flex max-w-300 flex-col px-6 py-8 md:px-10 md:py-12 xl:flex-row xl:gap-12"
+					class="sticky top-0 z-30 flex items-center justify-between border-b border-border py-3 pr-4 pl-6 backdrop-blur-md"
 				>
-					{/* Article Body */}
-					<div class="mx-auto w-full min-w-0 flex-1">
-						<div class="mb-4 flex items-center space-x-1 text-sm text-muted-foreground">
-							<div class="overflow-hidden text-ellipsis whitespace-nowrap">Docs</div>
-							<ChevronRight size={16} />
-							<div class="font-medium text-foreground">{title}</div>
-						</div>
+					<div class="flex items-center space-x-1 text-sm text-muted-foreground">
+						<div class="overflow-hidden text-ellipsis whitespace-nowrap">Docs</div>
+						<ChevronRight size={16} />
+						<div class="font-medium text-foreground">{title}</div>
+					</div>
+					<slot name="header-actions" />
+				</div>
 
+				{/* Inner container to constrain text width so it's readable on ultra-wides */}
+				<div class="mx-auto flex max-w-300 flex-col xl:flex-row xl:gap-12">
+					{/* Article Body */}
+					<div class="mx-auto w-full min-w-0 flex-1 px-6 py-8">
 						<div class="space-y-2">
 							<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
 							{description && <p class="text-lg text-muted-foreground">{description}</p>}
@@ -164,7 +168,7 @@ const currentPath = Astro.url.pathname;
 					{/* TOC (Desktop) */}
 					<div class="hidden w-60 shrink-0 text-sm xl:block">
 						{/* Sticky inside the scrolling main container */}
-						<div class="sticky top-12">
+						<div class="no-scrollbar sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto pb-8">
 							<div class="space-y-4">
 								<p class="flex items-center gap-2 font-medium text-foreground">
 									<AlignLeft size={16} />
