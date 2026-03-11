@@ -56,6 +56,11 @@ const currentPath = Astro.url.pathname;
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} - {SITE.title}</title>
+		<style define:vars={{ radius: SITE.theme.radius }}>
+			:root {
+				--radius: var(--radius);
+			}
+		</style>
 		<Font cssVariable="--font-sans-default" preload />
 		<Font cssVariable="--font-serif-default" preload />
 		<Font cssVariable="--font-mono-default" preload />

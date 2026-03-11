@@ -28,10 +28,21 @@ import { Image } from 'astro:assets';
 					}
 					{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
 				</div>
+				<div class="hidden items-center gap-6 md:flex">
+					{
+						SITE.nav.map((item) => (
+							<a
+								href={item.href}
+								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+							>
+								{item.title}
+							</a>
+						))
+					}
+				</div>
 				<div class="flex items-center space-x-4">
 					<ThemeToggle client:load />
-				</div>
-			</div>
+				</div>			</div>
 		</header>
 
 		<main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden">

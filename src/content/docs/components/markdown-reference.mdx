@@ -1,0 +1,97 @@
+---
+title: Markdown Reference
+description: A comprehensive overview of the supported Markdown and MDX syntax in Lyvo Docs.
+order: 2
+---
+
+This page serves as a visual reference for all the standard Markdown and custom MDX components supported by Lyvo Docs. Use this as a guide to see how your documentation will be rendered.
+
+## Typography
+
+Lyvo Docs uses a carefully tuned typography system based on Tailwind's typography plugin.
+
+### Headings
+
+# Heading 1 (Title)
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+### Text Styles
+
+You can use **bold**, _italic_, ~~strikethrough~~, or `inline code` to emphasize your content. You can also create [links to other pages](/docs/introduction) or [external websites](https://astro.build).
+
+### Blockquotes
+
+> "The best way to predict the future is to invent it."
+>
+> — Alan Kay
+
+---
+
+## Lists
+
+### Unordered List
+
+- Item one
+- Item two
+  - Nested item A
+  - Nested item B
+- Item three
+
+### Ordered List
+
+1. First step
+2. Second step
+3. Third step
+
+### Task List
+
+- [x] Task completed
+- [ ] Task pending
+- [ ] Another task
+
+---
+
+## Code
+
+### Inline Code
+
+To install dependencies, run `npm install`.
+
+### Code Blocks
+
+Lyvo Docs uses Shiki for high-quality syntax highlighting.
+
+```tsx title="Counter.tsx" showLineNumbers
+import { useState } from "react";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return <button onClick={() => setCount(count + 1)}>Count is {count}</button>;
+}
+```
+
+---
+
+## Tables
+
+| Feature   | Support | Note                         |
+| :-------- | :-----: | :--------------------------- |
+| GFM       |   ✅    | GitHub Flavored Markdown     |
+| MDX       |   ✅    | React components in Markdown |
+| Dark Mode |   ✅    | Automatic switching          |
+
+---
+
+## Images
+
+![Lyvo Docs Background](@/assets/background.svg)

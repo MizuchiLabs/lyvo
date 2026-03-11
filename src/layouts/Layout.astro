@@ -18,6 +18,11 @@ const { title = SITE.title } = Astro.props;
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<style define:vars={{ radius: SITE.theme.radius }}>
+			:root {
+				--radius: var(--radius);
+			}
+		</style>
 		<Font cssVariable="--font-sans-default" preload />
 		<Font cssVariable="--font-mono-default" preload />
 		<script is:inline>

@@ -24,7 +24,7 @@ const repoIcons: Record<string, any> = {
 
 const socialLinks = [
   { name: "Discord", url: SITE.social.discord, Icon: Discord, iconSize: "size-5" },
-  { name: "Twitter / X", url: SITE.social.twitter, Icon: Twitter, iconSize: "size-4" },
+  { name: "Twitter / X", url: SITE.social.x, Icon: Twitter, iconSize: "size-4" },
 ];
 
 export function SidebarNav({ categories, currentPath }: SidebarProps) {
