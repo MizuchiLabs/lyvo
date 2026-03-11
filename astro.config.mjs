@@ -9,10 +9,55 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import svgr from "vite-plugin-svgr";
 
-// https://astro.build/config
 export default defineConfig({
   vite: {
     plugins: [tailwindcss(), svgr()],
+  },
+
+  markdown: {
+    syntaxHighlight: false,
+    gfm: true,
+    smartypants: true,
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: "append",
+          properties: {
+            className: ["subheading-anchor"],
+            ariaLabel: "Link to section",
+          },
+          content: {
+            type: "element",
+            tagName: "span",
+            properties: { className: ["anchor-icon"] },
+            children: [],
+          },
+        },
+      ],
+      [
+        rehypePrettyCode,
+        {
+          theme: "github-dark-dimmed",
+          /** @param {any} node */
+          onVisitLine(node) {
+            // Prevent lines from collapsing in empty lines
+            if (node.children.length === 0) {
+              node.children = [{ type: "text", value: " " }];
+            }
+          },
+          /** @param {any} node */
+          onVisitHighlightedLine(node) {
+            node.properties.className.push("line--highlighted");
+          },
+          /** @param {any} node */
+          onVisitHighlightedWord(node) {
+            node.properties.className = ["word--highlighted"];
+          },
+        },
+      ],
+    ],
   },
 
   fonts: [
@@ -35,48 +80,6 @@ export default defineConfig({
 
   integrations: [
     react(),
-    mdx({
-      syntaxHighlight: false,
-      rehypePlugins: [
-        rehypeSlug,
-        [
-          rehypeAutolinkHeadings,
-          {
-            behavior: "append",
-            properties: {
-              className: ["subheading-anchor"],
-              ariaLabel: "Link to section",
-            },
-            content: {
-              type: "element",
-              tagName: "span",
-              properties: { className: ["anchor-icon"] },
-              children: [],
-            },
-          },
-        ],
-        [
-          rehypePrettyCode,
-          {
-            theme: "github-dark-dimmed",
-            /** @param {any} node */
-            onVisitLine(node) {
-              // Prevent lines from collapsing in empty lines
-              if (node.children.length === 0) {
-                node.children = [{ type: "text", value: " " }];
-              }
-            },
-            /** @param {any} node */
-            onVisitHighlightedLine(node) {
-              node.properties.className.push("line--highlighted");
-            },
-            /** @param {any} node */
-            onVisitHighlightedWord(node) {
-              node.properties.className = ["word--highlighted"];
-            },
-          },
-        ],
-      ],
-    }),
+    mdx(),
   ],
 });

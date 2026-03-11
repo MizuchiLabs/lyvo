@@ -277,19 +277,38 @@
 
   /* Task lists styling */
   .prose ul:has(input[type="checkbox"]) {
-    @apply list-none pl-0;
+    @apply list-none pl-0 -ml-6;
   }
 
   .prose li:has(input[type="checkbox"]) {
-    @apply flex items-center gap-3 my-1;
+    @apply flex items-start gap-3 my-2;
   }
 
   .prose li:has(input[type="checkbox"]) > p {
-    @apply m-0;
+    @apply m-0 pt-0.5;
   }
 
+  /* Custom checkbox replacement */
   .prose input[type="checkbox"] {
-    @apply m-0 w-4 h-4 cursor-pointer accent-blue-600;
+    @apply appearance-none m-0 mt-1 h-5 w-5 shrink-0 rounded-md border border-border bg-background shadow-sm transition-colors cursor-pointer relative;
+  }
+
+  .prose input[type="checkbox"]:checked {
+    @apply bg-primary border-primary;
+  }
+
+  .prose input[type="checkbox"]:checked::after {
+    content: "";
+    @apply absolute inset-0 flex items-center justify-center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /* Make dark mode checkmark adapt to primary-foreground */
+  .dark .prose input[type="checkbox"]:checked::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
   }
 
   /* Custom prose styling */
@@ -302,6 +321,12 @@
     text-underline-offset: 4px;
     text-decoration-thickness: 1px;
     font-weight: 500;
+  }
+
+  /* Remove default prose backticks from inline code */
+  .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
+  .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+    content: "" !important;
   }
 
   /* Code highlights */
@@ -317,9 +342,9 @@
     @apply m-0 overflow-x-auto p-4 text-sm leading-relaxed;
   }
 
-  /* Modern Card background for code */
+  /* Modern Card background for inline code */
   code:not(pre code) {
-    @apply rounded-md border border-border bg-muted/50 px-1.5 py-0.5 text-[0.85em] font-medium text-foreground;
+    @apply rounded-md border border-border bg-muted/60 px-1.5 py-0.5 text-[0.85em] font-medium text-foreground;
   }
 
   /* Heading anchors */
