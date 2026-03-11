@@ -2,13 +2,28 @@
 import { Font } from 'astro:assets';
 import { SITE } from '@/config.ts';
 import '@/styles/global.css';
+import { Image } from 'astro:assets';
+import ThemeToggle from '@/components/ThemeToggle.tsx';
 
 interface Props {
 	title?: string;
 }
 
 const { title = SITE.title } = Astro.props;
+
+// Dynamically import repo icon if applicable
+let RepoIcon;
+if (SITE.repo.url && SITE.repo.type) {
+	if (SITE.repo.type === 'github') {
+		RepoIcon = (await import('@/assets/github.svg?raw')).default;
+	} else if (SITE.repo.type === 'gitlab') {
+		RepoIcon = (await import('@/assets/gitlab.svg?raw')).default;
+	} else if (SITE.repo.type === 'gitea') {
+		RepoIcon = (await import('@/assets/gitea.svg?raw')).default;
+	}
+}
 ---
+
 <!doctype html>
 <html lang="en" class="scroll-smooth">
 	<head>
@@ -18,12 +33,8 @@ const { title = SITE.title } = Astro.props;
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		<style define:vars={{ radius: SITE.theme.radius }}>
-			:root {
-				--radius: var(--radius);
-			}
-		</style>
 		<Font cssVariable="--font-sans-default" preload />
+		<Font cssVariable="--font-serif-default" preload />
 		<Font cssVariable="--font-mono-default" preload />
 		<script is:inline>
 			// Theme setup
@@ -47,7 +58,74 @@ const { title = SITE.title } = Astro.props;
 			applyTheme();
 		</script>
 	</head>
-	<body class="min-h-screen bg-background font-sans text-foreground antialiased">
+	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
+		<header
+			class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
+		>
+			<div
+				class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
+			>
+				<div class="flex items-center gap-6">
+					<a
+						href="/"
+						class="flex items-center gap-2 text-lg font-bold transition-opacity hover:opacity-80"
+					>
+						{
+							(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
+								<Image
+									src={`/src/assets/${SITE.logo.src}`}
+									alt={`${SITE.title} Logo`}
+									width={SITE.logo.width}
+									height={SITE.logo.height}
+								/>
+							)
+						}
+						{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
+					</a>
+					<div class="hidden items-center gap-6 md:flex">
+						{
+							SITE.nav.map((item) => (
+								<a
+									href={item.href}
+									class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+								>
+									{item.title}
+								</a>
+							))
+						}
+						{
+							SITE.openapi?.url && (
+								<a
+									href="/api"
+									class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+								>
+									API
+								</a>
+							)
+						}
+					</div>
+				</div>
+				<div class="flex items-center space-x-4">
+					{
+						RepoIcon && (
+							<a
+								href={SITE.repo.url}
+								target="_blank"
+								rel="noreferrer"
+								class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+								title={`View on ${SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}`}
+							>
+								<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+									<Fragment set:html={RepoIcon} />
+								</span>
+								<span class="sr-only">{SITE.repo.type}</span>
+							</a>
+						)
+					}
+					<ThemeToggle client:load />
+				</div>
+			</div>
+		</header>
 		<slot />
 	</body>
 </html>

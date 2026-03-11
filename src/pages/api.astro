@@ -1,0 +1,33 @@
+---
+import { SITE } from '@/config.ts';
+import { ScalarComponent } from '@scalar/astro';
+import Layout from '@/layouts/Layout.astro';
+
+if (!SITE.openapi?.url) {
+	return Astro.redirect('/404');
+}
+---
+
+<Layout title={`API Reference - ${SITE.title}`}>
+	<style is:global>
+		body {
+			height: 100vh;
+			overflow: hidden;
+		}
+	</style>
+	<main class="flex-1 overflow-y-auto bg-background">
+		<ScalarComponent
+			configuration={{
+				url: SITE.openapi.url,
+				proxyUrl: 'https://proxy.scalar.com',
+				theme: 'deepSpace',
+				customCss: `
+					aside {
+						height: calc(100vh - 56px) !important;
+                  max-height: calc(100vh - 56px) !important;
+					}
+				`
+			}}
+		/>
+	</main>
+</Layout>

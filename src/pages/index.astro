@@ -1,145 +1,105 @@
 ---
 import { Button } from '@/components/ui/button.tsx';
 import { ArrowRight } from 'lucide-react';
-import ThemeToggle from '@/components/ThemeToggle.tsx';
 import Layout from '@/layouts/Layout.astro';
 import { SITE } from '@/config.ts';
-import { Image } from 'astro:assets';
 ---
 
-<Layout title={`${SITE.title} - Modern Documentation Generator`}>
-	<div class="relative flex min-h-screen flex-col">
-		<header
-			class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
+<Layout title={`${SITE.title}`}>
+	<main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
+		<!-- Background effects -->
+		<div
+			class="absolute inset-0 -z-10 h-full w-full bg-background [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"
+		>
+		</div>
+
+		<div
+			class="container mx-auto flex max-w-4xl flex-col items-center px-4 py-24 text-center md:px-6 md:py-32"
 		>
 			<div
-				class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
+				class="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
-				<div class="flex items-center gap-2 text-lg font-bold">
-					{
-						(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
-							<Image
-								src={`/src/assets/${SITE.logo.src}`}
-								alt={`${SITE.title} Logo`}
-								width={SITE.logo.width}
-								height={SITE.logo.height}
-							/>
-						)
-					}
-					{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-				</div>
-				<div class="hidden items-center gap-6 md:flex">
-					{
-						SITE.nav.map((item) => (
-							<a
-								href={item.href}
-								class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-							>
-								{item.title}
-							</a>
-						))
-					}
-				</div>
-				<div class="flex items-center space-x-4">
-					<ThemeToggle client:load />
-				</div>			</div>
-		</header>
-
-		<main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
-			<!-- Background effects -->
-			<div
-				class="absolute inset-0 -z-10 h-full w-full bg-background [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"
-			>
+				✨ Welcome to {SITE.title}
 			</div>
+			<h1
+				class="mb-6 text-4xl font-extrabold tracking-tight text-balance text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+			>
+				Build beautiful docs <br />
+				<span
+					class="bg-linear-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-cyan-400"
+					>in minutes.</span
+				>
+			</h1>
 
+			<p class="mb-10 max-w-2xl text-xl text-balance text-muted-foreground">
+				A minimalist, highly customizable Astro template for modern documentation. Built with React,
+				Tailwind CSS, and beautifully crafted components.
+			</p>
+
+			<div class="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
+				<a href="/docs/introduction" class="w-full sm:w-auto">
+					<Button size="lg" className="w-full gap-2 rounded-full px-8 font-medium sm:w-auto">
+						Get Started <ArrowRight className="h-4 w-4" />
+					</Button>
+				</a>
+
+				<a href={SITE.repo.url} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+					<Button
+						variant="outline"
+						size="lg"
+						className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
+					>
+						View on {SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}
+					</Button>
+				</a>
+			</div>
+		</div>
+
+		<!-- Feature highlight mockup graphic -->
+		<div class="container mx-auto mt-8 w-full max-w-5xl px-4 pb-24 md:pb-32">
 			<div
-				class="container mx-auto flex max-w-4xl flex-col items-center px-4 py-24 text-center md:px-6 md:py-32"
+				class="overflow-hidden rounded-xl border border-border/50 bg-card/50 p-2 shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
 			>
 				<div
-					class="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+					class="flex h-100 flex-col overflow-hidden rounded-lg border border-border bg-background md:h-125"
 				>
-					✨ Welcome to {SITE.title}
-				</div>
-				<h1
-					class="mb-6 text-4xl font-extrabold tracking-tight text-balance text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
-				>
-					Build beautiful docs <br />
-					<span
-						class="bg-linear-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent dark:from-indigo-400 dark:to-cyan-400"
-						>in minutes.</span
-					>
-				</h1>
-
-				<p class="mb-10 max-w-2xl text-xl text-balance text-muted-foreground">
-					A minimalist, highly customizable Astro template for modern documentation. Built with
-					React, Tailwind CSS, and beautifully crafted components.
-				</p>
-
-				<div class="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
-					<a href="/docs/introduction" class="w-full sm:w-auto">
-						<Button size="lg" className="w-full gap-2 rounded-full px-8 font-medium sm:w-auto">
-							Get Started <ArrowRight className="h-4 w-4" />
-						</Button>
-					</a>
-
-					<a href={SITE.repo.url} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
-						<Button
-							variant="outline"
-							size="lg"
-							className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
+					<div class="flex h-10 items-center gap-2 border-b border-border bg-muted/30 px-4">
+						<div class="flex gap-1.5">
+							<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
+							<div class="h-3 w-3 rounded-full bg-amber-500/80"></div>
+							<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
+						</div>
+						<div
+							class="mx-auto flex h-6 w-48 items-center justify-center truncate rounded-md border border-border/50 bg-background px-3 text-xs text-muted-foreground shadow-sm"
 						>
-							View on {SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}
-						</Button>
-					</a>
-				</div>
-			</div>
-
-			<!-- Feature highlight mockup graphic -->
-			<div class="container mx-auto mt-8 w-full max-w-5xl px-4 pb-24 md:pb-32">
-				<div
-					class="overflow-hidden rounded-xl border border-border/50 bg-card/50 p-2 shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
-				>
-					<div
-						class="flex h-100 flex-col overflow-hidden rounded-lg border border-border bg-background md:h-125"
-					>
-						<div class="flex h-10 items-center gap-2 border-b border-border bg-muted/30 px-4">
-							<div class="flex gap-1.5">
-								<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
-								<div class="h-3 w-3 rounded-full bg-amber-500/80"></div>
-								<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
-							</div>
-							<div
-								class="mx-auto flex h-6 w-48 items-center justify-center truncate rounded-md border border-border/50 bg-background px-3 text-xs text-muted-foreground shadow-sm"
-							>
-								docs.lyvo.dev
+							docs.lyvo.dev
+						</div>
+					</div>
+					<div class="flex flex-1 overflow-hidden">
+						<div class="hidden w-48 border-r border-border bg-muted/10 p-4 sm:block">
+							<div class="mb-6 h-4 w-24 rounded bg-muted"></div>
+							<div class="space-y-3">
+								<div class="h-3 w-32 rounded bg-primary/20"></div>
+								<div class="h-3 w-28 rounded bg-muted"></div>
+								<div class="h-3 w-20 rounded bg-muted"></div>
 							</div>
 						</div>
-						<div class="flex flex-1 overflow-hidden">
-							<div class="hidden w-48 border-r border-border bg-muted/10 p-4 sm:block">
-								<div class="mb-6 h-4 w-24 rounded bg-muted"></div>
-								<div class="space-y-3">
-									<div class="h-3 w-32 rounded bg-primary/20"></div>
-									<div class="h-3 w-28 rounded bg-muted"></div>
-									<div class="h-3 w-20 rounded bg-muted"></div>
-								</div>
-							</div>
-							<div class="relative flex-1 overflow-hidden p-6 sm:p-10">
-								<div class="mb-6 h-8 w-48 rounded bg-foreground/10"></div>
-								<div class="mb-3 h-4 w-full rounded bg-muted"></div>
-								<div class="mb-8 h-4 w-3/4 rounded bg-muted"></div>
-								<div class="mb-6 h-32 w-full rounded-lg border border-border bg-muted/30"></div>
-								<div class="mb-3 h-4 w-full rounded bg-muted"></div>
-								<div class="h-4 w-5/6 rounded bg-muted"></div>
+						<div class="relative flex-1 overflow-hidden p-6 sm:p-10">
+							<div class="mb-6 h-8 w-48 rounded bg-foreground/10"></div>
+							<div class="mb-3 h-4 w-full rounded bg-muted"></div>
+							<div class="mb-8 h-4 w-3/4 rounded bg-muted"></div>
+							<div class="mb-6 h-32 w-full rounded-lg border border-border bg-muted/30"></div>
+							<div class="mb-3 h-4 w-full rounded bg-muted"></div>
+							<div class="h-4 w-5/6 rounded bg-muted"></div>
 
-								<div
-									class="absolute right-0 bottom-0 h-64 w-64 rounded-tl-full bg-primary/10 blur-3xl"
-								>
-								</div>
+							<div
+								class="absolute right-0 bottom-0 h-64 w-64 rounded-tl-full bg-primary/10 blur-3xl"
+							>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</main>
-	</div>
+		</div>
+	</main>
 </Layout>
