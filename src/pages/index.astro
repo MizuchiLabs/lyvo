@@ -6,7 +6,7 @@ import { SITE } from '@/config.ts';
 ---
 
 <Layout title={`${SITE.title}`}>
-	<main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
+	<main class="relative flex h-[calc(100vh-3.5rem)] flex-col items-center overflow-hidden">
 		<!-- Background effects -->
 		<div
 			class="absolute inset-0 -z-10 h-full w-full bg-background [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"
@@ -14,10 +14,10 @@ import { SITE } from '@/config.ts';
 		</div>
 
 		<div
-			class="container mx-auto flex max-w-4xl flex-col items-center px-4 py-24 text-center md:px-6 md:py-32"
+			class="container mx-auto flex max-w-4xl flex-col items-center px-4 pt-12 pb-8 text-center md:pt-20 md:pb-12"
 		>
 			<div
-				class="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+				class="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
 			>
 				✨ Welcome to {SITE.title}
 			</div>
@@ -31,7 +31,7 @@ import { SITE } from '@/config.ts';
 				>
 			</h1>
 
-			<p class="mb-10 max-w-2xl text-xl text-balance text-muted-foreground">
+			<p class="mb-8 max-w-2xl text-lg text-balance text-muted-foreground sm:text-xl">
 				A minimalist, highly customizable Astro template for modern documentation. Built with React,
 				Tailwind CSS, and beautifully crafted components.
 			</p>
@@ -56,7 +56,9 @@ import { SITE } from '@/config.ts';
 		</div>
 
 		<!-- Feature highlight mockup graphic -->
-		<div class="container mx-auto mt-8 w-full max-w-5xl px-4 pb-24 md:pb-32">
+		<div
+			class="container mx-auto w-full max-w-5xl translate-y-4 px-4 sm:translate-y-8 md:translate-y-12"
+		>
 			<div
 				class="overflow-hidden rounded-xl border border-border/50 bg-card/50 p-2 shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
 			>

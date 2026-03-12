@@ -31,13 +31,39 @@ const socialLinks = [
 function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) {
   const RepoIcon = repoIcons[SITE.repo.type];
 
+  const topLevelItems = [
+    ...(categories["root"] || []).map((doc) => ({
+      type: "link" as const,
+      id: doc.id.split("/")[0],
+      title: doc.data.title,
+      doc,
+    })),
+    ...Object.entries(categories)
+      .filter(([category]) => category !== "root")
+      .map(([category, items]) => ({
+        type: "category" as const,
+        id: category.toLowerCase().replace(/ /g, "-"),
+        title: category,
+        items,
+      })),
+  ];
+
+  topLevelItems.sort((a, b) => {
+    const orderA = SITE.categoryOrder?.indexOf(a.id) ?? -1;
+    const orderB = SITE.categoryOrder?.indexOf(b.id) ?? -1;
+    if (orderA !== -1 && orderB !== -1) return orderA - orderB;
+    if (orderA !== -1) return -1;
+    if (orderB !== -1) return 1;
+    return a.title.localeCompare(b.title);
+  });
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       <div className="scrollbar-none flex-1 overflow-y-auto px-4">
-        {categories["root"] && (
-          <div className="pb-2 flex flex-col gap-1 text-sm">
-            {categories["root"].map((doc) => {
-              const href = `/docs/${doc.id}`;
+        <div className="flex flex-col gap-1 pb-2">
+          {topLevelItems.map((item) => {
+            if (item.type === "link") {
+              const href = `/docs/${item.doc.id}`;
               const isActive = currentPath === href || currentPath === href + "/";
               return (
                 <a
@@ -50,29 +76,18 @@ function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) 
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                   )}
                 >
-                  {doc.data.title}
+                  {item.title}
                 </a>
               );
-            })}
-          </div>
-        )}
-        {Object.entries(categories)
-          .filter(([category]) => category !== "root")
-          .sort(([a], [b]) => {
-            const orderA = SITE.categoryOrder?.indexOf(a) ?? -1;
-            const orderB = SITE.categoryOrder?.indexOf(b) ?? -1;
-            if (orderA !== -1 && orderB !== -1) return orderA - orderB;
-            if (orderA !== -1) return -1;
-            if (orderB !== -1) return 1;
-            return a.localeCompare(b);
-          })
-          .map(([category, items]) => {
-            const isCategoryActive = items.some((doc) => {
+            }
+
+            const isCategoryActive = item.items.some((doc) => {
               const href = `/docs/${doc.id}`;
               return currentPath === href || currentPath === href + "/";
             });
+
             return (
-              <div key={category} className="pb-2">
+              <div key={item.id} className="pb-1">
                 <details className="group" open>
                   <summary
                     className={cn(
@@ -82,14 +97,14 @@ function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) 
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                   >
-                    {category}
+                    {item.title}
                     <ChevronRight
                       className="opacity-50 transition-transform group-open:rotate-90"
                       size={16}
                     />
                   </summary>
                   <div className="mt-1 ml-4 flex flex-col gap-1 border-l border-border/70 pl-2 text-sm">
-                    {items.map((doc) => {
+                    {item.items.map((doc) => {
                       const href = `/docs/${doc.id}`;
                       const isActive = currentPath === href || currentPath === href + "/";
                       return (
@@ -112,6 +127,7 @@ function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) 
               </div>
             );
           })}
+        </div>
       </div>
 
       <div className="mt-auto shrink-0 p-4">
@@ -178,7 +194,7 @@ export default function Sidebar({ categories, currentPath, logoUrl }: SidebarPro
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/40 px-4 md:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger>
-            <Menu className="ml-1 mr-2" size={16} />
+            <Menu className="mr-2 ml-1" size={16} />
           </SheetTrigger>
           <SheetContent
             side="left"

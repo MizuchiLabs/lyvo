@@ -43,8 +43,52 @@ const components = {
 	Accordion: AccordionWrapper
 };
 
-// Sort docs for Prev/Next
-const sortedDocs = [...docs].sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
+// Sort docs for Prev/Next mirroring the sidebar order
+const categorizedDocs = docs.reduce(
+	(acc, doc) => {
+		const parts = doc.id.split('/');
+		let catId = 'root';
+		if (parts.length > 1) {
+			catId = parts[0].toLowerCase();
+		}
+		if (!acc[catId]) acc[catId] = [];
+		acc[catId].push(doc);
+		return acc;
+	},
+	{} as Record<string, typeof docs>
+);
+
+// Sort items within categories
+Object.values(categorizedDocs).forEach((catDocs) => {
+	catDocs.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
+});
+
+const topLevelItems = [
+	...(categorizedDocs['root'] || []).map((doc) => ({
+		id: doc.id.split('/')[0],
+		type: 'doc',
+		doc
+	})),
+	...Object.keys(categorizedDocs)
+		.filter((catId) => catId !== 'root')
+		.map((catId) => ({
+			id: catId,
+			type: 'category',
+			items: categorizedDocs[catId]
+		}))
+];
+
+topLevelItems.sort((a, b) => {
+	const orderA = SITE.categoryOrder?.indexOf(a.id) ?? -1;
+	const orderB = SITE.categoryOrder?.indexOf(b.id) ?? -1;
+	if (orderA !== -1 && orderB !== -1) return orderA - orderB;
+	if (orderA !== -1) return -1;
+	if (orderB !== -1) return 1;
+	return a.id.localeCompare(b.id);
+});
+
+const sortedDocs = topLevelItems.flatMap((item) => (item.type === 'doc' ? [item.doc] : item.items));
+
 const currentIndex = sortedDocs.findIndex((d) => d.id === entry.id);
 const prevDoc = currentIndex > 0 ? sortedDocs[currentIndex - 1] : null;
 const nextDoc = currentIndex < sortedDocs.length - 1 ? sortedDocs[currentIndex + 1] : null;

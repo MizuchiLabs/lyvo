@@ -17,7 +17,7 @@ interface AccordionProps {
 
 export default function Accordion({ items, className }: AccordionProps) {
   return (
-    <AccordionRoot className={cn("my-4 not-prose", className)}>
+    <AccordionRoot className={cn("not-prose my-4", className)}>
       {items.map((item, i) => {
         const value = item.value || `item-${i}`;
         return (

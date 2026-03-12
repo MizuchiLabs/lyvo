@@ -80,12 +80,12 @@ if (SITE.repo.url && SITE.repo.type) {
 						}
 						{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
 					</a>
-					<div class="hidden items-center gap-6 md:flex">
+					<div class="hidden items-center gap-1 md:flex">
 						{
 							SITE.nav.map((item) => (
 								<a
 									href={item.href}
-									class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 								>
 									{item.title}
 								</a>
@@ -95,9 +95,9 @@ if (SITE.repo.url && SITE.repo.type) {
 							SITE.openapi?.url && (
 								<a
 									href="/api"
-									class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 								>
-									API
+									OpenAPI
 								</a>
 							)
 						}

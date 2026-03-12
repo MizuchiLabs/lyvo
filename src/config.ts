@@ -6,13 +6,13 @@ export const SITE = {
     type: "github", // github, gitlab, gitea
   },
   openapi: {
-    url: "", // path to the file in public folder or external URL (e.g. /openapi.json)
+    url: "/openapi.json", // path to the file in public folder or external URL (e.g. /openapi.json)
   },
   social: {
     discord: "",
     x: "",
   },
-  nav: [{ title: "Docs", href: "/docs/introduction" }],
+  nav: [{ title: "Documentation", href: "/docs/introduction" }],
   logo: {
     type: "both", // "text", "logo", or "both"
     src: "logo.svg", // Name of the file inside src/assets/
@@ -20,5 +20,5 @@ export const SITE = {
     height: 28,
   },
   enableEdit: true, // Enable edit page button
-  categoryOrder: ["Overview", "Overview", "Components", "Changelog"], // Sort order for sidebar categories
+  categoryOrder: ["introduction", "overview", "components", "changelog"], // Sort order for sidebar categories
 };

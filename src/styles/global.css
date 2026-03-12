@@ -108,6 +108,7 @@
   --shadow-xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.3), 0px 8px 10px -1px hsl(0 0% 0% / 0.3);
   --shadow-2xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.6);
 }
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -251,11 +252,11 @@
 
   /* Task lists styling */
   .prose ul:has(input[type="checkbox"]) {
-    @apply list-none pl-0 -ml-6;
+    @apply -ml-6 list-none pl-0;
   }
 
   .prose li:has(input[type="checkbox"]) {
-    @apply flex items-start gap-3 my-2;
+    @apply my-2 flex items-start gap-3;
   }
 
   .prose li:has(input[type="checkbox"]) > p {
@@ -264,11 +265,11 @@
 
   /* Custom checkbox replacement */
   .prose input[type="checkbox"] {
-    @apply appearance-none m-0 mt-1 h-5 w-5 shrink-0 rounded-md border border-border bg-background shadow-sm transition-colors cursor-pointer relative;
+    @apply relative m-0 mt-1 h-5 w-5 shrink-0 cursor-pointer appearance-none rounded-md border border-border bg-background shadow-sm transition-colors;
   }
 
   .prose input[type="checkbox"]:checked {
-    @apply bg-primary border-primary;
+    @apply border-primary bg-primary;
   }
 
   .prose input[type="checkbox"]:checked::after {

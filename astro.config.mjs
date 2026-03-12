@@ -11,7 +11,17 @@ import svgr from "vite-plugin-svgr";
 import favicons from "astro-favicons";
 
 export default defineConfig({
-  vite: { plugins: [tailwindcss(), svgr()] },
+  vite: {
+    plugins: [tailwindcss(), svgr()],
+    server: {
+      watch: {
+        awaitWriteFinish: {
+          stabilityThreshold: 50,
+          pollInterval: 10,
+        },
+      },
+    },
+  },
 
   markdown: {
     syntaxHighlight: false,

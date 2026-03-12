@@ -4,11 +4,11 @@ description: Learn how to author and organize your documentation pages using MDX
 order: 3
 ---
 
-Lyvo Docs utilizes Astro's Content Collections to manage your documentation. This provides type-safe frontmatter, automatic routing, and excellent performance.
+Lyvo Docs utilizes Astro's built-in Content Collections to manage your documentation. This provides type-safe frontmatter, automatic routing, and excellent performance.
 
-## Frontmatter Schema
+## Frontmatter
 
-Every `.mdx` file inside the `src/content/docs` directory requires a frontmatter block at the top of the file. This metadata is used to generate the layout, sidebar, and SEO tags.
+Every `.mdx` file inside the `src/content/docs` directory requires a simple frontmatter block at the very top. This metadata drives the layout, SEO, and sidebar ordering.
 
 ```yaml
 ---
@@ -18,33 +18,41 @@ order: 3
 ---
 ```
 
-### Properties
+| Property      | Type     | Description                                                                                                         |
+| :------------ | :------- | :------------------------------------------------------------------------------------------------------------------ |
+| `title`       | `string` | **Required.** The main title of the page, displayed at the top and in the sidebar.                                  |
+| `description` | `string` | _Optional._ A brief subtitle displayed below the title and used for the meta `<meta name="description">` tag.       |
+| `order`       | `number` | _Optional._ Determines the sorting order of the pages **within their specific folder**. Lower numbers appear first. |
 
-| Property      | Type     | Description                                                                                                                    |
-| :------------ | :------- | :----------------------------------------------------------------------------------------------------------------------------- |
-| `title`       | `string` | **Required.** The main title of the page, displayed at the top and in the sidebar.                                             |
-| `description` | `string` | _Optional._ A brief subtitle displayed below the title and used for the meta `<meta name="description">` tag.                  |
-| `order`       | `number` | _Optional._ Determines the sorting order of the pages in the sidebar and Next/Previous navigation. Lower numbers appear first. |
+## Folders & Routing
 
-## Routing and Folders
+The URL and Sidebar placement of your documentation page is determined directly by the file's path.
 
-The URL of your documentation page is determined by the file's path.
+<FileTree>
+  <Folder name="src/content/docs" defaultOpen>
+    <File name="introduction.mdx" />
+    <Folder name="components" defaultOpen>
+      <File name="callout.mdx" />
+      <File name="tabs.mdx" />
+    </Folder>
+  </Folder>
+</FileTree>
 
-- `src/content/docs/introduction.mdx` becomes `/docs/introduction`
-- `src/content/docs/components/components.mdx` becomes `/docs/components/components`
+- `introduction.mdx` becomes `/docs/introduction` and appears at the root of your Sidebar.
+- `components/callout.mdx` becomes `/docs/components/callout` and appears grouped under a "Components" category dropdown in the Sidebar.
 
-You can create subfolders inside `src/content/docs` to automatically categorize your pages. The folder name will be used as the category name in the sidebar (e.g., `getting-started` becomes "Getting Started"). Files directly in `src/content/docs` will appear at the root level of the sidebar.
+If you want to control the order of the top-level categories, simply update the `categoryOrder` array in your `src/config.ts` file!
 
-## Auto-Imported Components
+## Using MDX Components
 
-Most of the custom components provided by Lyvo Docs (like `<Callout>`, `<Steps>`, `<FileTree>`, `<Tabs>`) are automatically injected into your MDX scope.
+All of the custom components provided by Lyvo Docs (like `<Callout>`, `<Steps>`, `<FileTree>`, `<Tabs>`) are automatically injected into your MDX scope.
 
-This means you do **not** need to write `import { Callout } from '@/components/Callout'` at the top of your markdown files. You can just start using them immediately!
+You do **not** need to manually import them at the top of your markdown files. You can just start using them immediately!
 
 ## Table of Contents
 
-The Table of Contents (TOC) on the right side of the page is automatically generated from your markdown headings.
+The Table of Contents (TOC) on the right side of the page is completely automatic.
 
 - It captures `##` (H2) and `###` (H3) headings.
-- It automatically tracks your scroll position and highlights the active section.
-- To exclude a section from the TOC, you can simply use a smaller heading like `####` (H4).
+- It dynamically tracks your scroll position and perfectly masks the active section as you read.
+- To exclude a section from the TOC, simply use a smaller heading like `####` (H4) instead.
