@@ -1,14 +1,14 @@
+import Discord from "@/assets/discord.svg?react";
+import Gitea from "@/assets/gitea.svg?react";
 import GitHub from "@/assets/github.svg?react";
 import Gitlab from "@/assets/gitlab.svg?react";
-import Gitea from "@/assets/gitea.svg?react";
-import Discord from "@/assets/discord.svg?react";
 import Twitter from "@/assets/x.svg?react";
-import { ChevronRight, Menu } from "lucide-react";
+import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "../config";
 import { cn } from "../lib/utils";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import Search from "./Search";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet";
 
 interface SidebarProps {
   categories: Record<string, any[]>;
@@ -189,28 +189,31 @@ export default function Sidebar({ categories, currentPath, logoUrl }: SidebarPro
   return (
     <>
       {/* Mobile Header */}
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/40 px-4 md:hidden">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger>
-            <Menu className="mr-2 ml-1" size={16} />
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="flex w-72 flex-col rounded-none border-r border-border/40 p-0"
-          >
-            <SheetHeader className="flex h-14 shrink-0 flex-row items-center border-b border-border/40 px-6 py-0 text-left">
-              <SheetTitle>
-                <Logo />
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-1 flex-col overflow-hidden">
-              <SidebarNav categories={categories} currentPath={currentPath} />
-            </div>
-          </SheetContent>
-        </Sheet>
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4 md:hidden">
         <Logo />
-        <div className="ml-auto w-40 sm:w-56">
+        <div className="flex items-center gap-4">
           <Search />
+
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger className="opacity-50 hover:opacity-100">
+              <PanelRightOpen size={20} />
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="flex w-72 flex-col rounded-none border-l border-border/40 p-0"
+              showCloseButton={false}
+            >
+              <SheetHeader className="flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 py-0 text-left">
+                <Logo />
+                <SheetClose className="opacity-50 hover:opacity-100">
+                  <PanelRightClose size={20} />
+                </SheetClose>
+              </SheetHeader>
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <SidebarNav categories={categories} currentPath={currentPath} />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 
