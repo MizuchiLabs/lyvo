@@ -1,5 +1,6 @@
-import { SITE } from "../config";
-import { Pencil } from "lucide-react";
+---
+import { SITE } from "@/config";
+import { Pencil } from "@lucide/astro";
 
 // Helper function to build the correct edit URL based on the platform
 function getEditUrl(filePath: string, branch: string = "main") {
@@ -21,25 +22,24 @@ function getEditUrl(filePath: string, branch: string = "main") {
   }
 }
 
-interface EditPageLinkProps {
+interface Props {
   filePath?: string;
   branch?: string; // Defaults to "main"
 }
 
-export default function EditPageLink({ filePath, branch = "main" }: EditPageLinkProps) {
-  if (!filePath || !SITE.repo.url || !SITE.repo.type) return null;
+const { filePath, branch = "main" } = Astro.props;
+const showLink = Boolean(filePath && SITE.repo.url && SITE.repo.type);
+const editUrl = showLink && filePath ? getEditUrl(filePath, branch) : "";
+---
 
-  const editUrl = getEditUrl(filePath, branch);
-
-  return (
-    <a
-      href={editUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex w-32 items-center gap-2 rounded-lg border border-border/80 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
-    >
-      <Pencil size={16} className="mr-0.5" />
-      <span>Edit page</span>
-    </a>
-  );
-}
+{showLink && (
+  <a
+    href={editUrl}
+    target="_blank"
+    rel="noreferrer"
+    class="inline-flex w-32 items-center gap-2 rounded-lg border border-border/80 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
+  >
+    <Pencil size={16} class="mr-0.5" />
+    <span>Edit page</span>
+  </a>
+)}

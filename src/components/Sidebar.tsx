@@ -7,7 +7,6 @@ import { ChevronRight, Menu } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "../config";
 import { cn } from "../lib/utils";
-import ThemeToggle from "./ThemeToggle";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import Search from "./Search";
 
@@ -164,7 +163,6 @@ function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) 
               );
             })}
           </div>
-          <ThemeToggle />
         </div>
       </div>
     </div>

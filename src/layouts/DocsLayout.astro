@@ -7,6 +7,7 @@ import Search from '@/components/Search';
 import Sidebar from '@/components/Sidebar';
 import { SITE } from '@/config';
 import { Font } from 'astro:assets';
+import ThemeToggle from '@/components/ThemeToggle.astro';
 
 interface Props {
 	title: string;
@@ -60,28 +61,6 @@ const logoUrl = logoImage ? logoImage.default.src : undefined;
 		<Font cssVariable="--font-serif-default" preload />
 		<Font cssVariable="--font-mono-default" preload />
 		<ClientRouter />
-		<script is:inline>
-			function applyTheme() {
-				const theme = (() => {
-					if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-						return localStorage.getItem('theme');
-					}
-					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-						return 'dark';
-					}
-					return 'light';
-				})();
-				if (theme === 'dark') {
-					document.documentElement.classList.add('dark');
-				} else {
-					document.documentElement.classList.remove('dark');
-				}
-				window.localStorage.setItem('theme', theme || 'light');
-			}
-
-			applyTheme();
-			document.addEventListener('astro:after-swap', applyTheme);
-		</script>
 	</head>
 
 	<body
@@ -113,6 +92,7 @@ const logoUrl = logoImage ? logoImage.default.src : undefined;
 							<Search client:load />
 						</div>
 						<slot name="header-actions" />
+						<ThemeToggle />
 					</div>
 				</div>
 
@@ -160,3 +140,26 @@ const logoUrl = logoImage ? logoImage.default.src : undefined;
 		</div>
 	</body>
 </html>
+
+<script is:inline>
+	function applyTheme() {
+		const theme = (() => {
+			if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+				return localStorage.getItem('theme');
+			}
+			if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				return 'dark';
+			}
+			return 'light';
+		})();
+		if (theme === 'dark') {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+		window.localStorage.setItem('theme', theme || 'light');
+	}
+
+	applyTheme();
+	document.addEventListener('astro:after-swap', applyTheme);
+</script>

@@ -1,0 +1,28 @@
+---
+import { FolderIcon, FolderOpen, ChevronRight } from "@lucide/astro";
+
+interface Props {
+  name: string;
+  defaultOpen?: boolean;
+}
+
+const { name, defaultOpen = false } = Astro.props;
+---
+
+<li class="m-0 flex flex-col p-0">
+  <details class="group/folder" open={defaultOpen}>
+    <summary class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 transition-colors select-none hover:bg-muted list-none [&::-webkit-details-marker]:hidden">
+      <div class="flex h-4 w-4 items-center justify-center text-muted-foreground">
+        <ChevronRight class="h-4 w-4 shrink-0 transition-transform duration-200 group-open/folder:rotate-90" />
+      </div>
+      
+      <FolderIcon class="h-4 w-4 shrink-0 fill-muted-foreground/30 text-muted-foreground group-hover/folder:text-foreground group-open/folder:hidden" />
+      <FolderOpen class="hidden h-4 w-4 shrink-0 fill-muted-foreground/30 text-foreground group-open/folder:block" />
+      
+      <span class="font-medium text-foreground">{name}</span>
+    </summary>
+    <ul class="m-0 ml-3 flex flex-col border-l border-border pl-3">
+      <slot />
+    </ul>
+  </details>
+</li>

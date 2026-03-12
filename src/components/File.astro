@@ -1,0 +1,15 @@
+---
+import { FileIcon } from "@lucide/astro";
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+---
+
+<li class="m-0 flex items-center gap-2 rounded-md p-0 px-2 py-1 text-muted-foreground transition-colors select-none hover:bg-muted hover:text-foreground">
+  <div class="h-4 w-4 shrink-0"></div>
+  <FileIcon class="h-4 w-4 shrink-0" />
+  <span class="truncate">{name}</span>
+</li>

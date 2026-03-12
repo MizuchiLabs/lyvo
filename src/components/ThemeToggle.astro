@@ -1,0 +1,38 @@
+---
+import { Sun, Moon } from '@lucide/astro';
+---
+
+<theme-toggle>
+	<button
+		class="inline-flex items-center justify-center rounded-full p-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-accent hover:text-accent-foreground"
+		title="Toggle theme"
+	>
+		<Sun class="size-5 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+		<Moon class="absolute size-5 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+		<span class="sr-only">Toggle theme</span>
+	</button>
+</theme-toggle>
+
+<script>
+	class ThemeToggle extends HTMLElement {
+		constructor() {
+			super();
+			const button = this.querySelector('button');
+
+			if (button) {
+				button.addEventListener('click', () => {
+					const isDark = document.documentElement.classList.contains('dark');
+					const newTheme = isDark ? 'light' : 'dark';
+
+					document.documentElement.classList.toggle('dark', newTheme === 'dark');
+					localStorage.setItem('theme', newTheme);
+				});
+			}
+		}
+	}
+
+	if (!customElements.get('theme-toggle')) {
+		customElements.define('theme-toggle', ThemeToggle);
+	}
+</script>
+

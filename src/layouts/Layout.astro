@@ -3,7 +3,7 @@ import { Font } from 'astro:assets';
 import { SITE } from '@/config.ts';
 import '@/styles/global.css';
 import { Image } from 'astro:assets';
-import ThemeToggle from '@/components/ThemeToggle.tsx';
+import ThemeToggle from '@/components/ThemeToggle.astro';
 
 interface Props {
 	title?: string;
@@ -34,27 +34,6 @@ if (SITE.repo.url && SITE.repo.type) {
 		<Font cssVariable="--font-sans-default" preload />
 		<Font cssVariable="--font-serif-default" preload />
 		<Font cssVariable="--font-mono-default" preload />
-		<script is:inline>
-			// Theme setup
-			function applyTheme() {
-				const theme = (() => {
-					if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-						return localStorage.getItem('theme');
-					}
-					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-						return 'dark';
-					}
-					return 'light';
-				})();
-				if (theme === 'dark') {
-					document.documentElement.classList.add('dark');
-				} else {
-					document.documentElement.classList.remove('dark');
-				}
-				window.localStorage.setItem('theme', theme || 'light');
-			}
-			applyTheme();
-		</script>
 	</head>
 	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
 		<header
@@ -120,10 +99,33 @@ if (SITE.repo.url && SITE.repo.type) {
 							</a>
 						)
 					}
-					<ThemeToggle client:load />
+					<ThemeToggle />
 				</div>
 			</div>
 		</header>
 		<slot />
 	</body>
 </html>
+
+<script is:inline>
+	function applyTheme() {
+		const theme = (() => {
+			if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+				return localStorage.getItem('theme');
+			}
+			if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				return 'dark';
+			}
+			return 'light';
+		})();
+		if (theme === 'dark') {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+		window.localStorage.setItem('theme', theme || 'light');
+	}
+
+	applyTheme();
+	document.addEventListener('astro:after-swap', applyTheme);
+</script>

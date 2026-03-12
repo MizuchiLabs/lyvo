@@ -1,0 +1,17 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="group relative mb-8 last:mb-0">
+  <div class="step-counter absolute -left-[39px] flex h-7 w-7 items-center justify-center rounded-full border-2 border-border bg-background text-xs font-semibold shadow-sm transition-colors group-hover:border-primary">
+    {/* CSS counter handles the numbers */}
+  </div>
+  {title && <h3 class="mt-0 mb-2 text-lg font-semibold tracking-tight">{title}</h3>}
+  <div class="text-muted-foreground [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+    <slot />
+  </div>
+</div>

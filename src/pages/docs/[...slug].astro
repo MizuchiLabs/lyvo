@@ -2,20 +2,22 @@
 import { render } from 'astro:content';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import fs from 'node:fs';
-import Callout from '@/components/Callout.tsx';
+import Callout from '@/components/Callout.astro';
 import CodeBlockWrapper from '@/components/CodeBlockWrapper.astro';
-import { File, FileTree } from '@/components/FileTree.tsx';
-import FolderWrapper from '@/components/FolderWrapper.astro';
+import FileTree from '@/components/FileTree.astro';
+import Folder from '@/components/Folder.astro';
+import File from '@/components/File.astro';
 import ImageWrapper from '@/components/ImageWrapper.astro';
 import Link from '@/components/Link.astro';
-import { Step, Steps } from '@/components/Steps.tsx';
+import Step from '@/components/Step.astro';
+import Steps from '@/components/Steps.astro';
 import Table from '@/components/Table.astro';
-import TabsWrapper from '@/components/TabsWrapper.astro';
-import AccordionWrapper from '@/components/AccordionWrapper.astro';
+import Accordion from '@/components/Accordion.astro';
 import { SITE } from '@/config.ts';
 import DocsLayout from '@/layouts/DocsLayout.astro';
-import EditPageLink from '@/components/EditPageLink';
+import EditPageLink from '@/components/EditPageLink.astro';
 import { getCollection } from 'astro:content';
+import TabsWrapper from '@/components/TabsWrapper.astro';
 
 export async function getStaticPaths() {
 	const docs = await getCollection('docs');
@@ -38,9 +40,9 @@ const components = {
 	Step,
 	Tabs: TabsWrapper,
 	FileTree,
-	Folder: FolderWrapper,
+	Folder,
 	File,
-	Accordion: AccordionWrapper
+	Accordion
 };
 
 // Sort docs for Prev/Next mirroring the sidebar order
@@ -66,14 +68,14 @@ Object.values(categorizedDocs).forEach((catDocs) => {
 const topLevelItems = [
 	...(categorizedDocs['root'] || []).map((doc) => ({
 		id: doc.id.split('/')[0],
-		type: 'doc',
+		type: 'doc' as const,
 		doc
 	})),
 	...Object.keys(categorizedDocs)
 		.filter((catId) => catId !== 'root')
 		.map((catId) => ({
 			id: catId,
-			type: 'category',
+			type: 'category' as const,
 			items: categorizedDocs[catId]
 		}))
 ];

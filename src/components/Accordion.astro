@@ -1,0 +1,35 @@
+---
+import { ChevronDown } from '@lucide/astro';
+
+interface AccordionItem {
+	title: string;
+	content: string;
+	value?: string;
+}
+
+interface Props {
+	items: AccordionItem[];
+	class?: string;
+}
+
+const { items, class: className } = Astro.props;
+---
+
+<div class={`not-prose my-4 w-full flex flex-col gap-2 ${className || ''}`}>
+	{
+		items.map((item, _) => {
+			return (
+				<details class="group border-b border-border" name="accordion-group">
+					<summary class="flex cursor-pointer list-none items-center justify-between px-4 py-4 text-base font-medium transition-all hover:underline [&::-webkit-details-marker]:hidden">
+						{item.title}
+						<ChevronDown class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+					</summary>
+					<div class="px-4 pt-0 pb-4 text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+						<Fragment set:html={item.content} />
+					</div>
+				</details>
+			);
+		})
+	}
+</div>
+
