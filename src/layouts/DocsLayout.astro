@@ -5,6 +5,7 @@ import { ChevronRight, AlignLeft } from 'lucide-react';
 import { getCollection } from 'astro:content';
 import Search from '@/components/Search';
 import Sidebar from '@/components/Sidebar';
+import MobileToc from '@/components/MobileToc';
 import { SITE } from '@/config';
 import { Font } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
@@ -12,9 +13,10 @@ import ThemeToggle from '@/components/ThemeToggle.astro';
 interface Props {
 	title: string;
 	description?: string;
+	headings?: { depth: number; slug: string; text: string }[];
 }
 
-const { title, description } = Astro.props;
+const { title, description, headings = [] } = Astro.props;
 
 // Fetch all docs to generate the sidebar
 const docs = await getCollection('docs');
@@ -76,18 +78,23 @@ const logoUrl = logoImage ? logoImage.default.src : undefined;
 			>
 				{/* Breadcrumbs Header */}
 				<div
-					class="sticky top-0 z-30 flex min-h-14 items-center justify-between border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
+					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
 				>
-					<div class="flex items-center space-x-1 text-sm text-muted-foreground">
-						<a
-							href="/docs/introduction"
-							class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
-							>Docs</a
-						>
-						<ChevronRight size={16} />
-						<div class="font-medium text-foreground">{title}</div>
+					<div class="flex flex-1 items-center min-w-0 text-sm text-muted-foreground">
+						<div class="hidden xl:flex items-center space-x-1">
+							<a
+								href="/docs/introduction"
+								class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
+								>Docs</a
+							>
+							<ChevronRight size={16} />
+							<div class="font-medium text-foreground">{title}</div>
+						</div>
+						<div class="flex xl:hidden w-full">
+							<MobileToc client:load headings={headings} title={title} />
+						</div>
 					</div>
-					<div class="flex items-center gap-4">
+					<div class="flex items-center gap-4 shrink-0">
 						<div class="hidden w-64 md:block">
 							<Search client:load />
 						</div>
