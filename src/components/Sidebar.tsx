@@ -9,11 +9,12 @@ import { SITE } from "../config";
 import { cn } from "../lib/utils";
 import ThemeToggle from "./ThemeToggle";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
-import { Image } from "astro:assets";
+import Search from "./Search";
 
 interface SidebarProps {
   categories: Record<string, any[]>;
   currentPath: string;
+  logoUrl?: string;
 }
 
 const repoIcons: Record<string, any> = {
@@ -27,7 +28,7 @@ const socialLinks = [
   { name: "Twitter / X", url: SITE.social.x, Icon: Twitter, iconSize: "size-4" },
 ];
 
-export function SidebarNav({ categories, currentPath }: SidebarProps) {
+function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) {
   const RepoIcon = repoIcons[SITE.repo.type];
 
   return (
@@ -75,7 +76,7 @@ export function SidebarNav({ categories, currentPath }: SidebarProps) {
                 <details className="group" open>
                   <summary
                     className={cn(
-                      "flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm font-semibold transition-colors",
+                      "flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-1.5 text-sm font-semibold transition-colors [&::-webkit-details-marker]:hidden",
                       isCategoryActive
                         ? "text-foreground"
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -115,7 +116,7 @@ export function SidebarNav({ categories, currentPath }: SidebarProps) {
 
       <div className="mt-auto shrink-0 p-4">
         <div className="h-px w-full bg-border/40" />
-        <div className="flex items-center justify-between mt-4">
+        <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {SITE.repo.url && SITE.repo.type && (
               <a
@@ -134,7 +135,7 @@ export function SidebarNav({ categories, currentPath }: SidebarProps) {
               if (!url) return null;
               return (
                 <a
-                  key={name} // Always include a unique key when mapping in React
+                  key={name}
                   href={url}
                   target="_blank"
                   rel="noreferrer"
@@ -154,42 +155,60 @@ export function SidebarNav({ categories, currentPath }: SidebarProps) {
   );
 }
 
-export function MobileSidebar({ categories, currentPath }: SidebarProps) {
+export default function Sidebar({ categories, currentPath, logoUrl }: SidebarProps) {
   const [open, setOpen] = useState(false);
 
+  const Logo = () => (
+    <a href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
+      {(SITE.logo.type === "logo" || SITE.logo.type === "both") && logoUrl && (
+        <img
+          src={logoUrl}
+          alt={`${SITE.title} Logo`}
+          width={SITE.logo.width}
+          height={SITE.logo.height}
+        />
+      )}
+      {(SITE.logo.type === "text" || SITE.logo.type === "both") && <span>{SITE.title}</span>}
+    </a>
+  );
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
-        render={
-          <button
-            className="mr-2 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:hidden"
-            aria-label="Toggle Menu"
+    <>
+      {/* Mobile Header */}
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/40 px-4 md:hidden">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger>
+            <Menu className="ml-1 mr-2" size={16} />
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="flex w-72 flex-col rounded-none border-r border-border/40 p-0"
           >
-            <Menu className="h-5 w-5" />
-          </button>
-        }
-      />
-      <SheetContent
-        side="left"
-        className="flex w-72 flex-col rounded-none! border-r border-border/40 p-0"
-      >
-        <SheetHeader className="flex h-14 shrink-0 flex-row items-center border-b border-border/40 px-6 py-0 text-left">
-          <SheetTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            {(SITE.logo.type === "logo" || SITE.logo.type === "both") && (
-              <Image
-                src={`/src/assets/${SITE.logo.src}`}
-                alt={`${SITE.title} Logo`}
-                width={SITE.logo.width}
-                height={SITE.logo.height}
-              />
-            )}
-            {(SITE.logo.type === "text" || SITE.logo.type === "both") && <span>{SITE.title}</span>}
-          </SheetTitle>
-        </SheetHeader>
+            <SheetHeader className="flex h-14 shrink-0 flex-row items-center border-b border-border/40 px-6 py-0 text-left">
+              <SheetTitle>
+                <Logo />
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <SidebarNav categories={categories} currentPath={currentPath} />
+            </div>
+          </SheetContent>
+        </Sheet>
+        <Logo />
+        <div className="ml-auto w-40 sm:w-56">
+          <Search />
+        </div>
+      </header>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden w-72 shrink-0 flex-col space-y-6 md:flex">
+        <div className="flex shrink-0 items-center px-6 pt-6 pb-2">
+          <Logo />
+        </div>
         <div className="flex flex-1 flex-col overflow-hidden">
           <SidebarNav categories={categories} currentPath={currentPath} />
         </div>
-      </SheetContent>
-    </Sheet>
+      </aside>
+    </>
   );
 }

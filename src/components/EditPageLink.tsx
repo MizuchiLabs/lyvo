@@ -36,7 +36,7 @@ export default function EditPageLink({ filePath, branch = "main" }: EditPageLink
       href={editUrl}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline border border-border/80 px-4 py-2 rounded-lg"
+      className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline border border-border/80 px-4 py-2 w-32 rounded-lg"
     >
       <Pencil size={16} className="mr-0.5" />
       <span>Edit page</span>

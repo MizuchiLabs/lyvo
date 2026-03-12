@@ -4,9 +4,9 @@ import { ClientRouter } from 'astro:transitions';
 import { ChevronRight, AlignLeft } from 'lucide-react';
 import { getCollection } from 'astro:content';
 import Search from '@/components/Search';
-import { SidebarNav, MobileSidebar } from '@/components/Sidebar';
+import Sidebar from '@/components/Sidebar';
 import { SITE } from '@/config';
-import { Image, Font } from 'astro:assets';
+import { Font } from 'astro:assets';
 
 interface Props {
 	title: string;
@@ -40,6 +40,12 @@ const categories = docs.reduce(
 );
 
 const currentPath = Astro.url.pathname;
+
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{jpeg,jpg,png,gif,svg}');
+const logoSrcPath = `/src/assets/${SITE.logo.src}`;
+const logoResolver = images[logoSrcPath];
+const logoImage = logoResolver ? await logoResolver() : null;
+const logoUrl = logoImage ? logoImage.default.src : undefined;
 ---
 
 <!doctype html>
@@ -85,66 +91,19 @@ const currentPath = Astro.url.pathname;
 	</head>
 
 	<body
-		class="flex h-screen w-full flex-col overflow-hidden bg-background font-sans text-foreground antialiased md:flex-row"
+		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
 	>
-		{/* Spacer for larger screens */}
-		<div class="hidden shrink-0 md:block" style="width: max(0px, calc((100vw - 1600px) / 2));">
-		</div>
-
-		{/* Mobile Sidebar */}
-		<header
-			class="flex h-14 shrink-0 items-center gap-2 border-b border-border/40 bg-background px-4 md:hidden"
-		>
-			<MobileSidebar client:load categories={categories} currentPath={currentPath} />
-			<a href="/" class="flex items-center gap-2 text-lg font-bold tracking-tight">
-				{
-					(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
-						<Image
-							src={`/src/assets/${SITE.logo.src}`}
-							alt={`${SITE.title} Logo`}
-							width={SITE.logo.width}
-							height={SITE.logo.height}
-						/>
-					)
-				}
-				{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-			</a>
-			<div class="ml-auto w-40 sm:w-56">
-				<Search client:load />
-			</div>
-		</header>
-
-		{/* Desktop Sidebar  */}
-		<aside class="hidden w-72 shrink-0 flex-col space-y-6 md:flex">
-			<div class="flex shrink-0 items-center px-6 pt-6 pb-2">
-				<a href="/" class="flex items-center gap-3 text-lg font-bold tracking-tight">
-					{
-						(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
-							<Image
-								src={`/src/assets/${SITE.logo.src}`}
-								alt={`${SITE.title} Logo`}
-								width={SITE.logo.width}
-								height={SITE.logo.height}
-							/>
-						)
-					}
-					{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-				</a>
-			</div>
-			<div class="flex flex-1 flex-col overflow-hidden">
-				<SidebarNav client:load categories={categories} currentPath={currentPath} />
-			</div>
-		</aside>
+		<Sidebar client:load categories={categories} currentPath={currentPath} logoUrl={logoUrl} />
 
 		{/* Main Content */}
 		<div class="flex h-full flex-1 flex-col overflow-hidden md:py-3 md:pr-3">
 			<main
 				id="main-scroll-area"
-				class="no-scrollbar relative flex-1 overflow-y-auto bg-muted/30 md:rounded-2xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
+				class="no-scrollbar relative flex-1 overflow-y-auto bg-background md:rounded-2xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
 			>
 				{/* Breadcrumbs Header */}
 				<div
-					class="sticky top-0 z-30 flex min-h-14 items-center justify-between border-b border-border/40 bg-muted/40 px-6 backdrop-blur-md"
+					class="sticky top-0 z-30 flex min-h-14 items-center justify-between border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
 				>
 					<div class="flex items-center space-x-1 text-sm text-muted-foreground">
 						<a
@@ -164,7 +123,7 @@ const currentPath = Astro.url.pathname;
 				</div>
 
 				{/* Inner container to constrain text width so it's readable on ultra-wides */}
-				<div class="mx-auto flex max-w-7xl flex-col xl:flex-row xl:gap-12">
+				<div class="mx-auto flex max-w-5xl flex-col px-4 sm:px-6 md:px-8 xl:flex-row xl:gap-12">
 					{/* Article Body */}
 					<div class="mx-auto w-full min-w-0 flex-1 py-8">
 						<div class="flex items-center justify-between space-y-2">

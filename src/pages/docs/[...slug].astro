@@ -71,7 +71,7 @@ try {
 <DocsLayout title={entry.data.title} description={entry.data.description}>
 	{
 		SITE.enableEdit && (
-			<div slot="edit-button">
+			<div slot="edit-button" class="hidden md:block">
 				<EditPageLink filePath={entry.filePath} />
 			</div>
 		)
