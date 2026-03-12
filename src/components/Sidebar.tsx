@@ -1,14 +1,11 @@
-import Discord from "@/assets/discord.svg?react";
-import Gitea from "@/assets/gitea.svg?react";
-import GitHub from "@/assets/github.svg?react";
-import Gitlab from "@/assets/gitlab.svg?react";
-import Twitter from "@/assets/x.svg?react";
-import { ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { ChevronRight, PanelRightClose, PanelRightOpen, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { SITE } from "../config";
 import { cn } from "../lib/utils";
 import Search from "./Search";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet";
+import RepoIcon from "./RepoIcon";
+import SocialIcon from "./SocialIcon";
 
 interface SidebarProps {
   categories: Record<string, any[]>;
@@ -16,19 +13,7 @@ interface SidebarProps {
   logoUrl?: string;
 }
 
-const repoIcons: Record<string, any> = {
-  github: GitHub,
-  gitlab: Gitlab,
-  gitea: Gitea,
-};
-
-const socialLinks = [
-  { name: "Discord", url: SITE.social.discord, Icon: Discord, iconSize: "size-5" },
-  { name: "Twitter / X", url: SITE.social.x, Icon: Twitter, iconSize: "size-4" },
-];
-
 function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) {
-  const RepoIcon = repoIcons[SITE.repo.type];
 
   const topLevelItems = [
     ...(categories["root"] || []).map((doc) => ({
@@ -130,39 +115,62 @@ function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) 
       </div>
 
       <div className="mt-auto shrink-0 p-4">
+        {SITE.extraLinks && SITE.extraLinks.length > 0 && (
+          <div className="mb-4 flex flex-col gap-1">
+            {SITE.extraLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+              >
+                {link.title}
+                <ExternalLink size={12} className="opacity-50" />
+              </a>
+            ))}
+          </div>
+        )}
+
         <div className="h-px w-full bg-border/40" />
         <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {SITE.repo.url && SITE.repo.type && (
+          <div className="flex items-center gap-1">
+            {SITE.repo.url && (
               <a
                 href={SITE.repo.url}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                title={`View on ${SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}`}
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                title={`View on ${SITE.repo.type}`}
               >
                 <RepoIcon className="size-5 dark:invert" />
                 <span className="sr-only">{SITE.repo.type}</span>
               </a>
             )}
 
-            {socialLinks.map(({ name, url, Icon, iconSize }) => {
+            {Object.entries(SITE.social).map(([platform, url]) => {
               if (!url) return null;
               return (
                 <a
-                  key={name}
+                  key={platform}
                   href={url}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                  title={name}
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  title={platform.charAt(0).toUpperCase() + platform.slice(1)}
                 >
-                  <Icon className={`${iconSize} dark:invert`} />
-                  <span className="sr-only">{name}</span>
+                  <SocialIcon platform={platform} className="size-5 dark:invert" />
+                  <span className="sr-only">{platform}</span>
                 </a>
               );
             })}
           </div>
+
+          {SITE.version && (
+            <div className="rounded-md bg-muted/50 px-2 py-1 text-[10px] font-medium tracking-tight text-muted-foreground">
+              {SITE.version}
+            </div>
+          )}
         </div>
       </div>
     </div>

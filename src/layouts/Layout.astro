@@ -4,24 +4,13 @@ import { SITE } from '@/config.ts';
 import '@/styles/global.css';
 import { Image } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
+import RepoIcon from '@/components/RepoIcon.tsx';
 
 interface Props {
 	title?: string;
 }
 
 const { title = SITE.title } = Astro.props;
-
-// Dynamically import repo icon if applicable
-let RepoIcon;
-if (SITE.repo.url && SITE.repo.type) {
-	if (SITE.repo.type === 'github') {
-		RepoIcon = (await import('@/assets/github.svg?raw')).default;
-	} else if (SITE.repo.type === 'gitlab') {
-		RepoIcon = (await import('@/assets/gitlab.svg?raw')).default;
-	} else if (SITE.repo.type === 'gitea') {
-		RepoIcon = (await import('@/assets/gitea.svg?raw')).default;
-	}
-}
 ---
 
 <!doctype html>
@@ -82,9 +71,9 @@ if (SITE.repo.url && SITE.repo.type) {
 						}
 					</div>
 				</div>
-				<div class="flex items-center space-x-4">
+				<div class="flex items-center space-x-2">
 					{
-						RepoIcon && (
+						SITE.repo.url && (
 							<a
 								href={SITE.repo.url}
 								target="_blank"
@@ -93,7 +82,7 @@ if (SITE.repo.url && SITE.repo.type) {
 								title={`View on ${SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}`}
 							>
 								<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
-									<Fragment set:html={RepoIcon} />
+									<RepoIcon />
 								</span>
 								<span class="sr-only">{SITE.repo.type}</span>
 							</a>

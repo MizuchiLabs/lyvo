@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.tsx';
 import { ArrowRight } from 'lucide-react';
 import Layout from '@/layouts/Layout.astro';
 import { SITE } from '@/config.ts';
+import RepoIcon from '@/components/RepoIcon';
 ---
 
 <Layout title={`${SITE.title}`}>
@@ -16,11 +17,6 @@ import { SITE } from '@/config.ts';
 		<div
 			class="container mx-auto flex max-w-4xl flex-col items-center px-4 pt-12 pb-8 text-center md:pt-20 md:pb-12"
 		>
-			<div
-				class="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary backdrop-blur-sm transition-colors focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-			>
-				✨ Welcome to {SITE.title}
-			</div>
 			<h1
 				class="mb-6 text-4xl font-extrabold tracking-tight text-balance text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
 			>
@@ -47,8 +43,9 @@ import { SITE } from '@/config.ts';
 					<Button
 						variant="outline"
 						size="lg"
-						className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
+						className="w-full rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
 					>
+						<RepoIcon className="mr-1 dark:invert" />
 						View on {SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}
 					</Button>
 				</a>

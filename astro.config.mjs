@@ -7,7 +7,6 @@ import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import svgr from "vite-plugin-svgr";
-
 import favicons from "astro-favicons";
 
 export default defineConfig({
