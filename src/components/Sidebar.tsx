@@ -1,20 +1,20 @@
-import { ChevronRight, PanelRightClose, PanelRightOpen, ExternalLink } from "lucide-react";
+import { SITE } from "@/config";
+import { cn } from "@/lib/utils";
+import { ChevronRight, ExternalLink, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useState } from "react";
-import { SITE } from "../config";
-import { cn } from "../lib/utils";
-import Search from "./Search";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet";
 import RepoIcon from "./RepoIcon";
+import Search from "./Search";
 import SocialIcon from "./SocialIcon";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTrigger } from "./ui/sheet";
 
 interface SidebarProps {
   categories: Record<string, any[]>;
   currentPath: string;
   logoUrl?: string;
+  version?: string;
 }
 
-function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) {
-
+function SidebarNav({ categories, currentPath, version }: Omit<SidebarProps, "logoUrl">) {
   const topLevelItems = [
     ...(categories["root"] || []).map((doc) => ({
       type: "link" as const,
@@ -166,9 +166,9 @@ function SidebarNav({ categories, currentPath }: Omit<SidebarProps, "logoUrl">) 
             })}
           </div>
 
-          {SITE.version && (
+          {version && (
             <div className="rounded-md bg-muted/50 px-2 py-1 text-[10px] font-medium tracking-tight text-muted-foreground">
-              {SITE.version}
+              {version}
             </div>
           )}
         </div>

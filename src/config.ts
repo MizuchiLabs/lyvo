@@ -1,9 +1,8 @@
 export const SITE = {
   title: "Lyvo Docs",
   description: "A modern, minimalistic documentation theme for Astro.",
-  version: "v0.0.1", // Optionally display the version number
   repo: {
-    url: "https://github.com/mizuchilabs/lyvo",
+    url: "https://github.com/mizuchilabs/orbitd",
     type: "github", // github, gitlab, gitea, forgejo, git
   },
   openapi: {
@@ -27,5 +26,6 @@ export const SITE = {
     height: 28,
   },
   enableEdit: true, // Enable edit page button
+  showVersion: true, // Show version in sidebar
   categoryOrder: ["introduction", "overview", "components", "changelog"], // Sort order for sidebar categories
 };
