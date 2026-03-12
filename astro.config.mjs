@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig, fontProviders } from "astro/config";
-
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
@@ -9,10 +8,10 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import svgr from "vite-plugin-svgr";
 
+import favicons from "astro-favicons";
+
 export default defineConfig({
-  vite: {
-    plugins: [tailwindcss(), svgr()],
-  },
+  vite: { plugins: [tailwindcss(), svgr()] },
 
   markdown: {
     syntaxHighlight: false,
@@ -78,8 +77,5 @@ export default defineConfig({
     },
   ],
 
-  integrations: [
-    react(),
-    mdx(),
-  ],
+  integrations: [react(), mdx(), favicons()],
 });
