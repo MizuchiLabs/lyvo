@@ -50,7 +50,7 @@ const logoSrcPath = `/src/assets/${SITE.logo.src}`;
 const logoResolver = images[logoSrcPath];
 const logoImage = logoResolver ? await logoResolver() : null;
 const logoUrl = logoImage ? logoImage.default.src : undefined;
-const latestVersion = await getRepoVersion();
+const latestVersion = SITE.showVersion ? await getRepoVersion() : '';
 ---
 
 <!doctype html>
