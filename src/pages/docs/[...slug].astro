@@ -114,7 +114,11 @@ try {
 }
 ---
 
-<DocsLayout title={entry.data.title} description={entry.data.description} headings={filteredHeadings}>
+<DocsLayout
+	title={entry.data.title}
+	description={entry.data.description}
+	headings={filteredHeadings}
+>
 	{
 		SITE.enableEdit && (
 			<div slot="edit-button" class="hidden md:block">
@@ -198,14 +202,15 @@ try {
 					const lowerOffset = getLineOffset(lower);
 
 					return (
-						<div class={`relative py-1.5 text-sm ${getPadding(heading.depth)}`}>
+						<div
+							class={`relative py-1.5 text-sm font-medium text-foreground ${getPadding(heading.depth)}`}
+						>
 							{offset !== upperOffset && (
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 16 16"
 									class="absolute -top-1.5 left-0 h-4 w-4"
 								>
-									{/* Thickened stroke so the active diagonal pops nicely */}
 									<line
 										x1={upperOffset}
 										y1="0"
@@ -220,8 +225,7 @@ try {
 								class={`absolute w-px bg-foreground ${offset !== upperOffset ? 'top-1.5' : 'top-0'} ${offset !== lowerOffset ? 'bottom-1.5' : 'bottom-0'}`}
 								style={`left: ${offset}px`}
 							/>
-							{/* Transparent text perfectly mimics the height of the real links in case they wrap into two lines */}
-							<span class="text-transparent select-none">{heading.text}</span>
+							<span class="select-none">{heading.text}</span>
 						</div>
 					);
 				})
@@ -283,7 +287,6 @@ try {
 		const headings = document.querySelectorAll('article h2, article h3');
 		if (!headings.length) return;
 
-		let activeId = '';
 		const mainScrollArea = document.querySelector('#main-scroll-area');
 		const container = document.querySelector('.toc-container') as HTMLElement | null;
 		const highlightLayer = document.querySelector('.toc-highlight-layer') as HTMLElement | null;
@@ -292,8 +295,8 @@ try {
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-						activeId = entry.target.getAttribute('id') || '';
-						updateToc();
+						const activeId = entry.target.getAttribute('id');
+						updateToc(activeId);
 					}
 				});
 			},
@@ -302,19 +305,13 @@ try {
 
 		headings.forEach((heading) => observer.observe(heading));
 
-		if (!activeId && headings.length > 0) {
-			activeId = headings[0].getAttribute('id') || '';
-			// Use setTimeout to allow DOM/styles to settle before calculating clip-path
-			setTimeout(updateToc, 50);
-		}
-
-		function updateToc() {
+		function updateToc(activeId: string | null) {
 			if (!activeId || !container || !highlightLayer) return;
 
 			const activeLink = document.querySelector(`.toc-link[data-id="${activeId}"]`);
 
 			if (activeLink) {
-				// Update text colors for the base layer
+				// Update base layer text colors
 				document.querySelectorAll('.toc-link').forEach((link) => {
 					link.classList.remove('text-foreground', 'font-medium');
 					link.classList.add('text-muted-foreground');
@@ -322,37 +319,20 @@ try {
 				activeLink.classList.remove('text-muted-foreground');
 				activeLink.classList.add('text-foreground', 'font-medium');
 
-				// Calculate position for the clipping mask
+				// Calculate position for the clipping mask animation
 				const containerRect = container.getBoundingClientRect();
 				const linkRect = activeLink.getBoundingClientRect();
 
-				// Get the top and bottom offsets relative to the TOC container
 				const topInset = linkRect.top - containerRect.top;
 				const bottomInset = containerRect.bottom - linkRect.bottom;
 
-				// Slide the window down to perfectly frame only the active section of the Highlight Layer
 				highlightLayer.style.clipPath = `inset(${topInset}px 0 ${bottomInset}px 0)`;
 			}
 		}
 
-		mainScrollArea?.addEventListener(
-			'scroll',
-			(e) => {
-				const target = e.target as HTMLElement;
-				const isScrollable = target.scrollHeight > target.clientHeight;
-				const isAtBottom =
-					target.clientHeight + Math.round(target.scrollTop) >= target.scrollHeight - 50;
-
-				if (isScrollable && isAtBottom) {
-					const lastHeading = headings[headings.length - 1];
-					if (lastHeading) {
-						activeId = lastHeading.getAttribute('id') || '';
-						updateToc();
-					}
-				}
-			},
-			{ passive: true }
-		);
+		// Initial update
+		const firstHeading = headings[0]?.getAttribute('id');
+		if (firstHeading) setTimeout(() => updateToc(firstHeading), 50);
 	}
 
 	initScrollspy();

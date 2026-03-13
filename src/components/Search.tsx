@@ -61,7 +61,7 @@ export default function Search() {
         onFocus={prefetchPagefind}
         onMouseEnter={prefetchPagefind}
         aria-label="Search documentation"
-        className="relative inline-flex h-11 w-11 md:h-9 md:w-full items-center justify-center md:justify-between rounded-md border-0 md:border border-input bg-transparent px-0 md:px-4 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground shadow-none md:shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:pr-12"
+        className="relative inline-flex h-11 w-11 items-center justify-center rounded-md border-0 border-input bg-transparent px-0 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:h-9 md:w-full md:justify-between md:border md:px-4 md:pr-12 md:shadow-sm"
       >
         <span className="hidden md:inline-flex">Search...</span>
         <SearchIcon className="md:hidden" size={20} />
