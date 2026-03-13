@@ -2,14 +2,12 @@
 import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import { ChevronRight, AlignLeft } from 'lucide-react';
-import { getCollection } from 'astro:content';
 import Search from '@/components/Search';
-import Sidebar from '@/components/Sidebar';
+import Sidebar from '@/components/Sidebar.astro';
 import MobileToc from '@/components/MobileToc';
 import { SITE } from '@/config';
 import { Font } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
-import { getRepoVersion } from '@/lib/version';
 
 interface Props {
 	title: string;
@@ -18,39 +16,6 @@ interface Props {
 }
 
 const { title, description, headings = [] } = Astro.props;
-
-// Fetch all docs to generate the sidebar
-const docs = await getCollection('docs');
-docs.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
-
-const categories = docs.reduce(
-	(acc, doc) => {
-		const parts = doc.id.split('/');
-		let cat = 'root';
-		if (parts.length > 1) {
-			cat = parts[0];
-			cat = cat
-				.split('-')
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(' ');
-		}
-		if (!acc[cat]) {
-			acc[cat] = [];
-		}
-		acc[cat].push(doc);
-		return acc;
-	},
-	{} as Record<string, typeof docs>
-);
-
-const currentPath = Astro.url.pathname;
-
-const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{jpeg,jpg,png,gif,svg}');
-const logoSrcPath = `/src/assets/${SITE.logo.src}`;
-const logoResolver = images[logoSrcPath];
-const logoImage = logoResolver ? await logoResolver() : null;
-const logoUrl = logoImage ? logoImage.default.src : undefined;
-const latestVersion = SITE.showVersion ? await getRepoVersion() : '';
 ---
 
 <!doctype html>
@@ -70,13 +35,7 @@ const latestVersion = SITE.showVersion ? await getRepoVersion() : '';
 	<body
 		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
 	>
-		<Sidebar
-			client:load
-			categories={categories}
-			currentPath={currentPath}
-			logoUrl={logoUrl}
-			version={latestVersion}
-		/>
+		<Sidebar />
 
 		{/* Main Content */}
 		<div class="flex h-full flex-1 flex-col overflow-hidden md:py-3 md:pr-3">

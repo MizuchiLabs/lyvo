@@ -26,6 +26,6 @@ export const SITE = {
     height: 28,
   },
   enableEdit: true, // Enable edit page button
-  showVersion: true, // Show version in sidebar
+  showVersion: false, // Show project version in sidebar
   categoryOrder: ["introduction", "overview", "components", "changelog"], // Sort order for sidebar categories
 };
