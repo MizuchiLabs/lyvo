@@ -274,15 +274,16 @@
   .prose input[type="checkbox"]:checked::after {
     content: "";
     @apply absolute inset-0 flex items-center justify-center;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
     background-size: 70%;
     background-position: center;
     background-repeat: no-repeat;
+    color: var(--primary-foreground);
   }
 
-  /* Make dark mode checkmark adapt to primary-foreground */
+  /* Remove manual dark mode color override as we use currentColor */
   .dark .prose input[type="checkbox"]:checked::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    color: var(--primary-foreground);
   }
 
   /* Custom prose styling */

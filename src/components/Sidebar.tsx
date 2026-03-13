@@ -177,33 +177,36 @@ function SidebarNav({ categories, currentPath, version }: Omit<SidebarProps, "lo
   );
 }
 
-export default function Sidebar({ categories, currentPath, logoUrl }: SidebarProps) {
-  const [open, setOpen] = useState(false);
+const Logo = ({ logoUrl }: { logoUrl?: string }) => (
+  <a
+    href="/"
+    className="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
+  >
+    {(SITE.logo.type === "logo" || SITE.logo.type === "both") && logoUrl && (
+      <img
+        src={logoUrl}
+        alt={`${SITE.title} Logo`}
+        width={SITE.logo.width}
+        height={SITE.logo.height}
+      />
+    )}
+    {(SITE.logo.type === "text" || SITE.logo.type === "both") && <span>{SITE.title}</span>}
+  </a>
+);
 
-  const Logo = () => (
-    <a href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-      {(SITE.logo.type === "logo" || SITE.logo.type === "both") && logoUrl && (
-        <img
-          src={logoUrl}
-          alt={`${SITE.title} Logo`}
-          width={SITE.logo.width}
-          height={SITE.logo.height}
-        />
-      )}
-      {(SITE.logo.type === "text" || SITE.logo.type === "both") && <span>{SITE.title}</span>}
-    </a>
-  );
+export default function Sidebar({ categories, currentPath, logoUrl, version }: SidebarProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
       {/* Mobile Header */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4 md:hidden">
-        <Logo />
-        <div className="flex items-center gap-4">
+        <Logo logoUrl={logoUrl} />
+        <div className="flex items-center gap-2">
           <Search />
 
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className="opacity-50 hover:opacity-100">
+            <SheetTrigger className="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100">
               <PanelRightOpen size={20} />
             </SheetTrigger>
             <SheetContent
@@ -212,13 +215,13 @@ export default function Sidebar({ categories, currentPath, logoUrl }: SidebarPro
               showCloseButton={false}
             >
               <SheetHeader className="flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 py-0 text-left">
-                <Logo />
-                <SheetClose className="opacity-50 hover:opacity-100">
+                <Logo logoUrl={logoUrl} />
+                <SheetClose className="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100">
                   <PanelRightClose size={20} />
                 </SheetClose>
               </SheetHeader>
               <div className="flex flex-1 flex-col overflow-hidden">
-                <SidebarNav categories={categories} currentPath={currentPath} />
+                <SidebarNav categories={categories} currentPath={currentPath} version={version} />
               </div>
             </SheetContent>
           </Sheet>
@@ -228,10 +231,10 @@ export default function Sidebar({ categories, currentPath, logoUrl }: SidebarPro
       {/* Desktop Sidebar */}
       <aside className="hidden w-72 shrink-0 flex-col space-y-6 md:flex">
         <div className="flex shrink-0 items-center px-6 pt-6 pb-2">
-          <Logo />
+          <Logo logoUrl={logoUrl} />
         </div>
         <div className="flex flex-1 flex-col overflow-hidden">
-          <SidebarNav categories={categories} currentPath={currentPath} />
+          <SidebarNav categories={categories} currentPath={currentPath} version={version} />
         </div>
       </aside>
     </>

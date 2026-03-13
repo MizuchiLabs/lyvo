@@ -41,7 +41,7 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
             }
           });
         },
-        { root: mainScrollArea, rootMargin: "-10% 0px -70% 0px" },
+        { root: mainScrollArea, rootMargin: "-20% 0px -60% 0px" },
       );
 
       headingElements.forEach((el) => observer.observe(el));
@@ -79,6 +79,8 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
     <div className="flex w-full items-center xl:hidden" ref={dropdownRef}>
       <button
         onClick={() => headings.length > 0 && setOpen(!open)}
+        aria-expanded={open}
+        aria-controls="mobile-toc-menu"
         className={cn(
           "flex w-full items-center space-x-2 text-sm transition-colors",
           headings.length > 0
@@ -125,7 +127,10 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
       </button>
 
       {open && headings.length > 0 && (
-        <div className="absolute top-14 left-0 right-0 z-50 rounded-b-xl border-b border-border/40 bg-sidebar p-4 shadow-lg w-full">
+        <div
+          id="mobile-toc-menu"
+          className="absolute top-14 left-0 right-0 z-50 rounded-b-xl border-b border-border/40 bg-sidebar p-4 shadow-lg w-full"
+        >
           <div className="no-scrollbar max-h-[60vh] overflow-y-auto">
             <div className="flex flex-col space-y-1">
               {headings.length > 0 ? (

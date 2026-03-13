@@ -21,8 +21,8 @@ const { title = SITE.title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<Font cssVariable="--font-sans-default" preload />
-		<Font cssVariable="--font-serif-default" preload />
-		<Font cssVariable="--font-mono-default" preload />
+		<Font cssVariable="--font-serif-default" />
+		<Font cssVariable="--font-mono-default" />
 	</head>
 	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
 		<header

@@ -62,8 +62,8 @@ const latestVersion = SITE.showVersion ? await getRepoVersion() : '';
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} - {SITE.title}</title>
 		<Font cssVariable="--font-sans-default" preload />
-		<Font cssVariable="--font-serif-default" preload />
-		<Font cssVariable="--font-mono-default" preload />
+		<Font cssVariable="--font-serif-default" />
+		<Font cssVariable="--font-mono-default" />
 		<ClientRouter />
 	</head>
 
