@@ -26,6 +26,10 @@ export const SITE = {
     height: 28,
   },
   enableEdit: true, // Enable edit page button
+  feedback: {
+    enabled: true, // Enable feedback button at the bottom of pages
+    provider: "umami", // "umami" or "plausible"
+  },
   showVersion: false, // Show project version in sidebar
   categoryOrder: ["introduction", "overview", "components", "changelog"], // Sort order for sidebar categories
 };
