@@ -33,7 +33,7 @@ export default function Feedback() {
 
   if (submitted) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground transition-all duration-300 animate-in fade-in zoom-in-95">
+      <div className="flex items-center justify-center gap-2 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground transition-all duration-300 animate-in fade-in zoom-in-95 mb-8">
         <Check size={16} className="text-green-500" />
         Thank you for your feedback!
       </div>
