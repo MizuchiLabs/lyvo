@@ -25,14 +25,13 @@ export default defineConfig({
         {
           behavior: "append",
           properties: {
-            className: ["subheading-anchor"],
-            ariaLabel: "Link to section",
+            class: "heading-link",
+            "aria-hidden": "true",
+            tabIndex: -1,
           },
           content: {
-            type: "element",
-            tagName: "span",
-            properties: { className: ["anchor-icon"] },
-            children: [],
+            type: "text",
+            value: "#",
           },
         },
       ],

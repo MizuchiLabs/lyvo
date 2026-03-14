@@ -182,7 +182,6 @@
     @apply bg-background text-foreground antialiased;
   }
   html {
-    @apply font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -302,16 +301,23 @@
     -webkit-box-decoration-break: clone;
   }
 
-  /* Heading anchors */
-  .subheading-anchor {
-    @apply text-muted-foreground/30 no-underline opacity-0 transition-all duration-200 hover:text-primary;
+  /* Remove the underline from the anchor link */
+  .prose .heading-link {
+    text-decoration: none !important;
+    font-weight: normal;
+    color: var(--color-muted-foreground);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
   }
 
-  article :is(h2, h3, h4, h5, h6):hover .subheading-anchor {
-    @apply opacity-100;
+  /* Show the hash mark when hovering over the heading */
+  .prose :is(h1, h2, h3, h4, h5, h6):hover .heading-link,
+  .prose .heading-link:focus {
+    opacity: 1;
   }
 
-  .anchor-icon::after {
-    content: "#";
+  /* Keep the scroll margin so the sticky header doesn't hide the heading */
+  .prose :is(h1, h2, h3, h4, h5, h6) {
+    scroll-margin-top: 5rem;
   }
 }
