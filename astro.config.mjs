@@ -29,10 +29,6 @@ export default defineConfig({
             "aria-hidden": "true",
             tabIndex: -1,
           },
-          content: {
-            type: "text",
-            value: "#",
-          },
         },
       ],
     ],

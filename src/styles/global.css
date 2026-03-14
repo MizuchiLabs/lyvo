@@ -182,6 +182,7 @@
     @apply bg-background text-foreground antialiased;
   }
   html {
+    @apply font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -304,8 +305,9 @@
   /* Remove the underline from the anchor link */
   .prose .heading-link {
     text-decoration: none !important;
+    margin-left: 0.4em;
     font-weight: normal;
-    color: var(--color-muted-foreground);
+    color: hsl(var(--muted-foreground, #94a3b8)); /* Adjusts to your theme */
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
   }
@@ -316,8 +318,12 @@
     opacity: 1;
   }
 
-  /* Keep the scroll margin so the sticky header doesn't hide the heading */
+  /* Optional: Keep the scroll margin so the sticky header doesn't hide the heading */
   .prose :is(h1, h2, h3, h4, h5, h6) {
-    scroll-margin-top: 5rem;
+    scroll-margin-top: 5rem; /* Adjust based on your nav height */
+  }
+
+  .heading-link::after {
+    content: "#";
   }
 }
