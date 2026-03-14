@@ -1,11 +1,10 @@
 ---
 import { Button } from '@/components/ui/button.tsx';
-import { ArrowLeft, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import Layout from '@/layouts/Layout.astro';
-import { SITE } from '@/config.ts';
 ---
 
-<Layout title={`404: Page Not Found - ${SITE.title}`}>
+<Layout>
 	<main class="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
 		<!-- Background effects -->
 		<div
@@ -35,19 +34,9 @@ import { SITE } from '@/config.ts';
 			</p>
 
 			<div class="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row">
-				<button onclick="history.back()" class="w-full sm:w-auto">
-					<Button
-						variant="outline"
-						size="lg"
-						className="w-full gap-2 rounded-full bg-background/50 px-8 font-medium backdrop-blur-sm sm:w-auto"
-					>
-						<ArrowLeft className="h-4 w-4" /> Go Back
-					</Button>
-				</button>
-
 				<a href="/" class="w-full sm:w-auto">
-					<Button size="lg" className="w-full gap-2 rounded-full px-8 font-medium sm:w-auto">
-						<Home className="h-4 w-4" /> Back to Home
+					<Button size="lg" className="w-full gap-2 rounded-full px-6 font-medium sm:w-auto">
+						<Home size={16} /> Back to Home
 					</Button>
 				</a>
 			</div>

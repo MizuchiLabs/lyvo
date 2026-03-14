@@ -4,18 +4,11 @@ import { Image } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
 import RepoIcon from '@/components/RepoIcon.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
-
-interface Props {
-	title?: string;
-	description?: string;
-}
-
-const { title, description } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class="scroll-smooth">
-	<BaseHead title={title} description={description} />
+	<BaseHead />
 
 	<body
 		class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased"
@@ -59,7 +52,7 @@ const { title, description } = Astro.props;
 						{
 							SITE.openapi?.url && (
 								<a
-									href="/api"
+									href="/openapi"
 									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 								>
 									OpenAPI
