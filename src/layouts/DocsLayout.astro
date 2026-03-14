@@ -1,13 +1,10 @@
 ---
-import '@/styles/global.css';
-import { ClientRouter } from 'astro:transitions';
 import { ChevronRight, AlignLeft } from 'lucide-react';
 import Search from '@/components/Search';
 import Sidebar from '@/components/Sidebar.astro';
 import MobileToc from '@/components/MobileToc';
-import { SITE } from '@/config';
-import { Font } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
+import BaseHead from '@/layouts/BaseHead.astro';
 
 interface Props {
 	title: string;
@@ -20,17 +17,7 @@ const { title, description, headings = [] } = Astro.props;
 
 <!doctype html>
 <html lang="en" class="scroll-smooth">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content={description || 'Documentation'} />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title} - {SITE.title}</title>
-		<Font cssVariable="--font-sans-default" preload />
-		<Font cssVariable="--font-serif-default" />
-		<Font cssVariable="--font-mono-default" />
-		<ClientRouter />
-	</head>
+	<BaseHead title={title} description={description} />
 
 	<body
 		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
@@ -114,26 +101,3 @@ const { title, description, headings = [] } = Astro.props;
 		</div>
 	</body>
 </html>
-
-<script is:inline>
-	function applyTheme() {
-		const theme = (() => {
-			if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-				return localStorage.getItem('theme');
-			}
-			if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-				return 'dark';
-			}
-			return 'light';
-		})();
-		if (theme === 'dark') {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
-		window.localStorage.setItem('theme', theme || 'light');
-	}
-
-	applyTheme();
-	document.addEventListener('astro:after-swap', applyTheme);
-</script>

@@ -12,7 +12,7 @@ export default function Tabs({ items }: { items: Tab[] }) {
 
   return (
     <div className="my-6 flex flex-col rounded-xl border border-border bg-card shadow-sm">
-      <div className="scrollbar-none flex items-center gap-4 overflow-x-auto rounded-t-xl border-b border-border bg-muted/40 px-3 py-1">
+      <div className="flex items-center gap-4 overflow-x-auto rounded-t-xl border-b border-border bg-muted/40 px-3 py-1">
         {items.map((tab) => (
           <button
             key={tab.value}

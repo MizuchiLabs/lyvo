@@ -1,29 +1,22 @@
 ---
-import { Font } from 'astro:assets';
 import { SITE } from '@/config.ts';
-import '@/styles/global.css';
 import { Image } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
 import RepoIcon from '@/components/RepoIcon.astro';
+import BaseHead from '@/layouts/BaseHead.astro';
 
 interface Props {
 	title?: string;
+	description?: string;
 }
 
-const { title = SITE.title } = Astro.props;
+const { title, description } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class="scroll-smooth">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-		<Font cssVariable="--font-sans-default" preload />
-		<Font cssVariable="--font-serif-default" />
-		<Font cssVariable="--font-mono-default" />
-	</head>
+	<BaseHead title={title} description={description} />
+
 	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
 		<header
 			class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
@@ -95,26 +88,3 @@ const { title = SITE.title } = Astro.props;
 		<slot />
 	</body>
 </html>
-
-<script is:inline>
-	function applyTheme() {
-		const theme = (() => {
-			if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-				return localStorage.getItem('theme');
-			}
-			if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-				return 'dark';
-			}
-			return 'light';
-		})();
-		if (theme === 'dark') {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
-		window.localStorage.setItem('theme', theme || 'light');
-	}
-
-	applyTheme();
-	document.addEventListener('astro:after-swap', applyTheme);
-</script>

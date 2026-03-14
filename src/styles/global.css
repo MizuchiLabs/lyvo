@@ -211,7 +211,6 @@
     display: none;
   }
 
-  /* Steps Component Counter */
   .steps-container {
     counter-reset: step;
   }
@@ -221,32 +220,13 @@
   }
 
   /* Code block adjustments for shiki/rehype-pretty-code */
-  div[data-rehype-pretty-code-fragment] pre {
-    @apply m-0;
-  }
   code {
     counter-reset: line;
   }
   code[data-line-numbers] > [data-line]::before {
     counter-increment: line;
     content: counter(line);
-    @apply mr-4 inline-block w-4 text-right text-muted-foreground/50;
-  }
-
-  /* Sidebar Collapsible Animation */
-  details[open] > div {
-    animation: slideDown 0.2s ease-out;
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    @apply mr-4 inline-block w-2 text-right text-muted-foreground/50;
   }
 
   /* Task lists styling */
@@ -281,49 +261,13 @@
     color: var(--primary-foreground);
   }
 
-  /* Remove manual dark mode color override as we use currentColor */
-  .dark .prose input[type="checkbox"]:checked::after {
-    color: var(--primary-foreground);
-  }
-
-  /* Custom prose styling */
-  .prose {
-    --tw-prose-links: var(--primary);
-    --tw-prose-invert-links: var(--primary);
-  }
-
-  .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-    text-underline-offset: 4px;
-    text-decoration-thickness: 1px;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-  }
-
-  .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)):hover {
-    text-underline-offset: 6px;
-    text-decoration-color: var(--muted-foreground);
-  }
-
   /* Remove default prose backticks from inline code */
   .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::before,
   .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
     content: "" !important;
   }
 
-  /* Code highlights */
-  [data-rehype-pretty-code-fragment] {
-    @apply my-6 overflow-hidden rounded-xl border border-border bg-zinc-950 dark:bg-zinc-900/50;
-  }
-
-  [data-rehype-pretty-code-title] {
-    @apply flex items-center gap-2 border-b border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-medium text-zinc-400 dark:bg-zinc-950/50;
-  }
-
-  [data-rehype-pretty-code-fragment] pre {
-    @apply m-0 overflow-x-auto p-4 text-sm leading-relaxed;
-  }
-
-  /* Modern Card background for inline code */
+  /* Card background for inline code */
   code:not(pre code) {
     @apply rounded-md border border-border bg-muted/60 px-1.5 py-0.5 text-[0.85em] font-medium text-foreground;
     overflow-wrap: break-word;
@@ -332,22 +276,6 @@
   }
 
   /* Heading anchors */
-  article h2,
-  article h3,
-  article h4,
-  article h5,
-  article h6 {
-    @apply scroll-m-20 tracking-tight;
-  }
-
-  article h2 {
-    @apply mt-12 mb-6 border-b border-border/50 pb-2 text-3xl font-bold;
-  }
-
-  article h3 {
-    @apply mt-8 mb-4 text-2xl font-semibold;
-  }
-
   .subheading-anchor {
     @apply text-muted-foreground/30 no-underline opacity-0 transition-all duration-200 hover:text-primary;
   }

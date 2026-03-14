@@ -1,0 +1,65 @@
+---
+import { Font } from 'astro:assets';
+import { SITE } from '@/config';
+import '@/styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+
+const displayTitle = title && title !== SITE.title ? `${title} - ${SITE.title}` : SITE.title;
+---
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<meta name="generator" content={Astro.generator} />
+	<meta name="description" content={description} />
+
+	<!-- Favicons -->
+	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="Lyvo" />
+	<link rel="manifest" href="/site.webmanifest" />
+
+	<!-- Title -->
+	<title>{displayTitle}</title>
+
+	<!-- Fonts -->
+	<Font cssVariable="--font-sans-default" preload />
+	<Font cssVariable="--font-serif-default" />
+	<Font cssVariable="--font-mono-default" />
+
+	<!-- Transitions -->
+	<ClientRouter />
+
+	<!-- Theme Script -->
+	<script is:inline>
+		function applyTheme() {
+			const theme = (() => {
+				if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+					return localStorage.getItem('theme');
+				}
+				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					return 'dark';
+				}
+				return 'light';
+			})();
+			if (theme === 'dark') {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+			window.localStorage.setItem('theme', theme || 'light');
+		}
+
+		applyTheme();
+		document.addEventListener('astro:after-swap', applyTheme);
+	</script>
+</head>

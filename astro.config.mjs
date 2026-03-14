@@ -7,7 +7,6 @@ import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import svgr from "vite-plugin-svgr";
-import favicons from "astro-favicons";
 
 export default defineConfig({
   vite: {
@@ -24,8 +23,6 @@ export default defineConfig({
 
   markdown: {
     syntaxHighlight: false,
-    gfm: true,
-    smartypants: true,
     rehypePlugins: [
       rehypeSlug,
       [
@@ -86,5 +83,5 @@ export default defineConfig({
     },
   ],
 
-  integrations: [react(), mdx(), favicons()],
+  integrations: [react(), mdx()],
 });
