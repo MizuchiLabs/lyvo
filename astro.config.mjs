@@ -3,7 +3,6 @@ import { defineConfig, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
-import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import svgr from "vite-plugin-svgr";
@@ -11,18 +10,14 @@ import svgr from "vite-plugin-svgr";
 export default defineConfig({
   vite: {
     plugins: [tailwindcss(), svgr()],
-    server: {
-      watch: {
-        awaitWriteFinish: {
-          stabilityThreshold: 50,
-          pollInterval: 10,
-        },
-      },
-    },
   },
 
   markdown: {
-    syntaxHighlight: false,
+    syntaxHighlight: "shiki",
+    shikiConfig: {
+      theme: "github-dark",
+      wrap: true,
+    },
     rehypePlugins: [
       rehypeSlug,
       [
@@ -38,27 +33,6 @@ export default defineConfig({
             tagName: "span",
             properties: { className: ["anchor-icon"] },
             children: [],
-          },
-        },
-      ],
-      [
-        rehypePrettyCode,
-        {
-          theme: "github-dark-dimmed",
-          /** @param {any} node */
-          onVisitLine(node) {
-            // Prevent lines from collapsing in empty lines
-            if (node.children.length === 0) {
-              node.children = [{ type: "text", value: " " }];
-            }
-          },
-          /** @param {any} node */
-          onVisitHighlightedLine(node) {
-            node.properties.className.push("line--highlighted");
-          },
-          /** @param {any} node */
-          onVisitHighlightedWord(node) {
-            node.properties.className = ["word--highlighted"];
           },
         },
       ],

@@ -33,7 +33,7 @@ export default function Feedback() {
 
   if (submitted) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground transition-all duration-300 animate-in fade-in zoom-in-95 mb-8">
+      <div className="flex flex-1 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-all duration-300 animate-in fade-in zoom-in-95">
         <Check size={16} className="text-green-500" />
         Thank you for your feedback!
       </div>
@@ -41,19 +41,19 @@ export default function Feedback() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-between gap-4 rounded-lg border border-border bg-card p-4 sm:flex-row sm:px-6 transition-all duration-300 mb-8">
-      <span className="text-sm font-medium text-card-foreground">Was this page helpful?</span>
+    <div className="flex flex-1 flex-col items-center gap-4 rounded-lg sm:flex-row transition-all duration-300">
+      <span className="text-sm font-medium text-muted-foreground">Was this page helpful?</span>
       <div className="flex items-center gap-2">
         <button
           onClick={() => handleFeedback(true)}
-          className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label="Yes, this page was helpful"
         >
           <ThumbsUp size={14} /> Yes
         </button>
         <button
           onClick={() => handleFeedback(false)}
-          className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           aria-label="No, this page was not helpful"
         >
           <ThumbsDown size={14} /> No

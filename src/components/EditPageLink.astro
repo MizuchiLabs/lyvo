@@ -38,9 +38,9 @@ const editUrl = showLink && filePath ? getEditUrl(filePath, branch) : '';
 			href={editUrl}
 			target="_blank"
 			rel="noreferrer"
-			class="inline-flex w-32 items-center gap-2 rounded-lg border border-border/80 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline"
+			class="hidden items-center gap-2 rounded-lg px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:inline-flex"
 		>
-			<Pencil size={16} class="mr-0.5" />
+			<Pencil size={14} />
 			<span>Edit page</span>
 		</a>
 	)

@@ -2,7 +2,7 @@ export const SITE = {
   title: "Lyvo Docs",
   description: "A modern, minimalistic documentation theme for Astro.",
   repo: {
-    url: "https://github.com/mizuchilabs/orbitd",
+    url: "https://github.com/mizuchilabs/lyvo",
     type: "github", // github, gitlab, gitea, forgejo, git
   },
   openapi: {
