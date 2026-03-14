@@ -21,6 +21,8 @@ const { title, description, headings = [] } = Astro.props;
 
 	<body
 		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
+		transition:persist
+		transition:name="page-layout"
 	>
 		<Sidebar />
 
