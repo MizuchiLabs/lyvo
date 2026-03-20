@@ -2,7 +2,7 @@
 import { render } from 'astro:content';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import fs from 'node:fs';
-import { Code } from 'astro:components';
+import CodeBlock from '@/components/CodeBlock.astro';
 import Callout from '@/components/Callout.astro';
 import FileTree from '@/components/FileTree.astro';
 import Folder from '@/components/Folder.astro';
@@ -32,7 +32,7 @@ const { entry, docs } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const components = {
-	Code,
+	Code: CodeBlock,
 	a: Link,
 	table: Table,
 	img: ImageWrapper,
@@ -132,98 +132,40 @@ try {
 	<Content components={components} />
 
 	<div slot="toc" class="toc-container relative z-10 text-muted-foreground select-none">
-		<div class="relative z-10 flex w-full flex-col">
-			{
-				filteredHeadings.map((heading, i) => {
-					const upper = filteredHeadings[i - 1]?.depth ?? heading.depth;
-					const lower = filteredHeadings[i + 1]?.depth ?? heading.depth;
+		<div class="relative flex px-2">
+			<!-- SVG Mask Container -->
+			<div class="toc-mask pointer-events-none absolute top-0 left-1 h-full w-10">
+				<!-- Background track -->
+				<div class="absolute inset-0 h-full w-full bg-border"></div>
+				<!-- Active indicator -->
+				<div
+					class="toc-indicator absolute left-0 w-full bg-foreground transition-all duration-300 ease-out"
+				>
+				</div>
+			</div>
 
-					const getLineOffset = (depth: number) => (depth >= 3 ? 12 : 0);
-					const getPadding = (depth: number) => (depth >= 3 ? 'pl-7' : 'pl-4');
-
-					const offset = getLineOffset(heading.depth);
-					const upperOffset = getLineOffset(upper);
-					const lowerOffset = getLineOffset(lower);
-
-					return (
-						<a
-							href={`#${heading.slug}`}
-							data-id={heading.slug}
-							class={`toc-link group relative py-1.5 text-sm no-underline transition-colors hover:text-foreground ${getPadding(heading.depth)}`}
-						>
-							{offset !== upperOffset && (
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 16 16"
-									class="pointer-events-none absolute -top-1.5 left-0 h-4 w-4"
+			<!-- Links List -->
+			<ul class="toc-links relative flex w-full flex-col pl-3 text-sm">
+				{
+					filteredHeadings.map((heading) => {
+						const offset = heading.depth >= 3 ? 12 : 0;
+						return (
+							<li
+								style={`padding-left: ${offset}px`}
+								class="transition-colors duration-150 ease-out"
+							>
+								<a
+									href={`#${heading.slug}`}
+									data-id={heading.slug}
+									class="toc-link block py-1.5 pr-2 text-muted-foreground no-underline transition-colors hover:text-foreground"
 								>
-									<line
-										x1={upperOffset}
-										y1="0"
-										x2={offset}
-										y2="12"
-										class="stroke-border"
-										stroke-width="1"
-									/>
-								</svg>
-							)}
-							<div
-								class={`absolute w-px bg-border transition-colors group-hover:bg-foreground/50 ${offset !== upperOffset ? 'top-1.5' : 'top-0'} ${offset !== lowerOffset ? 'bottom-1.5' : 'bottom-0'} pointer-events-none`}
-								style={`left: ${offset}px`}
-							/>
-							<span class="relative z-10">{heading.text}</span>
-						</a>
-					);
-				})
-			}
-		</div>
-
-		<div
-			class="toc-highlight-layer pointer-events-none absolute top-0 left-0 z-20 flex h-full w-full flex-col transition-all duration-300 ease-out"
-			style="clip-path: inset(0 0 100% 0);"
-			aria-hidden="true"
-		>
-			{
-				filteredHeadings.map((heading, i) => {
-					const upper = filteredHeadings[i - 1]?.depth ?? heading.depth;
-					const lower = filteredHeadings[i + 1]?.depth ?? heading.depth;
-
-					const getLineOffset = (depth: number) => (depth >= 3 ? 12 : 0);
-					const getPadding = (depth: number) => (depth >= 3 ? 'pl-7' : 'pl-4');
-
-					const offset = getLineOffset(heading.depth);
-					const upperOffset = getLineOffset(upper);
-					const lowerOffset = getLineOffset(lower);
-
-					return (
-						<div
-							class={`relative py-1.5 text-sm font-medium text-foreground ${getPadding(heading.depth)}`}
-						>
-							{offset !== upperOffset && (
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 16 16"
-									class="absolute -top-1.5 left-0 h-4 w-4"
-								>
-									<line
-										x1={upperOffset}
-										y1="0"
-										x2={offset}
-										y2="12"
-										class="stroke-foreground"
-										stroke-width="1.5"
-									/>
-								</svg>
-							)}
-							<div
-								class={`absolute w-px bg-foreground ${offset !== upperOffset ? 'top-1.5' : 'top-0'} ${offset !== lowerOffset ? 'bottom-1.5' : 'bottom-0'}`}
-								style={`left: ${offset}px`}
-							/>
-							<span class="select-none">{heading.text}</span>
-						</div>
-					);
-				})
-			}
+									{heading.text}
+								</a>
+							</li>
+						);
+					})
+				}
+			</ul>
 		</div>
 	</div>
 
@@ -282,32 +224,164 @@ try {
 </DocsLayout>
 
 <script>
+	function buildRoundedPath(points: { x: number; y: number }[], radius: number) {
+		if (points.length === 0) return '';
+		if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+		const commands = [`M ${points[0].x} ${points[0].y}`];
+
+		for (let i = 1; i < points.length; i++) {
+			const point = points[i];
+			const prev = points[i - 1];
+
+			if (i === points.length - 1) {
+				commands.push(` L ${point.x} ${point.y}`);
+				continue;
+			}
+
+			const next = points[i + 1];
+			const prevVecX = point.x - prev.x;
+			const prevVecY = point.y - prev.y;
+			const nextVecX = next.x - point.x;
+			const nextVecY = next.y - point.y;
+			const prevLen = Math.hypot(prevVecX, prevVecY);
+			const nextLen = Math.hypot(nextVecX, nextVecY);
+
+			if (prevLen === 0 || nextLen === 0) {
+				commands.push(` L ${point.x} ${point.y}`);
+				continue;
+			}
+
+			const prevDirX = prevVecX / prevLen;
+			const prevDirY = prevVecY / prevLen;
+			const nextDirX = nextVecX / nextLen;
+			const nextDirY = nextVecY / nextLen;
+			const dot = prevDirX * nextDirX + prevDirY * nextDirY;
+
+			if (Math.abs(dot) > 0.999) {
+				commands.push(` L ${point.x} ${point.y}`);
+				continue;
+			}
+
+			const cornerRadius = Math.min(radius, prevLen / 2, nextLen / 2);
+			const entryX = point.x - prevDirX * cornerRadius;
+			const entryY = point.y - prevDirY * cornerRadius;
+			const exitX = point.x + nextDirX * cornerRadius;
+			const exitY = point.y + nextDirY * cornerRadius;
+
+			commands.push(` L ${entryX} ${entryY}`);
+			commands.push(` Q ${point.x} ${point.y} ${exitX} ${exitY}`);
+		}
+
+		return commands.join('');
+	}
+
+	function updateLayout() {
+		const linksWrapper = document.querySelector('.toc-links') as HTMLElement | null;
+		const maskElement = document.querySelector('.toc-mask') as HTMLElement | null;
+		if (!linksWrapper || !maskElement) return;
+
+		const links = linksWrapper.querySelectorAll('.toc-link');
+		const points: { x: number; y: number }[] = [];
+		let maxW = 0;
+		const strokeWidth = 1.5;
+		const halfStroke = strokeWidth / 2;
+
+		links.forEach((link) => {
+			const li = link.parentElement;
+			if (!li) return;
+			const paddingLeft = parseFloat(li.style.paddingLeft) || 0;
+			const x = paddingLeft + halfStroke;
+
+			const style = window.getComputedStyle(link);
+			const paddingTop = parseFloat(style.paddingTop) || 0;
+			const paddingBottom = parseFloat(style.paddingBottom) || 0;
+
+			// Calculate points inside the padded area to create the vertical gap and diagonal links
+			const linkEl = link as HTMLElement;
+			const top = linkEl.offsetTop + paddingTop;
+			const bottom = linkEl.offsetTop + linkEl.offsetHeight - paddingBottom;
+
+			points.push({ x, y: top });
+			points.push({ x, y: bottom });
+
+			maxW = Math.max(maxW, x + halfStroke);
+		});
+
+		const svgPath = buildRoundedPath(points, 4);
+		const svgWidth = Math.max(40, maxW + 10);
+		const lineHeight = linksWrapper.scrollHeight;
+
+		const svgData = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth} ${lineHeight}' width='${svgWidth}' height='${lineHeight}' preserveAspectRatio='none'><path d='${svgPath}' stroke='black' stroke-width='${strokeWidth}' fill='none'/></svg>`;
+		const encodedSvg = `url("data:image/svg+xml,${encodeURIComponent(svgData)}")`;
+
+		maskElement.style.maskImage = encodedSvg;
+		maskElement.style.maskRepeat = 'no-repeat';
+		maskElement.style.maskPosition = 'left top';
+		maskElement.style.maskSize = '100% 100%';
+	}
+
 	function initScrollspy() {
 		const headings = document.querySelectorAll('article h2, article h3');
 		if (!headings.length) return;
 
 		const mainScrollArea = document.querySelector('#main-scroll-area');
-		const container = document.querySelector('.toc-container') as HTMLElement | null;
-		const highlightLayer = document.querySelector('.toc-highlight-layer') as HTMLElement | null;
+		const indicator = document.querySelector('.toc-indicator') as HTMLElement | null;
+		if (!mainScrollArea) return;
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						const activeId = entry.target.getAttribute('id');
-						updateToc(activeId);
-					}
-				});
-			},
-			{ root: mainScrollArea, rootMargin: '-10% 0px -70% 0px' }
-		);
+		// Calculate SVG mask
+		updateLayout();
 
-		headings.forEach((heading) => observer.observe(heading));
+		// Handle resize
+		window.addEventListener('resize', updateLayout);
 
-		function updateToc(activeId: string | null) {
-			if (!activeId || !container || !highlightLayer) return;
+		let activeId = '';
 
-			const activeLink = document.querySelector(`.toc-link[data-id="${activeId}"]`);
+		function updateActive() {
+			if (!mainScrollArea) return;
+			const scrollY = mainScrollArea.scrollTop;
+			const viewportHeight = mainScrollArea.clientHeight;
+			const scrollHeight = mainScrollArea.scrollHeight;
+			const containerBounds = mainScrollArea.getBoundingClientRect();
+
+			let current = '';
+			const headingElements = Array.from(headings);
+
+			for (const item of headingElements) {
+				const rect = item.getBoundingClientRect();
+				// Active offset logic
+				if (rect.top - containerBounds.top <= 140) {
+					current = item.getAttribute('id') || '';
+				}
+			}
+
+			const scrolledBottom = scrollY + viewportHeight;
+			if (scrolledBottom >= scrollHeight - 20) {
+				const last = headingElements[headingElements.length - 1];
+				if (last) {
+					current = last.getAttribute('id') || '';
+				}
+			}
+
+			if (!current || scrollY < 50) {
+				const first = headingElements[0];
+				if (first) {
+					current = first.getAttribute('id') || '';
+				}
+			}
+
+			if (current !== activeId) {
+				activeId = current;
+				updateToc(activeId);
+			}
+		}
+
+		mainScrollArea.addEventListener('scroll', updateActive, { passive: true });
+
+		function updateToc(targetId: string | null) {
+			if (!targetId || !indicator) return;
+
+			const activeLink = document.querySelector(`.toc-link[data-id="${targetId}"]`) as HTMLElement;
 
 			if (activeLink) {
 				// Update base layer text colors
@@ -318,22 +392,24 @@ try {
 				activeLink.classList.remove('text-muted-foreground');
 				activeLink.classList.add('text-foreground', 'font-medium');
 
-				// Calculate position for the clipping mask animation
-				const containerRect = container.getBoundingClientRect();
-				const linkRect = activeLink.getBoundingClientRect();
+				const style = window.getComputedStyle(activeLink);
+				const paddingTop = parseFloat(style.paddingTop) || 0;
+				const paddingBottom = parseFloat(style.paddingBottom) || 0;
 
-				const topInset = linkRect.top - containerRect.top;
-				const bottomInset = containerRect.bottom - linkRect.bottom;
+				const top = activeLink.offsetTop + paddingTop;
+				const height = activeLink.offsetHeight - paddingTop - paddingBottom;
 
-				highlightLayer.style.clipPath = `inset(${topInset}px 0 ${bottomInset}px 0)`;
+				indicator.style.top = `${top}px`;
+				indicator.style.height = `${height}px`;
 			}
 		}
 
 		// Initial update
-		const firstHeading = headings[0]?.getAttribute('id');
-		if (firstHeading) setTimeout(() => updateToc(firstHeading), 50);
+		updateActive();
 	}
 
 	initScrollspy();
-	document.addEventListener('astro:page-load', initScrollspy);
+	document.addEventListener('astro:page-load', () => {
+		initScrollspy();
+	});
 </script>

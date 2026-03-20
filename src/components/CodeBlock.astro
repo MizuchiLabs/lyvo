@@ -1,0 +1,23 @@
+---
+import { Code } from 'astro:components';
+import type { ComponentProps } from 'astro/types';
+
+type Props = ComponentProps<typeof Code>;
+
+const { theme, themes, code, ...props } = Astro.props;
+
+const defaultThemes = {
+	light: 'github-light',
+	dark: 'github-dark'
+} as const;
+
+const passedThemes = themes || (theme ? undefined : defaultThemes);
+---
+
+{
+	theme ? (
+		<Code theme={theme} code={code} {...props} />
+	) : (
+		<Code themes={passedThemes} code={code} {...props} />
+	)
+}
