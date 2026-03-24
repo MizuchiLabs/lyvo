@@ -2,6 +2,13 @@
   "name": "lyvo",
   "version": "0.0.1",
   "type": "module",
+  "keywords": [
+    "astro",
+    "astro-theme",
+    "astro-template",
+    "docs",
+    "documentation"
+  ],
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",

@@ -22,16 +22,26 @@ Lyvo is a highly polished, minimalistic, and modern documentation generator buil
 
 ## Getting Started
 
-1. **Clone the repository** (or use it as a template)
-2. **Install dependencies**:
-   ```bash
-   pnpm install
-   ```
-3. **Start the development server**:
-   ```bash
-   pnpm dev
-   ```
-4. **View your site** at `http://localhost:4321`
+The fastest way to start a new project with Lyvo is to use the `create astro` CLI with the template flag:
+
+```bash
+# npm
+npm create astro@latest -- --template MizuchiLabs/lyvo
+
+# pnpm
+pnpm create astro@latest --template MizuchiLabs/lyvo
+
+# yarn
+yarn create astro --template MizuchiLabs/lyvo
+```
+
+Then, navigate into your new project, install dependencies, and start the development server:
+
+```bash
+cd my-lyvo-docs
+pnpm install
+pnpm dev
+```
 
 ## Usage
 
