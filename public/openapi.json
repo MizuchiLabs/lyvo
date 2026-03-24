@@ -1227,7 +1227,14 @@
 										"type": "string"
 									}
 								},
-								"required": ["name", "number", "cvc", "exp_month", "exp_year", "address_country"]
+								"required": [
+									"name",
+									"number",
+									"cvc",
+									"exp_month",
+									"exp_year",
+									"address_country"
+								]
 							},
 							{
 								"title": "Bank Account",
@@ -1264,7 +1271,13 @@
 										"description": "Two-letter country code (ISO 3166-1 alpha-2)."
 									}
 								},
-								"required": ["name", "number", "account_type", "bank_name", "country"]
+								"required": [
+									"name",
+									"number",
+									"account_type",
+									"bank_name",
+									"country"
+								]
 							}
 						]
 					},
@@ -1282,7 +1295,9 @@
 					"booking": {
 						"type": "string",
 						"format": "uri",
-						"examples": ["https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb"]
+						"examples": [
+							"https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb"
+						]
 					}
 				}
 			}

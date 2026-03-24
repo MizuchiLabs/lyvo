@@ -93,7 +93,14 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
 						className="h-full w-full -rotate-90 transform text-muted-foreground/30"
 						viewBox="0 0 24 24"
 					>
-						<circle cx="12" cy="12" r={radius} stroke="currentColor" strokeWidth="2" fill="none" />
+						<circle
+							cx="12"
+							cy="12"
+							r={radius}
+							stroke="currentColor"
+							strokeWidth="2"
+							fill="none"
+						/>
 					</svg>
 					<svg
 						className="absolute h-full w-full -rotate-90 transform text-foreground transition-all duration-150 ease-out"
@@ -144,7 +151,11 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
 											if (el) {
 												e.preventDefault();
 												el.scrollIntoView({ behavior: 'smooth' });
-												window.history.pushState(null, '', `#${heading.slug}`);
+												window.history.pushState(
+													null,
+													'',
+													`#${heading.slug}`
+												);
 											}
 										}}
 										className={cn(
@@ -159,7 +170,9 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
 									</a>
 								))
 							) : (
-								<span className="text-sm text-muted-foreground">No headings found.</span>
+								<span className="text-sm text-muted-foreground">
+									No headings found.
+								</span>
 							)}
 						</div>
 					</div>

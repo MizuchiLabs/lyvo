@@ -38,10 +38,15 @@ export default function Search() {
 					/* @vite-ignore */ window.location.origin + '/pagefind/pagefind.js'
 				);
 				const searchRes = await pagefind.search(query);
-				const data = await Promise.all(searchRes.results.slice(0, 5).map((r: any) => r.data()));
+				const data = await Promise.all(
+					searchRes.results.slice(0, 5).map((r: any) => r.data())
+				);
 				setResults(data);
 			} catch (e) {
-				console.error('Pagefind not found. Search only works after building with `pnpm build`.', e);
+				console.error(
+					'Pagefind not found. Search only works after building with `pnpm build`.',
+					e
+				);
 			}
 		}
 		search();
@@ -78,7 +83,9 @@ export default function Search() {
 						placeholder="Search documentation..."
 					/>
 					<CommandList>
-						<CommandEmpty>{query ? 'No results found.' : 'Type to search...'}</CommandEmpty>
+						<CommandEmpty>
+							{query ? 'No results found.' : 'Type to search...'}
+						</CommandEmpty>
 
 						{results.length > 0 && (
 							<CommandGroup heading="Results">
@@ -92,7 +99,9 @@ export default function Search() {
 										}}
 									>
 										<div className="flex w-full flex-col gap-1 text-foreground">
-											<span className="text-sm font-medium">{res.meta.title}</span>
+											<span className="text-sm font-medium">
+												{res.meta.title}
+											</span>
 											<span
 												className="line-clamp-1 text-xs text-muted-foreground"
 												dangerouslySetInnerHTML={{ __html: res.excerpt }}

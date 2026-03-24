@@ -11,7 +11,9 @@ export async function getRepoVersion(): Promise<string> {
 			const owner = pathParts[0];
 			const name = pathParts[1];
 
-			const res = await fetch(`https://api.github.com/repos/${owner}/${name}/releases/latest`);
+			const res = await fetch(
+				`https://api.github.com/repos/${owner}/${name}/releases/latest`
+			);
 
 			if (res.ok) {
 				const data = await res.json();

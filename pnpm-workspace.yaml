@@ -1,4 +1,4 @@
 onlyBuiltDependencies:
-  - esbuild
-  - msw
-  - sharp
+    - esbuild
+    - msw
+    - sharp
