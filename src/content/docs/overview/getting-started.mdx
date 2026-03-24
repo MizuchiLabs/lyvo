@@ -26,28 +26,40 @@ Getting up and running with Lyvo Docs is incredibly straightforward. Since you h
   <Step title="Install dependencies">
     Install the project dependencies using your preferred package manager. We recommend `pnpm` for the fastest experience.
 
-    <Tabs
-      items={[
-        { label: "pnpm", value: "pnpm", content: "pnpm install" },
-        { label: "npm", value: "npm", content: "npm install" },
-        { label: "yarn", value: "yarn", content: "yarn install" },
-        { label: "bun", value: "bun", content: "bun install" },
-      ]}
-    />
+<Tabs>
+  <TabItem value="pnpm">
+    <Code code="pnpm install" lang="bash" />
+  </TabItem>
+  <TabItem value="npm">
+    <Code code="npm install" lang="bash" />
+  </TabItem>
+  <TabItem value="yarn">
+    <Code code="yarn install" lang="bash" />
+  </TabItem>
+  <TabItem value="bun">
+    <Code code="bun install" lang="bash" />
+  </TabItem>
+</Tabs>
 
   </Step>
 
   <Step title="Start the development server">
     Fire up the local development server to see your documentation live.
 
-    <Tabs
-      items={[
-        { label: "pnpm", value: "pnpm", content: "pnpm dev" },
-        { label: "npm", value: "npm", content: "npm run dev" },
-        { label: "yarn", value: "yarn", content: "yarn dev" },
-        { label: "bun", value: "bun", content: "bun run dev" },
-      ]}
-    />
+<Tabs>
+  <TabItem value="pnpm">
+    <Code code="pnpm dev" lang="bash" />
+  </TabItem>
+  <TabItem value="npm">
+    <Code code="npm run dev" lang="bash" />
+  </TabItem>
+  <TabItem value="yarn">
+    <Code code="yarn dev" lang="bash" />
+  </TabItem>
+  <TabItem value="bun">
+    <Code code="bun run dev" lang="bash" />
+  </TabItem>
+</Tabs>
 
     Your site is now running at [http://localhost:4321](http://localhost:4321). Any changes you make to the `.mdx` files will instantly reflect in your browser!
 

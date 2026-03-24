@@ -1,5 +1,5 @@
 ---
-import { ChevronRight, AlignLeft } from 'lucide-react';
+import { ChevronRight, TextAlignStart } from '@lucide/astro';
 import Search from '@/components/Search';
 import Sidebar from '@/components/Sidebar.astro';
 import MobileToc from '@/components/MobileToc';
@@ -88,7 +88,7 @@ const { title, description, headings = [] } = Astro.props;
 						>
 							<div class="space-y-4">
 								<p class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
-									<AlignLeft size={16} />
+									<TextAlignStart size={16} />
 									On this page
 								</p>
 								<slot name="toc" />

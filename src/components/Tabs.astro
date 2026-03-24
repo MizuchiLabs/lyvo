@@ -1,0 +1,98 @@
+---
+// interface Tab {
+// 	label: string;
+// 	value: string;
+// }
+
+// interface Props {
+// 	tabs?: Tab[];
+// }
+
+// const { tabs = [] } = Astro.props;
+
+// 1. Render the children into an HTML string
+const html = await Astro.slots.render('default');
+
+// 2. Extract the values and labels using a safe regex
+const regex = /data-tab-panel="([^"]+)"[^>]*data-tab-label="([^"]+)"/g;
+const tabs = [...html.matchAll(regex)].map((match) => ({
+	value: match[1],
+	label: match[2]
+}));
+---
+
+<div class="tabs-root my-6 rounded-xl border border-border bg-card shadow-sm">
+	<div class="flex gap-4 rounded-t-xl border-b border-border bg-muted/40 px-4">
+		{
+			tabs.map((tab) => (
+				<button
+					class="tab-btn relative mb-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+					data-tab={tab.value}
+				>
+					{tab.label}
+					<span class="tab-indicator absolute inset-x-0 -bottom-px h-0.5 origin-left scale-x-0 bg-primary transition-transform" />
+				</button>
+			))
+		}
+	</div>
+
+	<div
+		class="tabs-panels -mt-2 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm [&_pre]:-m-4! [&_pre]:rounded-none! [&_pre]:border-0! [&_pre]:p-4!"
+	>
+		<slot />
+	</div>
+</div>
+
+<script>
+	function initTabs() {
+		document.querySelectorAll('.tabs-root').forEach((root) => {
+			if (root.hasAttribute('data-tabs-init')) return;
+			root.setAttribute('data-tabs-init', '');
+
+			const buttons = root.querySelectorAll<HTMLButtonElement>('.tab-btn');
+			const panelContainer = root.querySelector('.tabs-panels');
+			if (!panelContainer) return;
+
+			const panels = panelContainer.querySelectorAll<HTMLElement>(':scope > [data-tab-panel]');
+
+			function activate(btn: HTMLButtonElement) {
+				const value = btn.dataset.tab;
+
+				buttons.forEach((b) => {
+					b.classList.remove('text-foreground');
+					b.classList.add('text-muted-foreground');
+					const ind = b.querySelector<HTMLElement>('.tab-indicator');
+					if (ind) {
+						ind.classList.remove('scale-x-100');
+						ind.classList.add('scale-x-0');
+					}
+				});
+
+				btn.classList.remove('text-muted-foreground');
+				btn.classList.add('text-foreground');
+				const activeInd = btn.querySelector<HTMLElement>('.tab-indicator');
+				if (activeInd) {
+					activeInd.classList.remove('scale-x-0');
+					activeInd.classList.add('scale-x-100');
+				}
+
+				panels.forEach((p) => {
+					p.classList.toggle('hidden', p.dataset.tabPanel !== value);
+				});
+			}
+
+			panels.forEach((p, i) => {
+				if (i !== 0) p.classList.add('hidden');
+			});
+
+			if (buttons.length > 0) activate(buttons[0]);
+
+			buttons.forEach((btn) => {
+				btn.addEventListener('click', () => activate(btn));
+			});
+		});
+	}
+
+	initTabs();
+	document.addEventListener('astro:after-swap', initTabs);
+</script>

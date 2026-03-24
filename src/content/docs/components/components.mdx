@@ -65,22 +65,30 @@ _(Note: The code block above is enhanced automatically by the pre tag wrapper!)_
 Tabs are perfect for showing alternative instructions, such as different package managers or operating systems.
 
 ```mdx
-<Tabs
-  items={[
-    { label: "npm", value: "npm", content: "npm install my-package" },
-    { label: "pnpm", value: "pnpm", content: "pnpm add my-package" },
-    { label: "yarn", value: "yarn", content: "yarn add my-package" },
-  ]}
-/>
+<Tabs>
+  <TabItem value="pnpm">
+    <Code code="pnpm add my-package" lang="bash" />
+  </TabItem>
+  <TabItem value="npm">
+    <Code code="npm install my-package" lang="bash" />
+  </TabItem>
+  <TabItem value="yarn">
+    <Code code="yarn add my-package" lang="bash" />
+  </TabItem>
+</Tabs>
 ```
 
-<Tabs
-  items={[
-    { label: "npm", value: "npm", content: "npm install my-package" },
-    { label: "pnpm", value: "pnpm", content: "pnpm add my-package" },
-    { label: "yarn", value: "yarn", content: "yarn add my-package" },
-  ]}
-/>
+<Tabs>
+  <TabItem value="pnpm">
+    <Code code="pnpm add my-package" lang="bash" />
+  </TabItem>
+  <TabItem value="npm">
+    <Code code="npm install my-package" lang="bash" />
+  </TabItem>
+  <TabItem value="yarn">
+    <Code code="yarn add my-package" lang="bash" />
+  </TabItem>
+</Tabs>
 
 ---
 

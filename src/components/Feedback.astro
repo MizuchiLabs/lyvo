@@ -1,0 +1,76 @@
+---
+import { ThumbsUp, ThumbsDown, Check } from '@lucide/astro';
+
+interface Props {
+	provider?: 'umami' | 'plausible';
+}
+
+const { provider } = Astro.props;
+---
+
+<div class="feedback-widget" data-provider={provider}>
+	<div
+		class="feedback-prompt flex flex-1 flex-col items-center gap-4 rounded-lg transition-all duration-300 sm:flex-row"
+	>
+		<span class="text-sm font-medium text-muted-foreground">Was this page helpful?</span>
+		<div class="flex items-center gap-2">
+			<button
+				data-helpful="true"
+				class="feedback-btn flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+				aria-label="Yes, this page was helpful"
+			>
+				<ThumbsUp size={16} />
+				Yes
+			</button>
+			<button
+				data-helpful="false"
+				class="feedback-btn flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+				aria-label="No, this page was not helpful"
+			>
+				<ThumbsDown size={16} />
+				No
+			</button>
+		</div>
+	</div>
+
+	<div
+		class="feedback-thanks hidden animate-in rounded-lg text-sm text-muted-foreground zoom-in-95 fade-in"
+	>
+		<div class="flex items-center justify-center gap-2">
+			<Check size={16} class="text-green-500" />
+			<p>Thank you for your feedback!</p>
+		</div>
+	</div>
+</div>
+
+<script>
+	function sendFeedbackEvent() {
+		document.querySelectorAll<HTMLDivElement>('.feedback-widget').forEach((widget) => {
+			const provider = widget.dataset.provider;
+			const prompt = widget.querySelector<HTMLElement>('.feedback-prompt')!;
+			const thanks = widget.querySelector<HTMLElement>('.feedback-thanks')!;
+
+			widget.querySelectorAll<HTMLButtonElement>('.feedback-btn').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const helpful = btn.dataset.helpful === 'true';
+					const path = window.location.pathname;
+
+					try {
+						if (provider === 'umami' && (window as any).umami) {
+							(window as any).umami.track('feedback', { helpful, path });
+						} else if (provider === 'plausible' && (window as any).plausible) {
+							(window as any).plausible('Feedback', { props: { helpful, path } });
+						}
+					} catch (e) {
+						console.error('Failed to send feedback event', e);
+					}
+
+					prompt.classList.add('hidden');
+					thanks.classList.remove('hidden');
+				});
+			});
+		});
+	}
+
+	document.addEventListener('astro:page-load', sendFeedbackEvent);
+</script>

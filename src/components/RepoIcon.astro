@@ -1,35 +1,35 @@
 ---
-import { SITE } from "@/config";
-import { GitMerge } from "@lucide/astro";
+import { SITE } from '@/config';
+import { GitMerge } from '@lucide/astro';
 
 interface Props {
-  type?: string;
-  class?: string;
-  className?: string;
-  [key: string]: any;
+	type?: string;
+	class?: string;
+	className?: string;
+	[key: string]: any;
 }
 
 const { type, class: astroClass, className: reactClass, ...props } = Astro.props;
-const finalClass = astroClass || reactClass || "";
-const repoType = type?.toLowerCase() || SITE.repo.type?.toLowerCase() || "git";
+const finalClass = astroClass || reactClass || '';
+const repoType = type?.toLowerCase() || SITE.repo.type?.toLowerCase() || 'git';
 
 // We use import.meta.glob to dynamically read the raw SVGs
-const svgs = import.meta.glob('/src/assets/*.svg', { query: '?raw', import: 'default', eager: true });
+const svgs = import.meta.glob('/src/assets/*.svg', {
+	query: '?raw',
+	import: 'default',
+	eager: true
+});
 
 let svgContent = svgs[`/src/assets/${repoType}.svg`] as string | undefined;
 if (!svgContent) {
-  svgContent = svgs[`/src/assets/git.svg`] as string | undefined;
+	svgContent = svgs[`/src/assets/git.svg`] as string | undefined;
 }
 
 let renderedSvg = svgContent;
 if (renderedSvg && finalClass) {
-  // Inject the class attribute into the root <svg> tag
-  renderedSvg = renderedSvg.replace(/<svg\s/, `<svg class="${finalClass}" `);
+	// Inject the class attribute into the root <svg> tag
+	renderedSvg = renderedSvg.replace(/<svg\s/, `<svg class="${finalClass}" `);
 }
 ---
 
-{renderedSvg ? (
-  <Fragment set:html={renderedSvg} />
-) : (
-  <GitMerge class={finalClass} {...props} />
-)}
+{renderedSvg ? <Fragment set:html={renderedSvg} /> : <GitMerge class={finalClass} {...props} />}

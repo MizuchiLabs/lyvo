@@ -1,5 +1,5 @@
 ---
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink } from '@lucide/astro';
 
 const { href, ...props } = Astro.props;
 const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
@@ -12,5 +12,5 @@ const isExternal = href && (href.startsWith('http://') || href.startsWith('https
 	rel={isExternal ? 'noopener noreferrer' : undefined}
 >
 	<slot />
-	{isExternal && <ExternalLink size={14} className="inline-block ml-1 opacity-70 -mt-0.5" />}
+	{isExternal && <ExternalLink size={14} class="-mt-0.5 ml-1 inline-block opacity-70" />}
 </a>
