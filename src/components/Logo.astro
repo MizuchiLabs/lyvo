@@ -1,0 +1,29 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+	type?: 'text' | 'logo' | 'both';
+	title?: string;
+	size?: number;
+}
+
+const { type = 'both', title = 'Lyvo Docs', size = 28 } = Astro.props;
+
+// Auto-discover logo.* from /src/assets/ (supports common formats)
+const images = import.meta.glob<{ default: ImageMetadata }>(
+	'/src/assets/logo.{svg,png,jpg,jpeg,webp,avif,gif}'
+);
+const logoEntry = Object.entries(images)[0];
+const logoImage = logoEntry ? (await logoEntry[1]()).default : null;
+
+const showLogo = (type === 'logo' || type === 'both') && logoImage;
+const showText = type === 'text' || type === 'both';
+---
+
+<a
+	href="/"
+	class="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
+>
+	{showLogo && <Image src={logoImage} alt={`${title} Logo`} width={size} height={size} />}
+	{showText && <span>{title}</span>}
+</a>

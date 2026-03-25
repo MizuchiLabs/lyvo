@@ -1,65 +1,26 @@
 ---
-import { SITE } from '@/config';
 import { PanelRightClose, PanelRightOpen } from '@lucide/astro';
 import Search from './Search';
 import SidebarNav from './SidebarNav.astro';
-import { getCollection } from 'astro:content';
+import Logo from './Logo.astro';
 import { getRepoVersion } from '@/lib/version';
+import { getDocsHierarchy } from '@/lib/docs';
 
-// Fetch all docs to generate the sidebar
-const docs = await getCollection('docs');
-docs.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
+// Editable configs for Sidebar
+const showVersion = false;
 
-const categories = docs.reduce(
-	(acc, doc) => {
-		const parts = doc.id.split('/');
-		let cat = 'root';
-		if (parts.length > 1) {
-			cat = parts[0];
-			cat = cat
-				.split('-')
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(' ');
-		}
-		if (!acc[cat]) {
-			acc[cat] = [];
-		}
-		acc[cat].push(doc);
-		return acc;
-	},
-	{} as Record<string, typeof docs>
-);
+// Fetch categorized and ordered hierarchy from library function
+const { topLevelItems } = await getDocsHierarchy();
 
 const currentPath = Astro.url.pathname;
-
-const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{jpeg,jpg,png,gif,svg}');
-const logoSrcPath = `/src/assets/${SITE.logo.src}`;
-const logoResolver = images[logoSrcPath];
-const logoImage = logoResolver ? await logoResolver() : null;
-const logoUrl = logoImage ? logoImage.default.src : undefined;
-const version = SITE.showVersion ? await getRepoVersion() : '';
+const version = showVersion ? await getRepoVersion() : '';
 ---
 
 <!-- Mobile Header -->
 <header
 	class="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4 md:hidden"
 >
-	<a
-		href="/"
-		class="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
-	>
-		{
-			(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && logoUrl && (
-				<img
-					src={logoUrl}
-					alt={`${SITE.title} Logo`}
-					width={SITE.logo.width}
-					height={SITE.logo.height}
-				/>
-			)
-		}
-		{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-	</a>
+	<Logo />
 	<div class="flex items-center gap-2">
 		<Search client:load />
 
@@ -87,22 +48,7 @@ const version = SITE.showVersion ? await getRepoVersion() : '';
 	<div
 		class="flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 py-0 text-left"
 	>
-		<a
-			href="/"
-			class="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
-		>
-			{
-				(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && logoUrl && (
-					<img
-						src={logoUrl}
-						alt={`${SITE.title} Logo`}
-						width={SITE.logo.width}
-						height={SITE.logo.height}
-					/>
-				)
-			}
-			{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-		</a>
+		<Logo />
 		<button
 			id="mobile-menu-close"
 			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
@@ -112,30 +58,15 @@ const version = SITE.showVersion ? await getRepoVersion() : '';
 		</button>
 	</div>
 
-	<SidebarNav categories={categories} currentPath={currentPath} version={version} />
+	<SidebarNav topLevelItems={topLevelItems} currentPath={currentPath} version={version} />
 </div>
 
 <!-- Desktop Sidebar -->
 <aside class="hidden w-72 shrink-0 flex-col space-y-6 md:flex">
 	<div class="flex shrink-0 items-center px-6 pt-6 pb-2">
-		<a
-			href="/"
-			class="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
-		>
-			{
-				(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && logoUrl && (
-					<img
-						src={logoUrl}
-						alt={`${SITE.title} Logo`}
-						width={SITE.logo.width}
-						height={SITE.logo.height}
-					/>
-				)
-			}
-			{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-		</a>
+		<Logo />
 	</div>
-	<SidebarNav categories={categories} currentPath={currentPath} version={version} />
+	<SidebarNav topLevelItems={topLevelItems} currentPath={currentPath} version={version} />
 </aside>
 
 <script is:inline>

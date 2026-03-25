@@ -1,19 +1,5 @@
 ---
-// interface Tab {
-// 	label: string;
-// 	value: string;
-// }
-
-// interface Props {
-// 	tabs?: Tab[];
-// }
-
-// const { tabs = [] } = Astro.props;
-
-// 1. Render the children into an HTML string
 const html = await Astro.slots.render('default');
-
-// 2. Extract the values and labels using a safe regex
 const regex = /data-tab-panel="([^"]+)"[^>]*data-tab-label="([^"]+)"/g;
 const tabs = [...html.matchAll(regex)].map((match) => ({
 	value: match[1],
@@ -53,7 +39,9 @@ const tabs = [...html.matchAll(regex)].map((match) => ({
 			const panelContainer = root.querySelector('.tabs-panels');
 			if (!panelContainer) return;
 
-			const panels = panelContainer.querySelectorAll<HTMLElement>(':scope > [data-tab-panel]');
+			const panels = panelContainer.querySelectorAll<HTMLElement>(
+				':scope > [data-tab-panel]'
+			);
 
 			function activate(btn: HTMLButtonElement) {
 				const value = btn.dataset.tab;

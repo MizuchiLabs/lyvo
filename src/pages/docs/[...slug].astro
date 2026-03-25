@@ -1,36 +1,30 @@
 ---
 import { render } from 'astro:content';
-import { ChevronLeft, ChevronRight, Calendar } from '@lucide/astro';
-import fs from 'node:fs';
+import Accordion from '@/components/Accordion.astro';
+import DocsLayout from '@/layouts/DocsLayout.astro';
+import { getCollection } from 'astro:content';
+import Tabs from '@/components/Tabs.astro';
+import TabItem from '@/components/TabItem.astro';
 import CodeBlock from '@/components/CodeBlock.astro';
+import Link from '@/components/Link.astro';
+import Table from '@/components/Table.astro';
+import ImageWrapper from '@/components/ImageWrapper.astro';
 import Callout from '@/components/Callout.astro';
+import Steps from '@/components/Steps.astro';
+import Step from '@/components/Step.astro';
 import FileTree from '@/components/FileTree.astro';
 import Folder from '@/components/Folder.astro';
 import File from '@/components/File.astro';
-import ImageWrapper from '@/components/ImageWrapper.astro';
-import Link from '@/components/Link.astro';
-import Step from '@/components/Step.astro';
-import Steps from '@/components/Steps.astro';
-import Table from '@/components/Table.astro';
-import Accordion from '@/components/Accordion.astro';
-import { SITE } from '@/config.ts';
-import DocsLayout from '@/layouts/DocsLayout.astro';
-import EditPageLink from '@/components/EditPageLink.astro';
-import { getCollection } from 'astro:content';
-// import TabsWrapper from '@/components/TabsWrapper.astro';
-import Tabs from '@/components/Tabs.astro';
-import TabItem from '@/components/TabItem.astro';
-import Feedback from '@/components/Feedback.astro';
 
 export async function getStaticPaths() {
 	const docs = await getCollection('docs');
 	return docs.map((entry) => ({
 		params: { slug: entry.id },
-		props: { entry, docs }
+		props: { entry }
 	}));
 }
 
-const { entry, docs } = Astro.props;
+const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 
 const components = {
@@ -49,393 +43,15 @@ const components = {
 	Accordion
 };
 
-// Sort docs for Prev/Next mirroring the sidebar order
-const categorizedDocs = docs.reduce(
-	(acc, doc) => {
-		const parts = doc.id.split('/');
-		let catId = 'root';
-		if (parts.length > 1) {
-			catId = parts[0].toLowerCase();
-		}
-		if (!acc[catId]) acc[catId] = [];
-		acc[catId].push(doc);
-		return acc;
-	},
-	{} as Record<string, typeof docs>
-);
-
-// Sort items within categories
-Object.values(categorizedDocs).forEach((catDocs) => {
-	catDocs.sort((a, b) => (a.data.order || 0) - (b.data.order || 0));
-});
-
-const topLevelItems = [
-	...(categorizedDocs['root'] || []).map((doc) => ({
-		id: doc.id.split('/')[0],
-		type: 'doc' as const,
-		doc
-	})),
-	...Object.keys(categorizedDocs)
-		.filter((catId) => catId !== 'root')
-		.map((catId) => ({
-			id: catId,
-			type: 'category' as const,
-			items: categorizedDocs[catId]
-		}))
-];
-
-topLevelItems.sort((a, b) => {
-	const orderA = SITE.categoryOrder?.indexOf(a.id) ?? -1;
-	const orderB = SITE.categoryOrder?.indexOf(b.id) ?? -1;
-	if (orderA !== -1 && orderB !== -1) return orderA - orderB;
-	if (orderA !== -1) return -1;
-	if (orderB !== -1) return 1;
-	return a.id.localeCompare(b.id);
-});
-
-const sortedDocs = topLevelItems.flatMap((item) => (item.type === 'doc' ? [item.doc] : item.items));
-
-const currentIndex = sortedDocs.findIndex((d) => d.id === entry.id);
-const prevDoc = currentIndex > 0 ? sortedDocs[currentIndex - 1] : null;
-const nextDoc = currentIndex < sortedDocs.length - 1 ? sortedDocs[currentIndex + 1] : null;
-
 // Build TOC
 const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
-
-// Last updated
-let lastUpdated = '';
-try {
-	if (entry.filePath) {
-		const stats = fs.statSync(entry.filePath);
-		lastUpdated = new Intl.DateTimeFormat('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		}).format(stats.mtime);
-	}
-} catch (e) {
-	// Ignore
-}
 ---
 
 <DocsLayout
 	title={entry.data.title}
 	description={entry.data.description}
 	headings={filteredHeadings}
+	entry={entry}
 >
-	{
-		lastUpdated && (
-			<div slot="last-updated" class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-				<Calendar size={16} />
-				Last updated on {lastUpdated}
-			</div>
-		)
-	}
-
 	<Content components={components} />
-
-	<div slot="toc" class="toc-container relative z-10 text-muted-foreground select-none">
-		<div class="relative flex px-2">
-			<!-- SVG Mask Container -->
-			<div class="toc-mask pointer-events-none absolute top-0 left-1 h-full w-10">
-				<!-- Background track -->
-				<div class="absolute inset-0 h-full w-full bg-border"></div>
-				<!-- Active indicator -->
-				<div
-					class="toc-indicator absolute left-0 w-full bg-foreground transition-all duration-300 ease-out"
-				>
-				</div>
-			</div>
-
-			<!-- Links List -->
-			<ul class="toc-links relative flex w-full flex-col pl-3 text-sm">
-				{
-					filteredHeadings.map((heading) => {
-						const offset = heading.depth >= 3 ? 12 : 0;
-						return (
-							<li
-								style={`padding-left: ${offset}px`}
-								class="transition-colors duration-150 ease-out"
-							>
-								<a
-									href={`#${heading.slug}`}
-									data-id={heading.slug}
-									class="toc-link block py-1.5 pr-2 text-muted-foreground no-underline transition-colors hover:text-foreground"
-								>
-									{heading.text}
-								</a>
-							</li>
-						);
-					})
-				}
-			</ul>
-		</div>
-	</div>
-
-	<div slot="footer" class="mt-10 space-y-8">
-		<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-			<Feedback provider={SITE.feedback.provider} />
-			{SITE.enableEdit && <EditPageLink filePath={entry.filePath} />}
-		</div>
-
-		<div class="grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
-			{
-				prevDoc ? (
-					<a
-						href={`/docs/${prevDoc.id}`}
-						class="group flex flex-col justify-center rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-					>
-						<div class="flex items-center gap-1 text-base font-semibold">
-							<ChevronLeft class="transition-transform group-hover:-translate-x-1" size={16} />
-							{prevDoc.data.title}
-						</div>
-						{prevDoc.data.description && (
-							<div class="mt-1 line-clamp-1 pl-3 text-sm text-muted-foreground">
-								{prevDoc.data.description}
-							</div>
-						)}
-					</a>
-				) : (
-					<div />
-				)
-			}
-
-			{
-				nextDoc ? (
-					<a
-						href={`/docs/${nextDoc.id}`}
-						class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-4 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-					>
-						<div class="flex items-center justify-end gap-1 text-base font-semibold">
-							{nextDoc.data.title}
-
-							<ChevronRight class="transition-transform group-hover:translate-x-1" size={16} />
-						</div>
-						{nextDoc.data.description && (
-							<div class="mt-1 line-clamp-1 pr-3 text-sm text-muted-foreground">
-								{nextDoc.data.description}
-							</div>
-						)}
-					</a>
-				) : (
-					<div />
-				)
-			}
-		</div>
-	</div>
 </DocsLayout>
-
-<script>
-	function buildRoundedPath(points: { x: number; y: number }[], radius: number) {
-		if (points.length === 0) return '';
-		if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
-
-		const commands = [`M ${points[0].x} ${points[0].y}`];
-
-		for (let i = 1; i < points.length; i++) {
-			const point = points[i];
-			const prev = points[i - 1];
-
-			if (i === points.length - 1) {
-				commands.push(` L ${point.x} ${point.y}`);
-				continue;
-			}
-
-			const next = points[i + 1];
-			const prevVecX = point.x - prev.x;
-			const prevVecY = point.y - prev.y;
-			const nextVecX = next.x - point.x;
-			const nextVecY = next.y - point.y;
-			const prevLen = Math.hypot(prevVecX, prevVecY);
-			const nextLen = Math.hypot(nextVecX, nextVecY);
-
-			if (prevLen === 0 || nextLen === 0) {
-				commands.push(` L ${point.x} ${point.y}`);
-				continue;
-			}
-
-			const prevDirX = prevVecX / prevLen;
-			const prevDirY = prevVecY / prevLen;
-			const nextDirX = nextVecX / nextLen;
-			const nextDirY = nextVecY / nextLen;
-			const dot = prevDirX * nextDirX + prevDirY * nextDirY;
-
-			if (Math.abs(dot) > 0.999) {
-				commands.push(` L ${point.x} ${point.y}`);
-				continue;
-			}
-
-			const cornerRadius = Math.min(radius, prevLen / 2, nextLen / 2);
-			const entryX = point.x - prevDirX * cornerRadius;
-			const entryY = point.y - prevDirY * cornerRadius;
-			const exitX = point.x + nextDirX * cornerRadius;
-			const exitY = point.y + nextDirY * cornerRadius;
-
-			commands.push(` L ${entryX} ${entryY}`);
-			commands.push(` Q ${point.x} ${point.y} ${exitX} ${exitY}`);
-		}
-
-		return commands.join('');
-	}
-
-	function updateLayout() {
-		const linksWrapper = document.querySelector('.toc-links') as HTMLElement | null;
-		const maskElement = document.querySelector('.toc-mask') as HTMLElement | null;
-		if (!linksWrapper || !maskElement) return;
-
-		const links = linksWrapper.querySelectorAll('.toc-link');
-		const points: { x: number; y: number }[] = [];
-		let maxW = 0;
-		const strokeWidth = 1.5;
-		const halfStroke = strokeWidth / 2;
-
-		links.forEach((link) => {
-			const li = link.parentElement;
-			if (!li) return;
-			const paddingLeft = parseFloat(li.style.paddingLeft) || 0;
-			const x = paddingLeft + halfStroke;
-
-			const style = window.getComputedStyle(link);
-			const paddingTop = parseFloat(style.paddingTop) || 0;
-			const paddingBottom = parseFloat(style.paddingBottom) || 0;
-
-			// Calculate points inside the padded area to create the vertical gap and diagonal links
-			const linkEl = link as HTMLElement;
-			const top = linkEl.offsetTop + paddingTop;
-			const bottom = linkEl.offsetTop + linkEl.offsetHeight - paddingBottom;
-
-			points.push({ x, y: top });
-			points.push({ x, y: bottom });
-
-			maxW = Math.max(maxW, x + halfStroke);
-		});
-
-		const svgPath = buildRoundedPath(points, 4);
-		const svgWidth = Math.max(40, maxW + 10);
-		const lineHeight = linksWrapper.scrollHeight;
-
-		const svgData = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${svgWidth} ${lineHeight}' width='${svgWidth}' height='${lineHeight}' preserveAspectRatio='none'><path d='${svgPath}' stroke='black' stroke-width='${strokeWidth}' fill='none'/></svg>`;
-		const encodedSvg = `url("data:image/svg+xml,${encodeURIComponent(svgData)}")`;
-
-		maskElement.style.maskImage = encodedSvg;
-		maskElement.style.maskRepeat = 'no-repeat';
-		maskElement.style.maskPosition = 'left top';
-		maskElement.style.maskSize = '100% 100%';
-	}
-
-	function initScrollspy() {
-		const headings = document.querySelectorAll('article h2, article h3');
-		if (!headings.length) return;
-
-		const mainScrollArea = document.querySelector('#main-scroll-area');
-		const indicator = document.querySelector('.toc-indicator') as HTMLElement | null;
-		if (!mainScrollArea) return;
-
-		updateLayout();
-		window.addEventListener('resize', updateLayout);
-
-		// Track a comma-separated string of IDs to know when state actually changes
-		let activeState = '';
-
-		function updateActive() {
-			if (!mainScrollArea) return;
-			const viewportHeight = mainScrollArea.clientHeight;
-			const scrollHeight = mainScrollArea.scrollHeight;
-			const scrollY = mainScrollArea.scrollTop;
-			const containerBounds = mainScrollArea.getBoundingClientRect();
-
-			let activeIds: string[] = [];
-			const headingElements = Array.from(headings);
-
-			// Define the visible "window" we care about
-			// Add offsets if you have a sticky top nav (e.g., viewTop = 100)
-			const viewTop = 80;
-			const viewBottom = viewportHeight - 80;
-
-			for (let i = 0; i < headingElements.length; i++) {
-				const current = headingElements[i];
-				const next = headingElements[i + 1];
-
-				const currentTop = current.getBoundingClientRect().top - containerBounds.top;
-				// If there is no next heading, this section extends to the bottom of the scroll area
-				const nextTop = next
-					? next.getBoundingClientRect().top - containerBounds.top
-					: scrollHeight;
-
-				// Check if the territory between this heading and the next overlaps the viewport
-				if (currentTop < viewBottom && nextTop > viewTop) {
-					const id = current.getAttribute('id');
-					if (id) activeIds.push(id);
-				}
-			}
-
-			// Fallback: If scrolled to absolute bottom and nothing triggered, grab the last one
-			const scrolledBottom = scrollY + viewportHeight;
-			if (scrolledBottom >= scrollHeight - 20 && activeIds.length === 0) {
-				const last = headingElements[headingElements.length - 1];
-				if (last) activeIds.push(last.getAttribute('id') || '');
-			}
-
-			// Fallback: If near the top and nothing triggered, grab the first one
-			if (scrollY < 50 && activeIds.length === 0 && headingElements.length > 0) {
-				activeIds.push(headingElements[0].getAttribute('id') || '');
-			}
-
-			const newState = activeIds.join(',');
-			if (newState !== activeState) {
-				activeState = newState;
-				updateToc(activeIds);
-			}
-		}
-
-		mainScrollArea.addEventListener('scroll', updateActive, { passive: true });
-
-		function updateToc(targetIds: string[]) {
-			if (!targetIds.length || !indicator) return;
-
-			// 1. Reset all links
-			document.querySelectorAll('.toc-link').forEach((link) => {
-				link.classList.remove('text-foreground', 'font-medium');
-				link.classList.add('text-muted-foreground');
-			});
-
-			// 2. Find elements for all active IDs
-			const activeLinks = targetIds
-				.map((id) => document.querySelector(`.toc-link[data-id="${id}"]`) as HTMLElement)
-				.filter(Boolean);
-
-			if (activeLinks.length > 0) {
-				// 3. Highlight all active text links
-				activeLinks.forEach((link) => {
-					link.classList.remove('text-muted-foreground');
-					link.classList.add('text-foreground', 'font-medium');
-				});
-
-				// 4. Stretch the indicator from the top of the first link to the bottom of the last link
-				const firstLink = activeLinks[0];
-				const lastLink = activeLinks[activeLinks.length - 1];
-
-				const firstStyle = window.getComputedStyle(firstLink);
-				const firstPaddingTop = parseFloat(firstStyle.paddingTop) || 0;
-
-				const lastStyle = window.getComputedStyle(lastLink);
-				const lastPaddingBottom = parseFloat(lastStyle.paddingBottom) || 0;
-
-				const top = firstLink.offsetTop + firstPaddingTop;
-				const bottom = lastLink.offsetTop + lastLink.offsetHeight - lastPaddingBottom;
-				const height = bottom - top;
-
-				indicator.style.top = `${top}px`;
-				indicator.style.height = `${height}px`;
-			}
-		}
-
-		// Initial update
-		updateActive();
-	}
-
-	initScrollspy();
-	document.addEventListener('astro:page-load', () => {
-		initScrollspy();
-	});
-</script>

@@ -1,13 +1,22 @@
-import { SITE } from '@/config';
 import { execSync } from 'node:child_process';
 
-export async function getRepoVersion(): Promise<string> {
+interface RepoOptions {
+	url?: string;
+	type?: string;
+}
+
+export async function getRepoVersion(
+	options: RepoOptions = { url: 'https://github.com/mizuchilabs/lyvo', type: 'github' }
+): Promise<string> {
+	const { url, type } = options;
+	if (!url) return '';
+
 	// GitHub API
-	if (SITE.repo.type === 'github') {
+	if (type === 'github') {
 		try {
-			const url = new URL(SITE.repo.url);
+			const parsedUrl = new URL(url);
 			// Filter out empty strings in case of trailing slashes
-			const pathParts = url.pathname.split('/').filter(Boolean);
+			const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
 			const owner = pathParts[0];
 			const name = pathParts[1];
 
@@ -28,13 +37,13 @@ export async function getRepoVersion(): Promise<string> {
 
 	// Universal Git Command (for Gitea, Forgejo, GitLab, or GitHub API fallback)
 	try {
-		const output = execSync(`git ls-remote --tags --sort="v:refname" ${SITE.repo.url}`)
+		const output = execSync(`git ls-remote --tags --sort="v:refname" ${url}`)
 			.toString()
 			.trim();
 
 		// If output is completely empty, the repo has no tags
 		if (!output) {
-			console.log(`[Git] No tags found for ${SITE.repo.url}`);
+			console.log(`[Git] No tags found for ${url}`);
 			return '';
 		}
 

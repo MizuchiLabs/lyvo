@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button.tsx';
 import { ArrowRight } from '@lucide/astro';
 import Layout from '@/layouts/Layout.astro';
 import RepoIcon from '@/components/RepoIcon.astro';
-import { SITE } from '@/config.ts';
+
+// Editable configs for Index page
+const repoUrl = 'https://github.com/mizuchilabs/lyvo';
+const repoType = 'github';
 ---
 
 <Layout>
@@ -28,25 +31,28 @@ import { SITE } from '@/config.ts';
 				</h1>
 
 				<p class="mb-8 max-w-2xl text-base text-balance text-muted-foreground sm:text-lg">
-					A structured, highly-extensible documentation framework for Astro. Focused on technical
-					clarity, speed, and standard-compliant architecture.
+					A structured, highly-extensible documentation framework for Astro. Focused on
+					technical clarity, speed, and standard-compliant architecture.
 				</p>
 
 				<div class="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
-					<a href="/docs/introduction" class="w-full sm:w-auto">
-						<Button size="lg" className="h-11 w-full gap-2 rounded-lg px-8 font-semibold sm:w-auto">
+					<a href="/docs" class="w-full sm:w-auto">
+						<Button
+							size="lg"
+							className="h-11 w-full gap-2 rounded-lg px-8 font-semibold sm:w-auto"
+						>
 							Get Started <ArrowRight size={16} />
 						</Button>
 					</a>
 
-					<a href={SITE.repo.url} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+					<a href={repoUrl} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
 						<Button
 							variant="outline"
 							size="lg"
 							className="h-11 w-full rounded-lg border-border bg-background/50 px-8 font-semibold backdrop-blur-sm transition-all hover:bg-accent sm:w-auto"
 						>
-							<RepoIcon className="mr-2 dark:invert" />
-							View on {SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}
+							<RepoIcon type={repoType} class="mr-2 dark:invert" />
+							View on {repoType.charAt(0).toUpperCase() + repoType.slice(1)}
 						</Button>
 					</a>
 				</div>
@@ -72,14 +78,19 @@ import { SITE } from '@/config.ts';
 								>Source (MDX)</span
 							>
 						</div>
-						<div class="p-4 font-mono text-[11px] leading-tight text-muted-foreground sm:text-xs">
+						<div
+							class="p-4 font-mono text-[11px] leading-tight text-muted-foreground sm:text-xs"
+						>
 							<div class="flex items-start gap-3">
 								<span class="w-3 text-muted-foreground/30 select-none">1</span>
 								<span class="text-primary">---</span>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="w-3 text-muted-foreground/30 select-none">2</span>
-								<span>title: <span class="text-foreground">"Introduction"</span></span>
+								<span
+									>title: <span class="text-foreground">"Introduction"</span
+									></span
+								>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="w-3 text-muted-foreground/30 select-none">3</span>
@@ -117,10 +128,14 @@ import { SITE } from '@/config.ts';
 					</div>
 
 					<!-- Connection (Arrow on Desktop) -->
-					<div class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
+					<div
+						class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block"
+					>
 						<div class="flex items-center gap-3">
 							<div class="h-px w-6 bg-border"></div>
-							<div class="rounded-full border border-border bg-background p-1.5 shadow-lg">
+							<div
+								class="rounded-full border border-border bg-background p-1.5 shadow-lg"
+							>
 								<ArrowRight class="text-primary" size={16} />
 							</div>
 							<div class="h-px w-6 bg-border"></div>
@@ -157,8 +172,12 @@ import { SITE } from '@/config.ts';
 								</div>
 							</div>
 							<div class="mt-4 flex gap-3">
-								<div class="h-12 flex-1 rounded-lg border border-border bg-muted/20"></div>
-								<div class="h-12 w-1/4 rounded-lg border border-border bg-muted/20"></div>
+								<div
+									class="h-12 flex-1 rounded-lg border border-border bg-muted/20"
+								>
+								</div>
+								<div class="h-12 w-1/4 rounded-lg border border-border bg-muted/20">
+								</div>
 							</div>
 						</div>
 					</div>

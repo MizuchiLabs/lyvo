@@ -1,9 +1,8 @@
 ---
-import { SITE } from '@/config.ts';
-import { Image } from 'astro:assets';
 import ThemeToggle from '@/components/ThemeToggle.astro';
 import RepoIcon from '@/components/RepoIcon.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
+import Logo from '@/components/Logo.astro';
 ---
 
 <!doctype html>
@@ -22,62 +21,35 @@ import BaseHead from '@/layouts/BaseHead.astro';
 				class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
 			>
 				<div class="flex items-center gap-6">
-					<a
-						href="/"
-						class="flex items-center gap-2 text-lg font-bold transition-opacity hover:opacity-80"
-					>
-						{
-							(SITE.logo.type === 'logo' || SITE.logo.type === 'both') && (
-								<Image
-									src={`/src/assets/${SITE.logo.src}`}
-									alt={`${SITE.title} Logo`}
-									width={SITE.logo.width}
-									height={SITE.logo.height}
-								/>
-							)
-						}
-						{(SITE.logo.type === 'text' || SITE.logo.type === 'both') && <span>{SITE.title}</span>}
-					</a>
+					<Logo />
 					<div class="hidden items-center gap-1 md:flex">
-						{
-							SITE.nav.map((item) => (
-								<a
-									href={item.href}
-									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-								>
-									{item.title}
-								</a>
-							))
-						}
-						{
-							SITE.openapi?.url && (
-								<a
-									href="/api"
-									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-								>
-									OpenAPI
-								</a>
-							)
-						}
+						<a
+							href="/docs"
+							class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+						>
+							Documentation
+						</a>
+						<a
+							href="/api"
+							class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+						>
+							OpenAPI
+						</a>
 					</div>
 				</div>
 				<div class="flex items-center space-x-2">
-					{
-						SITE.repo.url && (
-							<a
-								href={SITE.repo.url}
-								target="_blank"
-								rel="noreferrer"
-								class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-								title={`View on ${SITE.repo.type.charAt(0).toUpperCase() + SITE.repo.type.slice(1)}`}
-							>
-								<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
-									<RepoIcon />
-								</span>
-								<span class="sr-only">{SITE.repo.type}</span>
-							</a>
-						)
-					}
+					<a
+						href="https://github.com/mizuchilabs/lyvo"
+						target="_blank"
+						rel="noreferrer"
+						class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+						title="View on GitHub"
+					>
+						<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+							<RepoIcon type="github" />
+						</span>
+						<span class="sr-only">GitHub</span>
+					</a>
 					<ThemeToggle />
 				</div>
 			</div>

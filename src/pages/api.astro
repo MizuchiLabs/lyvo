@@ -1,16 +1,18 @@
 ---
-import { SITE } from '@/config.ts';
 import { ScalarComponent } from '@scalar/astro';
 import FloatingBackButton from '@/components/FloatingBackButton.astro';
 
-if (!SITE.openapi?.url) {
+// Editable configs for API
+const openapiUrl = '/openapi.json';
+
+if (!openapiUrl) {
 	return Astro.redirect('/404');
 }
 ---
 
 <ScalarComponent
 	configuration={{
-		url: SITE.openapi.url,
+		url: openapiUrl,
 		proxyUrl: 'https://proxy.scalar.com',
 		theme: 'default',
 		defaultOpenAllTags: true

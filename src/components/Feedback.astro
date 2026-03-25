@@ -1,14 +1,8 @@
 ---
 import { ThumbsUp, ThumbsDown, Check } from '@lucide/astro';
-
-interface Props {
-	provider?: 'umami' | 'plausible';
-}
-
-const { provider } = Astro.props;
 ---
 
-<div class="feedback-widget" data-provider={provider}>
+<div class="feedback-widget">
 	<div
 		class="feedback-prompt flex flex-1 flex-col items-center gap-4 rounded-lg transition-all duration-300 sm:flex-row"
 	>
@@ -42,25 +36,38 @@ const { provider } = Astro.props;
 		</div>
 	</div>
 </div>
-
 <script>
-	function sendFeedbackEvent() {
+	function sendFeedback(helpful: boolean, path: string) {
+		const w = window as any;
+
+		if (w.umami?.track) {
+			w.umami.track('feedback', { helpful, path });
+		}
+
+		if (w.plausible) {
+			w.plausible('Feedback', { props: { helpful, path } });
+		}
+
+		if (w.gtag) {
+			w.gtag('event', 'feedback', { helpful, path });
+		}
+
+		if (w.fathom?.trackEvent) {
+			w.fathom.trackEvent(`feedback_${helpful ? 'yes' : 'no'}`);
+		}
+	}
+
+	function initFeedbackWidgets() {
 		document.querySelectorAll<HTMLDivElement>('.feedback-widget').forEach((widget) => {
-			const provider = widget.dataset.provider;
 			const prompt = widget.querySelector<HTMLElement>('.feedback-prompt')!;
 			const thanks = widget.querySelector<HTMLElement>('.feedback-thanks')!;
 
 			widget.querySelectorAll<HTMLButtonElement>('.feedback-btn').forEach((btn) => {
 				btn.addEventListener('click', () => {
 					const helpful = btn.dataset.helpful === 'true';
-					const path = window.location.pathname;
 
 					try {
-						if (provider === 'umami' && (window as any).umami) {
-							(window as any).umami.track('feedback', { helpful, path });
-						} else if (provider === 'plausible' && (window as any).plausible) {
-							(window as any).plausible('Feedback', { props: { helpful, path } });
-						}
+						sendFeedback(helpful, window.location.pathname);
 					} catch (e) {
 						console.error('Failed to send feedback event', e);
 					}
@@ -72,5 +79,5 @@ const { provider } = Astro.props;
 		});
 	}
 
-	document.addEventListener('astro:page-load', sendFeedbackEvent);
+	document.addEventListener('astro:page-load', initFeedbackWidgets);
 </script>

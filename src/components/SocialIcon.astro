@@ -4,31 +4,25 @@ import { Globe } from '@lucide/astro';
 interface Props {
 	platform: string;
 	class?: string;
-	className?: string;
 	[key: string]: any;
 }
 
-const { platform, class: astroClass, className: reactClass, ...props } = Astro.props;
-const finalClass = astroClass || reactClass || '';
+const { platform, class: className, ...props } = Astro.props;
 
-// We use import.meta.glob to dynamically read the raw SVGs
 const svgs = import.meta.glob('/src/assets/*.svg', {
 	query: '?raw',
 	import: 'default',
 	eager: true
 });
 
-let svgName = platform.toLowerCase();
-if (svgName === 'twitter') svgName = 'x';
-if (svgName === 'linkedin') svgName = 'bluesky';
+const aliases: Record<string, string> = { twitter: 'x', linkedin: 'bluesky' };
+const name = aliases[platform.toLowerCase()] ?? platform.toLowerCase();
+const svgContent = svgs[`/src/assets/${name}.svg`] as string | undefined;
 
-const svgContent = svgs[`/src/assets/${svgName}.svg`] as string | undefined;
-
-let renderedSvg = svgContent;
-if (renderedSvg && finalClass) {
-	// Inject the class attribute into the root <svg> tag
-	renderedSvg = renderedSvg.replace(/<svg\s/, `<svg class="${finalClass}" `);
-}
+const rendered =
+	svgContent && className
+		? svgContent.replace(/<svg\s/, `<svg class="${className}" `)
+		: svgContent;
 ---
 
-{renderedSvg ? <Fragment set:html={renderedSvg} /> : <Globe class={finalClass} {...props} />}
+{rendered ? <Fragment set:html={rendered} /> : <Globe class={className} {...props} />}

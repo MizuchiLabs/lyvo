@@ -1,12 +1,19 @@
 ---
 import { Font } from 'astro:assets';
-import { SITE } from '@/config';
 import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 
-const { title = SITE.title, description = SITE.description } = Astro.props;
+interface Props {
+	title?: string;
+	description?: string;
+}
 
-const displayTitle = title && title !== SITE.title ? `${title} - ${SITE.title}` : SITE.title;
+const { 
+	title = 'Lyvo Docs', 
+	description = 'A modern, minimalistic documentation theme for Astro.' 
+} = Astro.props;
+
+const displayTitle = title && title !== 'Lyvo Docs' ? `${title} - Lyvo Docs` : 'Lyvo Docs';
 ---
 
 <head>
