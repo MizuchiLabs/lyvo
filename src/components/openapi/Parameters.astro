@@ -1,0 +1,60 @@
+---
+import type { OpenAPIParameter } from '@/lib/openapi/types';
+
+interface Props {
+	parameters: OpenAPIParameter[];
+}
+
+const { parameters } = Astro.props;
+
+if (!parameters || parameters.length === 0) return null;
+
+const parameterGroups = {
+	path: parameters.filter((parameter) => parameter.in === 'path'),
+	query: parameters.filter((parameter) => parameter.in === 'query'),
+	header: parameters.filter((parameter) => parameter.in === 'header'),
+	cookie: parameters.filter((parameter) => parameter.in === 'cookie')
+};
+
+const groupOrder: Array<keyof typeof parameterGroups> = ['path', 'query', 'header', 'cookie'];
+---
+
+<>
+	{
+		groupOrder.map((groupKey) => {
+			const groupParams = parameterGroups[groupKey];
+			if (groupParams.length === 0) return null;
+
+			return (
+				<section>
+					<h2 class="mb-4 text-xl tracking-tight font-semibold capitalize">
+						{groupKey} Parameters
+					</h2>
+					<div class="divide-y divide-border border-y border-border">
+						{groupParams.map((parameter: OpenAPIParameter) => (
+							<div class="space-y-2 py-4">
+								<div class="flex flex-wrap items-center gap-2">
+									<code class="text-sm font-semibold">{parameter.name}</code>
+									{parameter.required ? (
+										<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
+											required
+										</span>
+									) : (
+										<span class="rounded-md border border-border px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+											optional
+										</span>
+									)}
+								</div>
+								{parameter.description && (
+									<p class="text-sm leading-relaxed text-muted-foreground">
+										{parameter.description}
+									</p>
+								)}
+							</div>
+						))}
+					</div>
+				</section>
+			);
+		})
+	}
+</>

@@ -1,0 +1,121 @@
+---
+interface Props {
+	schema: any;
+	name?: string;
+	required?: boolean;
+	level?: number;
+}
+
+const { schema, name, required = false, level = 0 } = Astro.props;
+
+if (!schema) return null;
+
+const rootType = Array.isArray(schema.type) ? schema.type.join(' | ') : schema.type;
+const baseType = Array.isArray(schema.type) ? schema.type[0] : schema.type;
+
+const type = rootType || (schema.properties ? 'object' : 'any');
+const isObject = baseType === 'object' || schema.properties;
+const isArray = baseType === 'array' || schema.items;
+
+const typeColor = {
+	string: 'text-emerald-600 dark:text-emerald-400',
+	integer: 'text-blue-600 dark:text-blue-400',
+	number: 'text-blue-600 dark:text-blue-400',
+	boolean: 'text-rose-600 dark:text-rose-400',
+	array: 'text-amber-600 dark:text-amber-400',
+	object: 'text-fuchsia-600 dark:text-fuchsia-400',
+	any: 'text-muted-foreground'
+} as Record<string, string>;
+
+const badgeColor = typeColor[baseType] || typeColor.any;
+---
+
+<div class={`flex flex-col space-y-2 ${level > 0 ? 'mt-4 border-l pl-4 border-border/50' : ''}`}>
+	{
+		name ? (
+			<div class="flex flex-wrap items-center gap-2">
+				<code class="text-sm font-semibold">
+					{name}
+					{!required && <span class="-ml-1 font-normal text-muted-foreground/60">?</span>}
+				</code>
+
+				<div class="flex flex-wrap items-center gap-1.5">
+					<span class:list={['font-mono text-[11px] font-medium', badgeColor]}>
+						{type}
+						{schema.format ? ` <${schema.format}>` : ''}
+					</span>
+
+					{required && (
+						<span class="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
+							Required
+						</span>
+					)}
+					{schema.default !== undefined && (
+						<span class="rounded border border-border bg-muted/30 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-muted-foreground">
+							Default: {String(schema.default)}
+						</span>
+					)}
+				</div>
+			</div>
+		) : (
+			<div class="flex items-center gap-2">
+				<span class:list={['font-mono text-[11px] font-medium', badgeColor]}>
+					{type}
+					{schema.format ? ` <${schema.format}>` : ''}
+				</span>
+			</div>
+		)
+	}
+
+	{schema.description && <p class="text-sm text-muted-foreground">{schema.description}</p>}
+
+	{
+		schema.enum && (
+			<div class="flex flex-wrap gap-1 text-xs">
+				<span class="mr-1 font-medium text-muted-foreground">Enum:</span>
+				{schema.enum.map((v: any) => (
+					<code class="rounded border border-border bg-muted/50 px-1.5 py-0.5">
+						{typeof v === 'string' ? `"${v}"` : String(v)}
+					</code>
+				))}
+			</div>
+		)
+	}
+
+	{
+		schema.const !== undefined && (
+			<div class="flex flex-wrap gap-1 text-xs">
+				<span class="mr-1 font-medium text-muted-foreground">Const:</span>
+				<code class="rounded border border-border bg-emerald-500/10 px-1.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400">
+					{String(schema.const)}
+				</code>
+			</div>
+		)
+	}
+
+	{
+		isObject && (
+			<div class="flex flex-col gap-2 pt-1">
+				{Object.entries(schema.properties).map(([propName, propSchema]: [string, any]) => {
+					const isRequired = schema.required?.includes(propName);
+					return (
+						<Astro.self
+							schema={propSchema}
+							name={propName}
+							required={isRequired}
+							level={level + 1}
+						/>
+					);
+				})}
+			</div>
+		)
+	}
+
+	{
+		isArray && (
+			<div class="mt-2 text-sm text-muted-foreground">
+				<Astro.self schema={schema.items} required={false} level={level + 1} />
+			</div>
+		)
+	}
+</div>

@@ -1,0 +1,101 @@
+---
+import SchemaViewer from './SchemaViewer.astro';
+import type { OpenAPIMediaType } from '@/lib/openapi/types';
+
+interface Props {
+	requestBody: any; // Type is any until we strictly define OpenAPIRequestBody in types if missing
+}
+
+const { requestBody } = Astro.props;
+
+if (!requestBody) return null;
+---
+
+<section>
+	<div class="mb-4 flex items-center gap-2">
+		<h2 class="text-xl tracking-tight font-semibold">Request Body</h2>
+		{
+			requestBody.required && (
+				<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
+					required
+				</span>
+			)
+		}
+	</div>
+
+	{
+		requestBody.description && (
+			<p class="mb-4 text-sm text-muted-foreground">{requestBody.description}</p>
+		)
+	}
+
+	<div class="space-y-4">
+		<div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm api-media-selector">
+			{
+				requestBody.content.length > 1 ? (
+					<div class="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-3">
+						<span class="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+							Media Type
+						</span>
+						<div class="relative">
+							<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pl-3 pr-8 text-xs font-medium text-foreground outline-none ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
+								{requestBody.content.map((item: OpenAPIMediaType, index: number) => (
+									<option value={index}>{item.mediaType}</option>
+								))}
+							</select>
+							<svg class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+						</div>
+					</div>
+				) : (
+					requestBody.content.length === 1 && (
+						<div class="border-b border-border bg-muted/20 px-4 py-3">
+							<p class="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+								{requestBody.content[0].mediaType}
+							</p>
+						</div>
+					)
+				)
+			}
+
+			<div class="p-4">
+				{
+					requestBody.content.map((item: OpenAPIMediaType, index: number) => (
+						<div
+							class={`media-panel ${index > 0 ? 'hidden' : ''}`}
+							data-index={index}
+						>
+							{item.schema !== undefined ? (
+								<SchemaViewer schema={item.schema} />
+							) : (
+								<p class="text-xs italic text-muted-foreground">
+									No schema defined.
+								</p>
+							)}
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	document.addEventListener('astro:page-load', () => {
+		document.querySelectorAll('.api-media-selector').forEach((selector) => {
+			const select = selector.querySelector('.media-select') as HTMLSelectElement | null;
+			if (!select) return;
+
+			select.addEventListener('change', (e) => {
+				const target = e.target as HTMLSelectElement;
+				const index = target.value;
+				selector.querySelectorAll('.media-panel').forEach((panel) => {
+					if (panel.getAttribute('data-index') === index) {
+						panel.classList.remove('hidden');
+					} else {
+						panel.classList.add('hidden');
+					}
+				});
+			});
+		});
+	});
+</script>

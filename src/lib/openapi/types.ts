@@ -81,6 +81,7 @@ export interface OpenAPIWebhook {
 	responses: OpenAPIResponse[];
 	security: OpenAPISecurityRequirement[];
 	snippets: OpenAPISnippet[];
+	raw?: { externalDocsUrl?: string };
 }
 
 export interface OpenAPIParameter {
@@ -124,7 +125,7 @@ export interface OpenAPISecurityRequirement {
 }
 
 export interface OpenAPISnippet {
-	id: 'curl' | 'javascript' | 'python' | 'go';
+	id: 'curl' | 'javascript' | 'python' | 'go' | 'csharp' | 'java';
 	label: string;
 	language: string;
 	code: string;

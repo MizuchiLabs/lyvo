@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-27T03:42:05.150Z",
+  "generatedAt": "2026-03-27T18:12:49.112Z",
   "source": "public/openapi.json",
   "info": {
     "title": "Train Travel API",
@@ -70,6 +70,15 @@
           "method": "get",
           "path": "/bookings/{bookingId}",
           "deprecated": false
+        },
+        {
+          "id": "POST /newBooking",
+          "slug": "new-booking",
+          "label": "New Booking",
+          "method": "post",
+          "path": "/newBooking",
+          "deprecated": false,
+          "isWebhook": true
         }
       ]
     },
@@ -112,21 +121,6 @@
           "method": "get",
           "path": "/trips",
           "deprecated": false
-        }
-      ]
-    },
-    {
-      "id": "webhooks",
-      "title": "Webhooks",
-      "items": [
-        {
-          "id": "POST /newBooking",
-          "slug": "new-booking",
-          "label": "New Booking",
-          "method": "post",
-          "path": "/newBooking",
-          "deprecated": false,
-          "isWebhook": true
         }
       ]
     }
@@ -905,6 +899,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  var body io.Reader = nil\n  req, err := http.NewRequest(\"GET\", \"https://api.example.com/bookings\", body)\n  if err != nil { panic(err) }\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Get, \"https://api.example.com/bookings\");\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/bookings\"))\n      .method(\"GET\", HttpRequest.BodyPublishers.noBody())\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -1767,6 +1773,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  body := bytes.NewBuffer([]byte(\"{\\n  \\\"id\\\": \\\"3f3e3e1-c824-4d63-b37a-d8d698862f1d\\\",\\n  \\\"trip_id\\\": \\\"4f4e4e1-c824-4d63-b37a-d8d698862f1d\\\",\\n  \\\"passenger_name\\\": \\\"John Doe\\\",\\n  \\\"has_bicycle\\\": true,\\n  \\\"has_dog\\\": true\\n}\"))\n  req, err := http.NewRequest(\"POST\", \"https://api.example.com/bookings\", body)\n  if err != nil { panic(err) }\n  req.Header.Set(\"Content-Type\", \"application/json\")\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Post, \"https://api.example.com/bookings\");\nrequest.Content = new StringContent(\n    \"{\\n  \\\"id\\\": \\\"3f3e3e1-c824-4d63-b37a-d8d698862f1d\\\",\\n  \\\"trip_id\\\": \\\"4f4e4e1-c824-4d63-b37a-d8d698862f1d\\\",\\n  \\\"passenger_name\\\": \\\"John Doe\\\",\\n  \\\"has_bicycle\\\": true,\\n  \\\"has_dog\\\": true\\n}\",\n    System.Text.Encoding.UTF8,\n    \"application/json\"\n);\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/bookings\"))\n      .header(\"Content-Type\", \"application/json\")\n      .method(\"POST\", HttpRequest.BodyPublishers.ofString(\"{\\n  \\\"id\\\": \\\"3f3e3e1-c824-4d63-b37a-d8d698862f1d\\\",\\n  \\\"trip_id\\\": \\\"4f4e4e1-c824-4d63-b37a-d8d698862f1d\\\",\\n  \\\"passenger_name\\\": \\\"John Doe\\\",\\n  \\\"has_bicycle\\\": true,\\n  \\\"has_dog\\\": true\\n}\"))\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -2396,6 +2414,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  var body io.Reader = nil\n  req, err := http.NewRequest(\"DELETE\", \"https://api.example.com/bookings/{bookingId}\", body)\n  if err != nil { panic(err) }\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Delete, \"https://api.example.com/bookings/{bookingId}\");\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/bookings/{bookingId}\"))\n      .method(\"DELETE\", HttpRequest.BodyPublishers.noBody())\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -3166,6 +3196,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  var body io.Reader = nil\n  req, err := http.NewRequest(\"GET\", \"https://api.example.com/bookings/{bookingId}\", body)\n  if err != nil { panic(err) }\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Get, \"https://api.example.com/bookings/{bookingId}\");\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/bookings/{bookingId}\"))\n      .method(\"GET\", HttpRequest.BodyPublishers.noBody())\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -4113,6 +4155,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  body := bytes.NewBuffer([]byte(\"{\\n  \\\"amount\\\": 49.99,\\n  \\\"currency\\\": \\\"gbp\\\",\\n  \\\"source\\\": {\\n    \\\"object\\\": \\\"card\\\",\\n    \\\"name\\\": \\\"J. Doe\\\",\\n    \\\"number\\\": \\\"4242424242424242\\\",\\n    \\\"cvc\\\": 123,\\n    \\\"exp_month\\\": 12,\\n    \\\"exp_year\\\": 2025,\\n    \\\"address_line1\\\": \\\"123 Fake Street\\\",\\n    \\\"address_line2\\\": \\\"4th Floor\\\",\\n    \\\"address_city\\\": \\\"London\\\",\\n    \\\"address_country\\\": \\\"gb\\\",\\n    \\\"address_post_code\\\": \\\"N12 9XX\\\"\\n  }\\n}\"))\n  req, err := http.NewRequest(\"POST\", \"https://api.example.com/bookings/{bookingId}/payment\", body)\n  if err != nil { panic(err) }\n  req.Header.Set(\"Content-Type\", \"application/json\")\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Post, \"https://api.example.com/bookings/{bookingId}/payment\");\nrequest.Content = new StringContent(\n    \"{\\n  \\\"amount\\\": 49.99,\\n  \\\"currency\\\": \\\"gbp\\\",\\n  \\\"source\\\": {\\n    \\\"object\\\": \\\"card\\\",\\n    \\\"name\\\": \\\"J. Doe\\\",\\n    \\\"number\\\": \\\"4242424242424242\\\",\\n    \\\"cvc\\\": 123,\\n    \\\"exp_month\\\": 12,\\n    \\\"exp_year\\\": 2025,\\n    \\\"address_line1\\\": \\\"123 Fake Street\\\",\\n    \\\"address_line2\\\": \\\"4th Floor\\\",\\n    \\\"address_city\\\": \\\"London\\\",\\n    \\\"address_country\\\": \\\"gb\\\",\\n    \\\"address_post_code\\\": \\\"N12 9XX\\\"\\n  }\\n}\",\n    System.Text.Encoding.UTF8,\n    \"application/json\"\n);\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/bookings/{bookingId}/payment\"))\n      .header(\"Content-Type\", \"application/json\")\n      .method(\"POST\", HttpRequest.BodyPublishers.ofString(\"{\\n  \\\"amount\\\": 49.99,\\n  \\\"currency\\\": \\\"gbp\\\",\\n  \\\"source\\\": {\\n    \\\"object\\\": \\\"card\\\",\\n    \\\"name\\\": \\\"J. Doe\\\",\\n    \\\"number\\\": \\\"4242424242424242\\\",\\n    \\\"cvc\\\": 123,\\n    \\\"exp_month\\\": 12,\\n    \\\"exp_year\\\": 2025,\\n    \\\"address_line1\\\": \\\"123 Fake Street\\\",\\n    \\\"address_line2\\\": \\\"4th Floor\\\",\\n    \\\"address_city\\\": \\\"London\\\",\\n    \\\"address_country\\\": \\\"gb\\\",\\n    \\\"address_post_code\\\": \\\"N12 9XX\\\"\\n  }\\n}\"))\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -4925,6 +4979,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  var body io.Reader = nil\n  req, err := http.NewRequest(\"GET\", \"https://api.example.com/stations\", body)\n  if err != nil { panic(err) }\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Get, \"https://api.example.com/stations\");\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/stations\"))\n      .method(\"GET\", HttpRequest.BodyPublishers.noBody())\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -5839,6 +5905,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  var body io.Reader = nil\n  req, err := http.NewRequest(\"GET\", \"https://api.example.com/trips?origin=%3Corigin%3E&destination=%3Cdestination%3E&date=%3Cdate%3E&bicycles=%3Cbicycles%3E&dogs=%3Cdogs%3E\", body)\n  if err != nil { panic(err) }\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Get, \"https://api.example.com/trips?origin=%3Corigin%3E&destination=%3Cdestination%3E&date=%3Cdate%3E&bicycles=%3Cbicycles%3E&dogs=%3Cdogs%3E\");\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/trips?origin=%3Corigin%3E&destination=%3Cdestination%3E&date=%3Cdate%3E&bicycles=%3Cbicycles%3E&dogs=%3Cdogs%3E\"))\n      .method(\"GET\", HttpRequest.BodyPublishers.noBody())\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ],
       "raw": {
@@ -5858,7 +5936,7 @@
       "description": "Subscribe to new bookings being created, to update integrations for your users.  Related data is available via the links provided in the request.\n",
       "deprecated": false,
       "tags": [
-        "Webhooks"
+        "Bookings"
       ],
       "servers": [
         {
@@ -6010,6 +6088,18 @@
           "label": "Go",
           "language": "go",
           "code": "package main\n\nimport (\n  \"bytes\"\n  \"fmt\"\n  \"io\"\n  \"net/http\"\n)\n\nfunc main() {\n  body := bytes.NewBuffer([]byte(\"{\\n  \\\"id\\\": \\\"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e\\\",\\n  \\\"trip_id\\\": \\\"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e\\\",\\n  \\\"passenger_name\\\": \\\"John Doe\\\",\\n  \\\"has_bicycle\\\": true,\\n  \\\"has_dog\\\": true,\\n  \\\"links\\\": {\\n    \\\"self\\\": \\\"https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb\\\"\\n  }\\n}\"))\n  req, err := http.NewRequest(\"POST\", \"https://api.example.com/newBooking\", body)\n  if err != nil { panic(err) }\n  req.Header.Set(\"Content-Type\", \"application/json\")\n\n  res, err := http.DefaultClient.Do(req)\n  if err != nil { panic(err) }\n  defer res.Body.Close()\n\n  payload, err := io.ReadAll(res.Body)\n  if err != nil { panic(err) }\n  fmt.Println(string(payload))\n}"
+        },
+        {
+          "id": "csharp",
+          "label": "C#",
+          "language": "csharp",
+          "code": "using System.Net.Http;\nusing System.Net.Http.Headers;\n\nusing var client = new HttpClient();\nusing var request = new HttpRequestMessage(HttpMethod.Post, \"https://api.example.com/newBooking\");\nrequest.Content = new StringContent(\n    \"{\\n  \\\"id\\\": \\\"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e\\\",\\n  \\\"trip_id\\\": \\\"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e\\\",\\n  \\\"passenger_name\\\": \\\"John Doe\\\",\\n  \\\"has_bicycle\\\": true,\\n  \\\"has_dog\\\": true,\\n  \\\"links\\\": {\\n    \\\"self\\\": \\\"https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb\\\"\\n  }\\n}\",\n    System.Text.Encoding.UTF8,\n    \"application/json\"\n);\n\nusing var response = await client.SendAsync(request);\nresponse.EnsureSuccessStatusCode();\nConsole.WriteLine(await response.Content.ReadAsStringAsync());"
+        },
+        {
+          "id": "java",
+          "label": "Java",
+          "language": "java",
+          "code": "import java.net.URI;\nimport java.net.http.HttpClient;\nimport java.net.http.HttpRequest;\nimport java.net.http.HttpResponse;\n\npublic class Main {\n  public static void main(String[] args) throws Exception {\n    HttpClient client = HttpClient.newHttpClient();\n    HttpRequest request = HttpRequest.newBuilder()\n      .uri(URI.create(\"https://api.example.com/newBooking\"))\n      .header(\"Content-Type\", \"application/json\")\n      .method(\"POST\", HttpRequest.BodyPublishers.ofString(\"{\\n  \\\"id\\\": \\\"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e\\\",\\n  \\\"trip_id\\\": \\\"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e\\\",\\n  \\\"passenger_name\\\": \\\"John Doe\\\",\\n  \\\"has_bicycle\\\": true,\\n  \\\"has_dog\\\": true,\\n  \\\"links\\\": {\\n    \\\"self\\\": \\\"https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb\\\"\\n  }\\n}\"))\n      .build();\n\n    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());\n    System.out.println(response.body());\n  }\n}"
         }
       ]
     }

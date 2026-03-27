@@ -326,11 +326,61 @@ function buildSnippets({ method, url, headers, bodyExample }) {
 		'}'
 	].join('\n');
 
+	const csharpMethod =
+		methodUpper === 'PATCH'
+			? 'Patch'
+			: methodUpper.charAt(0) + methodUpper.slice(1).toLowerCase();
+	const csharpSnippet = [
+		'using System.Net.Http;',
+		'using System.Net.Http.Headers;',
+		'',
+		'using var client = new HttpClient();',
+		`using var request = new HttpRequestMessage(HttpMethod.${csharpMethod}, "${url}");`,
+		...Object.entries(headers).map(([k, v]) => `request.Headers.Add("${k}", "${v}");`),
+		...(jsonBody
+			? [
+					`request.Content = new StringContent(`,
+					`    ${JSON.stringify(jsonBody)},`,
+					`    System.Text.Encoding.UTF8,`,
+					`    "application/json"`,
+					`);`
+				]
+			: []),
+		'',
+		'using var response = await client.SendAsync(request);',
+		'response.EnsureSuccessStatusCode();',
+		'Console.WriteLine(await response.Content.ReadAsStringAsync());'
+	].join('\n');
+
+	const javaSnippet = [
+		'import java.net.URI;',
+		'import java.net.http.HttpClient;',
+		'import java.net.http.HttpRequest;',
+		'import java.net.http.HttpResponse;',
+		'',
+		'public class Main {',
+		'  public static void main(String[] args) throws Exception {',
+		'    HttpClient client = HttpClient.newHttpClient();',
+		'    HttpRequest request = HttpRequest.newBuilder()',
+		`      .uri(URI.create("${url}"))`,
+		...Object.entries(headers).map(([k, v]) => `      .header("${k}", "${v}")`),
+		...(jsonBody ? ['      .header("Content-Type", "application/json")'] : []),
+		`      .method("${methodUpper}", ${jsonBody ? `HttpRequest.BodyPublishers.ofString(${JSON.stringify(jsonBody)})` : 'HttpRequest.BodyPublishers.noBody()'})`,
+		'      .build();',
+		'',
+		'    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());',
+		'    System.out.println(response.body());',
+		'  }',
+		'}'
+	].join('\n');
+
 	return [
 		{ id: 'curl', label: 'cURL', language: 'bash', code: curlLines.join(' \\\n') },
 		{ id: 'javascript', label: 'JavaScript', language: 'javascript', code: jsSnippet },
 		{ id: 'python', label: 'Python', language: 'python', code: pythonSnippet },
-		{ id: 'go', label: 'Go', language: 'go', code: goSnippet }
+		{ id: 'go', label: 'Go', language: 'go', code: goSnippet },
+		{ id: 'csharp', label: 'C#', language: 'csharp', code: csharpSnippet },
+		{ id: 'java', label: 'Java', language: 'java', code: javaSnippet }
 	];
 }
 
@@ -492,7 +542,7 @@ function mapWebhooks(document, defaultServers, rootSecurity) {
 				summary: mapped.summary,
 				description: mapped.description,
 				deprecated: mapped.deprecated,
-				tags: ['Webhooks'],
+				tags: mapped.tags.length > 0 ? mapped.tags : ['Webhooks'],
 				servers: mapped.servers,
 				parameters: mapped.parameters,
 				requestBody: mapped.requestBody,
@@ -508,8 +558,9 @@ function mapWebhooks(document, defaultServers, rootSecurity) {
 
 function buildNavigation(operations, webhooks, groupBy) {
 	const groups = new Map();
+	const allItems = [...operations, ...webhooks.map((w) => ({ ...w, isWebhook: true }))];
 
-	for (const operation of operations) {
+	for (const operation of allItems) {
 		const keys =
 			groupBy === 'path'
 				? [operation.path.split('/').filter(Boolean)[0] ?? 'General']
@@ -525,24 +576,10 @@ function buildNavigation(operations, webhooks, groupBy) {
 				label: operation.summary ?? operation.title,
 				method: operation.method,
 				path: operation.path,
-				deprecated: operation.deprecated
+				deprecated: operation.deprecated,
+				isWebhook: operation.isWebhook
 			});
 		}
-	}
-
-	if (webhooks.length > 0) {
-		groups.set(
-			'Webhooks',
-			webhooks.map((webhook) => ({
-				id: webhook.id,
-				slug: webhook.slug,
-				label: webhook.summary ?? webhook.title,
-				method: webhook.method,
-				path: webhook.path,
-				deprecated: webhook.deprecated,
-				isWebhook: true
-			}))
-		);
 	}
 
 	return Array.from(groups.entries())
