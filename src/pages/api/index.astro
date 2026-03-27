@@ -1,0 +1,12 @@
+---
+import { tryReadOpenAPIModel } from '@/lib/openapi/model';
+
+const model = tryReadOpenAPIModel();
+const firstEndpoint = model ? [...model.operations, ...model.webhooks][0] : undefined;
+
+if (firstEndpoint) {
+	return Astro.redirect(`/api/${firstEndpoint.slug}`);
+}
+
+return Astro.redirect('/docs');
+---

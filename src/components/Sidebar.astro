@@ -5,14 +5,18 @@ import SidebarNav from './SidebarNav.astro';
 import Logo from './Logo.astro';
 import { getRepoVersion } from '@/lib/version';
 import { getDocsHierarchy } from '@/lib/docs';
+import { tryReadOpenAPIModel } from '@/lib/openapi/model';
 
 // Editable configs for Sidebar
 const showVersion = false;
 
 // Fetch categorized and ordered hierarchy from library function
 const { topLevelItems } = await getDocsHierarchy();
+const openapiModel = tryReadOpenAPIModel();
+const hasApiMode = (openapiModel?.operations.length ?? 0) + (openapiModel?.webhooks.length ?? 0) > 0;
 
 const currentPath = Astro.url.pathname;
+const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs';
 const version = showVersion ? await getRepoVersion() : '';
 ---
 
@@ -58,7 +62,14 @@ const version = showVersion ? await getRepoVersion() : '';
 		</button>
 	</div>
 
-	<SidebarNav topLevelItems={topLevelItems} currentPath={currentPath} version={version} />
+	<SidebarNav
+		topLevelItems={topLevelItems}
+		currentPath={currentPath}
+		version={version}
+		apiGroups={openapiModel?.navigation ?? []}
+		hasApiMode={hasApiMode}
+		activeMode={activeMode}
+	/>
 </div>
 
 <!-- Desktop Sidebar -->
@@ -66,7 +77,14 @@ const version = showVersion ? await getRepoVersion() : '';
 	<div class="flex shrink-0 items-center px-6 pt-6 pb-2">
 		<Logo />
 	</div>
-	<SidebarNav topLevelItems={topLevelItems} currentPath={currentPath} version={version} />
+	<SidebarNav
+		topLevelItems={topLevelItems}
+		currentPath={currentPath}
+		version={version}
+		apiGroups={openapiModel?.navigation ?? []}
+		hasApiMode={hasApiMode}
+		activeMode={activeMode}
+	/>
 </aside>
 
 <script is:inline>

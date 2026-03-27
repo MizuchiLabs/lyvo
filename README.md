@@ -66,6 +66,29 @@ order: 1
 ---
 ```
 
+### OpenAPI Docs Mode
+
+Lyvo can generate a normalized API model from an OpenAPI JSON/YAML file and render it in a dedicated API mode under `/api`.
+
+1. Set your source spec in `src/content/api/openapi.config.json` (`input` supports `.json` and `.yaml`).
+2. Run:
+
+```bash
+pnpm openapi:generate
+```
+
+This writes `src/content/api/openapi-model.json`. Once generated, a `Docs / API` toggle appears in the sidebar automatically.
+
+OpenAPI generation also runs automatically before `pnpm build` when `src/content/api/openapi.config.json` exists and is enabled.
+
+To disable automatic generation, set:
+
+```json
+{
+	"enabled": false
+}
+```
+
 ## Components
 
 Lyvo comes with a few essential components specifically tailored for documentation:

@@ -1,0 +1,6 @@
+{
+	"enabled": true,
+	"input": "public/openapi.json",
+	"output": "src/content/api/openapi-model.json",
+	"groupBy": "tag"
+}
