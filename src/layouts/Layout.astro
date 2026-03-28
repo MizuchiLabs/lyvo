@@ -1,8 +1,8 @@
 ---
-import ThemeToggle from '@/components/ThemeToggle.astro';
-import RepoIcon from '@/components/RepoIcon.astro';
+import ThemeToggle from '@/components/base/ThemeToggle.astro';
+import RepoIcon from '@/components/base/RepoIcon.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
-import Logo from '@/components/Logo.astro';
+import Logo from '@/components/base/Logo.astro';
 ---
 
 <!doctype html>
@@ -45,7 +45,9 @@ import Logo from '@/components/Logo.astro';
 						class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
 						title="View on GitHub"
 					>
-						<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+						<span
+							class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert"
+						>
 							<RepoIcon type="github" />
 						</span>
 						<span class="sr-only">GitHub</span>

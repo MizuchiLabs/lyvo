@@ -89,9 +89,13 @@ function parseInlineCode(text: string) {
 
 				{/* Release Header */}
 				<div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-baseline">
-					<h2 class="m-0 text-2xl font-bold tracking-tight text-foreground">v{release.version}</h2>
+					<h2 class="m-0 text-2xl font-bold tracking-tight text-foreground">
+						v{release.version}
+					</h2>
 					{release.date && (
-						<span class="text-sm font-medium text-muted-foreground">{release.date}</span>
+						<span class="text-sm font-medium text-muted-foreground">
+							{release.date}
+						</span>
 					)}
 				</div>
 
@@ -99,7 +103,8 @@ function parseInlineCode(text: string) {
 				<div class="space-y-6">
 					{release.categories.map((cat) => {
 						const colorClass =
-							categoryColors[cat.type] || 'bg-muted text-muted-foreground border-border';
+							categoryColors[cat.type] ||
+							'bg-muted text-muted-foreground border-border';
 						return (
 							<div class="space-y-3">
 								<div
@@ -109,7 +114,10 @@ function parseInlineCode(text: string) {
 								</div>
 								<ul class="list-disc space-y-2 pl-5 text-muted-foreground marker:text-muted-foreground/50">
 									{cat.items.map((item) => (
-										<li class="leading-relaxed" set:html={parseInlineCode(item)} />
+										<li
+											class="leading-relaxed"
+											set:html={parseInlineCode(item)}
+										/>
 									))}
 								</ul>
 							</div>

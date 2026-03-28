@@ -8,7 +8,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList
-} from './ui/command';
+} from '@/components/ui/command';
 
 export default function Search() {
 	const [open, setOpen] = useState(false);

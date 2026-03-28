@@ -1,0 +1,81 @@
+---
+import { ChevronLeft, ChevronRight } from '@lucide/astro';
+import Feedback from './Feedback.astro';
+import EditPageLink from './EditPageLink.astro';
+import { getPrevNextDocs } from '@/lib/docs';
+
+interface Props {
+	entry?: any;
+	showFeedback?: boolean;
+	showEdit?: boolean;
+}
+
+const { entry, showFeedback = true, showEdit = true } = Astro.props;
+
+let prevDoc, nextDoc;
+if (entry) {
+	const res = await getPrevNextDocs(entry.id);
+	prevDoc = res.prevDoc;
+	nextDoc = res.nextDoc;
+}
+---
+
+{
+	entry && (
+		<div class="mt-10 space-y-6">
+			{(showFeedback || (showEdit && entry.filePath)) && (
+				<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+					{showFeedback && <Feedback />}
+					{showEdit && entry.filePath && <EditPageLink filePath={entry.filePath} />}
+				</div>
+			)}
+
+			<div class="grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
+				{prevDoc ? (
+					<a
+						href={`/docs/${prevDoc.id}`}
+						class="group flex flex-col justify-center rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+					>
+						<div class="flex items-center gap-1 text-base font-semibold">
+							<ChevronLeft
+								class="transition-transform group-hover:-translate-x-1"
+								size={16}
+							/>
+							{prevDoc.data.title}
+						</div>
+						{prevDoc.data.description && (
+							<div class="mt-1 line-clamp-1 pl-3 text-sm text-muted-foreground">
+								{prevDoc.data.description}
+							</div>
+						)}
+					</a>
+				) : (
+					<div />
+				)}
+
+				{nextDoc ? (
+					<a
+						href={`/docs/${nextDoc.id}`}
+						class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-4 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+					>
+						<div class="flex items-center justify-end gap-1 text-base font-semibold">
+							{nextDoc.data.title}
+
+							<ChevronRight
+								class="transition-transform group-hover:translate-x-1"
+								size={16}
+							/>
+						</div>
+						{nextDoc.data.description && (
+							<div class="mt-1 line-clamp-1 pr-3 text-sm text-muted-foreground">
+								{nextDoc.data.description}
+							</div>
+						)}
+					</a>
+				) : (
+					<div />
+				)}
+			</div>
+		</div>
+	)
+}

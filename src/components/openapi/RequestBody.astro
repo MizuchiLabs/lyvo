@@ -13,7 +13,7 @@ if (!requestBody) return null;
 
 <section>
 	<div class="mb-4 flex items-center gap-2">
-		<h2 class="text-xl tracking-tight font-semibold">Request Body</h2>
+		<h2 class="text-xl font-semibold tracking-tight">Request Body</h2>
 		{
 			requestBody.required && (
 				<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
@@ -30,7 +30,9 @@ if (!requestBody) return null;
 	}
 
 	<div class="space-y-4">
-		<div class="overflow-hidden rounded-xl border border-border bg-card shadow-sm api-media-selector">
+		<div
+			class="api-media-selector overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+		>
 			{
 				requestBody.content.length > 1 ? (
 					<div class="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-3">
@@ -38,12 +40,25 @@ if (!requestBody) return null;
 							Media Type
 						</span>
 						<div class="relative">
-							<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pl-3 pr-8 text-xs font-medium text-foreground outline-none ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
-								{requestBody.content.map((item: OpenAPIMediaType, index: number) => (
-									<option value={index}>{item.mediaType}</option>
-								))}
+							<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pr-8 pl-3 text-xs font-medium text-foreground ring-offset-background transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
+								{requestBody.content.map(
+									(item: OpenAPIMediaType, index: number) => (
+										<option value={index}>{item.mediaType}</option>
+									)
+								)}
 							</select>
-							<svg class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+							<svg
+								class="pointer-events-none absolute top-1/2 right-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="m6 9 6 6 6-6" />
+							</svg>
 						</div>
 					</div>
 				) : (
@@ -60,14 +75,11 @@ if (!requestBody) return null;
 			<div class="p-4">
 				{
 					requestBody.content.map((item: OpenAPIMediaType, index: number) => (
-						<div
-							class={`media-panel ${index > 0 ? 'hidden' : ''}`}
-							data-index={index}
-						>
+						<div class={`media-panel ${index > 0 ? 'hidden' : ''}`} data-index={index}>
 							{item.schema !== undefined ? (
 								<SchemaViewer schema={item.schema} />
 							) : (
-								<p class="text-xs italic text-muted-foreground">
+								<p class="text-xs text-muted-foreground italic">
 									No schema defined.
 								</p>
 							)}

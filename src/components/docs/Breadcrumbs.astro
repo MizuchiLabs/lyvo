@@ -1,0 +1,20 @@
+---
+import { Slash, ChevronRight } from '@lucide/astro';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="hidden items-center space-x-2 text-sm text-muted-foreground xl:flex">
+	<a
+		href="/"
+		class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
+	>
+		<Slash size={16} />
+	</a>
+	<ChevronRight size={16} />
+	<span>{title}</span>
+</div>

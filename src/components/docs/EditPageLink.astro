@@ -28,15 +28,16 @@ interface Props {
 	repoType?: string; // github, gitlab, gitea
 }
 
-const { 
-	filePath, 
+const {
+	filePath,
 	branch = 'main',
 	repoUrl = 'https://github.com/mizuchilabs/lyvo',
 	repoType = 'github'
 } = Astro.props;
 
 const showLink = Boolean(filePath && repoUrl && repoType);
-const editUrl = showLink && filePath && repoUrl ? getEditUrl(filePath, branch, repoUrl, repoType) : '';
+const editUrl =
+	showLink && filePath && repoUrl ? getEditUrl(filePath, branch, repoUrl, repoType) : '';
 ---
 
 {

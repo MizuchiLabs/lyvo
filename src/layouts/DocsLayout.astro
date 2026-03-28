@@ -1,14 +1,13 @@
 ---
-import { ChevronRight, ChevronLeft, TextAlignStart, Calendar, Slash } from '@lucide/astro';
-import Search from '@/components/Search';
-import Sidebar from '@/components/Sidebar.astro';
-import MobileToc from '@/components/MobileToc';
-import ThemeToggle from '@/components/ThemeToggle.astro';
+import Search from '@/components/base/Search';
+import Sidebar from '@/components/docs/Sidebar.astro';
+import MobileToc from '@/components/docs/MobileToc';
+import ThemeToggle from '@/components/base/ThemeToggle.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
-import TableOfContents from '@/components/TableOfContents.astro';
-import Feedback from '@/components/Feedback.astro';
-import EditPageLink from '@/components/EditPageLink.astro';
-import { getPrevNextDocs } from '@/lib/docs';
+import TableOfContents from '@/components/docs/TableOfContents.astro';
+import Breadcrumbs from '@/components/docs/Breadcrumbs.astro';
+import PageHeader from '@/components/docs/PageHeader.astro';
+import Pagination from '@/components/docs/Pagination.astro';
 import fs from 'node:fs';
 
 interface Props {
@@ -16,19 +15,18 @@ interface Props {
 	description?: string;
 	headings?: { depth: number; slug: string; text: string }[];
 	entry?: any;
+	showFeedback?: boolean;
+	showEdit?: boolean;
 }
 
-const { title, description, headings = [], entry } = Astro.props;
-
-// Editable configs for DocsLayout
-const enableEdit = true;
-
-let prevDoc, nextDoc;
-if (entry) {
-	const res = await getPrevNextDocs(entry.id);
-	prevDoc = res.prevDoc;
-	nextDoc = res.nextDoc;
-}
+const {
+	title,
+	description,
+	headings = [],
+	entry,
+	showFeedback = true,
+	showEdit = true
+} = Astro.props;
 
 let lastUpdated = '';
 try {
@@ -57,27 +55,16 @@ try {
 		<Sidebar />
 
 		{/* Main Content */}
-		<div class="flex h-full flex-1 flex-col overflow-hidden md:py-3 md:pr-3">
+		<div class="flex h-full flex-1 flex-col overflow-hidden rounded-xl md:py-3 md:pr-3">
 			<main
 				id="main-scroll-area"
 				class="no-scrollbar relative flex-1 overflow-y-auto bg-background md:rounded-2xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
 			>
 				{/* Breadcrumbs Header */}
 				<div
-					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
+					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 rounded-t-xl border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
 				>
-					<div
-						class="hidden items-center space-x-2 text-sm text-muted-foreground xl:flex"
-					>
-						<a
-							href="/"
-							class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
-						>
-							<Slash size={16} />
-						</a>
-						<ChevronRight size={16} />
-						<span>{title}</span>
-					</div>
+					<Breadcrumbs title={title} />
 					<MobileToc client:load headings={headings} title={title} />
 					<div class="flex shrink-0 items-center gap-4">
 						<Search client:load />
@@ -91,23 +78,11 @@ try {
 				>
 					{/* Article Body */}
 					<div class="mx-auto w-full min-w-0 flex-1 py-8">
-						<div class="space-y-2">
-							<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
-							{
-								description && (
-									<p class="text-lg text-muted-foreground">{description}</p>
-								)
-							}
-						</div>
-
-						{
-							lastUpdated && (
-								<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-									<Calendar size={16} />
-									Last updated on {lastUpdated}
-								</div>
-							)
-						}
+						<PageHeader
+							title={title}
+							description={description}
+							lastUpdated={lastUpdated}
+						/>
 
 						<article
 							data-pagefind-body
@@ -116,81 +91,14 @@ try {
 							<slot />
 						</article>
 
-						{/* Next/Prev Navigation */}
-						{
-							entry && (
-								<div class="mt-10 space-y-8">
-									<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-										<Feedback />
-										{enableEdit && <EditPageLink filePath={entry.filePath} />}
-									</div>
-
-									<div class="grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
-										{prevDoc ? (
-											<a
-												href={`/docs/${prevDoc.id}`}
-												class="group flex flex-col justify-center rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-											>
-												<div class="flex items-center gap-1 text-base font-semibold">
-													<ChevronLeft
-														class="transition-transform group-hover:-translate-x-1"
-														size={16}
-													/>
-													{prevDoc.data.title}
-												</div>
-												{prevDoc.data.description && (
-													<div class="mt-1 line-clamp-1 pl-3 text-sm text-muted-foreground">
-														{prevDoc.data.description}
-													</div>
-												)}
-											</a>
-										) : (
-											<div />
-										)}
-
-										{nextDoc ? (
-											<a
-												href={`/docs/${nextDoc.id}`}
-												class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-4 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-											>
-												<div class="flex items-center justify-end gap-1 text-base font-semibold">
-													{nextDoc.data.title}
-
-													<ChevronRight
-														class="transition-transform group-hover:translate-x-1"
-														size={16}
-													/>
-												</div>
-												{nextDoc.data.description && (
-													<div class="mt-1 line-clamp-1 pr-3 text-sm text-muted-foreground">
-														{nextDoc.data.description}
-													</div>
-												)}
-											</a>
-										) : (
-											<div />
-										)}
-									</div>
-								</div>
-							)
-						}
+						<Pagination entry={entry} showFeedback={showFeedback} showEdit={showEdit} />
 					</div>
 
 					{/* TOC (Desktop) */}
-					<div class="hidden w-64 shrink-0 text-sm xl:block">
-						<div
-							class="no-scrollbar sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4 pb-8"
-						>
-							<div class="space-y-4">
-								<p
-									class="flex items-center gap-2 font-semibold tracking-tight text-foreground"
-								>
-									<TextAlignStart size={16} />
-									On this page
-								</p>
-								<TableOfContents headings={headings} />
-							</div>
-						</div>
+					<div
+						class="sticky top-20 hidden max-h-[calc(100vh-8rem)] w-64 shrink-0 overflow-y-auto xl:block"
+					>
+						<TableOfContents headings={headings} />
 					</div>
 				</div>
 			</main>

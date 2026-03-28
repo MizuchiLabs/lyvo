@@ -37,9 +37,7 @@ export async function getRepoVersion(
 
 	// Universal Git Command (for Gitea, Forgejo, GitLab, or GitHub API fallback)
 	try {
-		const output = execSync(`git ls-remote --tags --sort="v:refname" ${url}`)
-			.toString()
-			.trim();
+		const output = execSync(`git ls-remote --tags --sort="v:refname" ${url}`).toString().trim();
 
 		// If output is completely empty, the repo has no tags
 		if (!output) {

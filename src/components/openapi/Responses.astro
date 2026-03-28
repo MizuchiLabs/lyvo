@@ -22,7 +22,7 @@ function responseTone(status: string): string {
 ---
 
 <section>
-	<h2 class="mb-4 text-xl tracking-tight font-semibold">Responses</h2>
+	<h2 class="mb-4 text-xl font-semibold tracking-tight">Responses</h2>
 	<div class="space-y-3">
 		{
 			responses.map((response: OpenAPIResponse) => (
@@ -57,17 +57,32 @@ function responseTone(status: string): string {
 						{response.content.length > 0 ? (
 							<>
 								{response.content.length > 1 ? (
-									<div class="flex items-center justify-between mb-4">
+									<div class="mb-4 flex items-center justify-between">
 										<span class="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
 											Media Type
 										</span>
 										<div class="relative">
-											<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pl-3 pr-8 text-xs font-medium text-foreground outline-none ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
-												{response.content.map((item: OpenAPIMediaType, index: number) => (
-													<option value={index}>{item.mediaType}</option>
-												))}
+											<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pr-8 pl-3 text-xs font-medium text-foreground ring-offset-background transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
+												{response.content.map(
+													(item: OpenAPIMediaType, index: number) => (
+														<option value={index}>
+															{item.mediaType}
+														</option>
+													)
+												)}
 											</select>
-											<svg class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+											<svg
+												class="pointer-events-none absolute top-1/2 right-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+											>
+												<path d="m6 9 6 6 6-6" />
+											</svg>
 										</div>
 									</div>
 								) : (
@@ -76,7 +91,10 @@ function responseTone(status: string): string {
 									</p>
 								)}
 								{response.content.map((item: OpenAPIMediaType, index: number) => (
-									<div class={`media-panel space-y-2 ${index > 0 ? 'hidden' : ''}`} data-index={index}>
+									<div
+										class={`media-panel space-y-2 ${index > 0 ? 'hidden' : ''}`}
+										data-index={index}
+									>
 										{item.schema !== undefined && (
 											<div class="mt-2 rounded-lg border border-border/50 bg-muted/10 p-3">
 												<SchemaViewer schema={item.schema} />
@@ -86,7 +104,7 @@ function responseTone(status: string): string {
 								))}
 							</>
 						) : (
-							<p class="text-sm italic text-muted-foreground">
+							<p class="text-sm text-muted-foreground italic">
 								No content schema provided.
 							</p>
 						)}
@@ -102,7 +120,7 @@ function responseTone(status: string): string {
 		document.querySelectorAll('.api-media-selector').forEach((selector) => {
 			if (selector.getAttribute('data-media-bound') === 'true') return;
 			selector.setAttribute('data-media-bound', 'true');
-			
+
 			const select = selector.querySelector('.media-select') as HTMLSelectElement | null;
 			if (!select) return;
 

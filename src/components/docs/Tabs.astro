@@ -7,12 +7,12 @@ const tabs = [...html.matchAll(regex)].map((match) => ({
 }));
 ---
 
-<div class="tabs-root my-6 rounded-xl border border-border bg-card shadow-sm">
-	<div class="flex gap-4 rounded-t-xl border-b border-border bg-muted/40 px-4">
+<div class="tabs-root my-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+	<div class="flex gap-4 border-b border-border bg-muted/40 px-4">
 		{
 			tabs.map((tab) => (
 				<button
-					class="tab-btn relative mb-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+					class="tab-btn relative py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 					data-tab={tab.value}
 				>
 					{tab.label}
@@ -22,9 +22,7 @@ const tabs = [...html.matchAll(regex)].map((match) => ({
 		}
 	</div>
 
-	<div
-		class="tabs-panels -mt-2 overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm [&_pre]:-m-4! [&_pre]:rounded-none! [&_pre]:border-0! [&_pre]:p-4!"
-	>
+	<div class="tabs-panels p-4 [&_pre]:-m-4 [&_pre]:rounded-none [&_pre]:border-0 [&_pre]:p-4">
 		<slot />
 	</div>
 </div>

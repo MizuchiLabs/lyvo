@@ -136,7 +136,7 @@ export default function MobileToc({ headings, title }: { headings: Heading[]; ti
 			{open && headings.length > 0 && (
 				<div
 					id="mobile-toc-menu"
-					className="absolute top-14 right-0 left-0 z-50 w-full rounded-b-xl border-b border-border/40 bg-sidebar p-4 shadow-lg"
+					className="absolute top-14 right-0 left-0 z-50 w-full rounded-b-xl border-b border-border/40 p-4 shadow-lg backdrop-blur-md"
 				>
 					<div className="no-scrollbar max-h-[60vh] overflow-y-auto">
 						<div className="flex flex-col space-y-1">

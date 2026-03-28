@@ -1,0 +1,115 @@
+---
+import { ArrowRight } from '@lucide/astro';
+---
+
+<div class="relative w-full max-w-5xl translate-y-4 pb-12 sm:translate-y-8">
+	<div class="relative grid grid-cols-1 gap-6 lg:grid-cols-2">
+		<!-- Left Side: Source -->
+		<div
+			class="group relative overflow-hidden rounded-xl border border-border bg-card p-1 shadow-2xl transition-all duration-500 hover:scale-[1.01]"
+		>
+			<div
+				class="flex h-8 items-center justify-between border-b border-border bg-muted/30 px-3"
+			>
+				<div class="flex gap-1.5">
+					<div class="h-2.5 w-2.5 rounded-full bg-border"></div>
+					<div class="h-2.5 w-2.5 rounded-full bg-border"></div>
+					<div class="h-2.5 w-2.5 rounded-full bg-border"></div>
+				</div>
+				<span
+					class="font-mono text-[9px] font-medium tracking-widest text-muted-foreground uppercase"
+					>Source (MDX)</span
+				>
+			</div>
+			<div class="p-4 font-mono text-[11px] leading-tight text-muted-foreground sm:text-xs">
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">1</span>
+					<span class="text-primary">---</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">2</span>
+					<span>title: <span class="text-foreground">"Introduction"</span></span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">3</span>
+					<span class="text-primary">---</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">4</span>
+					<span class="opacity-0">.</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">5</span>
+					<span class="text-foreground"># Getting Started</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">6</span>
+					<span class="opacity-0">.</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">7</span>
+					<span>Welcome to Lyvo.</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">8</span>
+					<span>&lt;<span class="text-primary">Callout</span>&gt;</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">9</span>
+					<span class="pl-3">Ready?</span>
+				</div>
+				<div class="flex items-start gap-3">
+					<span class="w-3 text-muted-foreground/30 select-none">10</span>
+					<span>&lt;/<span class="text-primary">Callout</span>&gt;</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Connection (Arrow on Desktop) -->
+		<div class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
+			<div class="flex items-center gap-3">
+				<div class="h-px w-6 bg-border"></div>
+				<div class="rounded-full border border-border bg-background p-1.5 shadow-lg">
+					<ArrowRight class="text-primary" size={16} />
+				</div>
+				<div class="h-px w-6 bg-border"></div>
+			</div>
+		</div>
+
+		<!-- Right Side: Preview -->
+		<div
+			class="group relative hidden overflow-hidden rounded-xl border border-border bg-card p-1 shadow-2xl transition-all duration-500 hover:scale-[1.01] lg:block"
+		>
+			<div
+				class="flex h-8 items-center justify-between border-b border-border bg-muted/30 px-3"
+			>
+				<div class="flex gap-1.5">
+					<div class="h-2.5 w-2.5 rounded-full bg-red-500/50"></div>
+					<div class="h-2.5 w-2.5 rounded-full bg-amber-500/50"></div>
+					<div class="h-2.5 w-2.5 rounded-full bg-green-500/50"></div>
+				</div>
+				<span
+					class="font-mono text-[9px] font-medium tracking-widest text-muted-foreground uppercase"
+					>Live Preview</span
+				>
+			</div>
+			<div class="bg-background p-4">
+				<div class="mb-3 h-6 w-32 rounded bg-foreground/5"></div>
+				<div class="mb-4 space-y-2">
+					<div class="h-3 w-full rounded bg-muted/40"></div>
+					<div class="h-3 w-2/3 rounded bg-muted/40"></div>
+				</div>
+				<div class="rounded-lg border border-primary/20 bg-primary/5 p-3">
+					<div class="flex items-center gap-2">
+						<div class="h-3 w-3 rounded-full bg-primary/40"></div>
+						<div class="h-2.5 w-24 rounded bg-primary/20"></div>
+					</div>
+				</div>
+				<div class="mt-4 flex gap-3">
+					<div class="h-12 flex-1 rounded-lg border border-border bg-muted/20"></div>
+					<div class="h-12 w-1/4 rounded-lg border border-border bg-muted/20"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

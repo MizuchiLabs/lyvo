@@ -1,0 +1,25 @@
+---
+import { Calendar } from '@lucide/astro';
+
+interface Props {
+	title: string;
+	description?: string;
+	lastUpdated?: string;
+}
+
+const { title, description, lastUpdated } = Astro.props;
+---
+
+<div class="space-y-2">
+	<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
+	{description && <p class="text-lg text-muted-foreground">{description}</p>}
+</div>
+
+{
+	lastUpdated && (
+		<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+			<Calendar size={16} />
+			Last updated on {lastUpdated}
+		</div>
+	)
+}

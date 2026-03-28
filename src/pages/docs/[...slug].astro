@@ -1,20 +1,20 @@
 ---
 import { render } from 'astro:content';
-import Accordion from '@/components/Accordion.astro';
+import Accordion from '@/components/docs/Accordion.astro';
 import DocsLayout from '@/layouts/DocsLayout.astro';
 import { getCollection } from 'astro:content';
-import Tabs from '@/components/Tabs.astro';
-import TabItem from '@/components/TabItem.astro';
-import CodeBlock from '@/components/CodeBlock.astro';
-import Link from '@/components/Link.astro';
-import Table from '@/components/Table.astro';
-import ImageWrapper from '@/components/ImageWrapper.astro';
-import Callout from '@/components/Callout.astro';
-import Steps from '@/components/Steps.astro';
-import Step from '@/components/Step.astro';
-import FileTree from '@/components/FileTree.astro';
-import Folder from '@/components/Folder.astro';
-import File from '@/components/File.astro';
+import Tabs from '@/components/docs/Tabs.astro';
+import TabItem from '@/components/docs/TabItem.astro';
+import CodeBlock from '@/components/base/CodeBlock.astro';
+import Link from '@/components/base/Link.astro';
+import Table from '@/components/docs/Table.astro';
+import ImageWrapper from '@/components/base/ImageWrapper.astro';
+import Callout from '@/components/docs/Callout.astro';
+import Steps from '@/components/docs/Steps.astro';
+import Step from '@/components/docs/Step.astro';
+import FileTree from '@/components/docs/FileTree.astro';
+import Folder from '@/components/docs/Folder.astro';
+import File from '@/components/docs/File.astro';
 
 export async function getStaticPaths() {
 	const docs = await getCollection('docs');
