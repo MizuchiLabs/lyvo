@@ -10,12 +10,91 @@ const { schema, name, required = false, level = 0 } = Astro.props;
 
 if (!schema) return null;
 
-const rootType = Array.isArray(schema.type) ? schema.type.join(' | ') : schema.type;
-const baseType = Array.isArray(schema.type) ? schema.type[0] : schema.type;
+function getRefTypeName(value: any): string | undefined {
+	if (!value || typeof value.$ref !== 'string') return undefined;
+	const parts = value.$ref.split('/');
+	return parts[parts.length - 1] || undefined;
+}
 
-const type = rootType || (schema.properties ? 'object' : 'any');
-const isObject = baseType === 'object' || schema.properties;
+function getBaseType(value: any): string {
+	if (!value || typeof value !== 'object') return 'any';
+
+	if (Array.isArray(value.type) && typeof value.type[0] === 'string') return value.type[0];
+	if (typeof value.type === 'string') return value.type;
+	if (value.items) return 'array';
+	if (value.properties) return 'object';
+	if (Array.isArray(value.allOf) && value.allOf.length > 0) return 'object';
+	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) return 'object';
+	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) return 'object';
+	if (getRefTypeName(value)) return 'object';
+
+	return 'any';
+}
+
+function getTypeLabel(value: any): string {
+	if (!value || typeof value !== 'object') return 'any';
+
+	const refTypeName = getRefTypeName(value);
+	if (refTypeName) return refTypeName;
+
+	if (Array.isArray(value.type)) return value.type.join(' | ');
+
+	if (value.items) {
+		return `array<${getTypeLabel(value.items)}>`;
+	}
+
+	if (typeof value.type === 'string') return value.type;
+	if (value.properties) return 'object';
+	if (Array.isArray(value.allOf) && value.allOf.length > 0) return 'object';
+	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) return 'object';
+	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) return 'object';
+
+	return 'any';
+}
+
+function mergeObjectShape(value: any): { properties: Record<string, any>; required: Set<string> } {
+	const properties: Record<string, any> = {};
+	const required = new Set<string>();
+
+	function collect(node: any) {
+		if (!node || typeof node !== 'object') return;
+
+		if (node.properties && typeof node.properties === 'object') {
+			for (const [propName, propSchema] of Object.entries(node.properties)) {
+				properties[propName] = propSchema;
+			}
+		}
+
+		if (Array.isArray(node.required)) {
+			for (const propName of node.required) {
+				if (typeof propName === 'string') required.add(propName);
+			}
+		}
+	}
+
+	collect(value);
+
+	if (Array.isArray(value.allOf)) {
+		for (const node of value.allOf) collect(node);
+	}
+
+	return { properties, required };
+}
+
+const shape = mergeObjectShape(schema);
+const entries = Object.entries(shape.properties);
+const type = getTypeLabel(schema);
+const baseType = getBaseType(schema);
+
+const isObject = entries.length > 0 || baseType === 'object';
 const isArray = baseType === 'array' || schema.items;
+const shouldShowArrayItemDetails = Boolean(
+	schema.items?.properties ||
+	schema.items?.items ||
+	schema.items?.allOf ||
+	schema.items?.oneOf ||
+	schema.items?.anyOf
+);
 
 const typeColor = {
 	string: 'text-emerald-600 dark:text-emerald-400',
@@ -71,12 +150,12 @@ const badgeColor = typeColor[baseType] || typeColor.any;
 
 	{
 		schema.enum && (
-			<div class="flex flex-wrap gap-1 text-xs">
+			<div class="flex flex-wrap items-center gap-1 text-xs">
 				<span class="mr-1 font-medium text-muted-foreground">Enum:</span>
 				{schema.enum.map((v: any) => (
-					<code class="rounded border border-border bg-muted/50 px-1.5 py-0.5">
+					<span class="rounded border border-border bg-muted/50 px-1.5 py-0.5">
 						{typeof v === 'string' ? `"${v}"` : String(v)}
-					</code>
+					</span>
 				))}
 			</div>
 		)
@@ -96,8 +175,8 @@ const badgeColor = typeColor[baseType] || typeColor.any;
 	{
 		isObject && (
 			<div class="flex flex-col gap-2 pt-1">
-				{Object.entries(schema.properties).map(([propName, propSchema]: [string, any]) => {
-					const isRequired = schema.required?.includes(propName);
+				{entries.map(([propName, propSchema]: [string, any]) => {
+					const isRequired = shape.required.has(propName);
 					return (
 						<Astro.self
 							schema={propSchema}
@@ -112,7 +191,7 @@ const badgeColor = typeColor[baseType] || typeColor.any;
 	}
 
 	{
-		isArray && (
+		isArray && shouldShowArrayItemDetails && (
 			<div class="mt-2 text-sm text-muted-foreground">
 				<Astro.self schema={schema.items} required={false} level={level + 1} />
 			</div>

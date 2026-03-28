@@ -61,6 +61,7 @@ function toTitle(value) {
 	if (!value) return 'Untitled';
 	const normalized = value
 		.replaceAll(/[{}]/g, '')
+		.replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2')
 		.replaceAll(/[._-]+/g, ' ')
 		.replaceAll(/\s+/g, ' ')
 		.trim();
@@ -145,11 +146,35 @@ function deepResolve(value, document, stack = new Set()) {
 	return value;
 }
 
-function pickExampleFromExamples(examples) {
-	if (!examples || typeof examples !== 'object') return undefined;
-	for (const value of Object.values(examples)) {
-		if (!value || typeof value !== 'object') continue;
-		if ('value' in value) return value.value;
+function collectExamples(examples) {
+	if (examples === undefined || examples === null) return [];
+
+	if (Array.isArray(examples)) {
+		return examples.filter((value) => value !== undefined);
+	}
+
+	if (typeof examples !== 'object') return [examples];
+
+	const values = [];
+	for (const item of Object.values(examples)) {
+		if (item === undefined || item === null) continue;
+		if (typeof item === 'object' && 'value' in item) {
+			values.push(item.value);
+			continue;
+		}
+
+		values.push(item);
+	}
+
+	return values;
+}
+
+function resolveSchemaType(schema) {
+	if (!schema || typeof schema !== 'object') return undefined;
+
+	if (typeof schema.type === 'string') return schema.type;
+	if (Array.isArray(schema.type)) {
+		return schema.type.filter((value) => typeof value === 'string').join(' | ') || undefined;
 	}
 
 	return undefined;
@@ -173,15 +198,19 @@ function mapMediaContent(content, document) {
 
 	return Object.entries(content).map(([mediaType, mediaEntry]) => {
 		const resolved = deepResolve(mediaEntry, document);
-		const schema = resolved?.schema;
+		const schema = deepResolve(resolved?.schema, document);
+		const examples = [
+			...collectExamples(resolved?.examples),
+			...collectExamples(schema?.examples)
+		];
+		const example =
+			resolved?.example ?? schema?.example ?? examples[0] ?? sampleSchema(schema, document);
 
 		return {
 			mediaType,
 			schema,
-			example:
-				resolved?.example ??
-				pickExampleFromExamples(resolved?.examples) ??
-				sampleSchema(schema, document)
+			example,
+			examples: examples.length > 0 ? examples : undefined
 		};
 	});
 }
@@ -423,12 +452,15 @@ function mapOperation({
 		.filter(Boolean);
 
 	const mappedParameters = mergedParameters.map((parameter) => {
-		const schema = parameter.schema;
+		const schema = deepResolve(parameter.schema, document);
+		const examples = [
+			...collectExamples(parameter.examples),
+			...collectExamples(schema?.examples)
+		];
 		const example =
-			parameter.example ??
-			pickExampleFromExamples(parameter.examples) ??
-			parameter.schema?.example ??
-			sampleSchema(schema, document);
+			parameter.example ?? schema?.example ?? examples[0] ?? sampleSchema(schema, document);
+		const type = resolveSchemaType(schema);
+		const format = typeof schema?.format === 'string' ? schema.format : undefined;
 
 		return {
 			name: parameter.name,
@@ -437,7 +469,10 @@ function mapOperation({
 			description: parameter.description,
 			deprecated: Boolean(parameter.deprecated),
 			schema,
-			example
+			type,
+			format,
+			example,
+			examples: examples.length > 0 ? examples : undefined
 		};
 	});
 
@@ -531,6 +566,7 @@ function mapWebhooks(document, defaultServers, rootSecurity) {
 				defaultServers,
 				rootSecurity
 			});
+			const webhookTitle = operation.summary ?? operation.operationId ?? toTitle(event);
 
 			output.push({
 				id: mapped.id,
@@ -538,7 +574,7 @@ function mapWebhooks(document, defaultServers, rootSecurity) {
 				event,
 				method,
 				path: mapped.path,
-				title: mapped.title,
+				title: webhookTitle,
 				summary: mapped.summary,
 				description: mapped.description,
 				deprecated: mapped.deprecated,
@@ -635,6 +671,9 @@ async function generate() {
 		validate: {
 			schema: true,
 			spec: true
+		},
+		dereference: {
+			circular: 'ignore'
 		}
 	});
 

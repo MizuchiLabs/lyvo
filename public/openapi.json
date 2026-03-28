@@ -1,244 +1,120 @@
 {
-	"openapi": "3.1.0",
+	"openapi": "3.1.1",
 	"info": {
-		"title": "Train Travel API",
-		"description": "API for finding and booking train trips across Europe.\n\nThis API definition was ported over from https://github.com/bump-sh-examples/train-travel-api.",
+		"title": "Scalar Galaxy",
+		"description": "The Scalar Galaxy is an example OpenAPI document to test OpenAPI tools and libraries. It's a fictional universe with fictional planets and fictional data.\n\n## Resources\n\n* https://github.com/scalar/scalar\n* https://github.com/OAI/OpenAPI-Specification\n* https://scalar.com\n\n## Markdown Support\n\nAll descriptions *can* contain ~~tons of text~~ **Markdown**. [If GitHub supports the syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax), chances are we're supporting it, too.\n\n<details>\n  <summary>Examples</summary>\n\n  **Blockquotes**\n\n  > I love OpenAPI. <3\n\n  **Tables**\n\n  | Feature          | Availability |\n  | ---------------- | ------------ |\n  | Markdown Support | ✓            |\n\n  **Accordion**\n\n  ```html\n  <details>\n    <summary>Using Details Tags</summary>\n    <p>HTML Example</p>\n  </details>\n  ```\n\n  **Images**\n\n  Yes, there's support for images, too!\n\n  ![Empty placeholder image showing the width/height](https://images.placeholders.dev/?width=1280&height=720)\n\n  **Alerts**\n\n  > [!tip]\n  > You can use Markdown alerts in your descriptions.\n\n</details>\n",
 		"version": "1.0.0",
 		"contact": {
-			"name": "Train Support",
-			"url": "https://example.com/support",
-			"email": "support@example.com"
+			"name": "Scalar Support",
+			"url": "https://scalar.com",
+			"email": "support@scalar.com"
 		},
 		"license": {
-			"name": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International",
-			"identifier": "CC-BY-NC-SA-4.0"
+			"name": "MIT",
+			"url": "https://opensource.org/license/MIT"
 		}
+	},
+	"externalDocs": {
+		"description": "Documentation",
+		"url": "https://github.com/scalar/scalar"
 	},
 	"servers": [
 		{
-			"url": "https://api.example.com",
-			"description": "Production"
+			"url": "https://galaxy.scalar.com"
+		},
+		{
+			"url": "{protocol}://void.scalar.com/{path}",
+			"description": "Responds with your request data",
+			"variables": {
+				"protocol": {
+					"enum": ["https", "http"],
+					"default": "https"
+				},
+				"path": {
+					"default": ""
+				}
+			}
 		}
 	],
 	"security": [
 		{
-			"OAuth2": ["read"]
+			"bearerAuth": []
+		},
+		{
+			"basicAuth": []
+		},
+		{
+			"apiKeyQuery": []
+		},
+		{
+			"apiKeyHeader": []
+		},
+		{
+			"apiKeyCookie": []
+		},
+		{
+			"oAuth2": []
+		},
+		{
+			"openIdConnect": []
 		}
 	],
+	"x-speakeasy-webhooks": {
+		"security": {
+			"type": "signature",
+			"headerName": "x-signature",
+			"signatureTextEncoding": "base64",
+			"algorithm": "hmac-sha256"
+		}
+	},
 	"tags": [
 		{
-			"name": "Stations",
-			"description": "Find and filter train stations across Europe, including their location  and local timezone."
+			"name": "Authentication",
+			"description": "Some endpoints are public, but some require authentication. We provide all the required endpoints to create an account and authorize yourself."
 		},
 		{
-			"name": "Trips",
-			"description": "Timetables and routes for train trips between stations, including  pricing and availability."
+			"name": "Planets",
+			"description": "Everything about planets"
 		},
 		{
-			"name": "Bookings",
-			"description": "Create and manage bookings for train trips, including passenger  details and optional extras."
-		},
-		{
-			"name": "Payments",
-			"description": "Pay for bookings using a card or bank account, and view payment\nstatus and history.\n\n> warn\n> Bookings usually expire within 1 hour so you'll need to make your payment before the expiry date \n"
+			"name": "Celestial Bodies",
+			"description": "Celestial bodies are the planets and satellites in the Scalar Galaxy."
 		}
 	],
 	"paths": {
-		"/stations": {
+		"/planets": {
 			"get": {
-				"summary": "Get a list of train stations",
-				"description": "Returns a list of all train stations in the system.",
-				"operationId": "get-stations",
-				"tags": ["Stations"],
-				"responses": {
-					"200": {
-						"description": "A list of train stations",
-						"headers": {
-							"RateLimit": {
-								"$ref": "#/components/headers/RateLimit"
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Wrapper-Collection"
-										},
-										{
-											"properties": {
-												"data": {
-													"type": "array",
-													"items": {
-														"$ref": "#/components/schemas/Station"
-													}
-												}
-											}
-										},
-										{
-											"properties": {
-												"links": {
-													"allOf": [
-														{
-															"$ref": "#/components/schemas/Links-Self"
-														},
-														{
-															"$ref": "#/components/schemas/Links-Pagination"
-														}
-													]
-												}
-											}
-										}
-									]
-								},
-								"example": {
-									"data": [
-										{
-											"id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-											"name": "Berlin Hauptbahnhof",
-											"address": "Invalidenstraße 10557 Berlin, Germany",
-											"country_code": "DE",
-											"timezone": "Europe/Berlin"
-										},
-										{
-											"id": "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-											"name": "Paris Gare du Nord",
-											"address": "18 Rue de Dunkerque 75010 Paris, France",
-											"country_code": "FR",
-											"timezone": "Europe/Paris"
-										}
-									],
-									"links": {
-										"self": "https://api.example.com/stations&page=2",
-										"next": "https://api.example.com/stations?page=3",
-										"prev": "https://api.example.com/stations?page=1"
-									}
-								}
-							},
-							"application/xml": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Wrapper-Collection"
-										},
-										{
-											"properties": {
-												"data": {
-													"type": "array",
-													"xml": {
-														"name": "stations",
-														"wrapped": true
-													},
-													"items": {
-														"$ref": "#/components/schemas/Station"
-													}
-												}
-											}
-										},
-										{
-											"properties": {
-												"links": {
-													"allOf": [
-														{
-															"$ref": "#/components/schemas/Links-Self"
-														},
-														{
-															"$ref": "#/components/schemas/Links-Pagination"
-														}
-													]
-												}
-											}
-										}
-									]
-								}
-							}
-						}
-					},
-					"400": {
-						"$ref": "#/components/responses/BadRequest"
-					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
-					"403": {
-						"$ref": "#/components/responses/Forbidden"
-					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
-					}
-				}
-			}
-		},
-		"/trips": {
-			"get": {
-				"summary": "Get available train trips",
-				"description": "Returns a list of available train trips between the specified origin and destination stations on the given date, and allows for filtering by bicycle and dog allowances.",
-				"operationId": "get-trips",
-				"tags": ["Trips"],
+				"tags": ["Planets"],
+				"summary": "Get all planets",
+				"description": "It's easy to say you know them all, but do you really? Retrieve all the planets and check whether you missed one.",
+				"operationId": "getAllData",
+				"security": [{}],
 				"parameters": [
 					{
-						"name": "origin",
-						"in": "query",
-						"description": "The ID of the origin station",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"format": "uuid"
-						},
-						"example": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e"
+						"$ref": "#/components/parameters/limit"
 					},
 					{
-						"name": "destination",
-						"in": "query",
-						"description": "The ID of the destination station",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"format": "uuid"
-						},
-						"example": "b2e783e1-c824-4d63-b37a-d8d698862f1d"
-					},
-					{
-						"name": "date",
-						"in": "query",
-						"description": "The date and time of the trip in ISO 8601 format in origin station's timezone.",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"format": "date-time"
-						},
-						"example": "2024-02-01T09:00:00Z"
-					},
-					{
-						"name": "bicycles",
-						"in": "query",
-						"description": "Only return trips where bicycles are known to be allowed",
-						"required": false,
-						"schema": {
-							"type": "boolean",
-							"default": false
-						}
-					},
-					{
-						"name": "dogs",
-						"in": "query",
-						"description": "Only return trips where dogs are known to be allowed",
-						"required": false,
-						"schema": {
-							"type": "boolean",
-							"default": false
-						}
+						"$ref": "#/components/parameters/offset"
 					}
 				],
 				"responses": {
 					"200": {
-						"description": "A list of available train trips",
+						"description": "OK",
 						"headers": {
-							"RateLimit": {
-								"$ref": "#/components/headers/RateLimit"
+							"X-Request-ID": {
+								"$ref": "#/components/headers/X-Request-ID"
+							},
+							"X-Pagination-Total": {
+								"$ref": "#/components/headers/X-Pagination-Total"
+							},
+							"X-Pagination-Page": {
+								"$ref": "#/components/headers/X-Pagination-Page"
+							},
+							"X-Pagination-Per-Page": {
+								"$ref": "#/components/headers/X-Pagination-Per-Page"
+							},
+							"X-Cache-Control": {
+								"$ref": "#/components/headers/X-Cache-Control"
 							}
 						},
 						"content": {
@@ -246,410 +122,161 @@
 								"schema": {
 									"allOf": [
 										{
-											"$ref": "#/components/schemas/Wrapper-Collection"
-										},
-										{
+											"type": "object",
 											"properties": {
 												"data": {
 													"type": "array",
 													"items": {
-														"$ref": "#/components/schemas/Trip"
+														"$ref": "#/components/schemas/Planet"
 													}
 												}
 											}
 										},
 										{
-											"properties": {
-												"links": {
-													"allOf": [
-														{
-															"$ref": "#/components/schemas/Links-Self"
-														},
-														{
-															"$ref": "#/components/schemas/Links-Pagination"
-														}
-													]
-												}
-											}
+											"$ref": "#/components/schemas/PaginatedResource"
 										}
 									]
-								},
-								"example": {
-									"data": [
-										{
-											"id": "ea399ba1-6d95-433f-92d1-83f67b775594",
-											"origin": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-											"destination": "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-											"departure_time": "2024-02-01T10:00:00Z",
-											"arrival_time": "2024-02-01T16:00:00Z",
-											"price": 50,
-											"operator": "Deutsche Bahn",
-											"bicycles_allowed": true,
-											"dogs_allowed": true
-										},
-										{
-											"id": "4d67459c-af07-40bb-bb12-178dbb88e09f",
-											"origin": "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-											"destination": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-											"departure_time": "2024-02-01T12:00:00Z",
-											"arrival_time": "2024-02-01T18:00:00Z",
-											"price": 50,
-											"operator": "SNCF",
-											"bicycles_allowed": true,
-											"dogs_allowed": true
-										}
-									],
-									"links": {
-										"self": "https://api.example.com/trips?origin=efdbb9d1-02c2-4bc3-afb7-6788d8782b1e&destination=b2e783e1-c824-4d63-b37a-d8d698862f1d&date=2024-02-01",
-										"next": "https://api.example.com/trips?origin=efdbb9d1-02c2-4bc3-afb7-6788d8782b1e&destination=b2e783e1-c824-4d63-b37a-d8d698862f1d&date=2024-02-01&page=2"
-									}
 								}
 							},
 							"application/xml": {
 								"schema": {
 									"allOf": [
 										{
-											"$ref": "#/components/schemas/Wrapper-Collection"
-										},
-										{
+											"type": "object",
+											"xml": {
+												"name": "planets"
+											},
 											"properties": {
 												"data": {
 													"type": "array",
-													"xml": {
-														"name": "trips",
-														"wrapped": true
-													},
 													"items": {
-														"$ref": "#/components/schemas/Trip"
+														"$ref": "#/components/schemas/Planet"
 													}
 												}
 											}
 										},
 										{
-											"properties": {
-												"links": {
-													"allOf": [
-														{
-															"$ref": "#/components/schemas/Links-Self"
-														},
-														{
-															"$ref": "#/components/schemas/Links-Pagination"
-														}
-													]
-												}
-											}
+											"$ref": "#/components/schemas/PaginatedResource"
 										}
 									]
 								}
 							}
 						}
-					},
-					"400": {
-						"$ref": "#/components/responses/BadRequest"
-					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
-					"403": {
-						"$ref": "#/components/responses/Forbidden"
-					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
 					}
-				}
-			}
-		},
-		"/bookings": {
-			"get": {
-				"operationId": "get-bookings",
-				"summary": "List existing bookings",
-				"description": "Returns a list of all trips booking by the authenticated user.",
-				"tags": ["Bookings"],
-				"responses": {
-					"200": {
-						"description": "A list of bookings",
-						"headers": {
-							"RateLimit": {
-								"$ref": "#/components/headers/RateLimit"
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Wrapper-Collection"
-										},
-										{
-											"properties": {
-												"data": {
-													"type": "array",
-													"items": {
-														"$ref": "#/components/schemas/Booking"
-													}
-												}
-											}
-										},
-										{
-											"properties": {
-												"links": {
-													"allOf": [
-														{
-															"$ref": "#/components/schemas/Links-Self"
-														},
-														{
-															"$ref": "#/components/schemas/Links-Pagination"
-														}
-													]
-												}
-											}
-										}
-									]
-								},
-								"example": {
-									"data": [
-										{
-											"id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-											"trip_id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-											"passenger_name": "John Doe",
-											"has_bicycle": true,
-											"has_dog": true
-										},
-										{
-											"id": "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-											"trip_id": "b2e783e1-c824-4d63-b37a-d8d698862f1d",
-											"passenger_name": "Jane Smith",
-											"has_bicycle": false,
-											"has_dog": false
-										}
-									],
-									"links": {
-										"self": "https://api.example.com/bookings",
-										"next": "https://api.example.com/bookings?page=2"
-									}
-								}
-							},
-							"application/xml": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Wrapper-Collection"
-										},
-										{
-											"properties": {
-												"data": {
-													"type": "array",
-													"xml": {
-														"name": "bookings",
-														"wrapped": true
-													},
-													"items": {
-														"$ref": "#/components/schemas/Booking"
-													}
-												}
-											}
-										},
-										{
-											"properties": {
-												"links": {
-													"allOf": [
-														{
-															"$ref": "#/components/schemas/Links-Self"
-														},
-														{
-															"$ref": "#/components/schemas/Links-Pagination"
-														}
-													]
-												}
-											}
-										}
-									]
-								}
-							}
-						}
-					},
-					"400": {
-						"$ref": "#/components/responses/BadRequest"
-					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
-					"403": {
-						"$ref": "#/components/responses/Forbidden"
-					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
-					}
-				}
+				},
+				"x-post-response": "pm.test(\"Status code is 200\", () => {\n  pm.response.to.have.status(200);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response has data array and meta\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"data\");\n  pm.expect(jsonData.data).to.be.an(\"array\");\n  pm.expect(jsonData).to.have.property(\"meta\");\n});\n"
 			},
 			"post": {
-				"operationId": "create-booking",
-				"summary": "Create a booking",
-				"description": "A booking is a temporary hold on a trip. It is not confirmed until the payment is processed.",
-				"tags": ["Bookings"],
-				"security": [
-					{
-						"OAuth2": ["write"]
+				"tags": ["Planets"],
+				"summary": "Create a planet",
+				"description": "Time to play god and create a new planet. What do you think? Ah, don't think too much. What could go wrong anyway?",
+				"operationId": "createPlanet",
+				"callbacks": {
+					"planetCreated": {
+						"{$request.body#/successCallbackUrl}": {
+							"post": {
+								"requestBody": {
+									"description": "Information about the newly created planet",
+									"content": {
+										"application/json": {
+											"schema": {
+												"$ref": "#/components/schemas/Planet"
+											}
+										}
+									}
+								},
+								"responses": {
+									"200": {
+										"description": "Your server returns this code if it accepts the callback"
+									},
+									"204": {
+										"description": "Your server should return this HTTP status code if no longer interested in further updates"
+									}
+								}
+							}
+						}
+					},
+					"planetCreationFailed": {
+						"{$request.body#/failureCallbackUrl}": {
+							"post": {
+								"requestBody": {
+									"description": "Information about which fields failed to validate",
+									"content": {
+										"application/json": {
+											"schema": {
+												"$ref": "#/components/schemas/Planet"
+											}
+										}
+									}
+								},
+								"responses": {
+									"200": {
+										"description": "Your server returns this code if it accepts the failure callback notification"
+									}
+								}
+							}
+						}
+					},
+					"planetExploded": {
+						"{$request.body#/successCallbackUrl}": {
+							"post": {
+								"requestBody": {
+									"description": "Information about the newly exploded planet",
+									"content": {
+										"application/json": {
+											"schema": {
+												"$ref": "#/components/schemas/Planet"
+											}
+										}
+									}
+								},
+								"responses": {
+									"200": {
+										"description": "Your server returns this code if it accepts the planet explosion callback notification"
+									}
+								}
+							}
+						}
 					}
-				],
+				},
 				"requestBody": {
-					"required": true,
+					"description": "Planet",
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/Booking"
+								"$ref": "#/components/schemas/Planet"
 							}
 						},
 						"application/xml": {
 							"schema": {
-								"$ref": "#/components/schemas/Booking"
+								"$ref": "#/components/schemas/Planet"
 							}
 						}
 					}
 				},
 				"responses": {
 					"201": {
-						"description": "Booking successful",
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Booking"
-										},
-										{
-											"properties": {
-												"links": {
-													"$ref": "#/components/schemas/Links-Self"
-												}
-											}
-										}
-									]
-								},
-								"example": {
-									"id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-									"trip_id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-									"passenger_name": "John Doe",
-									"has_bicycle": true,
-									"has_dog": true,
-									"links": {
-										"self": "https://api.example.com/bookings/efdbb9d1-02c2-4bc3-afb7-6788d8782b1e"
-									}
-								}
-							},
-							"application/xml": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Booking"
-										},
-										{
-											"properties": {
-												"links": {
-													"$ref": "#/components/schemas/Links-Self"
-												}
-											}
-										}
-									]
-								}
-							}
-						}
-					},
-					"400": {
-						"$ref": "#/components/responses/BadRequest"
-					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
-					"404": {
-						"$ref": "#/components/responses/NotFound"
-					},
-					"409": {
-						"$ref": "#/components/responses/Conflict"
-					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
-					}
-				}
-			}
-		},
-		"/bookings/{bookingId}": {
-			"parameters": [
-				{
-					"name": "bookingId",
-					"in": "path",
-					"required": true,
-					"description": "The ID of the booking to retrieve.",
-					"schema": {
-						"type": "string",
-						"format": "uuid"
-					},
-					"example": "1725ff48-ab45-4bb5-9d02-88745177dedb"
-				}
-			],
-			"get": {
-				"summary": "Get a booking",
-				"description": "Returns the details of a specific booking.",
-				"operationId": "get-booking",
-				"tags": ["Bookings"],
-				"responses": {
-					"200": {
-						"description": "The booking details",
+						"description": "Created",
 						"headers": {
-							"RateLimit": {
-								"$ref": "#/components/headers/RateLimit"
+							"X-Request-ID": {
+								"$ref": "#/components/headers/X-Request-ID"
+							},
+							"Location": {
+								"$ref": "#/components/headers/Location"
+							},
+							"X-Processing-Time": {
+								"$ref": "#/components/headers/X-Processing-Time"
 							}
 						},
 						"content": {
 							"application/json": {
 								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Booking"
-										},
-										{
-											"properties": {
-												"links": {
-													"$ref": "#/components/schemas/Links-Self"
-												}
-											}
-										}
-									]
-								},
-								"example": {
-									"id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-									"trip_id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-									"passenger_name": "John Doe",
-									"has_bicycle": true,
-									"has_dog": true,
-									"links": {
-										"self": "https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb"
-									}
+									"$ref": "#/components/schemas/Planet"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/Booking"
-										},
-										{
-											"properties": {
-												"links": {
-													"$ref": "#/components/schemas/Links-Self"
-												}
-											}
-										}
-									]
+									"$ref": "#/components/schemas/Planet"
 								}
 							}
 						}
@@ -657,118 +284,159 @@
 					"400": {
 						"$ref": "#/components/responses/BadRequest"
 					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
 					"403": {
 						"$ref": "#/components/responses/Forbidden"
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 201\", () => {\n  pm.response.to.have.status(201);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response is a planet with id and name\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"id\");\n  pm.expect(jsonData).to.have.property(\"name\");\n});\n"
+			}
+		},
+		"/planets/{planetId}": {
+			"get": {
+				"tags": ["Planets"],
+				"summary": "Get a planet",
+				"description": "You'll better learn a little bit more about the planets. It might come in handy once space travel is available for everyone.",
+				"operationId": "getPlanet",
+				"security": [{}],
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/planetId"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Planet Found",
+						"headers": {
+							"X-Request-ID": {
+								"$ref": "#/components/headers/X-Request-ID"
+							},
+							"ETag": {
+								"$ref": "#/components/headers/ETag"
+							},
+							"Last-Modified": {
+								"$ref": "#/components/headers/Last-Modified"
+							},
+							"X-Cache-Control": {
+								"$ref": "#/components/headers/X-Cache-Control"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Planet"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/Planet"
+								}
+							}
+						}
 					},
 					"404": {
 						"$ref": "#/components/responses/NotFound"
-					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
 					}
-				}
+				},
+				"x-post-response": "pm.test(\"Status code is 200\", () => {\n  pm.response.to.have.status(200);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response is a planet with id and name\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"id\");\n  pm.expect(jsonData).to.have.property(\"name\");\n});\n"
 			},
-			"delete": {
-				"summary": "Delete a booking",
-				"description": "Deletes a booking, cancelling the hold on the trip.",
-				"operationId": "delete-booking",
-				"security": [
+			"put": {
+				"tags": ["Planets"],
+				"summary": "Update a planet",
+				"description": "Sometimes you make mistakes, that's fine. No worries, you can update all planets.",
+				"operationId": "updatePlanet",
+				"requestBody": {
+					"description": "New information about the planet",
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Planet"
+							}
+						},
+						"application/xml": {
+							"schema": {
+								"$ref": "#/components/schemas/Planet"
+							}
+						}
+					}
+				},
+				"parameters": [
 					{
-						"OAuth2": ["write"]
+						"$ref": "#/components/parameters/planetId"
 					}
 				],
-				"tags": ["Bookings"],
 				"responses": {
-					"204": {
-						"description": "Booking deleted"
+					"200": {
+						"description": "Planet updated successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Planet"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/Planet"
+								}
+							}
+						}
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequest"
 					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
 					"403": {
 						"$ref": "#/components/responses/Forbidden"
 					},
 					"404": {
 						"$ref": "#/components/responses/NotFound"
-					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
 					}
-				}
+				},
+				"x-post-response": "pm.test(\"Status code is 200\", () => {\n  pm.response.to.have.status(200);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response is a planet with id and name\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"id\");\n  pm.expect(jsonData).to.have.property(\"name\");\n});\n"
+			},
+			"delete": {
+				"tags": ["Planets"],
+				"summary": "Delete a planet",
+				"operationId": "deletePlanet",
+				"description": "This endpoint was used to delete planets. Unfortunately, that caused a lot of trouble for planets with life. So, this endpoint is now deprecated and should not be used anymore.",
+				"x-scalar-stability": "experimental",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/planetId"
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 204\", () => {\n  pm.response.to.have.status(204);\n});\n"
 			}
 		},
-		"/bookings/{bookingId}/payment": {
-			"parameters": [
-				{
-					"name": "bookingId",
-					"in": "path",
-					"required": true,
-					"description": "The ID of the booking to pay for.",
-					"schema": {
-						"type": "string",
-						"format": "uuid"
-					},
-					"example": "1725ff48-ab45-4bb5-9d02-88745177dedb"
-				}
-			],
+		"/planets/{planetId}/image": {
 			"post": {
-				"summary": "Pay for a Booking",
-				"description": "A payment is an attempt to pay for the booking, which will confirm the booking for the user and enable them to get their tickets.",
-				"operationId": "create-booking-payment",
-				"tags": ["Payments"],
+				"tags": ["Planets"],
+				"summary": "Upload an image to a planet",
+				"description": "Got a crazy good photo of a planet? Share it with the world!",
+				"operationId": "uploadImage",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/planetId"
+					}
+				],
 				"requestBody": {
+					"description": "Image to upload",
 					"content": {
-						"application/json": {
+						"multipart/form-data": {
 							"schema": {
-								"$ref": "#/components/schemas/BookingPayment"
-							},
-							"examples": {
-								"Card": {
-									"summary": "Card Payment",
-									"value": {
-										"amount": 49.99,
-										"currency": "gbp",
-										"source": {
-											"object": "card",
-											"name": "J. Doe",
-											"number": "4242424242424242",
-											"cvc": 123,
-											"exp_month": 12,
-											"exp_year": 2025,
-											"address_line1": "123 Fake Street",
-											"address_line2": "4th Floor",
-											"address_city": "London",
-											"address_country": "gb",
-											"address_post_code": "N12 9XX"
-										}
-									}
-								},
-								"Bank": {
-									"summary": "Bank Account Payment",
-									"value": {
-										"amount": 100.5,
-										"currency": "gbp",
-										"source": {
-											"object": "bank_account",
-											"name": "J. Doe",
-											"number": "00012345",
-											"sort_code": "000123",
-											"account_type": "individual",
-											"bank_name": "Starling Bank",
-											"country": "gb"
-										}
+								"type": "object",
+								"properties": {
+									"image": {
+										"type": "string",
+										"format": "binary",
+										"description": "The image file to upload",
+										"examples": ["@mars.jpg", "@jupiter.png"]
 									}
 								}
 							}
@@ -777,713 +445,649 @@
 				},
 				"responses": {
 					"200": {
-						"description": "Payment successful",
-						"headers": {
-							"RateLimit": {
-								"$ref": "#/components/headers/RateLimit"
-							}
-						},
-						"content": {
-							"application/json": {
-								"schema": {
-									"allOf": [
-										{
-											"$ref": "#/components/schemas/BookingPayment"
-										},
-										{
-											"properties": {
-												"links": {
-													"$ref": "#/components/schemas/Links-Booking"
-												}
-											}
-										}
-									]
-								},
-								"examples": {
-									"Card": {
-										"summary": "Card Payment",
-										"value": {
-											"id": "2e3b4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
-											"amount": 49.99,
-											"currency": "gbp",
-											"source": {
-												"object": "card",
-												"name": "J. Doe",
-												"number": "************4242",
-												"cvc": 123,
-												"exp_month": 12,
-												"exp_year": 2025,
-												"address_country": "gb",
-												"address_post_code": "N12 9XX"
-											},
-											"status": "succeeded",
-											"links": {
-												"booking": "https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb/payment"
-											}
-										}
-									},
-									"Bank": {
-										"summary": "Bank Account Payment",
-										"value": {
-											"id": "2e3b4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
-											"amount": 100.5,
-											"currency": "gbp",
-											"source": {
-												"object": "bank_account",
-												"name": "J. Doe",
-												"account_type": "individual",
-												"number": "*********2345",
-												"sort_code": "000123",
-												"bank_name": "Starling Bank",
-												"country": "gb"
-											},
-											"status": "succeeded",
-											"links": {
-												"booking": "https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb"
-											}
-										}
-									}
-								}
-							}
-						}
+						"$ref": "#/components/responses/ImageUploaded"
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequest"
 					},
-					"401": {
-						"$ref": "#/components/responses/Unauthorized"
-					},
 					"403": {
 						"$ref": "#/components/responses/Forbidden"
 					},
-					"429": {
-						"$ref": "#/components/responses/TooManyRequests"
-					},
-					"500": {
-						"$ref": "#/components/responses/InternalServerError"
+					"404": {
+						"$ref": "#/components/responses/NotFound"
 					}
-				}
+				},
+				"x-post-response": "pm.test(\"Status code is 200\", () => {\n  pm.response.to.have.status(200);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response has message and imageUrl\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"message\");\n  pm.expect(jsonData).to.have.property(\"imageUrl\");\n});\n"
 			}
-		}
-	},
-	"webhooks": {
-		"newBooking": {
+		},
+		"/celestial-bodies": {
 			"post": {
-				"operationId": "new-booking",
-				"summary": "New Booking",
-				"description": "Subscribe to new bookings being created, to update integrations for your users.  Related data is available via the links provided in the request.\n",
-				"tags": ["Bookings"],
+				"tags": ["Celestial Bodies"],
+				"summary": "Create a celestial body",
+				"operationId": "createCelestialBody",
 				"requestBody": {
+					"description": "Celestial body to create",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CelestialBody"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Celestial body created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CelestialBody"
+								}
+							}
+						}
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 201\", () => {\n  pm.response.to.have.status(201);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response is a celestial body with id and name\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"id\");\n  pm.expect(jsonData).to.have.property(\"name\");\n});\n"
+			}
+		},
+		"/user/signup": {
+			"post": {
+				"tags": ["Authentication"],
+				"summary": "Create a user",
+				"description": "Time to create a user account, eh?",
+				"operationId": "createUser",
+				"security": [{}],
+				"requestBody": {
+					"description": "User to create",
 					"content": {
 						"application/json": {
 							"schema": {
 								"allOf": [
 									{
-										"$ref": "#/components/schemas/Booking"
+										"$ref": "#/components/schemas/User"
 									},
 									{
-										"properties": {
-											"links": {
-												"allOf": [
-													{
-														"$ref": "#/components/schemas/Links-Self"
-													},
-													{
-														"$ref": "#/components/schemas/Links-Pagination"
-													}
-												]
-											}
-										}
+										"$ref": "#/components/schemas/Credentials"
 									}
 								]
 							},
-							"example": {
-								"id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-								"trip_id": "efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-								"passenger_name": "John Doe",
-								"has_bicycle": true,
-								"has_dog": true,
-								"links": {
-									"self": "https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb"
+							"examples": {
+								"Marc": {
+									"value": {
+										"name": "Marc",
+										"email": "marc@scalar.com",
+										"password": "i-love-scalar"
+									}
+								},
+								"Cam": {
+									"value": {
+										"name": "Cam",
+										"email": "cam@scalar.com",
+										"password": "scalar-is-cool"
+									}
+								},
+								"Hans": {
+									"value": {
+										"name": "Hans",
+										"email": "hans@scalar.com",
+										"password": "5c4l4r"
+									}
+								}
+							}
+						},
+						"application/xml": {
+							"schema": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/User"
+									},
+									{
+										"$ref": "#/components/schemas/Credentials"
+									}
+								]
+							},
+							"examples": {
+								"Marc": {
+									"value": {
+										"name": "Marc",
+										"email": "marc@scalar.com",
+										"password": "i-love-scalar"
+									}
+								},
+								"Cam": {
+									"value": {
+										"name": "Cam",
+										"email": "cam@scalar.com",
+										"password": "scalar-is-cool"
+									}
+								},
+								"Hans": {
+									"value": {
+										"name": "Hans",
+										"email": "hans@scalar.com",
+										"password": "5c4l4r"
+									}
 								}
 							}
 						}
 					}
 				},
 				"responses": {
-					"200": {
-						"description": "Return a 200 status to indicate that the data was received successfully.",
+					"201": {
+						"description": "User account created successfully",
 						"headers": {
-							"RateLimit": {
-								"$ref": "#/components/headers/RateLimit"
+							"X-Request-ID": {
+								"$ref": "#/components/headers/X-Request-ID"
+							},
+							"Location": {
+								"$ref": "#/components/headers/Location"
+							},
+							"X-Processing-Time": {
+								"$ref": "#/components/headers/X-Processing-Time"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/Forbidden"
+					},
+					"409": {
+						"$ref": "#/components/responses/Conflict"
+					},
+					"422": {
+						"$ref": "#/components/responses/UnprocessableEntity"
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 201\", () => {\n  pm.response.to.have.status(201);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response is a user with id and name\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"id\");\n  pm.expect(jsonData).to.have.property(\"name\");\n});\n"
+			}
+		},
+		"/auth/token": {
+			"post": {
+				"tags": ["Authentication"],
+				"summary": "Get a token",
+				"description": "Yeah, this is the boring security stuff. Just get your super secret token and move on.",
+				"operationId": "getToken",
+				"security": [{}],
+				"requestBody": {
+					"description": "Body for credentials to authenticate a user",
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Credentials"
+							}
+						},
+						"application/xml": {
+							"schema": {
+								"$ref": "#/components/schemas/Credentials"
 							}
 						}
 					}
-				}
+				},
+				"responses": {
+					"201": {
+						"description": "Token Created",
+						"headers": {
+							"X-Request-ID": {
+								"$ref": "#/components/headers/X-Request-ID"
+							},
+							"X-RateLimit-Limit": {
+								"$ref": "#/components/headers/X-RateLimit-Limit"
+							},
+							"X-RateLimit-Remaining": {
+								"$ref": "#/components/headers/X-RateLimit-Remaining"
+							},
+							"X-RateLimit-Reset": {
+								"$ref": "#/components/headers/X-RateLimit-Reset"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Token"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/Token"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/Forbidden"
+					},
+					"429": {
+						"$ref": "#/components/responses/TooManyRequests"
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 201\", () => {\n  pm.response.to.have.status(201);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response contains token\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"token\");\n  pm.expect(jsonData.token).to.be.an(\"string\");\n});\n"
+			}
+		},
+		"/me": {
+			"get": {
+				"tags": ["Authentication"],
+				"summary": "Get authenticated user",
+				"description": "Find yourself they say. That's what you can do here.",
+				"operationId": "getMe",
+				"security": [
+					{
+						"basicAuth": []
+					},
+					{
+						"oAuth2": ["read:account"]
+					},
+					{
+						"bearerAuth": []
+					},
+					{
+						"apiKeyHeader": []
+					},
+					{
+						"apiKeyQuery": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Authenticated user information retrieved successfully",
+						"headers": {
+							"X-Request-ID": {
+								"$ref": "#/components/headers/X-Request-ID"
+							},
+							"ETag": {
+								"$ref": "#/components/headers/ETag"
+							},
+							"Last-Modified": {
+								"$ref": "#/components/headers/Last-Modified"
+							},
+							"X-Cache-Control": {
+								"$ref": "#/components/headers/X-Cache-Control"
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"403": {
+						"$ref": "#/components/responses/Forbidden"
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 200\", () => {\n  pm.response.to.have.status(200);\n});\n\npm.test(\"Content-Type header is present\", () => {\n  pm.response.to.have.header(\"Content-Type\");\n});\n\npm.test(\"Response is a user with id and name\", () => {\n  const jsonData = pm.response.json();\n  pm.expect(jsonData).to.have.property(\"id\");\n  pm.expect(jsonData).to.have.property(\"name\");\n});\n"
+			}
+		}
+	},
+	"webhooks": {
+		"newPlanet": {
+			"post": {
+				"tags": ["Planets"],
+				"requestBody": {
+					"description": "Information about a new planet",
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Planet"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Return a 200 status to indicate that the data was received successfully"
+					}
+				},
+				"x-post-response": "pm.test(\"Status code is 200\", () => {\n  pm.response.to.have.status(200);\n});\n"
 			}
 		}
 	},
 	"components": {
 		"securitySchemes": {
-			"OAuth2": {
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"description": "JWT Bearer token authentication"
+			},
+			"basicAuth": {
+				"type": "http",
+				"scheme": "basic",
+				"description": "Basic HTTP authentication"
+			},
+			"apiKeyHeader": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "X-API-Key",
+				"description": "API key request header"
+			},
+			"apiKeyQuery": {
+				"type": "apiKey",
+				"in": "query",
+				"name": "api_key",
+				"description": "API key query parameter"
+			},
+			"apiKeyCookie": {
+				"type": "apiKey",
+				"in": "cookie",
+				"name": "api_key",
+				"description": "API key browser cookie"
+			},
+			"oAuth2": {
 				"type": "oauth2",
-				"description": "OAuth 2.0 authorization code following RFC8725 best practices.",
+				"description": "OAuth 2.0 authentication",
 				"flows": {
 					"authorizationCode": {
-						"authorizationUrl": "https://example.com/oauth/authorize",
-						"tokenUrl": "https://example.com/oauth/token",
+						"authorizationUrl": "https://galaxy.scalar.com/oauth/authorize",
+						"tokenUrl": "https://galaxy.scalar.com/oauth/token",
 						"scopes": {
-							"read": "Read access",
-							"write": "Write access"
+							"read:account": "read your account information",
+							"write:planets": "modify planets in your account",
+							"read:planets": "read your planets"
+						}
+					},
+					"clientCredentials": {
+						"tokenUrl": "https://galaxy.scalar.com/oauth/token",
+						"scopes": {
+							"read:account": "read your account information",
+							"write:planets": "modify planets in your account",
+							"read:planets": "read your planets"
+						}
+					},
+					"implicit": {
+						"authorizationUrl": "https://galaxy.scalar.com/oauth/authorize",
+						"scopes": {
+							"read:account": "read your account information",
+							"write:planets": "modify planets in your account",
+							"read:planets": "read your planets"
+						}
+					},
+					"password": {
+						"tokenUrl": "https://galaxy.scalar.com/oauth/token",
+						"scopes": {
+							"read:account": "read your account information",
+							"write:planets": "modify planets in your account",
+							"read:planets": "read your planets"
 						}
 					}
 				}
+			},
+			"openIdConnect": {
+				"type": "openIdConnect",
+				"openIdConnectUrl": "https://galaxy.scalar.com/.well-known/openid-configuration",
+				"description": "OpenID Connect Authentication"
 			}
 		},
-		"schemas": {
-			"Station": {
-				"type": "object",
-				"xml": {
-					"name": "station"
-				},
-				"required": ["id", "name", "address", "country_code"],
-				"properties": {
-					"id": {
-						"type": "string",
-						"format": "uuid",
-						"description": "Unique identifier for the station.",
-						"examples": [
-							"efdbb9d1-02c2-4bc3-afb7-6788d8782b1e",
-							"b2e783e1-c824-4d63-b37a-d8d698862f1d"
-						]
-					},
-					"name": {
-						"type": "string",
-						"description": "The name of the station",
-						"examples": ["Berlin Hauptbahnhof", "Paris Gare du Nord"]
-					},
-					"address": {
-						"type": "string",
-						"description": "The address of the station.",
-						"examples": [
-							"Invalidenstraße 10557 Berlin, Germany",
-							"18 Rue de Dunkerque 75010 Paris, France"
-						]
-					},
-					"country_code": {
-						"type": "string",
-						"description": "The country code of the station.",
-						"format": "iso-country-code",
-						"examples": ["DE", "FR"]
-					},
-					"timezone": {
-						"type": "string",
-						"description": "The timezone of the station in the [IANA Time Zone Database format](https://www.iana.org/time-zones).",
-						"examples": ["Europe/Berlin", "Europe/Paris"]
-					}
+		"parameters": {
+			"planetId": {
+				"name": "planetId",
+				"description": "The ID of the planet to get",
+				"in": "path",
+				"required": true,
+				"schema": {
+					"type": "integer",
+					"format": "int64",
+					"examples": [1]
 				}
 			},
-			"Links-Self": {
-				"type": "object",
-				"properties": {
-					"self": {
-						"type": "string",
-						"format": "uri"
-					}
+			"limit": {
+				"name": "limit",
+				"description": "The number of items to return",
+				"in": "query",
+				"required": false,
+				"schema": {
+					"type": "integer",
+					"format": "int64",
+					"default": 10
 				}
 			},
-			"Links-Pagination": {
-				"type": "object",
-				"properties": {
-					"next": {
-						"type": "string",
-						"format": "uri"
-					},
-					"prev": {
-						"type": "string",
-						"format": "uri"
-					}
-				}
-			},
-			"Problem": {
-				"xml": {
-					"name": "problem",
-					"namespace": "urn:ietf:rfc:7807"
-				},
-				"properties": {
-					"type": {
-						"type": "string",
-						"description": "A URI reference that identifies the problem type",
-						"example": "https://example.com/probs/out-of-credit"
-					},
-					"title": {
-						"type": "string",
-						"description": "A short, human-readable summary of the problem type",
-						"example": "You do not have enough credit."
-					},
-					"detail": {
-						"type": "string",
-						"description": "A human-readable explanation specific to this occurrence of the problem",
-						"example": "Your current balance is 30, but that costs 50."
-					},
-					"instance": {
-						"type": "string",
-						"description": "A URI reference that identifies the specific occurrence of the problem",
-						"example": "/account/12345/msgs/abc"
-					},
-					"status": {
-						"type": "integer",
-						"description": "The HTTP status code",
-						"example": 400
-					}
-				}
-			},
-			"Trip": {
-				"type": "object",
-				"xml": {
-					"name": "trip"
-				},
-				"properties": {
-					"id": {
-						"type": "string",
-						"format": "uuid",
-						"description": "Unique identifier for the trip",
-						"examples": ["4f4e4e1-c824-4d63-b37a-d8d698862f1d"]
-					},
-					"origin": {
-						"type": "string",
-						"description": "The starting station of the trip",
-						"examples": ["Berlin Hauptbahnhof", "Paris Gare du Nord"]
-					},
-					"destination": {
-						"type": "string",
-						"description": "The destination station of the trip",
-						"examples": ["Paris Gare du Nord", "Berlin Hauptbahnhof"]
-					},
-					"departure_time": {
-						"type": "string",
-						"format": "date-time",
-						"description": "The date and time when the trip departs",
-						"examples": ["2024-02-01T10:00:00Z"]
-					},
-					"arrival_time": {
-						"type": "string",
-						"format": "date-time",
-						"description": "The date and time when the trip arrives",
-						"examples": ["2024-02-01T16:00:00Z"]
-					},
-					"operator": {
-						"type": "string",
-						"description": "The name of the operator of the trip",
-						"examples": ["Deutsche Bahn", "SNCF"]
-					},
-					"price": {
-						"type": "number",
-						"description": "The cost of the trip",
-						"examples": [50]
-					},
-					"bicycles_allowed": {
-						"type": "boolean",
-						"description": "Indicates whether bicycles are allowed on the trip"
-					},
-					"dogs_allowed": {
-						"type": "boolean",
-						"description": "Indicates whether dogs are allowed on the trip"
-					}
-				}
-			},
-			"Booking": {
-				"type": "object",
-				"xml": {
-					"name": "booking"
-				},
-				"properties": {
-					"id": {
-						"type": "string",
-						"format": "uuid",
-						"description": "Unique identifier for the booking",
-						"readOnly": true,
-						"examples": ["3f3e3e1-c824-4d63-b37a-d8d698862f1d"]
-					},
-					"trip_id": {
-						"type": "string",
-						"format": "uuid",
-						"description": "Identifier of the booked trip",
-						"examples": ["4f4e4e1-c824-4d63-b37a-d8d698862f1d"]
-					},
-					"passenger_name": {
-						"type": "string",
-						"description": "Name of the passenger",
-						"examples": ["John Doe"]
-					},
-					"has_bicycle": {
-						"type": "boolean",
-						"description": "Indicates whether the passenger has a bicycle."
-					},
-					"has_dog": {
-						"type": "boolean",
-						"description": "Indicates whether the passenger has a dog."
-					}
-				}
-			},
-			"Wrapper-Collection": {
-				"description": "This is a generic request/response wrapper which contains both data and links which serve as hypermedia controls (HATEOAS).",
-				"type": "object",
-				"properties": {
-					"data": {
-						"description": "The wrapper for a collection is an array of objects.",
-						"type": "array",
-						"items": {
-							"type": "object"
-						}
-					},
-					"links": {
-						"description": "A set of hypermedia links which serve as controls for the client.",
-						"type": "object",
-						"readOnly": true
-					}
-				},
-				"xml": {
-					"name": "data"
-				}
-			},
-			"BookingPayment": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"description": "Unique identifier for the payment. This will be a unique identifier for the payment, and is used to reference the payment in other objects.",
-						"type": "string",
-						"format": "uuid",
-						"readOnly": true
-					},
-					"amount": {
-						"description": "Amount intended to be collected by this payment. A positive decimal figure describing the amount to be collected.",
-						"type": "number",
-						"exclusiveMinimum": 0,
-						"examples": [49.99]
-					},
-					"currency": {
-						"description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.",
-						"type": "string",
-						"enum": ["bam", "bgn", "chf", "eur", "gbp", "nok", "sek", "try"]
-					},
-					"source": {
-						"unevaluatedProperties": false,
-						"description": "The payment source to take the payment from. This can be a card or a bank account. Some of these properties will be hidden on read to protect PII leaking.",
-						"anyOf": [
-							{
-								"title": "Card",
-								"description": "A card (debit or credit) to take payment from.",
-								"properties": {
-									"object": {
-										"type": "string",
-										"const": "card"
-									},
-									"name": {
-										"type": "string",
-										"description": "Cardholder's full name as it appears on the card.",
-										"examples": ["Francis Bourgeois"]
-									},
-									"number": {
-										"type": "string",
-										"description": "The card number, as a string without any separators. On read all but the last four digits will be masked for security.",
-										"examples": ["4242424242424242"]
-									},
-									"cvc": {
-										"type": "integer",
-										"description": "Card security code, 3 or 4 digits usually found on the back of the card.",
-										"minLength": 3,
-										"maxLength": 4,
-										"writeOnly": true,
-										"example": 123
-									},
-									"exp_month": {
-										"type": "integer",
-										"format": "int64",
-										"description": "Two-digit number representing the card's expiration month.",
-										"examples": [12]
-									},
-									"exp_year": {
-										"type": "integer",
-										"format": "int64",
-										"description": "Four-digit number representing the card's expiration year.",
-										"examples": [2025]
-									},
-									"address_line1": {
-										"type": "string",
-										"writeOnly": true
-									},
-									"address_line2": {
-										"type": "string",
-										"writeOnly": true
-									},
-									"address_city": {
-										"type": "string"
-									},
-									"address_country": {
-										"type": "string"
-									},
-									"address_post_code": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"name",
-									"number",
-									"cvc",
-									"exp_month",
-									"exp_year",
-									"address_country"
-								]
-							},
-							{
-								"title": "Bank Account",
-								"description": "A bank account to take payment from. Must be able to make payments in the currency specified in the payment.",
-								"type": "object",
-								"properties": {
-									"object": {
-										"const": "bank_account",
-										"type": "string"
-									},
-									"name": {
-										"type": "string"
-									},
-									"number": {
-										"type": "string",
-										"description": "The account number for the bank account, in string form. Must be a current account."
-									},
-									"sort_code": {
-										"type": "string",
-										"description": "The sort code for the bank account, in string form. Must be a six-digit number."
-									},
-									"account_type": {
-										"enum": ["individual", "company"],
-										"type": "string",
-										"description": "The type of entity that holds the account. This can be either `individual` or `company`."
-									},
-									"bank_name": {
-										"type": "string",
-										"description": "The name of the bank associated with the routing number.",
-										"examples": ["Starling Bank"]
-									},
-									"country": {
-										"type": "string",
-										"description": "Two-letter country code (ISO 3166-1 alpha-2)."
-									}
-								},
-								"required": [
-									"name",
-									"number",
-									"account_type",
-									"bank_name",
-									"country"
-								]
-							}
-						]
-					},
-					"status": {
-						"description": "The status of the payment, one of `pending`, `succeeded`, or `failed`.",
-						"type": "string",
-						"enum": ["pending", "succeeded", "failed"],
-						"readOnly": true
-					}
-				}
-			},
-			"Links-Booking": {
-				"type": "object",
-				"properties": {
-					"booking": {
-						"type": "string",
-						"format": "uri",
-						"examples": [
-							"https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb"
-						]
-					}
+			"offset": {
+				"name": "offset",
+				"description": "The number of items to skip before starting to collect the result set",
+				"in": "query",
+				"required": false,
+				"schema": {
+					"type": "integer",
+					"format": "int64",
+					"default": 0
 				}
 			}
 		},
 		"headers": {
-			"RateLimit": {
-				"description": "The RateLimit header is communicate quota policies, and contains a `limit` to\nconveys the expiring limit, `remaining` to convey the remaining quota units,\nand `reset` to convey the time window reset time.\n",
+			"X-RateLimit-Limit": {
+				"description": "The number of allowed requests in the current period",
 				"schema": {
-					"type": "string",
-					"examples": ["limit=10, remaining=0, reset=10"]
+					"type": "integer",
+					"example": 100
 				}
 			},
-			"Retry-After": {
-				"description": "The Retry-After header indicates how long the user agent should wait before making a follow-up request. \nThe value is in seconds and can be an integer or a date in the future. \nIf the value is an integer, it indicates the number of seconds to wait. \nIf the value is a date, it indicates the time at which the user agent should make a follow-up request. \n",
+			"X-RateLimit-Remaining": {
+				"description": "The number of remaining requests in the current period",
 				"schema": {
-					"type": "string"
-				},
-				"examples": {
-					"integer": {
-						"value": "120",
-						"summary": "Retry after 120 seconds"
-					},
-					"date": {
-						"value": "Fri, 31 Dec 2021 23:59:59 GMT",
-						"summary": "Retry after the specified date"
-					}
+					"type": "integer",
+					"example": 95
+				}
+			},
+			"X-RateLimit-Reset": {
+				"description": "The number of seconds left in the current period",
+				"schema": {
+					"type": "integer",
+					"example": 3600
+				}
+			},
+			"X-Request-ID": {
+				"description": "Unique identifier for the request",
+				"schema": {
+					"type": "string",
+					"format": "uuid",
+					"example": "123e4567-e89b-12d3-a456-426614174000"
+				}
+			},
+			"X-Pagination-Total": {
+				"description": "Total number of items available",
+				"schema": {
+					"type": "integer",
+					"example": 1000
+				}
+			},
+			"X-Pagination-Page": {
+				"description": "Current page number",
+				"schema": {
+					"type": "integer",
+					"example": 1
+				}
+			},
+			"X-Pagination-Per-Page": {
+				"description": "Number of items per page",
+				"schema": {
+					"type": "integer",
+					"example": 10
+				}
+			},
+			"X-Cache-Control": {
+				"description": "Cache control directives",
+				"schema": {
+					"type": "string",
+					"example": "max-age=3600, public"
+				}
+			},
+			"ETag": {
+				"description": "Entity tag for caching",
+				"schema": {
+					"type": "string",
+					"example": "\"33a64df551\""
+				}
+			},
+			"Last-Modified": {
+				"description": "The last modification date of the resource",
+				"schema": {
+					"type": "string",
+					"format": "date-time",
+					"example": "2023-12-01T12:00:00.000Z"
+				}
+			},
+			"Location": {
+				"description": "The URL of the newly created resource",
+				"schema": {
+					"type": "string",
+					"format": "uri",
+					"example": "https://galaxy.scalar.com/planets/123"
+				}
+			},
+			"X-Processing-Time": {
+				"description": "The time taken to process the request in milliseconds",
+				"schema": {
+					"type": "integer",
+					"example": 150
 				}
 			}
 		},
 		"responses": {
-			"BadRequest": {
-				"description": "Bad Request",
+			"ImageUploaded": {
+				"description": "Image uploaded",
 				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
+					"X-Request-ID": {
+						"$ref": "#/components/headers/X-Request-ID"
+					},
+					"X-Cache-Control": {
+						"$ref": "#/components/headers/X-Cache-Control"
 					}
 				},
 				"content": {
-					"application/problem+json": {
+					"application/json": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/bad-request",
-							"title": "Bad Request",
-							"status": 400,
-							"detail": "The request is invalid or missing required parameters."
+							"$ref": "#/components/schemas/ImageUploadedMessage"
 						}
 					},
-					"application/problem+xml": {
+					"application/xml": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/bad-request",
-							"title": "Bad Request",
-							"status": 400,
-							"detail": "The request is invalid or missing required parameters."
+							"$ref": "#/components/schemas/ImageUploadedMessage"
 						}
 					}
 				}
 			},
-			"Conflict": {
-				"description": "Conflict",
+			"BadRequest": {
+				"description": "Bad Request",
 				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
+					"X-Request-ID": {
+						"$ref": "#/components/headers/X-Request-ID"
 					}
 				},
 				"content": {
-					"application/problem+json": {
+					"application/json": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/conflict",
-							"title": "Conflict",
-							"status": 409,
-							"detail": "There is a conflict with an existing resource."
+							"$ref": "#/components/schemas/BadRequestError"
 						}
 					},
-					"application/problem+xml": {
+					"application/xml": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/conflict",
-							"title": "Conflict",
-							"status": 409,
-							"detail": "There is a conflict with an existing resource."
+							"$ref": "#/components/schemas/BadRequestError"
 						}
 					}
 				}
 			},
 			"Forbidden": {
 				"description": "Forbidden",
-				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
-					}
-				},
 				"content": {
-					"application/problem+json": {
+					"application/json": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/forbidden",
-							"title": "Forbidden",
-							"status": 403,
-							"detail": "Access is forbidden for the provided credentials."
+							"$ref": "#/components/schemas/ForbiddenError"
 						}
 					},
-					"application/problem+xml": {
+					"application/xml": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/forbidden",
-							"title": "Forbidden",
-							"status": 403,
-							"detail": "Access is forbidden for the provided credentials."
-						}
-					}
-				}
-			},
-			"InternalServerError": {
-				"description": "Internal Server Error",
-				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
-					}
-				},
-				"content": {
-					"application/problem+json": {
-						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/internal-server-error",
-							"title": "Internal Server Error",
-							"status": 500,
-							"detail": "An unexpected error occurred."
-						}
-					},
-					"application/problem+xml": {
-						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/internal-server-error",
-							"title": "Internal Server Error",
-							"status": 500,
-							"detail": "An unexpected error occurred."
+							"$ref": "#/components/schemas/ForbiddenError"
 						}
 					}
 				}
 			},
 			"NotFound": {
 				"description": "Not Found",
-				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
-					}
-				},
 				"content": {
-					"application/problem+json": {
+					"application/json": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/not-found",
-							"title": "Not Found",
-							"status": 404,
-							"detail": "The requested resource was not found."
+							"$ref": "#/components/schemas/NotFoundError"
 						}
 					},
-					"application/problem+xml": {
+					"application/xml": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/not-found",
-							"title": "Not Found",
-							"status": 404,
-							"detail": "The requested resource was not found."
+							"$ref": "#/components/schemas/NotFoundError"
+						}
+					}
+				}
+			},
+			"Unauthorized": {
+				"description": "Unauthorized",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/UnauthorizedError"
+						}
+					},
+					"application/xml": {
+						"schema": {
+							"$ref": "#/components/schemas/UnauthorizedError"
+						}
+					}
+				}
+			},
+			"Conflict": {
+				"description": "Conflict",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Conflict"
+						}
+					},
+					"application/xml": {
+						"schema": {
+							"$ref": "#/components/schemas/Conflict"
+						}
+					}
+				}
+			},
+			"UnprocessableEntity": {
+				"description": "Unprocessable Entity",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/UnprocessableEntity"
+						}
+					},
+					"application/xml": {
+						"schema": {
+							"$ref": "#/components/schemas/UnprocessableEntity"
 						}
 					}
 				}
@@ -1491,67 +1095,580 @@
 			"TooManyRequests": {
 				"description": "Too Many Requests",
 				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
+					"X-Request-ID": {
+						"$ref": "#/components/headers/X-Request-ID"
+					},
+					"X-RateLimit-Limit": {
+						"$ref": "#/components/headers/X-RateLimit-Limit"
+					},
+					"X-RateLimit-Remaining": {
+						"$ref": "#/components/headers/X-RateLimit-Remaining"
+					},
+					"X-RateLimit-Reset": {
+						"$ref": "#/components/headers/X-RateLimit-Reset"
 					},
 					"Retry-After": {
-						"$ref": "#/components/headers/Retry-After"
+						"description": "The number of seconds to wait before retrying",
+						"schema": {
+							"type": "integer",
+							"example": 60
+						}
 					}
 				},
 				"content": {
-					"application/problem+json": {
+					"application/json": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/too-many-requests",
-							"title": "Too Many Requests",
-							"status": 429,
-							"detail": "You have exceeded the rate limit."
+							"$ref": "#/components/schemas/TooManyRequestsError"
 						}
 					},
-					"application/problem+xml": {
+					"application/xml": {
 						"schema": {
-							"$ref": "#/components/schemas/Problem"
+							"$ref": "#/components/schemas/TooManyRequestsError"
+						}
+					}
+				}
+			}
+		},
+		"schemas": {
+			"User": {
+				"description": "A user",
+				"type": "object",
+				"xml": {
+					"name": "user"
+				},
+				"properties": {
+					"id": {
+						"type": "integer",
+						"format": "int64",
+						"readOnly": true,
+						"examples": [1]
+					},
+					"name": {
+						"type": "string",
+						"examples": ["Marc", "Cam", "Hans"]
+					}
+				}
+			},
+			"Credentials": {
+				"description": "Credentials to authenticate a user",
+				"type": "object",
+				"required": ["email", "password"],
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email",
+						"examples": ["marc@scalar.com", "cam@scalar.com", "hans@scalar.com"]
+					},
+					"password": {
+						"type": "string",
+						"writeOnly": true,
+						"examples": ["i-love-scalar", "i-love-oss", "qwerty123"]
+					}
+				}
+			},
+			"Token": {
+				"description": "A token to authenticate a user",
+				"type": "object",
+				"properties": {
+					"token": {
+						"type": "string",
+						"examples": [
+							"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+						]
+					}
+				}
+			},
+			"CelestialBody": {
+				"oneOf": [
+					{
+						"$ref": "#/components/schemas/Planet"
+					},
+					{
+						"$ref": "#/components/schemas/Satellite"
+					}
+				],
+				"discriminator": {
+					"propertyName": "type",
+					"mapping": {
+						"terrestrial": "#/components/schemas/Planet",
+						"gas_giant": "#/components/schemas/Planet",
+						"ice_giant": "#/components/schemas/Planet",
+						"dwarf": "#/components/schemas/Planet",
+						"super_earth": "#/components/schemas/Planet",
+						"moon": "#/components/schemas/Satellite",
+						"asteroid": "#/components/schemas/Satellite",
+						"comet": "#/components/schemas/Satellite"
+					}
+				},
+				"description": "A celestial body which can be either a planet or a satellite"
+			},
+			"Planet": {
+				"description": "A planet in the Scalar Galaxy",
+				"type": "object",
+				"required": ["id", "name"],
+				"additionalProperties": false,
+				"xml": {
+					"name": "planet"
+				},
+				"properties": {
+					"id": {
+						"type": "integer",
+						"format": "int64",
+						"readOnly": true,
+						"examples": [1],
+						"x-variable": "planetId"
+					},
+					"name": {
+						"type": "string",
+						"examples": ["Mars", "Jupiter", "HD 40307g"]
+					},
+					"description": {
+						"type": ["string", "null"],
+						"examples": ["The red planet", "A gas giant with a great red spot"]
+					},
+					"type": {
+						"type": "string",
+						"enum": ["terrestrial", "gas_giant", "ice_giant", "dwarf", "super_earth"],
+						"x-enum-varnames": [
+							"Terrestrial",
+							"GasGiant",
+							"IceGiant",
+							"Dwarf",
+							"SuperEarth"
+						],
+						"x-enum-descriptions": {
+							"terrestrial": "Rocky planets with solid surfaces, like Earth and Mars",
+							"gas_giant": "Large planets composed mainly of hydrogen and helium, like Jupiter and Saturn",
+							"ice_giant": "Planets composed of water, ammonia, and methane ices, like Uranus and Neptune",
+							"dwarf": "Small planetary bodies that don't meet full planet criteria, like Pluto",
+							"super_earth": "Rocky planets larger than Earth but smaller than gas giants"
 						},
-						"example": {
-							"type": "https://example.com/errors/too-many-requests",
-							"title": "Too Many Requests",
-							"status": 429,
-							"detail": "You have exceeded the rate limit."
+						"examples": ["terrestrial"]
+					},
+					"habitabilityIndex": {
+						"type": "number",
+						"format": "float",
+						"minimum": 0,
+						"maximum": 1,
+						"description": "A score from 0 to 1 indicating potential habitability",
+						"examples": [0.68]
+					},
+					"physicalProperties": {
+						"type": "object",
+						"additionalProperties": {
+							"x-additionalPropertiesName": "measurement",
+							"type": "number",
+							"format": "float",
+							"description": "Additional physical measurements for the planet"
+						},
+						"properties": {
+							"mass": {
+								"type": "number",
+								"format": "float",
+								"exclusiveMinimum": 0,
+								"description": "Mass in Earth masses (must be greater than 0)",
+								"examples": [0.107]
+							},
+							"radius": {
+								"type": "number",
+								"format": "float",
+								"exclusiveMinimum": 0,
+								"description": "Radius in Earth radii (must be greater than 0)",
+								"examples": [0.532]
+							},
+							"gravity": {
+								"type": "number",
+								"format": "float",
+								"description": "Surface gravity in Earth g",
+								"examples": [0.378]
+							},
+							"temperature": {
+								"type": "object",
+								"additionalProperties": {
+									"x-additionalPropertiesName": "temperatureMetric",
+									"type": "number",
+									"format": "float",
+									"description": "Additional temperature-related measurements in Kelvin"
+								},
+								"properties": {
+									"min": {
+										"type": "number",
+										"format": "float",
+										"description": "Minimum temperature in Kelvin",
+										"examples": [130]
+									},
+									"max": {
+										"type": "number",
+										"format": "float",
+										"description": "Maximum temperature in Kelvin",
+										"examples": [308]
+									},
+									"average": {
+										"type": "number",
+										"format": "float",
+										"description": "Average temperature in Kelvin",
+										"examples": [210]
+									}
+								}
+							}
+						}
+					},
+					"atmosphere": {
+						"type": "array",
+						"description": "Atmospheric composition",
+						"items": {
+							"type": "object",
+							"additionalProperties": {
+								"x-additionalPropertiesName": "atmosphericData",
+								"type": "string",
+								"description": "Additional atmospheric composition data"
+							},
+							"properties": {
+								"compound": {
+									"type": "string",
+									"examples": ["CO2", "N2"]
+								},
+								"percentage": {
+									"type": "number",
+									"format": "float",
+									"exclusiveMaximum": 100,
+									"examples": [95.3]
+								}
+							}
+						}
+					},
+					"discoveredAt": {
+						"type": "string",
+						"format": "date-time",
+						"examples": ["1610-01-07T00:00:00.000Z"]
+					},
+					"image": {
+						"type": ["string", "null"],
+						"examples": ["https://cdn.scalar.com/photos/mars.jpg"]
+					},
+					"satellites": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/Satellite"
+						}
+					},
+					"creator": {
+						"$ref": "#/components/schemas/User"
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"examples": [["solar-system", "rocky", "explored"]]
+					},
+					"lastUpdated": {
+						"type": "string",
+						"format": "date-time",
+						"readOnly": true,
+						"examples": ["2024-01-15T14:30:00.000Z"]
+					},
+					"successCallbackUrl": {
+						"type": "string",
+						"format": "uri",
+						"description": "URL which gets invoked upon a successful operation",
+						"examples": ["https://example.com/webhook"]
+					},
+					"failureCallbackUrl": {
+						"type": "string",
+						"format": "uri",
+						"description": "URL which gets invoked upon a failed operation",
+						"examples": ["https://example.com/webhook"]
+					}
+				}
+			},
+			"Satellite": {
+				"description": "Every satellite in the Scalar Galaxy",
+				"type": "object",
+				"required": ["name"],
+				"properties": {
+					"id": {
+						"type": "integer",
+						"format": "int64",
+						"readOnly": true,
+						"examples": [1]
+					},
+					"name": {
+						"type": "string",
+						"examples": ["Phobos"]
+					},
+					"description": {
+						"type": ["string", "null"],
+						"examples": ["Phobos is the larger and innermost of the two moons of Mars."]
+					},
+					"diameter": {
+						"type": "number",
+						"format": "float",
+						"description": "Diameter in kilometers",
+						"examples": [22.2]
+					},
+					"type": {
+						"type": "string",
+						"enum": ["moon", "asteroid", "comet"],
+						"x-enum-varnames": ["Moon", "Asteroid", "Comet"],
+						"x-enum-descriptions": {
+							"moon": "Natural satellites that orbit planets",
+							"asteroid": "Rocky objects that orbit the sun, typically found in the asteroid belt",
+							"comet": "Icy bodies that release gas when approaching the sun, creating visible tails"
+						},
+						"examples": ["moon"]
+					},
+					"orbit": {
+						"type": "object",
+						"properties": {
+							"planet": {
+								"$ref": "#/components/schemas/Planet"
+							},
+							"orbitalPeriod": {
+								"type": "number",
+								"format": "float",
+								"description": "Orbital period in Earth days",
+								"examples": [0.319]
+							},
+							"distance": {
+								"type": "number",
+								"format": "float",
+								"description": "Average distance from the planet in kilometers",
+								"examples": [9376]
+							}
 						}
 					}
 				}
 			},
-			"Unauthorized": {
-				"description": "Unauthorized",
-				"headers": {
-					"RateLimit": {
-						"$ref": "#/components/headers/RateLimit"
+			"PaginatedResource": {
+				"description": "A paginated resource",
+				"type": "object",
+				"properties": {
+					"meta": {
+						"type": "object",
+						"properties": {
+							"limit": {
+								"type": "integer",
+								"format": "int64",
+								"examples": [10]
+							},
+							"offset": {
+								"type": "integer",
+								"format": "int64",
+								"examples": [0]
+							},
+							"total": {
+								"type": "integer",
+								"format": "int64",
+								"examples": [100]
+							},
+							"next": {
+								"type": ["string", "null"],
+								"examples": ["/planets?limit=10&offset=10"]
+							}
+						}
 					}
-				},
-				"content": {
-					"application/problem+json": {
-						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/unauthorized",
-							"title": "Unauthorized",
-							"status": 401,
-							"detail": "You do not have the necessary permissions."
-						}
+				}
+			},
+			"ImageUploadedMessage": {
+				"x-scalar-ignore": true,
+				"description": "Message about an image upload",
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string",
+						"examples": ["Image uploaded successfully"]
 					},
-					"application/problem+xml": {
-						"schema": {
-							"$ref": "#/components/schemas/Problem"
-						},
-						"example": {
-							"type": "https://example.com/errors/unauthorized",
-							"title": "Unauthorized",
-							"status": 401,
-							"detail": "You do not have the necessary permissions."
-						}
+					"imageUrl": {
+						"type": "string",
+						"description": "The URL where the uploaded image can be accessed",
+						"examples": [
+							"https://cdn.scalar.com/images/8f47c132-9d1f-4f83-b5a4-91db5ee757ab.jpg"
+						]
+					},
+					"uploadedAt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Timestamp when the image was uploaded",
+						"examples": ["2024-01-15T14:30:00.000Z"]
+					},
+					"fileSize": {
+						"type": "integer",
+						"description": "Size of the uploaded image in bytes",
+						"examples": [1048576]
+					},
+					"mimeType": {
+						"type": "string",
+						"description": "The content type of the uploaded image",
+						"examples": ["image/jpeg", "image/png"]
+					}
+				}
+			},
+			"BadRequestError": {
+				"x-scalar-ignore": true,
+				"description": "RFC 7807 (https://datatracker.ietf.org/doc/html/rfc7807)",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/bad-request"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Bad Request"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [400]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["The request was invalid."]
+					}
+				}
+			},
+			"ForbiddenError": {
+				"x-scalar-ignore": true,
+				"description": "Error response for forbidden access (RFC 7807). Returned when the user does not have permission to access the requested resource.",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/forbidden"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Forbidden"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [403]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["You are not authorized to access this resource."]
+					}
+				}
+			},
+			"NotFoundError": {
+				"x-scalar-ignore": true,
+				"description": "Error response for resource not found (RFC 7807). Returned when the requested resource does not exist.",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/not-found"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Not Found"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [404]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["The resource you are trying to access does not exist."]
+					}
+				}
+			},
+			"UnauthorizedError": {
+				"x-scalar-ignore": true,
+				"description": "Error response for unauthorized access (RFC 7807). Returned when authentication is required or has failed.",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/not-found"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Unauthorized"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [401]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["You are not authorized to access this resource."]
+					}
+				}
+			},
+			"Conflict": {
+				"x-scalar-ignore": true,
+				"description": "Error response for resource conflicts (RFC 7807). Returned when the request conflicts with the current state of the resource.",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/conflict"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Conflict"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [409]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["The resource you are trying to access is in conflict."]
+					}
+				}
+			},
+			"UnprocessableEntity": {
+				"x-scalar-ignore": true,
+				"description": "Error response for unprocessable entity (RFC 7807). Returned when the request is well-formed but contains semantic errors.",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/unprocessable-entity"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Unprocessable Entity"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [422]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["The request was invalid."]
+					}
+				}
+			},
+			"TooManyRequestsError": {
+				"x-scalar-ignore": true,
+				"description": "Error response for rate limiting (RFC 7807). Returned when the client has exceeded the rate limit for requests.",
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"examples": ["https://example.com/errors/too-many-requests"]
+					},
+					"title": {
+						"type": "string",
+						"examples": ["Too Many Requests"]
+					},
+					"status": {
+						"type": "integer",
+						"format": "int64",
+						"examples": [429]
+					},
+					"detail": {
+						"type": "string",
+						"examples": ["Rate limit exceeded. Please try again later."]
 					}
 				}
 			}

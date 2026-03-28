@@ -91,7 +91,10 @@ export interface OpenAPIParameter {
 	description?: string;
 	deprecated: boolean;
 	schema?: unknown;
+	type?: string;
+	format?: string;
 	example?: unknown;
+	examples?: unknown[];
 }
 
 export interface OpenAPIRequestBody {
@@ -110,6 +113,7 @@ export interface OpenAPIMediaType {
 	mediaType: string;
 	schema?: unknown;
 	example?: unknown;
+	examples?: unknown[];
 }
 
 export interface OpenAPISecurityRequirement {
