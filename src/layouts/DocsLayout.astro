@@ -1,5 +1,5 @@
 ---
-import { ChevronRight, ChevronLeft, TextAlignStart, Calendar } from '@lucide/astro';
+import { ChevronRight, ChevronLeft, TextAlignStart, Calendar, Slash } from '@lucide/astro';
 import Search from '@/components/Search';
 import Sidebar from '@/components/Sidebar.astro';
 import MobileToc from '@/components/MobileToc';
@@ -66,26 +66,21 @@ try {
 				<div
 					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
 				>
-					<div class="flex min-w-0 flex-1 items-center text-sm text-muted-foreground">
-						<div class="hidden items-center space-x-1 xl:flex">
-							<a
-								href="/docs"
-								class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
-							>
-								Docs
-							</a>
-							<ChevronRight size={16} />
-							<div class="font-medium text-foreground">{title}</div>
-						</div>
-						<div class="flex w-full xl:hidden">
-							<MobileToc client:load headings={headings} title={title} />
-						</div>
+					<div
+						class="hidden items-center space-x-2 text-sm text-muted-foreground xl:flex"
+					>
+						<a
+							href="/"
+							class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
+						>
+							<Slash size={16} />
+						</a>
+						<ChevronRight size={16} />
+						<span>{title}</span>
 					</div>
+					<MobileToc client:load headings={headings} title={title} />
 					<div class="flex shrink-0 items-center gap-4">
-						<div class="hidden w-64 md:block">
-							<Search client:load />
-						</div>
-						<slot name="header-actions" />
+						<Search client:load />
 						<ThemeToggle />
 					</div>
 				</div>

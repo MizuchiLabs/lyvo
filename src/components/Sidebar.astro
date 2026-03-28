@@ -1,6 +1,5 @@
 ---
 import { PanelRightClose, PanelRightOpen } from '@lucide/astro';
-import Search from './Search';
 import SidebarNav from './SidebarNav.astro';
 import Logo from './Logo.astro';
 import { getRepoVersion } from '@/lib/version';
@@ -13,7 +12,8 @@ const showVersion = false;
 // Fetch categorized and ordered hierarchy from library function
 const { topLevelItems } = await getDocsHierarchy();
 const openapiModel = tryReadOpenAPIModel();
-const hasApiMode = (openapiModel?.operations.length ?? 0) + (openapiModel?.webhooks.length ?? 0) > 0;
+const hasApiMode =
+	(openapiModel?.operations.length ?? 0) + (openapiModel?.webhooks.length ?? 0) > 0;
 
 const currentPath = Astro.url.pathname;
 const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs';
@@ -26,8 +26,6 @@ const version = showVersion ? await getRepoVersion() : '';
 >
 	<Logo />
 	<div class="flex items-center gap-2">
-		<Search client:load />
-
 		<button
 			id="mobile-menu-open"
 			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
@@ -47,7 +45,7 @@ const version = showVersion ? await getRepoVersion() : '';
 
 <div
 	id="mobile-menu-content"
-	class="fixed inset-y-0 right-0 z-50 flex hidden h-full w-72 translate-x-full flex-col border-l border-border/40 bg-background shadow-lg transition-transform duration-300 data-[state=open]:translate-x-0 sm:max-w-sm"
+	class="fixed inset-y-0 right-0 z-50 hidden h-full w-72 translate-x-full flex-col border-l border-border/40 bg-background shadow-lg transition-transform duration-300 data-[state=open]:translate-x-0 sm:max-w-sm xl:flex"
 >
 	<div
 		class="flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 py-0 text-left"

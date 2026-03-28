@@ -66,12 +66,18 @@ export default function Search() {
 				onFocus={prefetchPagefind}
 				onMouseEnter={prefetchPagefind}
 				aria-label="Search documentation"
-				className="relative inline-flex h-11 w-11 items-center justify-center rounded-md border-0 border-input bg-transparent px-0 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:h-9 md:w-full md:justify-between md:border md:px-4 md:pr-12 md:shadow-sm"
+				className="inline-flex items-center rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:h-9 sm:w-9 sm:justify-center md:relative md:w-64 md:justify-start md:border md:border-input md:bg-background md:px-4 md:pr-12 md:shadow-sm"
 			>
+				{/* Desktop Text */}
 				<span className="hidden md:inline-flex">Search...</span>
+
+				{/* Tablet Icon */}
 				<SearchIcon className="md:hidden" size={20} />
-				<kbd className="pointer-events-none absolute top-1/2 right-1.5 hidden h-5 -translate-y-1/2 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 select-none md:flex">
-					<span className="text-xs">⌘</span>K
+
+				{/* Desktop Keyboard Shortcut */}
+				<kbd className="pointer-events-none absolute top-1/2 right-1.5 hidden h-5 -translate-y-1/2 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 select-none md:flex">
+					<span>⌘</span>
+					<span>K</span>
 				</kbd>
 			</button>
 
