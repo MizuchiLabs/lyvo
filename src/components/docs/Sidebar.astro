@@ -1,23 +1,9 @@
 ---
 import { PanelRightClose, PanelRightOpen } from '@lucide/astro';
-import SidebarNav from './SidebarNav.astro';
+import SidebarModeToggle from './SidebarModeToggle.astro';
+import SidebarLinks from './SidebarLinks.astro';
+import SidebarFooter from './SidebarFooter.astro';
 import Logo from '@/components/base/Logo.astro';
-import { getRepoVersion } from '@/lib/version';
-import { getDocsHierarchy } from '@/lib/docs';
-import { tryReadOpenAPIModel } from '@/lib/openapi/model';
-
-// Editable configs for Sidebar
-const showVersion = false;
-
-// Fetch categorized and ordered hierarchy from library function
-const { topLevelItems } = await getDocsHierarchy();
-const openapiModel = tryReadOpenAPIModel();
-const hasApiMode =
-	(openapiModel?.operations.length ?? 0) + (openapiModel?.webhooks.length ?? 0) > 0;
-
-const currentPath = Astro.url.pathname;
-const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs';
-const version = showVersion ? await getRepoVersion() : '';
 ---
 
 <!-- Mobile Header -->
@@ -45,7 +31,7 @@ const version = showVersion ? await getRepoVersion() : '';
 
 <div
 	id="mobile-menu-content"
-	class="fixed inset-y-0 right-0 z-50 hidden h-full w-72 translate-x-full flex-col border-l border-border/40 bg-background shadow-lg transition-transform duration-300 data-[state=open]:translate-x-0 sm:max-w-sm xl:flex"
+	class="fixed inset-y-0 right-0 z-50 hidden h-full w-72 translate-x-full flex-col border-l border-border/40 bg-background shadow-lg transition-transform duration-300 data-[state=open]:translate-x-0 sm:max-w-sm xl:flex flex"
 >
 	<div
 		class="flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 py-0 text-left"
@@ -60,66 +46,59 @@ const version = showVersion ? await getRepoVersion() : '';
 		</button>
 	</div>
 
-	<SidebarNav
-		topLevelItems={topLevelItems}
-		currentPath={currentPath}
-		version={version}
-		apiGroups={openapiModel?.navigation ?? []}
-		hasApiMode={hasApiMode}
-		activeMode={activeMode}
-	/>
+	<SidebarModeToggle />
+	<SidebarLinks />
+	<SidebarFooter />
 </div>
 
 <!-- Desktop Sidebar -->
-<aside class="hidden w-72 shrink-0 flex-col space-y-6 md:flex">
+<aside class="sticky top-0 hidden h-screen w-72 shrink-0 flex-col md:flex">
 	<div class="flex shrink-0 items-center px-6 pt-6 pb-2">
 		<Logo />
 	</div>
-	<SidebarNav
-		topLevelItems={topLevelItems}
-		currentPath={currentPath}
-		version={version}
-		apiGroups={openapiModel?.navigation ?? []}
-		hasApiMode={hasApiMode}
-		activeMode={activeMode}
-	/>
+
+	<SidebarModeToggle />
+	<SidebarLinks />
+	<SidebarFooter />
 </aside>
 
 <script is:inline>
-	document.addEventListener('astro:page-load', () => {
+	function setupMobileMenu() {
 		const openBtn = document.getElementById('mobile-menu-open');
 		const closeBtn = document.getElementById('mobile-menu-close');
 		const overlay = document.getElementById('mobile-menu-overlay');
 		const content = document.getElementById('mobile-menu-content');
 
-		function openMenu() {
-			overlay?.classList.remove('hidden');
-			content?.classList.remove('hidden');
+		if (!openBtn || !closeBtn || !overlay || !content) return;
 
-			// Small delay to allow display: block to apply before adding transition attributes
+		function openMenu() {
+			overlay.classList.remove('hidden');
+			content.classList.remove('hidden');
+
 			requestAnimationFrame(() => {
-				overlay?.setAttribute('data-state', 'open');
-				content?.setAttribute('data-state', 'open');
+				overlay.setAttribute('data-state', 'open');
+				content.setAttribute('data-state', 'open');
 			});
 			document.body.style.overflow = 'hidden';
 		}
 
 		function closeMenu() {
-			overlay?.removeAttribute('data-state');
-			content?.removeAttribute('data-state');
+			overlay.removeAttribute('data-state');
+			content.removeAttribute('data-state');
 			document.body.style.overflow = '';
 
-			// Wait for animation to finish before hiding
 			setTimeout(() => {
-				if (!overlay?.hasAttribute('data-state')) {
-					overlay?.classList.add('hidden');
-					content?.classList.add('hidden');
+				if (!overlay.hasAttribute('data-state')) {
+					overlay.classList.add('hidden');
+					content.classList.add('hidden');
 				}
 			}, 300);
 		}
 
-		openBtn?.addEventListener('click', openMenu);
-		closeBtn?.addEventListener('click', closeMenu);
-		overlay?.addEventListener('click', closeMenu);
-	});
+		openBtn.addEventListener('click', openMenu);
+		closeBtn.addEventListener('click', closeMenu);
+		overlay.addEventListener('click', closeMenu);
+	}
+
+	document.addEventListener('astro:page-load', setupMobileMenu);
 </script>
