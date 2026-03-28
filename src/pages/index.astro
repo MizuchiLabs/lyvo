@@ -2,10 +2,10 @@
 import Layout from '@/layouts/Layout.astro';
 import Hero from '@/components/marketing/Hero.astro';
 import FeaturePreview from '@/components/marketing/FeaturePreview.astro';
+import config from 'virtual:lyvo-config';
 
-// Editable configs for Index page
-const repoUrl = 'https://github.com/mizuchilabs/lyvo';
-const repoType = 'github';
+const repoUrl = config.repo?.url;
+const repoType = config.repo?.type || 'github';
 ---
 
 <Layout>

@@ -7,6 +7,8 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import svgr from 'vite-plugin-svgr';
 
+import lyvoTheme from './src/integration.ts';
+
 export default defineConfig({
 	vite: {
 		plugins: [tailwindcss(), svgr()]
@@ -55,5 +57,29 @@ export default defineConfig({
 		}
 	],
 
-	integrations: [react(), mdx()]
+	integrations: [
+		lyvoTheme({
+			repo: { url: 'https://github.com/mizuchilabs/lyvo', branch: 'main' },
+			socials: { 
+				discord: '', 
+				x: '', 
+				youtube: '', 
+				bluesky: '' 
+			},
+			extraLinks: [
+				{ title: 'Support', href: 'https://example.com/support' },
+				{ title: 'Status', href: 'https://status.example.com' }
+			],
+			docs: {
+				editDoc: true,
+				showFeedback: true
+			},
+			openapi: {
+				input: 'public/openapi.json',
+				groupBy: 'tag'
+			}
+		}),
+		react(), 
+		mdx()
+	]
 });

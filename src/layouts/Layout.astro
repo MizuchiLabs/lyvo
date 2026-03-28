@@ -3,6 +3,11 @@ import ThemeToggle from '@/components/base/ThemeToggle.astro';
 import RepoIcon from '@/components/base/RepoIcon.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
 import Logo from '@/components/base/Logo.astro';
+import config from 'virtual:lyvo-config';
+import { getProviderFromUrl } from '@/lib/repo';
+
+const repoUrl = config.repo?.url;
+const repoType = getProviderFromUrl(repoUrl);
 ---
 
 <!doctype html>
@@ -38,20 +43,22 @@ import Logo from '@/components/base/Logo.astro';
 					</div>
 				</div>
 				<div class="flex items-center space-x-2">
-					<a
-						href="https://github.com/mizuchilabs/lyvo"
-						target="_blank"
-						rel="noreferrer"
-						class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-						title="View on GitHub"
-					>
-						<span
-							class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert"
+					{repoUrl && (
+						<a
+							href={repoUrl}
+							target="_blank"
+							rel="noreferrer"
+							class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+							title={`View on ${repoType.charAt(0).toUpperCase() + repoType.slice(1)}`}
 						>
-							<RepoIcon type="github" />
-						</span>
-						<span class="sr-only">GitHub</span>
-					</a>
+							<span
+								class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert"
+							>
+								<RepoIcon url={repoUrl} />
+							</span>
+							<span class="sr-only">{repoType}</span>
+						</a>
+					)}
 					<ThemeToggle />
 				</div>
 			</div>

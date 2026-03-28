@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import Feedback from './Feedback.astro';
 import EditPageLink from './EditPageLink.astro';
 import { getPrevNextDocs } from '@/lib/docs';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	entry?: any;
@@ -10,7 +11,11 @@ interface Props {
 	showEdit?: boolean;
 }
 
-const { entry, showFeedback = true, showEdit = true } = Astro.props;
+const { 
+	entry, 
+	showFeedback = config.docs.showFeedback, 
+	showEdit = config.docs.editDoc 
+} = Astro.props;
 
 let prevDoc, nextDoc;
 if (entry) {

@@ -1,11 +1,14 @@
 ---
 import { Pencil } from '@lucide/astro';
+import config from 'virtual:lyvo-config';
+import { getProviderFromUrl } from '@/lib/repo';
 
 // Helper function to build the correct edit URL based on the platform
-function getEditUrl(filePath: string, branch: string, repoUrl: string, repoType: string) {
+function getEditUrl(filePath: string, branch: string, repoUrl: string) {
 	// Strip trailing slashes to prevent double slashes in the final URL
 	const base = repoUrl.replace(/\/$/, '');
 	const path = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+	const repoType = getProviderFromUrl(repoUrl);
 
 	switch (repoType) {
 		case 'github':
@@ -14,6 +17,7 @@ function getEditUrl(filePath: string, branch: string, repoUrl: string, repoType:
 			// GitLab uses /-/ in its tree/edit URLs
 			return `${base}/-/edit/${branch}/${path}`;
 		case 'gitea':
+		case 'forgejo':
 			// Gitea uses /_edit/
 			return `${base}/_edit/${branch}/${path}`;
 		default:
@@ -23,21 +27,18 @@ function getEditUrl(filePath: string, branch: string, repoUrl: string, repoType:
 
 interface Props {
 	filePath?: string;
-	branch?: string; // Defaults to "main"
+	branch?: string;
 	repoUrl?: string;
-	repoType?: string; // github, gitlab, gitea
 }
 
 const {
 	filePath,
-	branch = 'main',
-	repoUrl = 'https://github.com/mizuchilabs/lyvo',
-	repoType = 'github'
+	branch = config.repo?.branch || 'main',
+	repoUrl = config.repo?.url
 } = Astro.props;
 
-const showLink = Boolean(filePath && repoUrl && repoType);
-const editUrl =
-	showLink && filePath && repoUrl ? getEditUrl(filePath, branch, repoUrl, repoType) : '';
+const showLink = Boolean(filePath && repoUrl);
+const editUrl = showLink && filePath && repoUrl ? getEditUrl(filePath, branch, repoUrl) : '';
 ---
 
 {

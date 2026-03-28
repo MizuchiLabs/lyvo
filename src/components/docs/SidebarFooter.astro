@@ -2,23 +2,21 @@
 import { ExternalLink } from '@lucide/astro';
 import RepoIcon from '@/components/base/RepoIcon.astro';
 import SocialIcon from '@/components/base/SocialIcon.astro';
+import config from 'virtual:lyvo-config';
+import { getProviderFromUrl } from '@/lib/repo';
 
 interface Props {
 	repoURL?: string;
 }
 
-const { repoURL } = Astro.props;
+const { repoURL = config.repo?.url } = Astro.props;
 
-// Editable configs for SidebarFooter
-const extraLinks = [
-	{ title: 'Support', href: 'https://example.com/support' },
-	{ title: 'Status', href: 'https://status.example.com' }
-];
-const repoType = 'github';
-const socialLinks = { discord: '', x: '', youtube: '', bluesky: '' };
+const extraLinks = config.extraLinks;
+const repoType = getProviderFromUrl(repoURL);
+const socialLinks = config.socials;
 ---
 
-<div class="mt-auto p-4 pb-8">
+<div class="mt-auto p-4">
 	{
 		extraLinks && extraLinks.length > 0 && (
 			<div class="mb-4 flex flex-col gap-1">
@@ -49,7 +47,7 @@ const socialLinks = { discord: '', x: '', youtube: '', bluesky: '' };
 						class="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
 						title={`View on ${repoType}`}
 					>
-						<RepoIcon type={repoType as any} class="size-5 dark:invert" />
+						<RepoIcon url={repoURL} class="size-5 dark:invert" />
 						<span class="sr-only">{repoType}</span>
 					</a>
 				)

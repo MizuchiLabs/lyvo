@@ -5,30 +5,11 @@ import SwaggerParser from '@apidevtools/swagger-parser';
 import OpenAPISampler from 'openapi-sampler';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
-const DEFAULT_CONFIG_PATH = 'src/content/api/openapi.config.json';
-
-function loadConfig(configPath = DEFAULT_CONFIG_PATH) {
-	const resolvedPath = path.resolve(configPath);
-	if (!fsSync.existsSync(resolvedPath)) return {};
-
-	const content = fsSync.readFileSync(resolvedPath, 'utf-8');
-	const parsed = JSON.parse(content);
-
-	if (!parsed || typeof parsed !== 'object') return {};
-
-	const config = {};
-	if (typeof parsed.input === 'string') config.input = parsed.input;
-	if (typeof parsed.output === 'string') config.output = parsed.output;
-	if (parsed.groupBy === 'tag' || parsed.groupBy === 'path') config.groupBy = parsed.groupBy;
-
-	return config;
-}
-
-function parseArgs(argv, config = {}) {
+function parseArgs(argv) {
 	const options = {
-		input: config.input ?? 'public/openapi.json',
-		output: config.output ?? 'src/content/api/openapi-model.json',
-		groupBy: config.groupBy ?? 'tag'
+		input: 'public/openapi.json',
+		output: 'src/content/api/openapi-model.json',
+		groupBy: 'tag'
 	};
 
 	for (let i = 0; i < argv.length; i++) {
@@ -662,8 +643,7 @@ function buildTags(document, operations) {
 }
 
 async function generate() {
-	const config = loadConfig();
-	const options = parseArgs(process.argv.slice(2), config);
+	const options = parseArgs(process.argv.slice(2));
 	const inputPath = path.resolve(options.input);
 	const outputPath = path.resolve(options.output);
 

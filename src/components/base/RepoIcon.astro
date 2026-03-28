@@ -1,10 +1,13 @@
 ---
+import { getProviderFromUrl } from '@/lib/repo';
+
 interface Props {
-	type?: 'git' | 'gitea' | 'github' | 'gitlab' | 'forgejo';
+	url?: string;
 	class?: string;
 }
 
-const { type = 'github', class: className } = Astro.props;
+const { url, class: className } = Astro.props;
+const type = getProviderFromUrl(url);
 
 const svgs = import.meta.glob('/src/assets/*.svg', {
 	query: '?raw',
@@ -12,7 +15,7 @@ const svgs = import.meta.glob('/src/assets/*.svg', {
 	eager: true
 });
 
-const svgContent = (svgs[`/src/assets/${type}.svg`] ?? svgs['/src/assets/github.svg']) as string;
+const svgContent = (svgs[`/src/assets/${type}.svg`] ?? svgs['/src/assets/git.svg']) as string;
 
 const rendered = className
 	? svgContent.replace(/<svg\s/, `<svg class="${className}" `)

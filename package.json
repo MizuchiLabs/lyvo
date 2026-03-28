@@ -11,12 +11,10 @@
 	],
 	"scripts": {
 		"dev": "astro dev",
-		"prebuild": "pnpm openapi:prebuild",
 		"build": "astro build && pagefind --site dist",
 		"preview": "astro preview",
 		"astro": "astro",
 		"openapi:generate": "node ./scripts/generate-openapi-model.mjs",
-		"openapi:prebuild": "node ./scripts/openapi-prebuild.mjs",
 		"lint": "oxlint --fix",
 		"format": "prettier --write ."
 	},

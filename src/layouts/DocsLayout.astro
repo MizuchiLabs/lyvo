@@ -9,6 +9,7 @@ import Breadcrumbs from '@/components/docs/Breadcrumbs.astro';
 import PageHeader from '@/components/docs/PageHeader.astro';
 import Pagination from '@/components/docs/Pagination.astro';
 import fs from 'node:fs';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	title: string;
@@ -24,8 +25,8 @@ const {
 	description,
 	headings = [],
 	entry,
-	showFeedback = true,
-	showEdit = true
+	showFeedback = config.docs.showFeedback,
+	showEdit = config.docs.editDoc
 } = Astro.props;
 
 let lastUpdated = '';
