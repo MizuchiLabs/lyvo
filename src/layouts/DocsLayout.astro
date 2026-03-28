@@ -1,7 +1,7 @@
 ---
 import Search from '@/components/base/Search';
 import Sidebar from '@/components/docs/Sidebar.astro';
-import MobileToc from '@/components/docs/MobileToc';
+import MobileToc from '@/components/docs/MobileToc.astro';
 import ThemeToggle from '@/components/base/ThemeToggle.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
 import TableOfContents from '@/components/docs/TableOfContents.astro';
@@ -65,7 +65,7 @@ try {
 					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 rounded-t-xl border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
 				>
 					<Breadcrumbs title={title} />
-					<MobileToc client:load headings={headings} title={title} />
+					<MobileToc headings={headings} title={title} />
 					<div class="flex shrink-0 items-center gap-4">
 						<Search client:load />
 						<ThemeToggle />

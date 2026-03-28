@@ -1,0 +1,199 @@
+---
+import { ChevronRight } from '@lucide/astro';
+
+interface Heading {
+	depth: number;
+	slug: string;
+	text: string;
+}
+
+interface Props {
+	headings: Heading[];
+	title: string;
+}
+
+const { headings, title } = Astro.props;
+const radius = 9;
+const circumference = 2 * Math.PI * radius;
+---
+
+<div class="mobile-toc-root flex w-full items-center xl:hidden" data-title={title}>
+	<button
+		id="mobile-toc-trigger"
+		aria-expanded="false"
+		aria-controls="mobile-toc-menu"
+		class="flex w-full items-center space-x-2 text-sm transition-colors cursor-pointer text-muted-foreground hover:text-foreground disabled:cursor-default disabled:text-foreground"
+		disabled={headings.length === 0}
+	>
+		<div class="relative -ml-1 flex h-6 w-6 shrink-0 items-center justify-center">
+			<svg
+				class="h-full w-full -rotate-90 transform text-muted-foreground/30"
+				viewBox="0 0 24 24"
+			>
+				<circle
+					cx="12"
+					cy="12"
+					r={radius}
+					stroke="currentColor"
+					stroke-width="2"
+					fill="none"
+				></circle>
+			</svg>
+			<svg
+				class="absolute h-full w-full -rotate-90 transform text-foreground transition-all duration-150 ease-out"
+				viewBox="0 0 24 24"
+			>
+				<circle
+					id="progress-circle"
+					cx="12"
+					cy="12"
+					r={radius}
+					stroke="currentColor"
+					stroke-width="2"
+					fill="none"
+					stroke-dasharray={circumference}
+					stroke-dashoffset={circumference}
+					stroke-linecap="round"
+				></circle>
+			</svg>
+		</div>
+		<div class="flex flex-1 items-center gap-1 font-medium overflow-hidden">
+			<span id="active-heading-text" class="truncate text-left">{title}</span>
+			{
+				headings.length > 0 && (
+					<ChevronRight
+						size={14}
+						class="mobile-toc-chevron shrink-0 text-muted-foreground transition-transform"
+					/>
+				)
+			}
+		</div>
+	</button>
+
+	<div
+		id="mobile-toc-menu"
+		class="absolute top-14 right-0 left-0 z-50 hidden w-full rounded-b-xl border-x border-b border-border/40 bg-background/95 p-4 shadow-xl backdrop-blur-xl"
+	>
+		<div class="no-scrollbar max-h-[60vh] overflow-y-auto">
+			<div class="flex flex-col space-y-1">
+				{
+					headings.length > 0 ? (
+						headings.map((heading) => (
+							<a
+								href={`#${heading.slug}`}
+								data-slug={heading.slug}
+								class:list={[
+									'mobile-toc-link block truncate py-1.5 text-sm transition-colors hover:text-foreground text-muted-foreground',
+									{ 'pl-4': heading.depth >= 3 }
+								]}
+							>
+								{heading.text}
+							</a>
+						))
+					) : (
+						<span class="text-sm text-muted-foreground">No headings found.</span>
+					)
+				}
+			</div>
+		</div>
+	</div>
+</div>
+
+<script is:inline define:vars={{ circumference, headings }}>
+	function initMobileToc() {
+		const root = document.querySelector('.mobile-toc-root');
+		if (!root) return;
+
+		const trigger = document.getElementById('mobile-toc-trigger');
+		const menu = document.getElementById('mobile-toc-menu');
+		const chevron = root.querySelector('.mobile-toc-chevron');
+		const progressCircle = document.getElementById('progress-circle');
+		const activeText = document.getElementById('active-heading-text');
+		const mainScrollArea = document.querySelector('#main-scroll-area');
+		const defaultTitle = root.getAttribute('data-title');
+
+		if (!mainScrollArea || !progressCircle || !activeText) return;
+
+		let isOpen = false;
+
+		function toggleMenu(force) {
+			isOpen = force !== undefined ? force : !isOpen;
+			trigger.setAttribute('aria-expanded', isOpen);
+			menu.classList.toggle('hidden', !isOpen);
+			if (chevron) chevron.classList.toggle('rotate-90', isOpen);
+		}
+
+		trigger.addEventListener('click', () => toggleMenu());
+
+		// Close on click outside
+		document.addEventListener('mousedown', (e) => {
+			if (isOpen && !root.contains(e.target)) {
+				toggleMenu(false);
+			}
+		});
+
+		// Scroll progress
+		function handleScroll() {
+			const scrollTop = mainScrollArea.scrollTop;
+			const scrollHeight = mainScrollArea.scrollHeight - mainScrollArea.clientHeight;
+			const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+			const offset = circumference - (progress / 100) * circumference;
+			progressCircle.style.strokeDashoffset = offset;
+
+			// Update title logic (similar to React version)
+			if (progress <= 5) {
+				activeText.textContent = defaultTitle;
+			}
+		}
+
+		mainScrollArea.addEventListener('scroll', handleScroll, { passive: true });
+		handleScroll();
+
+		// Active heading tracking
+		const headingElements = document.querySelectorAll('article h2, article h3');
+		const tocLinks = document.querySelectorAll('.mobile-toc-link');
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						const id = entry.target.getAttribute('id');
+						updateActiveHeading(id);
+					}
+				});
+			},
+			{ root: mainScrollArea, rootMargin: '-20% 0px -60% 0px' }
+		);
+
+		headingElements.forEach((el) => observer.observe(el));
+
+		function updateActiveHeading(id) {
+			tocLinks.forEach((link) => {
+				const isActive = link.getAttribute('data-slug') === id;
+				link.classList.toggle('font-medium', isActive);
+				link.classList.toggle('text-foreground', isActive);
+				link.classList.toggle('text-muted-foreground', !isActive);
+
+				if (isActive && mainScrollArea.scrollTop / (mainScrollArea.scrollHeight - mainScrollArea.clientHeight) > 0.05) {
+					activeText.textContent = link.textContent.trim();
+				}
+			});
+		}
+
+		// Smooth scroll and close menu
+		tocLinks.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				const id = link.getAttribute('data-slug');
+				const el = document.getElementById(id);
+				if (el) {
+					e.preventDefault();
+					el.scrollIntoView({ behavior: 'smooth' });
+					window.history.pushState(null, '', `#${id}`);
+					toggleMenu(false);
+				}
+			});
+		});
+	}
+
+	document.addEventListener('astro:page-load', initMobileToc);
+</script>
