@@ -1,41 +1,110 @@
 ---
 import { ThumbsUp, ThumbsDown, Check } from '@lucide/astro';
+import config from 'virtual:lyvo-config';
 ---
 
-<div class="feedback-widget">
-	<div
-		class="feedback-prompt flex flex-1 flex-col items-center gap-4 rounded-lg transition-all duration-300 sm:flex-row"
-	>
-		<span class="text-sm font-medium text-muted-foreground">Was this page helpful?</span>
-		<div class="flex items-center gap-2">
-			<button
-				data-helpful="true"
-				class="feedback-btn flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-				aria-label="Yes, this page was helpful"
-			>
-				<ThumbsUp size={16} />
-				Yes
-			</button>
-			<button
-				data-helpful="false"
-				class="feedback-btn flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-				aria-label="No, this page was not helpful"
-			>
-				<ThumbsDown size={16} />
-				No
-			</button>
-		</div>
-	</div>
+{
+	config.docs.feedback && (
+		<div class="feedback-widget">
+			<div class="feedback-prompt flex flex-1 flex-col items-center gap-4 rounded-lg transition-all duration-300 sm:flex-row">
+				<span class="text-sm font-medium text-muted-foreground">
+					Was this page helpful?
+				</span>
+				<div class="flex items-center gap-2">
+					<button
+						data-helpful="true"
+						class="feedback-btn flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+						aria-label="Yes, this page was helpful"
+					>
+						<ThumbsUp size={16} />
+						Yes
+					</button>
+					<button
+						data-helpful="false"
+						class="feedback-btn flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+						aria-label="No, this page was not helpful"
+					>
+						<ThumbsDown size={16} />
+						No
+					</button>
+				</div>
+			</div>
 
-	<div
-		class="feedback-thanks hidden animate-in rounded-lg text-sm text-muted-foreground zoom-in-95 fade-in"
-	>
-		<div class="flex items-center justify-center gap-2">
-			<Check size={16} class="text-green-500" />
-			<p>Thank you for your feedback!</p>
+			<div class="feedback-thanks hidden text-sm text-muted-foreground">
+				<div class="flex items-center justify-center gap-2">
+					<Check size={16} class="text-green-500" />
+					<p>Thank you for your feedback!</p>
+				</div>
+			</div>
 		</div>
-	</div>
-</div>
+	)
+}
+
+<style>
+	@keyframes yes-pop {
+		0% {
+			transform: scale(1);
+		}
+		40% {
+			transform: scale(1.25);
+		}
+		70% {
+			transform: scale(0.95);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	@keyframes no-shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		20% {
+			transform: translateX(-5px) rotate(-3deg);
+		}
+		40% {
+			transform: translateX(5px) rotate(3deg);
+		}
+		60% {
+			transform: translateX(-4px) rotate(-2deg);
+		}
+		80% {
+			transform: translateX(4px) rotate(2deg);
+		}
+	}
+
+	@keyframes thanks-in {
+		0% {
+			opacity: 0;
+			transform: translateY(6px) scale(0.97);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	.feedback-btn-yes-active {
+		animation: yes-pop 0.4s ease forwards;
+		background-color: oklch(var(--color-green-500) / 0.15) !important;
+		border-color: oklch(var(--color-green-500) / 0.5) !important;
+		color: var(--color-green-600) !important;
+	}
+
+	.feedback-btn-no-active {
+		animation: no-shake 0.45s ease forwards;
+		background-color: oklch(var(--color-red-500) / 0.15) !important;
+		border-color: oklch(var(--color-red-500) / 0.5) !important;
+		color: var(--color-red-600) !important;
+	}
+
+	.feedback-thanks-visible {
+		animation: thanks-in 0.35s ease forwards;
+	}
+</style>
+
 <script>
 	function sendFeedback(helpful: boolean, path: string) {
 		const w = window as any;
@@ -43,21 +112,24 @@ import { ThumbsUp, ThumbsDown, Check } from '@lucide/astro';
 		if (w.umami?.track) {
 			w.umami.track('feedback', { helpful, path });
 		}
-
 		if (w.plausible) {
-			w.plausible('Feedback', { props: { helpful, path } });
+			w.plausible('Feedback', { props: { helpful: String(helpful), path } });
 		}
-
 		if (w.gtag) {
 			w.gtag('event', 'feedback', { helpful, path });
 		}
-
 		if (w.fathom?.trackEvent) {
 			w.fathom.trackEvent(`feedback_${helpful ? 'yes' : 'no'}`);
 		}
+		if (w._paq) {
+			w._paq.push(['trackEvent', 'Feedback', helpful ? 'yes' : 'no', path]);
+		}
+		if (w.posthog?.capture) {
+			w.posthog.capture('feedback', { helpful, path });
+		}
 	}
 
-	function initFeedbackWidgets() {
+	function initFeedback() {
 		document.querySelectorAll<HTMLDivElement>('.feedback-widget').forEach((widget) => {
 			const prompt = widget.querySelector<HTMLElement>('.feedback-prompt')!;
 			const thanks = widget.querySelector<HTMLElement>('.feedback-thanks')!;
@@ -72,12 +144,30 @@ import { ThumbsUp, ThumbsDown, Check } from '@lucide/astro';
 						console.error('Failed to send feedback event', e);
 					}
 
-					prompt.classList.add('hidden');
-					thanks.classList.remove('hidden');
+					// Animate the clicked button
+					btn.classList.add(
+						helpful ? 'feedback-btn-yes-active' : 'feedback-btn-no-active'
+					);
+
+					// After button animation, swap to thank you
+					setTimeout(
+						() => {
+							prompt.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+							prompt.style.opacity = '0';
+							prompt.style.transform = 'translateY(-4px)';
+
+							setTimeout(() => {
+								prompt.classList.add('hidden');
+								thanks.classList.remove('hidden');
+								thanks.classList.add('feedback-thanks-visible');
+							}, 200);
+						},
+						helpful ? 350 : 420
+					);
 				});
 			});
 		});
 	}
 
-	document.addEventListener('astro:page-load', initFeedbackWidgets);
+	document.addEventListener('astro:page-load', initFeedback);
 </script>

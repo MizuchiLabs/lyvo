@@ -1,13 +1,13 @@
 ---
-import { getProviderFromUrl } from '@/lib/repo';
+import { getProvider } from '@/lib/repo';
+import config from 'virtual:lyvo-config';
 
 interface Props {
-	url?: string;
 	class?: string;
 }
 
-const { url, class: className } = Astro.props;
-const type = getProviderFromUrl(url);
+const { class: className } = Astro.props;
+const type = getProvider(config.repo?.url);
 
 const svgs = import.meta.glob('/src/assets/*.svg', {
 	query: '?raw',

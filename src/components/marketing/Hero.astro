@@ -2,13 +2,11 @@
 import { Button } from '@/components/ui/button.tsx';
 import { ArrowRight } from '@lucide/astro';
 import RepoIcon from '@/components/base/RepoIcon.astro';
+import config from 'virtual:lyvo-config';
+import { getProvider } from '@/lib/repo';
 
-interface Props {
-	repoUrl: string;
-	repoType: string;
-}
-
-const { repoUrl, repoType } = Astro.props;
+const repoURL = config.repo?.url;
+const repoType = getProvider(repoURL);
 ---
 
 <div class="flex flex-1 flex-col items-center justify-center pt-8 pb-4 text-center">
@@ -38,13 +36,13 @@ const { repoUrl, repoType } = Astro.props;
 			</Button>
 		</a>
 
-		<a href={repoUrl} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+		<a href={repoURL} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
 			<Button
 				variant="outline"
 				size="lg"
-				className="h-11 w-full rounded-lg border-border bg-background/50 px-8 font-semibold backdrop-blur-sm transition-all hover:bg-accent sm:w-auto"
+				className="h-11 w-full rounded-lg border-border bg-background/50 px-6 font-semibold backdrop-blur-sm transition-all hover:bg-accent sm:w-auto"
 			>
-				<RepoIcon type={repoType as any} class="mr-2 dark:invert" />
+				<RepoIcon class="mr-1 dark:invert" />
 				View on {repoType.charAt(0).toUpperCase() + repoType.slice(1)}
 			</Button>
 		</a>

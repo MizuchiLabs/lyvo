@@ -1,16 +1,15 @@
 ---
 import { TextAlignStart } from '@lucide/astro';
+
 interface Props {
 	headings: { depth: number; slug: string; text: string }[];
 }
-
 const { headings } = Astro.props;
-const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 {
-	filteredHeadings.length > 0 && (
-		<div class="toc-container relative z-10 text-muted-foreground select-none">
+	headings.length > 0 && (
+		<div class="sticky top-20 z-10 hidden max-h-[calc(100vh-8rem)] w-64 shrink-0 overflow-y-auto text-muted-foreground select-none xl:block">
 			<p class="mb-2 flex items-center gap-2 text-foreground">
 				<TextAlignStart size={16} />
 				On this page
@@ -22,7 +21,7 @@ const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 				</div>
 
 				<ul class="toc-links relative flex w-full flex-col pl-3 text-sm">
-					{filteredHeadings.map((heading) => {
+					{headings.map((heading) => {
 						const offset = heading.depth >= 3 ? 12 : 0;
 						return (
 							<li

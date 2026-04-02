@@ -2,29 +2,28 @@ import type { AstroIntegration } from 'astro';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
-export interface RepoOptions {
-	url?: string;
-	branch?: string;
-}
-
 export interface LinkOptions {
 	title: string;
 	href: string;
 }
 
 export interface LyvoOptions {
-	repo?: RepoOptions;
+	title?: string;
+	repo?: {
+		url?: string;
+		branch?: string;
+	};
 	socials?: {
 		discord?: string;
-		x?: string;
 		youtube?: string;
 		bluesky?: string;
+		x?: string;
 		[key: string]: string | undefined;
 	};
 	extraLinks?: LinkOptions[];
 	docs?: {
-		editDoc?: boolean;
-		showFeedback?: boolean;
+		edit?: boolean;
+		feedback?: boolean;
 	};
 	openapi?: {
 		input?: string;
@@ -32,9 +31,9 @@ export interface LyvoOptions {
 	};
 }
 
-export default function lyvoTheme(options: LyvoOptions = {}): AstroIntegration {
+export default function lyvo(options: LyvoOptions = {}): AstroIntegration {
 	return {
-		name: 'lyvo-theme',
+		name: 'lyvo',
 		hooks: {
 			'astro:config:setup': ({ updateConfig, logger }) => {
 				updateConfig({
@@ -50,12 +49,13 @@ export default function lyvoTheme(options: LyvoOptions = {}): AstroIntegration {
 								load(id) {
 									if (id === '\0virtual:lyvo-config') {
 										const config = {
+											title: options.title,
 											repo: options.repo,
 											socials: options.socials || {},
 											extraLinks: options.extraLinks || [],
 											docs: {
-												editDoc: true,
-												showFeedback: true,
+												edit: true,
+												feedback: true,
 												...options.docs
 											},
 											openapi: {
@@ -73,9 +73,9 @@ export default function lyvoTheme(options: LyvoOptions = {}): AstroIntegration {
 				if (options.openapi?.input) {
 					logger.info('[openapi] Generating model...');
 					const scriptPath = path.resolve('scripts/generate-openapi-model.mjs');
-					
+
 					const args = [scriptPath, '--input', options.openapi.input];
-					
+
 					if (options.openapi.groupBy) {
 						args.push('--group-by', options.openapi.groupBy);
 					}
@@ -85,9 +85,13 @@ export default function lyvoTheme(options: LyvoOptions = {}): AstroIntegration {
 					});
 
 					if (result.error) {
-						logger.error('[openapi] Failed to start generator: ' + result.error.message);
+						logger.error(
+							'[openapi] Failed to start generator: ' + result.error.message
+						);
 					} else if (result.status !== 0) {
-						logger.error('[openapi] Generator script exited with status ' + result.status);
+						logger.error(
+							'[openapi] Generator script exited with status ' + result.status
+						);
 					} else {
 						logger.info('[openapi] Model generated successfully.');
 					}

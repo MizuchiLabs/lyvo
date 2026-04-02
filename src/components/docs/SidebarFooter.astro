@@ -3,7 +3,7 @@ import { ExternalLink } from '@lucide/astro';
 import RepoIcon from '@/components/base/RepoIcon.astro';
 import SocialIcon from '@/components/base/SocialIcon.astro';
 import config from 'virtual:lyvo-config';
-import { getProviderFromUrl } from '@/lib/repo';
+import { getProvider } from '@/lib/repo';
 
 interface Props {
 	repoURL?: string;
@@ -12,7 +12,7 @@ interface Props {
 const { repoURL = config.repo?.url } = Astro.props;
 
 const extraLinks = config.extraLinks;
-const repoType = getProviderFromUrl(repoURL);
+const repoType = getProvider(repoURL);
 const socialLinks = config.socials;
 ---
 
@@ -47,7 +47,7 @@ const socialLinks = config.socials;
 						class="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
 						title={`View on ${repoType}`}
 					>
-						<RepoIcon url={repoURL} class="size-5 dark:invert" />
+						<RepoIcon class="size-5 dark:invert" />
 						<span class="sr-only">{repoType}</span>
 					</a>
 				)

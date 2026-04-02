@@ -6,8 +6,7 @@ import mdx from '@astrojs/mdx';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import svgr from 'vite-plugin-svgr';
-
-import lyvoTheme from './src/integration.ts';
+import lyvo from './src/integration.ts';
 
 export default defineConfig({
 	vite: {
@@ -58,28 +57,29 @@ export default defineConfig({
 	],
 
 	integrations: [
-		lyvoTheme({
+		lyvo({
+			title: 'Lyvo',
 			repo: { url: 'https://github.com/mizuchilabs/lyvo', branch: 'main' },
-			socials: { 
-				discord: '', 
-				x: '', 
-				youtube: '', 
-				bluesky: '' 
+			socials: {
+				discord: '',
+				x: '',
+				youtube: '',
+				bluesky: ''
 			},
 			extraLinks: [
 				{ title: 'Support', href: 'https://example.com/support' },
 				{ title: 'Status', href: 'https://status.example.com' }
 			],
-			docs: {
-				editDoc: true,
-				showFeedback: true
-			},
+			// docs: {
+			// 	edit: false,
+			// 	feedback: false
+			// },
 			openapi: {
 				input: 'public/openapi.json',
 				groupBy: 'tag'
 			}
 		}),
-		react(), 
+		react(),
 		mdx()
 	]
 });

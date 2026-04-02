@@ -3,19 +3,11 @@ import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import Feedback from './Feedback.astro';
 import EditPageLink from './EditPageLink.astro';
 import { getPrevNextDocs } from '@/lib/docs';
-import config from 'virtual:lyvo-config';
 
 interface Props {
 	entry?: any;
-	showFeedback?: boolean;
-	showEdit?: boolean;
 }
-
-const { 
-	entry, 
-	showFeedback = config.docs.showFeedback, 
-	showEdit = config.docs.editDoc 
-} = Astro.props;
+const { entry } = Astro.props;
 
 let prevDoc, nextDoc;
 if (entry) {
@@ -28,12 +20,10 @@ if (entry) {
 {
 	entry && (
 		<div class="mt-10 space-y-6">
-			{(showFeedback || (showEdit && entry.filePath)) && (
-				<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-					{showFeedback && <Feedback />}
-					{showEdit && entry.filePath && <EditPageLink filePath={entry.filePath} />}
-				</div>
-			)}
+			<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+				<Feedback />
+				<EditPageLink filePath={entry.filePath} />
+			</div>
 
 			<div class="grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
 				{prevDoc ? (

@@ -1,15 +1,14 @@
 ---
 import Search from '@/components/base/Search';
 import Sidebar from '@/components/docs/Sidebar.astro';
-import MobileToc from '@/components/docs/MobileToc.astro';
+import MobileToC from '@/components/docs/MobileToC.astro';
 import ThemeToggle from '@/components/base/ThemeToggle.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
-import TableOfContents from '@/components/docs/TableOfContents.astro';
+import ToC from '@/components/docs/ToC.astro';
 import Breadcrumbs from '@/components/docs/Breadcrumbs.astro';
 import PageHeader from '@/components/docs/PageHeader.astro';
 import Pagination from '@/components/docs/Pagination.astro';
 import fs from 'node:fs';
-import config from 'virtual:lyvo-config';
 
 interface Props {
 	title: string;
@@ -20,33 +19,24 @@ interface Props {
 	showEdit?: boolean;
 }
 
-const {
-	title,
-	description,
-	headings = [],
-	entry,
-	showFeedback = config.docs.showFeedback,
-	showEdit = config.docs.editDoc
-} = Astro.props;
+const { title, description, headings = [], entry } = Astro.props;
 
-let lastUpdated = '';
-try {
+let lastUpdated = () => {
 	if (entry?.filePath) {
 		const stats = fs.statSync(entry.filePath);
-		lastUpdated = new Intl.DateTimeFormat(undefined, {
+		return new Intl.DateTimeFormat(undefined, {
 			month: 'short',
 			day: 'numeric',
 			year: 'numeric'
 		}).format(stats.mtime);
 	}
-} catch (e) {
-	// Ignore
-}
+	return '';
+};
 ---
 
 <!doctype html>
 <html lang="en" class="scroll-smooth">
-	<BaseHead />
+	<BaseHead title={title} description={description} />
 
 	<body
 		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
@@ -66,7 +56,7 @@ try {
 					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 rounded-t-xl border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
 				>
 					<Breadcrumbs title={title} />
-					<MobileToc headings={headings} title={title} />
+					<MobileToC headings={headings} title={title} />
 					<div class="flex shrink-0 items-center gap-4">
 						<Search client:load />
 						<ThemeToggle />
@@ -82,7 +72,7 @@ try {
 						<PageHeader
 							title={title}
 							description={description}
-							lastUpdated={lastUpdated}
+							lastUpdated={lastUpdated()}
 						/>
 
 						<article
@@ -92,15 +82,10 @@ try {
 							<slot />
 						</article>
 
-						<Pagination entry={entry} showFeedback={showFeedback} showEdit={showEdit} />
+						<Pagination entry={entry} />
 					</div>
 
-					{/* TOC (Desktop) */}
-					<div
-						class="sticky top-20 hidden max-h-[calc(100vh-8rem)] w-64 shrink-0 overflow-y-auto xl:block"
-					>
-						<TableOfContents headings={headings} />
-					</div>
+					<ToC headings={headings} />
 				</div>
 			</main>
 		</div>

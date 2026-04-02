@@ -2,18 +2,20 @@
 import { Font } from 'astro:assets';
 import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	title?: string;
 	description?: string;
 }
+const { title, description } = Astro.props;
 
-const {
-	title = 'Lyvo Docs',
-	description = 'A modern, minimalistic documentation theme for Astro.'
-} = Astro.props;
-
-const displayTitle = title && title !== 'Lyvo Docs' ? `${title} - Lyvo Docs` : 'Lyvo Docs';
+const displayTitle = () => {
+	let customTitle = config.title ?? 'Lyvo Docs';
+	if (!title) return customTitle;
+	if (title !== customTitle) return `${title} - ${config.title}`;
+	return customTitle;
+};
 ---
 
 <head>

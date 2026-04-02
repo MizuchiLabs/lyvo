@@ -4,10 +4,10 @@ import RepoIcon from '@/components/base/RepoIcon.astro';
 import BaseHead from '@/layouts/BaseHead.astro';
 import Logo from '@/components/base/Logo.astro';
 import config from 'virtual:lyvo-config';
-import { getProviderFromUrl } from '@/lib/repo';
+import { getProvider } from '@/lib/repo';
 
 const repoUrl = config.repo?.url;
-const repoType = getProviderFromUrl(repoUrl);
+const repoType = getProvider(repoUrl);
 ---
 
 <!doctype html>
@@ -43,22 +43,22 @@ const repoType = getProviderFromUrl(repoUrl);
 					</div>
 				</div>
 				<div class="flex items-center space-x-2">
-					{repoUrl && (
-						<a
-							href={repoUrl}
-							target="_blank"
-							rel="noreferrer"
-							class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-							title={`View on ${repoType.charAt(0).toUpperCase() + repoType.slice(1)}`}
-						>
-							<span
-								class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert"
+					{
+						repoUrl && (
+							<a
+								href={repoUrl}
+								target="_blank"
+								rel="noreferrer"
+								class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+								title={`View on ${repoType.charAt(0).toUpperCase() + repoType.slice(1)}`}
 							>
-								<RepoIcon url={repoUrl} />
-							</span>
-							<span class="sr-only">{repoType}</span>
-						</a>
-					)}
+								<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+									<RepoIcon />
+								</span>
+								<span class="sr-only">{repoType}</span>
+							</a>
+						)
+					}
 					<ThemeToggle />
 				</div>
 			</div>
