@@ -12,6 +12,7 @@ export interface LyvoOptions {
 	repo?: {
 		url?: string;
 		branch?: string;
+		provider?: string;
 	};
 	socials?: {
 		discord?: string;

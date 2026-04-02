@@ -5,14 +5,9 @@ import SocialIcon from '@/components/base/SocialIcon.astro';
 import config from 'virtual:lyvo-config';
 import { getProvider } from '@/lib/repo';
 
-interface Props {
-	repoURL?: string;
-}
-
-const { repoURL = config.repo?.url } = Astro.props;
-
+const repoURL = config.repo?.url;
+const repoType = getProvider(repoURL, config.repo?.provider);
 const extraLinks = config.extraLinks;
-const repoType = getProvider(repoURL);
 const socialLinks = config.socials;
 ---
 

@@ -6,7 +6,7 @@ import config from 'virtual:lyvo-config';
 import { getProvider } from '@/lib/repo';
 
 const repoURL = config.repo?.url;
-const repoType = getProvider(repoURL);
+const repoType = getProvider(repoURL, config.repo?.provider);
 ---
 
 <div class="flex flex-1 flex-col items-center justify-center pt-8 pb-4 text-center">

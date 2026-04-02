@@ -59,7 +59,10 @@ export default defineConfig({
 	integrations: [
 		lyvo({
 			title: 'Lyvo',
-			repo: { url: 'https://github.com/mizuchilabs/lyvo', branch: 'main' },
+			repo: {
+				url: 'https://github.com/mizuchilabs/lyvo',
+				branch: 'main'
+			},
 			socials: {
 				discord: '',
 				x: '',
