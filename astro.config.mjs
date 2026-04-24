@@ -73,10 +73,10 @@ export default defineConfig({
 				{ title: 'Support', href: 'https://example.com/support' },
 				{ title: 'Status', href: 'https://status.example.com' }
 			],
-			// docs: {
-			// 	edit: false,
-			// 	feedback: false
-			// },
+			docs: {
+				edit: true,
+				feedback: true
+			},
 			openapi: {
 				input: 'public/openapi.json',
 				groupBy: 'tag'
