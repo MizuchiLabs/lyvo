@@ -7,23 +7,10 @@ const isStringSrc = typeof src === 'string';
 
 <figure class="my-8 flex flex-col items-center justify-center space-y-3">
 	{
-		isStringSrc ? (
-			<img
-				class="rounded-xl border border-border/50 bg-muted/20 shadow-sm"
-				src={src}
-				alt={alt || ''}
-				title={title}
-				{...props}
-			/>
-		) : (
-			<Image
-				class="rounded-xl border border-border/50 bg-muted/20 shadow-sm"
-				src={src}
-				alt={alt || ''}
-				title={title}
-				{...props}
-			/>
-		)
+		(() => {
+			const shared = { class: "rounded-xl border border-border/50 bg-muted/20 shadow-sm", src, alt: alt || '', title, ...props };
+			return isStringSrc ? <img {...shared} /> : <Image {...shared} />;
+		})()
 	}
 	{alt && <figcaption class="text-sm text-muted-foreground">{alt}</figcaption>}
 </figure>

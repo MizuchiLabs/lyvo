@@ -24,9 +24,6 @@
 	--ring: oklch(0.55 0.12 255);
 	--destructive: oklch(0.6 0.15 20);
 	--destructive-foreground: oklch(1 0 0);
-	--border: oklch(0.9 0.01 250);
-	--input: oklch(0.9 0.01 250);
-	--ring: oklch(0.55 0.12 255);
 	--chart-1: oklch(0.6 0.12 255);
 	--chart-2: oklch(0.65 0.12 180);
 	--chart-3: oklch(0.7 0.14 45);
@@ -142,10 +139,6 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
-
-	--font-sans: var(--font-sans);
-	--font-mono: var(--font-mono);
-	--font-serif: var(--font-serif);
 
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -307,7 +300,7 @@
 		text-decoration: none !important;
 		margin-left: 0.4em;
 		font-weight: normal;
-		color: hsl(var(--muted-foreground, #94a3b8)); /* Adjusts to your theme */
+		color: var(--muted-foreground);
 		opacity: 0;
 		transition: opacity 0.2s ease-in-out;
 	}

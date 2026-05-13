@@ -15,7 +15,7 @@ const svgs = import.meta.glob('/src/assets/*.svg', {
 	eager: true
 });
 
-const aliases: Record<string, string> = { twitter: 'x', linkedin: 'bluesky' };
+const aliases: Record<string, string> = { twitter: 'x' };
 const name = aliases[platform.toLowerCase()] ?? platform.toLowerCase();
 const svgContent = svgs[`/src/assets/${name}.svg`] as string | undefined;
 

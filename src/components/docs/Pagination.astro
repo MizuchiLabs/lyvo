@@ -25,11 +25,11 @@ if (entry) {
 				<EditPageLink filePath={entry.filePath} />
 			</div>
 
-			<div class="grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2">
-				{prevDoc ? (
+			<div class="flex gap-4 border-t border-border pt-8">
+				{prevDoc && (
 					<a
 						href={`/docs/${prevDoc.id}`}
-						class="group flex flex-col justify-center rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+						class="flex flex-1 flex-col justify-center rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
 					>
 						<div class="flex items-center gap-1 text-base font-semibold">
 							<ChevronLeft
@@ -44,14 +44,11 @@ if (entry) {
 							</div>
 						)}
 					</a>
-				) : (
-					<div />
 				)}
-
-				{nextDoc ? (
+				{nextDoc && (
 					<a
 						href={`/docs/${nextDoc.id}`}
-						class="group ml-auto flex w-full flex-col justify-center rounded-lg border border-border bg-card p-4 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+						class="group ml-auto flex flex-1 flex-col justify-center rounded-lg border border-border bg-card p-4 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
 					>
 						<div class="flex items-center justify-end gap-1 text-base font-semibold">
 							{nextDoc.data.title}
@@ -67,8 +64,6 @@ if (entry) {
 							</div>
 						)}
 					</a>
-				) : (
-					<div />
 				)}
 			</div>
 		</div>

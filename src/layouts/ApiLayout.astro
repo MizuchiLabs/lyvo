@@ -19,7 +19,7 @@ const { title, description } = Astro.props;
 	<body
 		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
 		transition:persist
-		transition:name="page-layout"
+		transition:name="api-layout"
 	>
 		<Sidebar />
 
@@ -28,10 +28,7 @@ const { title, description } = Astro.props;
 				id="main-scroll-area"
 				class="no-scrollbar relative flex-1 overflow-y-auto bg-background md:rounded-2xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
 			>
-				{/* Breadcrumbs Header */}
-				<div
-					class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 rounded-t-xl border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
-				>
+				<div class="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 rounded-t-xl border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md">
 					<Breadcrumbs title={title} />
 					<div class="flex shrink-0 items-center gap-4">
 						<Search client:load />
