@@ -1,38 +1,45 @@
 import type { AstroIntegration } from 'astro';
+import { z } from 'astro/zod';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
-export interface LinkOptions {
-	title: string;
-	href: string;
-}
+export const LyvoOptionsSchema = z.object({
+	title: z.string().optional(),
+	repo: z
+		.object({
+			url: z.string().optional(),
+			branch: z.string().optional(),
+			provider: z.string().optional()
+		})
+		.optional(),
+	socials: z.record(z.string(), z.string().optional()).optional(),
+	extraLinks: z
+		.array(
+			z.object({
+				title: z.string(),
+				href: z.string()
+			})
+		)
+		.optional(),
+	docs: z
+		.object({
+			edit: z.boolean().optional(),
+			feedback: z.boolean().optional()
+		})
+		.optional(),
+	openapi: z
+		.object({
+			input: z.string().optional(),
+			groupBy: z.enum(['tag', 'path']).optional()
+		})
+		.optional()
+});
 
-export interface LyvoOptions {
-	title?: string;
-	repo?: {
-		url?: string;
-		branch?: string;
-		provider?: string;
-	};
-	socials?: {
-		discord?: string;
-		youtube?: string;
-		bluesky?: string;
-		x?: string;
-		[key: string]: string | undefined;
-	};
-	extraLinks?: LinkOptions[];
-	docs?: {
-		edit?: boolean;
-		feedback?: boolean;
-	};
-	openapi?: {
-		input?: string;
-		groupBy?: 'tag' | 'path';
-	};
-}
+export type LyvoOptions = z.infer<typeof LyvoOptionsSchema>;
 
-export default function lyvo(options: LyvoOptions = {}): AstroIntegration {
+export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
+	const options = LyvoOptionsSchema.parse(userOptions);
+
 	return {
 		name: 'lyvo',
 		hooks: {
