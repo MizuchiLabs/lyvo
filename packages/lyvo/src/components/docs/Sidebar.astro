@@ -1,0 +1,104 @@
+---
+import { PanelRightClose, PanelRightOpen } from '@lucide/astro';
+import SidebarModeToggle from './SidebarModeToggle.astro';
+import SidebarLinks from './SidebarLinks.astro';
+import SidebarFooter from './SidebarFooter.astro';
+import Logo from '../base/Logo.astro';
+---
+
+<!-- Mobile Header -->
+<header
+	class="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4 md:hidden"
+>
+	<Logo />
+	<div class="flex items-center gap-2">
+		<button
+			id="mobile-menu-open"
+			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
+			aria-label="Open Menu"
+		>
+			<PanelRightOpen size={20} />
+		</button>
+	</div>
+</header>
+
+<!-- Mobile Menu Overlay & Content -->
+<div
+	id="mobile-menu-overlay"
+	class="fixed inset-0 z-50 hidden bg-black/80 opacity-0 transition-opacity duration-300 data-[state=open]:opacity-100"
+>
+</div>
+
+<div
+	id="mobile-menu-content"
+	class="fixed inset-y-0 right-0 z-50 flex h-full w-72 translate-x-full flex-col border-l border-border/40 bg-background shadow-lg transition-transform duration-300 data-[state=open]:translate-x-0 sm:max-w-sm"
+>
+	<div
+		class="flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 py-0 text-left"
+	>
+		<Logo />
+		<button
+			id="mobile-menu-close"
+			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
+			aria-label="Close Menu"
+		>
+			<PanelRightClose size={20} />
+		</button>
+	</div>
+
+	<SidebarModeToggle />
+	<SidebarLinks />
+	<SidebarFooter />
+</div>
+
+<!-- Desktop Sidebar -->
+<aside class="sticky top-0 hidden h-screen w-72 shrink-0 flex-col md:flex">
+	<div class="flex shrink-0 items-center px-6 pt-6 pb-2">
+		<Logo />
+	</div>
+
+	<SidebarModeToggle />
+	<SidebarLinks />
+	<SidebarFooter />
+</aside>
+
+<script is:inline>
+	function setupMobileMenu() {
+		const openBtn = document.getElementById('mobile-menu-open');
+		const closeBtn = document.getElementById('mobile-menu-close');
+		const overlay = document.getElementById('mobile-menu-overlay');
+		const content = document.getElementById('mobile-menu-content');
+
+		if (!openBtn || !closeBtn || !overlay || !content) return;
+
+		function openMenu() {
+			overlay.classList.remove('hidden');
+			content.classList.remove('hidden');
+
+			requestAnimationFrame(() => {
+				overlay.setAttribute('data-state', 'open');
+				content.setAttribute('data-state', 'open');
+			});
+			document.body.style.overflow = 'hidden';
+		}
+
+		function closeMenu() {
+			overlay.removeAttribute('data-state');
+			content.removeAttribute('data-state');
+			document.body.style.overflow = '';
+
+			setTimeout(() => {
+				if (!overlay.hasAttribute('data-state')) {
+					overlay.classList.add('hidden');
+					content.classList.add('hidden');
+				}
+			}, 300);
+		}
+
+		openBtn.addEventListener('click', openMenu);
+		closeBtn.addEventListener('click', closeMenu);
+		overlay.addEventListener('click', closeMenu);
+	}
+
+	document.addEventListener('astro:page-load', setupMobileMenu);
+</script>

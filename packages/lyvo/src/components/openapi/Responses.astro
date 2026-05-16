@@ -1,0 +1,117 @@
+---
+import { ChevronDown } from '@lucide/astro';
+import SchemaViewer from './SchemaViewer.astro';
+import type { OpenAPIResponse, OpenAPIMediaType } from '../../lib/openapi/types';
+
+interface Props {
+	responses: OpenAPIResponse[];
+}
+
+const { responses } = Astro.props;
+
+if (!responses || responses.length === 0) return null;
+
+function responseTone(status: string): string {
+	const code = Number.parseInt(status, 10);
+	if (Number.isNaN(code)) return 'text-muted-foreground';
+	if (code >= 200 && code < 300) return 'text-emerald-600 dark:text-emerald-400';
+	if (code >= 300 && code < 400) return 'text-blue-600 dark:text-blue-400';
+	if (code >= 400 && code < 500) return 'text-amber-600 dark:text-amber-300';
+	if (code >= 500) return 'text-rose-600 dark:text-rose-400';
+	return 'text-muted-foreground';
+}
+---
+
+<section>
+	<h2 class="mb-4 text-xl font-semibold tracking-tight">Responses</h2>
+	<div class="space-y-3">
+		{
+			responses.map((response: OpenAPIResponse) => (
+				<details class="group overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+					<summary class="flex cursor-pointer list-none items-center justify-between bg-card p-4 transition-colors hover:bg-muted/50">
+						<div class="flex items-center gap-3">
+							<code class:list={['text-sm font-bold', responseTone(response.status)]}>
+								{response.status}
+							</code>
+							{response.description && (
+								<p class="text-sm font-medium text-foreground">
+									{response.description}
+								</p>
+							)}
+						</div>
+						<ChevronDown class="h-4 w-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+					</summary>
+					<div class="api-media-selector space-y-4 border-t border-border px-4 py-4">
+						{response.content.length > 0 ? (
+							<>
+								{response.content.length > 1 ? (
+									<div class="mb-4 flex items-center justify-between">
+										<span class="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+											Media Type
+										</span>
+										<div class="relative">
+											<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pr-8 pl-3 text-xs font-medium text-foreground ring-offset-background transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
+												{response.content.map(
+													(item: OpenAPIMediaType, index: number) => (
+														<option value={index}>
+															{item.mediaType}
+														</option>
+													)
+												)}
+											</select>
+											<ChevronDown class="pointer-events-none absolute top-1/2 right-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+										</div>
+									</div>
+								) : (
+									<p class="mb-4 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+										{response.content[0].mediaType}
+									</p>
+								)}
+								{response.content.map((item: OpenAPIMediaType, index: number) => (
+									<div
+										class={`media-panel space-y-2 ${index > 0 ? 'hidden' : ''}`}
+										data-index={index}
+									>
+										{item.schema !== undefined && (
+											<div class="mt-2 rounded-lg border border-border/50 bg-muted/10 p-3">
+												<SchemaViewer schema={item.schema} />
+											</div>
+										)}
+									</div>
+								))}
+							</>
+						) : (
+							<p class="text-sm text-muted-foreground italic">
+								No content schema provided.
+							</p>
+						)}
+					</div>
+				</details>
+			))
+		}
+	</div>
+</section>
+
+<script>
+	document.addEventListener('astro:page-load', () => {
+		document.querySelectorAll('.api-media-selector').forEach((selector) => {
+			if (selector.getAttribute('data-media-bound') === 'true') return;
+			selector.setAttribute('data-media-bound', 'true');
+
+			const select = selector.querySelector('.media-select') as HTMLSelectElement | null;
+			if (!select) return;
+
+			select.addEventListener('change', (e) => {
+				const target = e.target as HTMLSelectElement;
+				const index = target.value;
+				selector.querySelectorAll('.media-panel').forEach((panel) => {
+					if (panel.getAttribute('data-index') === index) {
+						panel.classList.remove('hidden');
+					} else {
+						panel.classList.add('hidden');
+					}
+				});
+			});
+		});
+	});
+</script>

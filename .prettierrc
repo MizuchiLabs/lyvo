@@ -5,7 +5,7 @@
 	"printWidth": 100,
 	"tabWidth": 4,
 	"plugins": ["prettier-plugin-astro", "prettier-plugin-tailwindcss"],
-	"tailwindStylesheet": "./src/styles/global.css",
+	"tailwindStylesheet": "./packages/lyvo/src/styles/global.css",
 	"overrides": [
 		{
 			"files": "*.astro",

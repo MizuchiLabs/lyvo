@@ -1,0 +1,61 @@
+---
+import RepoIcon from 'lyvo/components/base/RepoIcon.astro';
+import { ArrowRight } from '@lucide/astro';
+import config from 'virtual:lyvo-config';
+
+// Re-implement getProvider here since it's not exported
+const getProvider = (url: string | undefined, override: string | undefined) => {
+	if (override) return override.toLowerCase();
+	if (!url) return 'github';
+	const _url = url.toLowerCase();
+	if (_url.includes('gitlab.com')) return 'gitlab';
+	if (_url.includes('bitbucket.org')) return 'bitbucket';
+	if (_url.includes('codeberg.org')) return 'codeberg';
+	if (_url.includes('gitea.com')) return 'gitea';
+	if (_url.includes('forgejo.org')) return 'forgejo';
+	return 'github';
+};
+
+const repoURL = config.repo?.url;
+const repoType = getProvider(repoURL, config.repo?.provider);
+---
+
+<div class="flex flex-1 flex-col items-center justify-center pt-8 pb-4 text-center">
+	<div
+		class="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary backdrop-blur-sm md:text-sm"
+	>
+		<span class="flex h-2 w-2 animate-pulse rounded-full bg-primary"></span>
+		Open Source Documentation Template
+	</div>
+
+	<h1
+		class="mb-4 text-4xl font-extrabold tracking-tighter text-foreground sm:text-6xl md:text-7xl lg:text-8xl"
+	>
+		Professional docs, <br />
+		<span class="text-primary italic">built for developers.</span>
+	</h1>
+
+	<p class="mb-8 max-w-2xl text-base text-balance text-muted-foreground sm:text-lg">
+		A structured, highly-extensible documentation framework for Astro. Focused on technical
+		clarity, speed, and standard-compliant architecture.
+	</p>
+
+	<div class="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
+		<a href="/docs" class="w-full sm:w-auto">
+			<button
+				class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-8 font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+			>
+				Get Started <ArrowRight size={16} />
+			</button>
+		</a>
+
+		<a href={repoURL} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+			<button
+				class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-6 font-semibold text-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+			>
+				<RepoIcon class="size-5 dark:invert" />
+				View on {repoType.charAt(0).toUpperCase() + repoType.slice(1)}
+			</button>
+		</a>
+	</div>
+</div>

@@ -1,0 +1,45 @@
+---
+import { tryReadOpenAPIModel } from '../../lib/openapi/model';
+import { cn } from '../../lib/utils';
+import { BookOpen, Terminal } from '@lucide/astro';
+
+const openapiModel = await tryReadOpenAPIModel();
+const hasApiMode =
+	(openapiModel?.operations?.length ?? 0) + (openapiModel?.webhooks?.length ?? 0) > 0;
+
+const currentPath = Astro.url.pathname;
+const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs';
+---
+
+{
+	hasApiMode && (
+		<div class="px-4 pt-8 pb-4">
+			<div class="flex items-center justify-between rounded-lg bg-muted/40 p-0.5 ring-1 ring-border/50 ring-inset">
+				<a
+					href="/docs"
+					class={cn(
+						'flex w-full items-center justify-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold transition-all duration-200',
+						activeMode === 'docs'
+							? 'bg-background text-foreground shadow-sm ring-1 ring-border/50'
+							: 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+					)}
+				>
+					<BookOpen size={14} />
+					Guides
+				</a>
+				<a
+					href="/api"
+					class={cn(
+						'flex w-full items-center justify-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold transition-all duration-200',
+						activeMode === 'api'
+							? 'bg-background text-foreground shadow-sm ring-1 ring-border/50'
+							: 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+					)}
+				>
+					<Terminal size={14} />
+					Reference
+				</a>
+			</div>
+		</div>
+	)
+}

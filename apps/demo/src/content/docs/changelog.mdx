@@ -1,0 +1,21 @@
+---
+title: Changelog
+description: Example of how to use the changelog component.
+order: 2
+---
+
+import Changelog from 'lyvo/components/docs/Changelog.astro';
+
+You can render a local `CHANGELOG.md` file, or fetch one remotely from GitHub using the `url` prop!
+
+<Changelog />
+
+```astro
+Example using a local CHANGELOG.md file:
+
+<Changelog />
+
+Example for remote fetching:
+
+<Changelog url="https://raw.githubusercontent.com/mizuchilabs/lyvo/main/CHANGELOG.md" />
+```

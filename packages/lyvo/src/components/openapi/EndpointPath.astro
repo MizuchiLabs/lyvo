@@ -1,0 +1,101 @@
+---
+import { Webhook, Copy, Check } from '@lucide/astro';
+import type { HttpMethod } from '../../lib/openapi/types';
+
+interface Props {
+	endpoint: any;
+	isWebhook: boolean;
+}
+
+const { endpoint, isWebhook } = Astro.props;
+
+const methodColor = {
+	get: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5',
+	post: 'text-blue-600 dark:text-blue-400 border-blue-500/30 bg-blue-500/5',
+	put: 'text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/5',
+	patch: 'text-yellow-600 dark:text-yellow-300 border-yellow-500/30 bg-yellow-500/5',
+	delete: 'text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/5',
+	head: 'text-violet-600 dark:text-violet-300 border-violet-500/30 bg-violet-500/5',
+	options: 'text-cyan-600 dark:text-cyan-400 border-cyan-500/30 bg-cyan-500/5',
+	trace: 'text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30 bg-fuchsia-500/5'
+} as const;
+
+const methodLabel = endpoint.method.toUpperCase();
+const baseUrl =
+	endpoint.servers && endpoint.servers.length > 0
+		? endpoint.servers[0].url.replace(/\/$/, '')
+		: '';
+const fullUrl = `${baseUrl}${endpoint.path}`;
+---
+
+<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+	{
+		isWebhook ? (
+			<span class="inline-flex items-center gap-1.5 rounded-md border border-fuchsia-500/30 bg-fuchsia-500/10 px-2.5 py-1 text-xs font-semibold tracking-wide text-fuchsia-600 uppercase dark:text-fuchsia-300">
+				<Webhook size={14} />
+				{methodLabel}
+			</span>
+		) : (
+			<span
+				class:list={[
+					'rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide uppercase',
+					methodColor[endpoint.method as HttpMethod]
+				]}
+			>
+				{methodLabel}
+			</span>
+		)
+	}
+
+	<div
+		class="flex min-w-0 flex-1 items-center gap-1 rounded-md border border-border/70 bg-muted/40 px-1 py-1 sm:gap-2"
+	>
+		<code
+			class="no-scrollbar min-w-0 flex-1 overflow-auto px-2 py-1 text-sm font-medium whitespace-nowrap"
+		>
+			{baseUrl ? <span class="text-muted-foreground/70 select-none">{baseUrl}</span> : null}
+			<span class="-ml-1 text-foreground">{endpoint.path}</span>
+		</code>
+
+		<button
+			type="button"
+			class="api-copy-btn inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted-foreground/20 hover:text-foreground"
+			data-url={fullUrl}
+			aria-label="Copy endpoint URL"
+			title="Copy URL"
+		>
+			<Copy size={14} class="copy-icon" />
+			<Check size={14} class="check-icon hidden text-emerald-500" />
+		</button>
+	</div>
+</div>
+
+<script>
+	document.addEventListener('astro:page-load', () => {
+		document.querySelectorAll('.api-copy-btn').forEach((btn) => {
+			if (btn.getAttribute('data-copy-bound') === 'true') return;
+			btn.setAttribute('data-copy-bound', 'true');
+
+			btn.addEventListener('click', async () => {
+				const url = btn.getAttribute('data-url');
+				if (!url) return;
+
+				try {
+					await navigator.clipboard.writeText(url);
+					const copyIcon = btn.querySelector('.copy-icon');
+					const checkIcon = btn.querySelector('.check-icon');
+
+					copyIcon?.classList.add('hidden');
+					checkIcon?.classList.remove('hidden');
+
+					setTimeout(() => {
+						copyIcon?.classList.remove('hidden');
+						checkIcon?.classList.add('hidden');
+					}, 2000);
+				} catch (err) {
+					console.error('Failed to copy: ', err);
+				}
+			});
+		});
+	});
+</script>
