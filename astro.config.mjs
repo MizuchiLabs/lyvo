@@ -7,8 +7,10 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import svgr from 'vite-plugin-svgr';
 import lyvo from './src/integration.ts';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
+	site: 'https://example.com',
 	vite: {
 		plugins: [tailwindcss(), svgr()]
 	},
@@ -82,6 +84,7 @@ export default defineConfig({
 				groupBy: 'tag'
 			}
 		}),
+		sitemap(),
 		react(),
 		mdx()
 	]
