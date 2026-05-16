@@ -19,50 +19,63 @@ if (entry) {
 
 {
 	entry && (
-		<div class="mt-10 space-y-6">
-			<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+		<div class="space-y-6">
+			<div class="border-t border-border" />
+			<div class="flex flex-wrap items-center justify-between gap-4 px-2">
 				<Feedback />
 				<EditPageLink filePath={entry.filePath} />
 			</div>
 
-			<div class="flex gap-4 border-t border-border pt-8">
-				{prevDoc && (
+			<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+				{prevDoc ? (
 					<a
 						href={`/docs/${prevDoc.id}`}
-						class="flex flex-1 flex-col justify-center rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+						class="group flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 					>
-						<div class="flex items-center gap-1 text-base font-semibold">
+						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 							<ChevronLeft
-								class="transition-transform group-hover:-translate-x-1"
 								size={16}
+								class="transition-transform duration-300 group-hover:-translate-x-1"
 							/>
-							{prevDoc.data.title}
+							Previous
 						</div>
-						{prevDoc.data.description && (
-							<div class="mt-1 line-clamp-1 pl-3 text-sm text-muted-foreground">
-								{prevDoc.data.description}
-							</div>
-						)}
+						<div class="transition-colors">
+							<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
+								{prevDoc.data.title}
+							</p>
+							{prevDoc.data.description && (
+								<p class="line-clamp-1 text-sm text-muted-foreground/80">
+									{prevDoc.data.description}
+								</p>
+							)}
+						</div>
 					</a>
+				) : (
+					<div />
 				)}
+
 				{nextDoc && (
 					<a
 						href={`/docs/${nextDoc.id}`}
-						class="group ml-auto flex flex-1 flex-col justify-center rounded-lg border border-border bg-card p-4 text-right text-card-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+						class="group flex flex-col items-end gap-2 rounded-xl border border-border bg-card p-5 text-right text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 					>
-						<div class="flex items-center justify-end gap-1 text-base font-semibold">
-							{nextDoc.data.title}
-
+						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+							Next
 							<ChevronRight
-								class="transition-transform group-hover:translate-x-1"
 								size={16}
+								class="transition-transform duration-300 group-hover:translate-x-1"
 							/>
 						</div>
-						{nextDoc.data.description && (
-							<div class="mt-1 line-clamp-1 pr-3 text-sm text-muted-foreground">
-								{nextDoc.data.description}
-							</div>
-						)}
+						<div class="transition-colors">
+							<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
+								{nextDoc.data.title}
+							</p>
+							{nextDoc.data.description && (
+								<p class="line-clamp-1 text-sm text-muted-foreground/80">
+									{nextDoc.data.description}
+								</p>
+							)}{' '}
+						</div>
 					</a>
 				)}
 			</div>
