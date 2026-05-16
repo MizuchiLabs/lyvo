@@ -1,17 +1,17 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import type { OpenAPIModel } from './types';
+import { getEntry } from 'astro:content';
 
-const DEFAULT_MODEL_PATH = path.resolve('src/content/api/openapi-model.json');
-
-export function readOpenAPIModel(modelPath: string = DEFAULT_MODEL_PATH): OpenAPIModel {
-	const content = fs.readFileSync(modelPath, 'utf-8');
-	return JSON.parse(content) as OpenAPIModel;
+export async function readOpenAPIModel(): Promise<OpenAPIModel> {
+	const entry = await getEntry('api', 'openapi-model');
+	if (!entry) {
+		throw new Error('OpenAPI model not found. Ensure the API collection is configured correctly.');
+	}
+	return entry.data as unknown as OpenAPIModel;
 }
 
-export function tryReadOpenAPIModel(modelPath: string = DEFAULT_MODEL_PATH): OpenAPIModel | null {
+export async function tryReadOpenAPIModel(): Promise<OpenAPIModel | null> {
 	try {
-		return readOpenAPIModel(modelPath);
+		return await readOpenAPIModel();
 	} catch {
 		return null;
 	}
@@ -24,3 +24,4 @@ export function getOpenAPIOperationBySlug(model: OpenAPIModel, slug: string) {
 export function getOpenAPIWebhookBySlug(model: OpenAPIModel, slug: string) {
 	return model.webhooks.find((webhook) => webhook.slug === slug) ?? null;
 }
+

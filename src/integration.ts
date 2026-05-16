@@ -1,7 +1,5 @@
 import type { AstroIntegration } from 'astro';
 import { z } from 'astro/zod';
-import { spawnSync } from 'node:child_process';
-import path from 'node:path';
 
 export const LyvoOptionsSchema = z.object({
 	title: z.string().optional(),
@@ -43,7 +41,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 	return {
 		name: 'lyvo',
 		hooks: {
-			'astro:config:setup': ({ updateConfig, logger }) => {
+			'astro:config:setup': ({ updateConfig }) => {
 				updateConfig({
 					vite: {
 						plugins: [
@@ -77,33 +75,6 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 						]
 					}
 				});
-
-				if (options.openapi?.input) {
-					logger.info('[openapi] Generating model...');
-					const scriptPath = path.resolve('scripts/generate-openapi-model.mjs');
-
-					const args = [scriptPath, '--input', options.openapi.input];
-
-					if (options.openapi.groupBy) {
-						args.push('--group-by', options.openapi.groupBy);
-					}
-
-					const result = spawnSync('node', args, {
-						stdio: 'inherit'
-					});
-
-					if (result.error) {
-						logger.error(
-							'[openapi] Failed to start generator: ' + result.error.message
-						);
-					} else if (result.status !== 0) {
-						logger.error(
-							'[openapi] Generator script exited with status ' + result.status
-						);
-					} else {
-						logger.info('[openapi] Model generated successfully.');
-					}
-				}
 			}
 		}
 	};

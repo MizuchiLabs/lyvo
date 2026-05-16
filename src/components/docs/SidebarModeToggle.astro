@@ -3,9 +3,9 @@ import { tryReadOpenAPIModel } from '@/lib/openapi/model';
 import { cn } from '@/lib/utils';
 import { BookOpen, Terminal } from '@lucide/astro';
 
-const openapiModel = tryReadOpenAPIModel();
+const openapiModel = await tryReadOpenAPIModel();
 const hasApiMode =
-	(openapiModel?.operations.length ?? 0) + (openapiModel?.webhooks.length ?? 0) > 0;
+	(openapiModel?.operations?.length ?? 0) + (openapiModel?.webhooks?.length ?? 0) > 0;
 
 const currentPath = Astro.url.pathname;
 const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs';

@@ -18,7 +18,8 @@ const methodClassMap = {
 // Fetch categorized and ordered hierarchy from library function
 const { topLevelItems } = await getDocsHierarchy();
 
-const apiGroups = tryReadOpenAPIModel()?.navigation ?? [];
+const model = await tryReadOpenAPIModel();
+const apiGroups = model?.navigation ?? [];
 
 const currentPath = Astro.url.pathname;
 const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';

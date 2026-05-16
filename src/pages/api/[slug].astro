@@ -18,10 +18,10 @@ import Authorization from '@/components/openapi/Authorization.astro';
 import EndpointPath from '@/components/openapi/EndpointPath.astro';
 import { ExternalLink } from '@lucide/astro';
 
-const model = tryReadOpenAPIModel();
+const model = await tryReadOpenAPIModel();
 
 export async function getStaticPaths() {
-	const model = tryReadOpenAPIModel();
+	const model = await tryReadOpenAPIModel();
 	if (!model) return [];
 
 	return [...model.operations, ...model.webhooks].map((endpoint) => ({

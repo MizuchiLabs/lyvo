@@ -1,44 +1,13 @@
 import fs from 'node:fs/promises';
-import fsSync from 'node:fs';
 import path from 'node:path';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import OpenAPISampler from 'openapi-sampler';
+import type { Loader } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
-function parseArgs(argv) {
-	const options = {
-		input: 'public/openapi.json',
-		output: 'src/content/api/openapi-model.json',
-		groupBy: 'tag'
-	};
 
-	for (let i = 0; i < argv.length; i++) {
-		const arg = argv[i];
-		if (arg === '--input') {
-			options.input = argv[i + 1] ?? options.input;
-			i++;
-			continue;
-		}
-
-		if (arg === '--output') {
-			options.output = argv[i + 1] ?? options.output;
-			i++;
-			continue;
-		}
-
-		if (arg === '--group-by') {
-			const value = argv[i + 1];
-			if (value === 'tag' || value === 'path') {
-				options.groupBy = value;
-			}
-			i++;
-		}
-	}
-
-	return options;
-}
-
-function toTitle(value) {
+function toTitle(value: any) {
 	if (!value) return 'Untitled';
 	const normalized = value
 		.replaceAll(/[{}]/g, '')
@@ -51,11 +20,11 @@ function toTitle(value) {
 
 	return normalized
 		.split(' ')
-		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
 		.join(' ');
 }
 
-function normalizePathForSlug(value) {
+function normalizePathForSlug(value: string) {
 	return value
 		.replaceAll(/\{([^}]+)\}/g, '$1')
 		.replaceAll(/[^a-zA-Z0-9/]+/g, '-')
@@ -63,7 +32,7 @@ function normalizePathForSlug(value) {
 		.replaceAll(/\/+/g, '/');
 }
 
-function makeSlug(method, apiPath, operationId) {
+function makeSlug(method: string, apiPath: string, operationId: string) {
 	if (operationId && operationId.trim().length > 0) {
 		return operationId
 			.trim()
@@ -76,7 +45,7 @@ function makeSlug(method, apiPath, operationId) {
 	return `${method}-${pathPart || 'root'}`;
 }
 
-function resolveRef(ref, document) {
+function resolveRef(ref: any, document: any) {
 	if (typeof ref !== 'string' || !ref.startsWith('#/')) return undefined;
 
 	const parts = ref
@@ -96,7 +65,7 @@ function resolveRef(ref, document) {
 	return current;
 }
 
-function deepResolve(value, document, stack = new Set()) {
+function deepResolve(value: any, document: any, stack = new Set()): any {
 	if (Array.isArray(value)) {
 		return value.map((item) => deepResolve(item, document, stack));
 	}
@@ -127,7 +96,7 @@ function deepResolve(value, document, stack = new Set()) {
 	return value;
 }
 
-function collectExamples(examples) {
+function collectExamples(examples: any) {
 	if (examples === undefined || examples === null) return [];
 
 	if (Array.isArray(examples)) {
@@ -140,7 +109,7 @@ function collectExamples(examples) {
 	for (const item of Object.values(examples)) {
 		if (item === undefined || item === null) continue;
 		if (typeof item === 'object' && 'value' in item) {
-			values.push(item.value);
+			values.push((item as any).value);
 			continue;
 		}
 
@@ -150,34 +119,31 @@ function collectExamples(examples) {
 	return values;
 }
 
-function resolveSchemaType(schema) {
+function resolveSchemaType(schema: any) {
 	if (!schema || typeof schema !== 'object') return undefined;
 
 	if (typeof schema.type === 'string') return schema.type;
 	if (Array.isArray(schema.type)) {
-		return schema.type.filter((value) => typeof value === 'string').join(' | ') || undefined;
+		return schema.type.filter((value: any) => typeof value === 'string').join(' | ') || undefined;
 	}
 
 	return undefined;
 }
 
-function sampleSchema(schema, document) {
+function sampleSchema(schema: any, document: any) {
 	if (!schema) return undefined;
 
 	try {
-		return OpenAPISampler.sample(schema, document, {
-			skipNonRequired: false,
-			xml: false
-		});
+		return OpenAPISampler.sample(schema, undefined, document);
 	} catch {
 		return undefined;
 	}
 }
 
-function mapMediaContent(content, document) {
+function mapMediaContent(content: any, document: any) {
 	if (!content || typeof content !== 'object') return [];
 
-	return Object.entries(content).map(([mediaType, mediaEntry]) => {
+	return Object.entries(content).map(([mediaType, mediaEntry]: [string, any]) => {
 		const resolved = deepResolve(mediaEntry, document);
 		const schema = deepResolve(resolved?.schema, document);
 		const examples = [
@@ -196,7 +162,7 @@ function mapMediaContent(content, document) {
 	});
 }
 
-function mergeParameters(pathParameters, operationParameters) {
+function mergeParameters(pathParameters: any, operationParameters: any) {
 	const merged = [];
 	const keys = new Set();
 
@@ -212,7 +178,7 @@ function mergeParameters(pathParameters, operationParameters) {
 	return merged;
 }
 
-function mapSecurity(operationSecurity, rootSecurity, components, document) {
+function mapSecurity(operationSecurity: any, rootSecurity: any, components: any, document: any) {
 	const requirements = operationSecurity ?? rootSecurity ?? [];
 	if (!Array.isArray(requirements)) return [];
 
@@ -240,7 +206,7 @@ function mapSecurity(operationSecurity, rootSecurity, components, document) {
 		.filter((item) => item.type !== 'unknown');
 }
 
-function headerLine(headers) {
+function headerLine(headers: any) {
 	if (Object.keys(headers).length === 0) return '';
 
 	return Object.entries(headers)
@@ -248,7 +214,7 @@ function headerLine(headers) {
 		.join(' \\\n');
 }
 
-function buildUrl(baseUrl, apiPath, queryParameters) {
+function buildUrl(baseUrl: string, apiPath: string, queryParameters: any[]) {
 	const query = queryParameters
 		.map(
 			(parameter) =>
@@ -262,12 +228,12 @@ function buildUrl(baseUrl, apiPath, queryParameters) {
 	return `${url}?${query}`;
 }
 
-function toJsonBlock(value) {
+function toJsonBlock(value: any) {
 	if (value === undefined) return undefined;
 	return JSON.stringify(value, null, 2);
 }
 
-function buildSnippets({ method, url, headers, bodyExample }) {
+function buildSnippets({ method, url, headers, bodyExample }: any) {
 	const methodUpper = method.toUpperCase();
 	const headerString = headerLine(headers);
 	const jsonBody = toJsonBlock(bodyExample);
@@ -279,7 +245,7 @@ function buildSnippets({ method, url, headers, bodyExample }) {
 		curlLines.push(`  -d '${jsonBody.replaceAll("'", "'\\''")}'`);
 	}
 
-	const jsHeaders = Object.keys(headers).length > 0 ? { ...headers } : {};
+	const jsHeaders: any = Object.keys(headers).length > 0 ? { ...headers } : {};
 	if (jsonBody) jsHeaders['Content-Type'] = 'application/json';
 
 	const jsSnippet = [
@@ -293,7 +259,7 @@ function buildSnippets({ method, url, headers, bodyExample }) {
 		'console.log(data);'
 	].join('\n');
 
-	const pythonHeaders = Object.keys(headers).length > 0 ? { ...headers } : {};
+	const pythonHeaders: any = Object.keys(headers).length > 0 ? { ...headers } : {};
 	if (jsonBody) pythonHeaders['Content-Type'] = 'application/json';
 
 	const pythonSnippet = [
@@ -394,8 +360,8 @@ function buildSnippets({ method, url, headers, bodyExample }) {
 	];
 }
 
-function defaultHeadersFromSecurity(security) {
-	const headers = {};
+function defaultHeadersFromSecurity(security: any) {
+	const headers: any = {};
 
 	for (const item of security) {
 		if (item.type === 'http' && item.scheme === 'bearer') {
@@ -424,15 +390,15 @@ function mapOperation({
 	operation,
 	defaultServers,
 	rootSecurity
-}) {
+}: any) {
 	const slug = makeSlug(method, apiPath, operation.operationId);
 	const id = `${method.toUpperCase()} ${apiPath}`;
 
 	const mergedParameters = mergeParameters(pathItem.parameters, operation.parameters)
-		.map((parameter) => deepResolve(parameter, document))
+		.map((parameter: any) => deepResolve(parameter, document))
 		.filter(Boolean);
 
-	const mappedParameters = mergedParameters.map((parameter) => {
+	const mappedParameters = mergedParameters.map((parameter: any) => {
 		const schema = deepResolve(parameter.schema, document);
 		const examples = [
 			...collectExamples(parameter.examples),
@@ -469,7 +435,7 @@ function mapOperation({
 			}
 		: undefined;
 
-	const responses = Object.entries(operation.responses ?? {}).map(([status, response]) => {
+	const responses = Object.entries(operation.responses ?? {}).map(([status, response]: [string, any]) => {
 		const resolved = deepResolve(response, document);
 		return {
 			status,
@@ -481,17 +447,17 @@ function mapOperation({
 	const security = mapSecurity(operation.security, rootSecurity, document.components, document);
 
 	const servers = (operation.servers ?? pathItem.servers ?? defaultServers ?? []).map(
-		(server) => ({
+		(server: any) => ({
 			url: server.url,
 			description: server.description
 		})
 	);
 
 	const primaryServer = servers[0]?.url ?? defaultServers?.[0]?.url ?? 'https://api.example.com';
-	const queryParameters = mappedParameters.filter((parameter) => parameter.in === 'query');
+	const queryParameters = mappedParameters.filter((parameter: any) => parameter.in === 'query');
 	const snippetUrl = buildUrl(primaryServer, apiPath, queryParameters);
 	const bodyExample =
-		requestBody?.content.find((item) => item.mediaType === 'application/json')?.example ??
+		requestBody?.content.find((item: any) => item.mediaType === 'application/json')?.example ??
 		requestBody?.content[0]?.example;
 	const securityHeaders = defaultHeadersFromSecurity(security);
 
@@ -527,7 +493,7 @@ function mapOperation({
 	};
 }
 
-function mapWebhooks(document, defaultServers, rootSecurity) {
+function mapWebhooks(document: any, defaultServers: any, rootSecurity: any) {
 	if (!document.webhooks || typeof document.webhooks !== 'object') return [];
 
 	const output = [];
@@ -573,7 +539,7 @@ function mapWebhooks(document, defaultServers, rootSecurity) {
 	return output;
 }
 
-function buildNavigation(operations, webhooks, groupBy) {
+function buildNavigation(operations: any[], webhooks: any[], groupBy: string) {
 	const groups = new Map();
 	const allItems = [...operations, ...webhooks.map((w) => ({ ...w, isWebhook: true }))];
 
@@ -607,14 +573,14 @@ function buildNavigation(operations, webhooks, groupBy) {
 				.replaceAll(/[^a-z0-9]+/g, '-')
 				.replaceAll(/^-+|-+$/g, ''),
 			title: toTitle(title),
-			items: items.sort((a, b) => {
+			items: items.sort((a: any, b: any) => {
 				if (a.path === b.path) return a.method.localeCompare(b.method);
 				return a.path.localeCompare(b.path);
 			})
 		}));
 }
 
-function buildTags(document, operations) {
+function buildTags(document: any, operations: any[]) {
 	const tagMap = new Map();
 
 	for (const tag of document.tags ?? []) {
@@ -639,84 +605,83 @@ function buildTags(document, operations) {
 		}
 	}
 
-	return Array.from(tagMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+	return Array.from(tagMap.values()).sort((a: any, b: any) => a.name.localeCompare(b.name));
 }
 
-async function generate() {
-	const options = parseArgs(process.argv.slice(2));
-	const inputPath = path.resolve(options.input);
-	const outputPath = path.resolve(options.output);
+export interface OpenAPILoaderOptions {
+	input: string;
+	groupBy?: 'tag' | 'path';
+}
 
-	const document = await SwaggerParser.validate(inputPath, {
-		validate: {
-			schema: true,
-			spec: true
-		},
-		dereference: {
-			circular: 'ignore'
+export function openapiLoader(options: OpenAPILoaderOptions): Loader {
+	return {
+		name: 'openapi-loader',
+		load: async ({ store, logger }) => {
+			const inputPath = path.resolve(options.input);
+
+			logger.info(`Validating OpenAPI document at ${options.input}...`);
+			const document = await SwaggerParser.validate(inputPath, {
+				validate: { schema: true, spec: true },
+				dereference: { circular: 'ignore' }
+			});
+
+			const defaultServers = Array.isArray(document.servers)
+				? document.servers.map((server: any) => ({ url: server.url, description: server.description }))
+				: [];
+
+			const rootSecurity = Array.isArray(document.security) ? document.security : [];
+
+			const operations = [];
+			for (const [apiPath, rawPathItem] of Object.entries(document.paths ?? {})) {
+				const pathItem = deepResolve(rawPathItem, document);
+				for (const method of HTTP_METHODS) {
+					const operation = pathItem?.[method];
+					if (!operation) continue;
+
+					operations.push(
+						mapOperation({
+							document,
+							apiPath,
+							method,
+							pathItem,
+							operation,
+							defaultServers,
+							rootSecurity
+						})
+					);
+				}
+			}
+
+			operations.sort((a, b) => {
+				if (a.path === b.path) return a.method.localeCompare(b.method);
+				return a.path.localeCompare(b.path);
+			});
+
+			const webhooks = mapWebhooks(document, defaultServers, rootSecurity);
+
+			const model = {
+				generatedAt: new Date().toISOString(),
+				source: path.relative(process.cwd(), inputPath),
+				info: {
+					title: document.info?.title ?? 'API',
+					version: document.info?.version ?? '0.0.0',
+					description: document.info?.description
+				},
+				servers: defaultServers,
+				tags: buildTags(document, operations),
+				navigation: buildNavigation(operations, webhooks, options.groupBy ?? 'tag'),
+				operations,
+				webhooks
+			};
+
+			store.clear();
+			
+			store.set({
+				id: 'openapi-model',
+				data: model
+			});
+
+			logger.info(`Loaded OpenAPI model with ${operations.length} operations and ${webhooks.length} webhooks.`);
 		}
-	});
-
-	const defaultServers = Array.isArray(document.servers)
-		? document.servers.map((server) => ({ url: server.url, description: server.description }))
-		: [];
-
-	const rootSecurity = Array.isArray(document.security) ? document.security : [];
-
-	const operations = [];
-	for (const [apiPath, rawPathItem] of Object.entries(document.paths ?? {})) {
-		const pathItem = deepResolve(rawPathItem, document);
-		for (const method of HTTP_METHODS) {
-			const operation = pathItem?.[method];
-			if (!operation) continue;
-
-			operations.push(
-				mapOperation({
-					document,
-					apiPath,
-					method,
-					pathItem,
-					operation,
-					defaultServers,
-					rootSecurity
-				})
-			);
-		}
-	}
-
-	operations.sort((a, b) => {
-		if (a.path === b.path) return a.method.localeCompare(b.method);
-		return a.path.localeCompare(b.path);
-	});
-
-	const webhooks = mapWebhooks(document, defaultServers, rootSecurity);
-
-	const model = {
-		generatedAt: new Date().toISOString(),
-		source: path.relative(process.cwd(), inputPath),
-		info: {
-			title: document.info?.title ?? 'API',
-			version: document.info?.version ?? '0.0.0',
-			description: document.info?.description
-		},
-		servers: defaultServers,
-		tags: buildTags(document, operations),
-		navigation: buildNavigation(operations, webhooks, options.groupBy),
-		operations,
-		webhooks
 	};
-
-	await fs.mkdir(path.dirname(outputPath), { recursive: true });
-	await fs.writeFile(outputPath, JSON.stringify(model, null, 2));
-
-	console.log(`OpenAPI source: ${path.relative(process.cwd(), inputPath)}`);
-	console.log(`OpenAPI model generated: ${path.relative(process.cwd(), outputPath)}`);
-	console.log(`Operations: ${operations.length}`);
-	console.log(`Webhooks: ${model.webhooks.length}`);
 }
-
-generate().catch((error) => {
-	console.error('Failed to generate OpenAPI model');
-	console.error(error);
-	process.exit(1);
-});
