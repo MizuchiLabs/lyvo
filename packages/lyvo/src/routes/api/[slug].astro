@@ -132,6 +132,8 @@ function formatJson(value: unknown): string {
 											<CodeBlock
 												code={snippet.code}
 												lang={snippet.language as any}
+												wrap={true}
+												class="font-mono text-sm"
 											/>
 										</TabItem>
 									))}
@@ -166,6 +168,8 @@ function formatJson(value: unknown): string {
 												<CodeBlock
 													code={formatJson(jsonContent.example)}
 													lang="json"
+													wrap={true}
+													class="font-mono text-sm"
 												/>
 											</TabItem>
 										);

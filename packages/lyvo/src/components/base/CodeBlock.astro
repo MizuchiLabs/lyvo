@@ -1,10 +1,13 @@
 ---
 import { Code } from 'astro:components';
 import type { ComponentProps } from 'astro/types';
+import { cn } from '../../lib/utils';
 
-type Props = ComponentProps<typeof Code>;
+type Props = ComponentProps<typeof Code> & {
+	wrap?: boolean;
+};
 
-const { theme, themes, code, ...props } = Astro.props;
+const { theme, themes, code, wrap = false, class: className, ...props } = Astro.props;
 
 const defaultThemes = {
 	light: 'github-light',
@@ -14,10 +17,18 @@ const defaultThemes = {
 const passedThemes = themes || (theme ? undefined : defaultThemes);
 ---
 
-{
-	theme ? (
-		<Code theme={theme} code={code} {...props} />
-	) : (
-		<Code themes={passedThemes} code={code} {...props} />
-	)
-}
+<div
+	class={cn(
+		'not-prose relative rounded-lg border border-border/50 bg-muted/40',
+		wrap && '[&>pre]:whitespace-pre-wrap [&>pre]:wrap-break-word',
+		className
+	)}
+>
+	{
+		theme ? (
+			<Code theme={theme} code={code} {...props} />
+		) : (
+			<Code themes={passedThemes} code={code} {...props} />
+		)
+	}
+</div>
