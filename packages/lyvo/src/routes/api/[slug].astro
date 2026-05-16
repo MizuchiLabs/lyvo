@@ -1,5 +1,5 @@
 ---
-import ApiLayout from '../../layouts/ApiLayout.astro';
+import DocsLayout from '../../layouts/DocsLayout.astro';
 import {
 	getOpenAPIOperationBySlug,
 	getOpenAPIWebhookBySlug,
@@ -56,121 +56,126 @@ function formatJson(value: unknown): string {
 }
 ---
 
-<ApiLayout title={endpoint.title} description={endpoint.description ?? endpoint.summary}>
+<DocsLayout
+	title={endpoint.title}
+	description={endpoint.description ?? endpoint.summary}
+	isApi={true}
+>
 	<div
-		class="mx-auto flex w-full max-w-400 flex-col xl:min-h-[calc(100vh-3.5rem)] xl:flex-row xl:gap-8"
+		class="grid w-full grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_450px] 2xl:grid-cols-[1fr_550px]"
 	>
 		{/* LEFT SIDE (DOCS) */}
-		<div class="w-full min-w-0 flex-1 px-4 py-8 sm:px-6 md:py-12 xl:px-8">
-			<div class="mb-10 space-y-4">
-				<h1 class="scroll-m-20 text-3xl font-bold tracking-tight md:text-4xl">
-					{endpoint.title}
-				</h1>
-				{
-					(endpoint.description ?? endpoint.summary) && (
-						<p class="text-base text-muted-foreground md:text-lg">
-							{endpoint.description ?? endpoint.summary}
-						</p>
-					)
-				}
-				{
-					endpoint.raw?.externalDocsUrl && (
-						<div class="pt-2">
-							<a
-								href={endpoint.raw.externalDocsUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
-							>
-								Read External Documentation
-								<ExternalLink size={14} />
-							</a>
-						</div>
-					)
-				}
-				{
-					endpoint.tags.length > 0 && (
-						<div class="flex flex-wrap gap-2">
-							{endpoint.tags.map((tag) => (
-								<span class="rounded-md border border-border bg-sidebar/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-									{tag}
-								</span>
-							))}
-						</div>
-					)
-				}
-			</div>
+		<div class="min-w-0 px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:px-12">
+			<div class="mx-auto max-w-4xl">
+				<div class="mb-10 space-y-4">
+					<h1 class="scroll-m-20 text-3xl font-bold tracking-tight md:text-4xl">
+						{endpoint.title}
+					</h1>
+					{
+						(endpoint.description ?? endpoint.summary) && (
+							<p class="text-base text-muted-foreground md:text-lg">
+								{endpoint.description ?? endpoint.summary}
+							</p>
+						)
+					}
+					{
+						endpoint.raw?.externalDocsUrl && (
+							<div class="pt-2">
+								<a
+									href={endpoint.raw.externalDocsUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+								>
+									Read External Documentation
+									<ExternalLink size={14} />
+								</a>
+							</div>
+						)
+					}
+					{
+						endpoint.tags.length > 0 && (
+							<div class="flex flex-wrap gap-2">
+								{endpoint.tags.map((tag) => (
+									<span class="rounded-md border border-border bg-sidebar/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+										{tag}
+									</span>
+								))}
+							</div>
+						)
+					}
+				</div>
 
-			<div class="space-y-12">
-				<EndpointPath endpoint={endpoint} isWebhook={isWebhook} />
-				<Parameters parameters={endpoint.parameters} />
-				<Authorization security={endpoint.security} />
-				<RequestBody requestBody={endpoint.requestBody} />
-				<Responses responses={endpoint.responses} />
+				<div class="space-y-12">
+					<EndpointPath endpoint={endpoint} isWebhook={isWebhook} />
+					<Parameters parameters={endpoint.parameters} />
+					<Authorization security={endpoint.security} />
+					<RequestBody requestBody={endpoint.requestBody} />
+					<Responses responses={endpoint.responses} />
+				</div>
 			</div>
 		</div>
 
 		{/* RIGHT SIDE (CODE) */}
-		<div
-			class="relative w-full shrink-0 border-t border-border xl:w-112.5 xl:border-t-0 2xl:w-137.5"
-		>
-			<div
-				class="no-scrollbar flex flex-col space-y-8 p-4 sm:p-6 xl:sticky xl:top-14 xl:h-[calc(100vh-3.5rem)] xl:overflow-y-auto xl:px-8 xl:py-12"
-			>
-				{
-					endpoint.snippets.length > 0 && (
-						<div>
-							<h3 class="mb-4 text-sm font-semibold tracking-tight text-foreground">
-								Code Samples
-							</h3>
-							<Tabs>
-								{endpoint.snippets.map((snippet: OpenAPISnippet) => (
-									<TabItem value={snippet.id} label={snippet.label}>
-										<CodeBlock
-											code={snippet.code}
-											lang={snippet.language as any}
-										/>
-									</TabItem>
-								))}
-							</Tabs>
-						</div>
-					)
-				}
-
-				{
-					endpoint.responses.some((r) =>
-						r.content.some((c) => c.example !== undefined)
-					) && (
-						<div>
-							<h3 class="mb-4 text-sm font-semibold tracking-tight text-foreground">
-								Example Responses
-							</h3>
-							<Tabs>
-								{endpoint.responses.map((response) => {
-									const jsonContent = response.content.find(
-										(c) =>
-											c.mediaType.includes('json') || c.example !== undefined
-									);
-									if (!jsonContent || jsonContent.example === undefined)
-										return null;
-
-									return (
-										<TabItem
-											value={`res-${response.status}`}
-											label={response.status}
-										>
+		<div class="border-t border-border bg-muted/10 lg:border-t-0 lg:border-l">
+			<div class="no-scrollbar sticky top-14 h-auto overflow-y-auto p-4 sm:p-6 lg:p-8">
+				<div class="flex flex-col gap-8">
+					{
+						endpoint.snippets.length > 0 && (
+							<div>
+								<h3 class="mb-4 text-sm font-semibold tracking-tight text-foreground/80">
+									Code Samples
+								</h3>
+								<Tabs>
+									{endpoint.snippets.map((snippet: OpenAPISnippet) => (
+										<TabItem value={snippet.id} label={snippet.label}>
 											<CodeBlock
-												code={formatJson(jsonContent.example)}
-												lang="json"
+												code={snippet.code}
+												lang={snippet.language as any}
 											/>
 										</TabItem>
-									);
-								})}
-							</Tabs>
-						</div>
-					)
-				}
+									))}
+								</Tabs>
+							</div>
+						)
+					}
+
+					{
+						endpoint.responses.some((r) =>
+							r.content.some((c) => c.example !== undefined)
+						) && (
+							<div>
+								<h3 class="mb-4 text-sm font-semibold tracking-tight text-foreground/80">
+									Example Responses
+								</h3>
+								<Tabs>
+									{endpoint.responses.map((response) => {
+										const jsonContent = response.content.find(
+											(c) =>
+												c.mediaType.includes('json') ||
+												c.example !== undefined
+										);
+										if (!jsonContent || jsonContent.example === undefined)
+											return null;
+
+										return (
+											<TabItem
+												value={`res-${response.status}`}
+												label={response.status}
+											>
+												<CodeBlock
+													code={formatJson(jsonContent.example)}
+													lang="json"
+												/>
+											</TabItem>
+										);
+									})}
+								</Tabs>
+							</div>
+						)
+					}
+				</div>
 			</div>
 		</div>
 	</div>
-</ApiLayout>
+</DocsLayout>
