@@ -3,112 +3,54 @@
 <br><br>
 <img alt="GitHub Tag" src="https://img.shields.io/github/v/tag/MizuchiLabs/lyvo?label=Version">
 <img alt="GitHub License" src="https://img.shields.io/github/license/MizuchiLabs/lyvo">
-<img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/MizuchiLabs/lyvo">
 </p>
 
 # Lyvo
 
-Lyvo is a highly polished, minimalistic, and modern documentation generator built on top of [Astro](https://astro.build/). It draws inspiration from beautiful documentation tools like Fumadocs and Mintlify, providing a solid foundation to build your own custom documentation sites quickly.
+Lyvo is a highly polished, minimalistic, and modern documentation generator package for [Astro](https://astro.build/). It provides a solid foundation to build custom documentation sites and rich API references quickly.
+
+## Project Structure
+
+This project is a monorepo managed with `pnpm` workspaces:
+
+- `packages/lyvo/`: The core Astro integration and UI components. This is the main package.
+- `apps/demo/`: A demo Astro application using the `lyvo` package. Use this for local testing and development.
+
+## Development Setup
+
+To get started with development:
+
+1. **Install dependencies:**
+
+   ```bash
+   pnpm install
+   ```
+
+2. **Start the dev server:**
+   ```bash
+   pnpm dev
+   ```
+   This will spin up the `apps/demo` site where you can preview changes to the package.
 
 ## Features
 
-- **Blazing Fast**: Powered by Astro and Vite for instant load times.
-- **Modern Design**: Clean typography and UI inspired by modern developer tools.
-- **Dark Mode**: Fully supported out of the box with a slick theme toggle.
-- **Full Text Search**: Built-in blazing fast search powered by Pagefind.
-- **Rich Components**: Includes `Tabs`, `Steps`, `Callout`, and `CodeBlock` components.
-- **shadcn/ui**: Easy to extend and maintain, leveraging Tailwind CSS v4 and React.
-- **MDX Support**: Write content using MDX for ultimate flexibility.
+- **Unified Layout:** Seamlessly switch between Markdown guides (`/docs`) and API references (`/api`) with a smooth, morphing transition.
+- **Scalar-like API Docs:** A dedicated, fully responsive two-column grid layout for OpenAPI references with sticky code snippets.
+- **MDX Support:** Write content using MDX with rich built-in components (`Tabs`, `Callout`, `Steps`, etc.).
+- **Built-in Search:** Lightning-fast offline search powered by Pagefind.
+- **Dark Mode:** Native dark mode with a toggle.
 
-## Getting Started
+## Building the Demo
 
-The fastest way to start a new project with Lyvo is to use the `create astro` CLI with the template flag:
-
-```bash
-# npm
-npm create astro@latest -- --template MizuchiLabs/lyvo
-
-# pnpm
-pnpm create astro@latest --template MizuchiLabs/lyvo
-
-# yarn
-yarn create astro --template MizuchiLabs/lyvo
-```
-
-Then, navigate into your new project, install dependencies, and start the development server:
-
-```bash
-cd my-lyvo-docs
-pnpm install
-pnpm dev
-```
-
-## Usage
-
-### Folder Structure
-
-- `src/content/docs/`: Your markdown/mdx content lives here. Create folders to organize.
-- `src/components/`: Reusable UI components.
-- `src/layouts/`: Base and Docs layouts.
-
-### Adding New Pages
-
-Simply create a new `.md` or `.mdx` file in `src/content/docs/`. The layout will automatically pick it up and add it to the sidebar based on its category frontmatter property.
-
-**Example Frontmatter:**
-
-```yaml
----
-title: Introduction
-description: Welcome to Lyvo.
-category: Getting Started
-order: 1
----
-```
-
-### OpenAPI Docs Mode
-
-Lyvo can generate a normalized API model from an OpenAPI JSON/YAML file and render it in a dedicated API mode under `/api`.
-
-1. Set your source spec in `src/content/api/openapi.config.json` (`input` supports `.json` and `.yaml`).
-2. Run:
-
-```bash
-pnpm openapi:generate
-```
-
-This writes `src/content/api/openapi-model.json`. Once generated, a `Docs / API` toggle appears in the sidebar automatically.
-
-OpenAPI generation also runs automatically before `pnpm build` when `src/content/api/openapi.config.json` exists and is enabled.
-
-To disable automatic generation, set:
-
-```json
-{
-	"enabled": false
-}
-```
-
-## Components
-
-Lyvo comes with a few essential components specifically tailored for documentation:
-
-- `<Tabs />`: Great for code snippets or switchable content.
-- `<Steps />`: To guide users through sequential instructions.
-- `<Callout />`: Useful for warnings, info, or tips (success, danger, warning, default).
-- `<CodeBlock />`: Beautiful code highlighting with a copy-to-clipboard button.
-
-## Building for Production
+To build the demo application for production (which also runs the Pagefind indexer):
 
 ```bash
 pnpm build
 ```
 
-This command builds your Astro project and subsequently indexes the static output with `pagefind` to enable search.
-
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details
+Apache License 2.0 - See [LICENSE](LICENSE)
 
 ## Contributing
 
