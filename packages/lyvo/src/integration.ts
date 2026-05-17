@@ -80,21 +80,21 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 
 				injectRoute({
 					pattern: '/docs/[...slug]',
-					entrypoint: 'lyvo/routes/docs/[...slug].astro'
+					entrypoint: '@mizuchilabs/lyvo/routes/docs/[...slug].astro'
 				});
 				injectRoute({
 					pattern: '/docs',
-					entrypoint: 'lyvo/routes/docs/index.astro'
+					entrypoint: '@mizuchilabs/lyvo/routes/docs/index.astro'
 				});
 
 				if (options.openapi?.input) {
 					injectRoute({
 						pattern: '/api/[slug]',
-						entrypoint: 'lyvo/routes/api/[slug].astro'
+						entrypoint: '@mizuchilabs/lyvo/routes/api/[slug].astro'
 					});
 					injectRoute({
 						pattern: '/api',
-						entrypoint: 'lyvo/routes/api/index.astro'
+						entrypoint: '@mizuchilabs/lyvo/routes/api/index.astro'
 					});
 				}
 			},
