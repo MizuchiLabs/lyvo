@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.astro"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.astro"
+      - "**/package.json"
+      - "**/pnpm-lock.yaml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Build frontend
+        run: |
+          cd web
+          pnpm install
+          pnpm lint
+          pnpm build
