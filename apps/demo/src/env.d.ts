@@ -1,2 +1,2 @@
 /// <reference types="astro/client" />
-/// <reference types="lyvo/types" />
+/// <reference types="@mizuchilabs/lyvo/types" />
