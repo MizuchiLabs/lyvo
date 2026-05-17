@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import svgr from 'vite-plugin-svgr';
-import lyvo from 'lyvo';
+import lyvo from '@mizuchilabs/lyvo';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
