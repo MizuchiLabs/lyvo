@@ -1,17 +1,17 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":semanticCommits", ":disableDependencyDashboard"],
-  "timezone": "Europe/Vienna",
-  "lockFileMaintenance": { "enabled": true },
-  "packageRules": [
-    {
-      "matchPackagePatterns": ["*"],
-      "automerge": true,
-      "automergeType": "branch"
-    }
-  ],
-  "platformAutomerge": true,
-  "separateMinorPatch": true,
-  "vulnerabilityAlerts": { "enabled": true },
-  "osvVulnerabilityAlerts": true
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", ":semanticCommits", ":disableDependencyDashboard"],
+	"timezone": "Europe/Vienna",
+	"lockFileMaintenance": { "enabled": true },
+	"packageRules": [
+		{
+			"matchPackagePatterns": ["*"],
+			"automerge": true,
+			"automergeType": "branch"
+		}
+	],
+	"platformAutomerge": true,
+	"separateMinorPatch": true,
+	"vulnerabilityAlerts": { "enabled": true },
+	"osvVulnerabilityAlerts": true
 }

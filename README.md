@@ -23,15 +23,15 @@ To get started with development:
 
 1. **Install dependencies:**
 
-   ```bash
-   pnpm install
-   ```
+    ```bash
+    pnpm install
+    ```
 
 2. **Start the dev server:**
-   ```bash
-   pnpm dev
-   ```
-   This will spin up the `apps/demo` site where you can preview changes to the package.
+    ```bash
+    pnpm dev
+    ```
+    This will spin up the `apps/demo` site where you can preview changes to the package.
 
 ## Features
 
