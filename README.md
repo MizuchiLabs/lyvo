@@ -1,7 +1,7 @@
 <p align="center">
 <img src="./.github/logo.svg" width="80">
 <br><br>
-<img alt="GitHub Tag" src="https://img.shields.io/github/v/tag/MizuchiLabs/lyvo?label=Version">
+<img alt="npm version" src="https://img.shields.io/npm/v/@mizuchilabs/lyvo?color=brightgreen">
 <img alt="GitHub License" src="https://img.shields.io/github/license/MizuchiLabs/lyvo">
 <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/MizuchiLabs/lyvo">
 </p>
@@ -23,15 +23,15 @@ To get started with development:
 
 1. **Install dependencies:**
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   pnpm install
+   ```
 
 2. **Start the dev server:**
-    ```bash
-    pnpm dev
-    ```
-    This will spin up the `apps/demo` site where you can preview changes to the package.
+   ```bash
+   pnpm dev
+   ```
+   This will spin up the `apps/demo` site where you can preview changes to the package.
 
 ## Features
 
