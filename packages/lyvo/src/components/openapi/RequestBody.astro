@@ -1,7 +1,7 @@
 ---
 import { ChevronDown } from '@lucide/astro';
-import SchemaViewer from './SchemaViewer.astro';
-import type { OpenAPIMediaType } from '../../lib/openapi/types';
+import SchemaViewer from '@lyvo/components/openapi/SchemaViewer.astro';
+import type { OpenAPIMediaType } from '@lyvo/lib/openapi/types';
 
 interface Props {
 	requestBody: any; // Type is any until we strictly define OpenAPIRequestBody in types if missing

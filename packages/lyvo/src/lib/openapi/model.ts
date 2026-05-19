@@ -1,4 +1,4 @@
-import type { OpenAPIModel } from './types';
+import type { OpenAPIModel } from '@lyvo/lib/openapi/types';
 import { getEntry } from 'astro:content';
 
 export async function readOpenAPIModel(): Promise<OpenAPIModel> {

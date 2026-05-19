@@ -1,9 +1,9 @@
 ---
 import { ExternalLink } from '@lucide/astro';
-import RepoIcon from '../base/RepoIcon.astro';
-import SocialIcon from '../base/SocialIcon.astro';
+import RepoIcon from '@lyvo/components/base/RepoIcon.astro';
+import SocialIcon from '@lyvo/components/base/SocialIcon.astro';
 import config from 'virtual:lyvo-config';
-import { getProvider } from '../../lib/repo';
+import { getProvider } from '@lyvo/lib/repo';
 
 const repoURL = config.repo?.url;
 const repoType = getProvider(repoURL, config.repo?.provider);

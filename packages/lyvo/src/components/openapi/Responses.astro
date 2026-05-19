@@ -1,7 +1,7 @@
 ---
 import { ChevronDown } from '@lucide/astro';
-import SchemaViewer from './SchemaViewer.astro';
-import type { OpenAPIResponse, OpenAPIMediaType } from '../../lib/openapi/types';
+import SchemaViewer from '@lyvo/components/openapi/SchemaViewer.astro';
+import type { OpenAPIResponse, OpenAPIMediaType } from '@lyvo/lib/openapi/types';
 
 interface Props {
 	responses: OpenAPIResponse[];

@@ -60,7 +60,7 @@ export default defineConfig({
 
   integrations: [
     lyvo({
-      title: "Lyvo",
+      title: "Demo Docs",
       repo: {
         url: "https://github.com/mizuchilabs/lyvo",
         branch: "main",

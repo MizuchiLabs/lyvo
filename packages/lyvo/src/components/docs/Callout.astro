@@ -1,9 +1,28 @@
 ---
-import { cn } from '../../lib/utils';
-import { Info, TriangleAlert, CircleX, CircleCheck } from '@lucide/astro';
+import { cn } from '@lyvo/lib/utils';
+import {
+	Info,
+	TriangleAlert,
+	CircleX,
+	CircleCheck,
+	Lightbulb,
+	StickyNote,
+	CircleQuestionMark
+} from '@lucide/astro';
+
+type CalloutType =
+	| 'default'
+	| 'info'
+	| 'warning'
+	| 'danger'
+	| 'error'
+	| 'success'
+	| 'note'
+	| 'tip'
+	| 'question';
 
 interface Props {
-	type?: 'default' | 'warning' | 'danger' | 'success';
+	type?: CalloutType;
 	title?: string;
 }
 
@@ -12,35 +31,59 @@ const { type = 'default', title } = Astro.props;
 const variants = {
 	default: {
 		Icon: Info,
-		classes:
+		container:
 			'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200',
-		iconClass: 'text-blue-600 dark:text-blue-400'
+		icon: 'text-blue-600 dark:text-blue-400'
 	},
 	warning: {
 		Icon: TriangleAlert,
-		classes:
+		container:
 			'border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-200',
-		iconClass: 'text-orange-600 dark:text-orange-400'
+		icon: 'text-orange-600 dark:text-orange-400'
 	},
 	danger: {
 		Icon: CircleX,
-		classes:
+		container:
 			'border-red-200 bg-red-50 text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200',
-		iconClass: 'text-red-600 dark:text-red-400'
+		icon: 'text-red-600 dark:text-red-400'
 	},
 	success: {
 		Icon: CircleCheck,
-		classes:
+		container:
 			'border-green-200 bg-green-50 text-green-900 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-200',
-		iconClass: 'text-green-600 dark:text-green-400'
+		icon: 'text-green-600 dark:text-green-400'
+	},
+	tip: {
+		Icon: Lightbulb,
+		container:
+			'border-purple-200 bg-purple-50 text-purple-900 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-200',
+		icon: 'text-purple-600 dark:text-purple-400'
+	},
+	note: {
+		Icon: StickyNote,
+		container:
+			'border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-500/30 dark:bg-zinc-500/10 dark:text-zinc-200',
+		icon: 'text-zinc-600 dark:text-zinc-400'
+	},
+	question: {
+		Icon: CircleQuestionMark,
+		container:
+			'border-indigo-200 bg-indigo-50 text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200',
+		icon: 'text-indigo-600 dark:text-indigo-400'
 	}
+} as const;
+
+const aliases: Partial<Record<CalloutType, keyof typeof variants>> = {
+	info: 'default',
+	error: 'danger'
 };
 
-const { Icon, classes, iconClass } = variants[type];
+const resolvedType = aliases[type] || (type as keyof typeof variants);
+const { Icon, container, icon } = variants[resolvedType] || variants.default;
 ---
 
-<div class={cn('my-6 flex items-start rounded-xl border p-4 shadow-sm', classes)}>
-	<Icon class={cn('mt-0.5 mr-3 h-5 w-5 shrink-0', iconClass)} />
+<div class={cn('my-6 flex items-start rounded-xl border p-4 shadow-sm', container)}>
+	<Icon class={cn('mt-0.5 mr-3 h-5 w-5 shrink-0', icon)} />
 	<div class="w-full min-w-0">
 		{title && <h5 class="mb-1 leading-none font-semibold tracking-tight">{title}</h5>}
 		<div

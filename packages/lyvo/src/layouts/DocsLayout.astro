@@ -1,15 +1,15 @@
 ---
-import Search from '../components/base/Search.astro';
-import Sidebar from '../components/docs/Sidebar.astro';
-import MobileToC from '../components/docs/MobileToC.astro';
-import ThemeToggle from '../components/base/ThemeToggle.astro';
-import BaseHead from './BaseHead.astro';
-import ToC from '../components/docs/ToC.astro';
-import Breadcrumbs from '../components/docs/Breadcrumbs.astro';
-import PageHeader from '../components/docs/PageHeader.astro';
-import Pagination from '../components/docs/Pagination.astro';
+import Search from '@lyvo/components/base/Search.astro';
+import Sidebar from '@lyvo/components/docs/Sidebar.astro';
+import MobileToC from '@lyvo/components/docs/MobileToC.astro';
+import ThemeToggle from '@lyvo/components/base/ThemeToggle.astro';
+import BaseHead from '@lyvo/layouts/BaseHead.astro';
+import ToC from '@lyvo/components/docs/ToC.astro';
+import Breadcrumbs from '@lyvo/components/docs/Breadcrumbs.astro';
+import PageHeader from '@lyvo/components/docs/PageHeader.astro';
+import Pagination from '@lyvo/components/docs/Pagination.astro';
 import fs from 'node:fs';
-import { cn } from '../lib/utils';
+import { cn } from '@lyvo/lib/utils';
 
 interface Props {
 	title: string;

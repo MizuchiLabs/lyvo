@@ -1,21 +1,21 @@
 ---
-import DocsLayout from '../../layouts/DocsLayout.astro';
+import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
 import {
 	getOpenAPIOperationBySlug,
 	getOpenAPIWebhookBySlug,
 	tryReadOpenAPIModel
-} from '../../lib/openapi/model';
-import type { OpenAPISnippet } from '../../lib/openapi/types';
-import Tabs from '../../components/docs/Tabs.astro';
-import TabItem from '../../components/docs/TabItem.astro';
-import CodeBlock from '../../components/base/CodeBlock.astro';
+} from '@lyvo/lib/openapi/model';
+import type { OpenAPISnippet } from '@lyvo/lib/openapi/types';
+import Tabs from '@lyvo/components/docs/Tabs.astro';
+import TabItem from '@lyvo/components/docs/TabItem.astro';
+import CodeBlock from '@lyvo/components/base/CodeBlock.astro';
 
 // OpenAPI Extracted Components
-import Parameters from '../../components/openapi/Parameters.astro';
-import RequestBody from '../../components/openapi/RequestBody.astro';
-import Responses from '../../components/openapi/Responses.astro';
-import Authorization from '../../components/openapi/Authorization.astro';
-import EndpointPath from '../../components/openapi/EndpointPath.astro';
+import Parameters from '@lyvo/components/openapi/Parameters.astro';
+import RequestBody from '@lyvo/components/openapi/RequestBody.astro';
+import Responses from '@lyvo/components/openapi/Responses.astro';
+import Authorization from '@lyvo/components/openapi/Authorization.astro';
+import EndpointPath from '@lyvo/components/openapi/EndpointPath.astro';
 import { ExternalLink } from '@lucide/astro';
 
 const model = await tryReadOpenAPIModel();

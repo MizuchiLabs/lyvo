@@ -1,20 +1,28 @@
 ---
 import { Image } from 'astro:assets';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	type?: 'text' | 'logo' | 'both';
-	title?: string;
 	size?: number;
 }
 
-const { type = 'both', title = 'Lyvo Docs', size = 28 } = Astro.props;
+const { type = 'both', size = 28 } = Astro.props;
 
-// Auto-discover logo.* from /src/assets/ (supports common formats)
-const images = import.meta.glob<{ default: ImageMetadata }>(
-	'../../assets/logo.{svg,png,jpg,jpeg,webp,avif,gif}'
-);
-const logoEntry = Object.entries(images)[0];
-const logoImage = logoEntry ? (await logoEntry[1]()).default : null;
+// Auto-discover logo.* from consumer's /src/assets/ or library's @lyvo/assets/
+const images = import.meta.glob<{ default: ImageMetadata }>([
+	'/src/assets/logo.{svg,png,jpg,jpeg,webp,avif,gif}',
+	'@lyvo/assets/logo.{svg,png,jpg,jpeg,webp,avif,gif}'
+]);
+
+// Prefer config.logo if it's a string path that we can find in the glob
+// Otherwise prefer /src/assets/logo over @lyvo/assets/logo
+const logoEntry =
+	Object.entries(images).find(([path]) => config.logo && path.includes(config.logo))?.[1] ??
+	Object.entries(images).find(([path]) => path.includes('/src/assets/logo'))?.[1] ??
+	Object.entries(images).find(([path]) => path.includes('@lyvo/assets/logo'))?.[1];
+
+const logoImage = logoEntry ? (await logoEntry()).default : config.logo || null;
 
 const showLogo = (type === 'logo' || type === 'both') && logoImage;
 const showText = type === 'text' || type === 'both';
@@ -24,6 +32,15 @@ const showText = type === 'text' || type === 'both';
 	href="/"
 	class="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
 >
-	{showLogo && <Image src={logoImage} alt={`${title} Logo`} width={size} height={size} />}
-	{showText && <span>{title}</span>}
+	{
+		showLogo && (
+			<Image
+				src={logoImage as any}
+				alt={`${config.title || 'Lyvo'} Logo`}
+				width={size}
+				height={size}
+			/>
+		)
+	}
+	{showText && <span>{config.title || 'Lyvo Docs'}</span>}
 </a>

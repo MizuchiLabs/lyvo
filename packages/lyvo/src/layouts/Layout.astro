@@ -1,11 +1,11 @@
 ---
-import ThemeToggle from '../components/base/ThemeToggle.astro';
-import RepoIcon from '../components/base/RepoIcon.astro';
-import BaseHead from './BaseHead.astro';
-import Logo from '../components/base/Logo.astro';
+import ThemeToggle from '@lyvo/components/base/ThemeToggle.astro';
+import RepoIcon from '@lyvo/components/base/RepoIcon.astro';
+import BaseHead from '@lyvo/layouts/BaseHead.astro';
+import Logo from '@lyvo/components/base/Logo.astro';
 import config from 'virtual:lyvo-config';
-import { getProvider } from '../lib/repo';
-import { tryReadOpenAPIModel } from '../lib/openapi/model';
+import { getProvider } from '@lyvo/lib/repo';
+import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
 
 const repoUrl = config.repo?.url;
 const repoType = getProvider(repoUrl, config.repo?.provider);

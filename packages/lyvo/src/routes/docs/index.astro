@@ -1,5 +1,5 @@
 ---
-import { getDocsHierarchy } from '../../lib/docs';
+import { getDocsHierarchy } from '@lyvo/lib/docs';
 
 const { topLevelItems } = await getDocsHierarchy();
 const sortedDocs = topLevelItems.flatMap((item) => (item.type === 'doc' ? [item.doc] : item.items));
