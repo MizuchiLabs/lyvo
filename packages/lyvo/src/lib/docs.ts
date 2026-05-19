@@ -10,10 +10,13 @@ export async function getDocsHierarchy() {
 	const docs = await getCollection('docs');
 
 	let meta: MetaConfig = {};
-	try {
-		meta = JSON.parse(fs.readFileSync('src/content/docs/meta.json', 'utf-8'));
-	} catch (e) {
-		console.warn('Could not read meta.json for docs sidebar ordering', e);
+	const metaPath = 'src/content/docs/meta.json';
+	if (fs.existsSync(metaPath)) {
+		try {
+			meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+		} catch (e) {
+			console.warn('Could not read meta.json for docs sidebar ordering', e);
+		}
 	}
 
 	const orderArr: string[] = meta.order || [];

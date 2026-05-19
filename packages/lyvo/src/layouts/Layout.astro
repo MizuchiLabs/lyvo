@@ -5,9 +5,14 @@ import BaseHead from './BaseHead.astro';
 import Logo from '../components/base/Logo.astro';
 import config from 'virtual:lyvo-config';
 import { getProvider } from '../lib/repo';
+import { tryReadOpenAPIModel } from '../lib/openapi/model';
 
 const repoUrl = config.repo?.url;
 const repoType = getProvider(repoUrl, config.repo?.provider);
+
+const openapiModel = await tryReadOpenAPIModel();
+const apiEnabled =
+	(openapiModel?.operations?.length ?? 0) + (openapiModel?.webhooks?.length ?? 0) > 0;
 ---
 
 <!doctype html>
@@ -30,12 +35,16 @@ const repoType = getProvider(repoUrl, config.repo?.provider);
 						>
 							Documentation
 						</a>
-						<a
-							href="/api"
-							class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-						>
-							OpenAPI
-						</a>
+						{
+							apiEnabled && (
+								<a
+									href="/api"
+									class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+								>
+									OpenAPI
+								</a>
+							)
+						}
 					</div>
 				</div>
 				<div class="flex items-center space-x-2">

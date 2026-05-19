@@ -1,5 +1,5 @@
 ---
-import Search from '../components/base/Search';
+import Search from '../components/base/Search.astro';
 import Sidebar from '../components/docs/Sidebar.astro';
 import MobileToC from '../components/docs/MobileToC.astro';
 import ThemeToggle from '../components/base/ThemeToggle.astro';
@@ -60,7 +60,7 @@ const lastUpdated = () => {
 					<Breadcrumbs title={title} />
 					{!isApi && <MobileToC headings={headings} title={title} />}
 					<div class="flex shrink-0 items-center gap-4">
-						<Search client:load transition:persist />
+						<Search transition:persist />
 						<ThemeToggle transition:persist />
 					</div>
 				</div>

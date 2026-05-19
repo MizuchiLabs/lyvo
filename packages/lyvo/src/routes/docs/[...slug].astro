@@ -18,13 +18,17 @@ import File from '../../components/docs/File.astro';
 
 export async function getStaticPaths() {
 	const docs = await getCollection('docs');
-	return docs.map((entry) => ({
+	return docs.map((entry: any) => ({
 		params: { slug: entry.id },
 		props: { entry }
 	}));
 }
 
-const { entry } = Astro.props;
+type Props = {
+	entry: any;
+};
+
+const { entry } = Astro.props as Props;
 const { Content, headings } = await render(entry);
 
 const components = {
@@ -44,7 +48,7 @@ const components = {
 };
 
 // Build TOC
-const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const filteredHeadings = headings.filter((h: any) => h.depth === 2 || h.depth === 3);
 ---
 
 <DocsLayout

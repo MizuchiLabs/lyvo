@@ -25,7 +25,7 @@ const currentPath = Astro.url.pathname;
 const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 ---
 
-<div class="no-scrollbar flex-1 overflow-y-auto px-4">
+<div class="no-scrollbar flex-1 overflow-y-auto p-4">
 	<div class="flex flex-col gap-1 pb-4">
 		{
 			activeMode === 'api'
@@ -114,7 +114,7 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 							);
 						}
 
-						const isCategoryActive = item.items.some((doc) => {
+						const isCategoryActive = item.items.some((doc: any) => {
 							const href = `/docs/${doc.id}`;
 							return currentPath === href || currentPath === href + '/';
 						});
@@ -137,7 +137,7 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 										/>
 									</summary>
 									<div class="mt-1 ml-4 flex flex-col gap-1 border-l border-border/70 pl-2 text-sm">
-										{item.items.map((doc) => {
+										{item.items.map((doc: any) => {
 											const href = `/docs/${doc.id}`;
 											const isActive =
 												currentPath === href || currentPath === href + '/';

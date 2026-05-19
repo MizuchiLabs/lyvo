@@ -20,6 +20,14 @@
 
 ## Installation
 
+Setup astro:
+
+```bash
+pnpm create astro@latest
+```
+
+Install lyvo:
+
 ```bash
 pnpm add @mizuchilabs/lyvo
 ```
@@ -27,7 +35,7 @@ pnpm add @mizuchilabs/lyvo
 You will also need to install its peer dependencies if they aren't already in your project:
 
 ```bash
-pnpm add @astrojs/mdx @astrojs/react @tailwindcss/vite tailwindcss react react-dom
+pnpm add @astrojs/mdx @astrojs/react @tailwindcss/vite tailwindcss
 ```
 
 ## Quick Start
