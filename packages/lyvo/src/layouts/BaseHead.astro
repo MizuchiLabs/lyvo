@@ -1,6 +1,6 @@
 ---
 import { Font } from 'astro:assets';
-import '../styles/global.css';
+import '@lyvo/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import config from 'virtual:lyvo-config';
 
@@ -25,12 +25,8 @@ const displayTitle = () => {
 	<meta name="description" content={description} />
 
 	<!-- Favicons -->
-	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="shortcut icon" href="/favicon.ico" />
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-	<meta name="apple-mobile-web-app-title" content="Lyvo" />
-	<link rel="manifest" href="/site.webmanifest" />
 	<link rel="sitemap" href="/sitemap-index.xml" />
 
 	<!-- Title -->
