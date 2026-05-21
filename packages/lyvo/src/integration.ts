@@ -5,7 +5,15 @@ import { fileURLToPath } from "node:url";
 
 export const LyvoOptionsSchema = z.object({
   title: z.string().optional(),
-  logo: z.string().optional(),
+  logo: z
+    .union([
+      z.string(),
+      z.object({
+        light: z.string(),
+        dark: z.string(),
+      }),
+    ])
+    .optional(),
   repo: z
     .object({
       url: z.string().optional(),

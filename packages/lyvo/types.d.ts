@@ -3,7 +3,7 @@
 declare module "virtual:lyvo-config" {
   interface Config {
     title?: string;
-    logo?: string;
+    logo?: string | { light: string; dark: string };
     repo?: {
       url?: string;
       branch?: string;
