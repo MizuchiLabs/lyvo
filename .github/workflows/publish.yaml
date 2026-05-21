@@ -23,8 +23,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: "pnpm"
           registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -40,6 +40,4 @@ jobs:
         run: pnpm --filter @mizuchilabs/lyvo build
 
       - name: Publish to npm
-        run: pnpm --filter @mizuchilabs/lyvo publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm --filter @mizuchilabs/lyvo publish
