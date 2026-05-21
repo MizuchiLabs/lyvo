@@ -8,23 +8,18 @@ interface Props {
 }
 
 const { size = 28, id = 'default' } = Astro.props;
-const titleText = config.title;
-const logoName = config.logo;
 
-// Fetch all images from the consumer's src/assets folder
-const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{svg,png,jpg,jpeg,webp,avif,gif}', {
-	eager: true
+const images = import.meta.glob<{ default: ImageMetadata }>(
+	'/src/assets/*.{svg,png,jpg,jpeg,webp,avif,gif}'
+);
+
+const target = config.logo || 'logo.svg';
+const imageKey = Object.keys(images).find((key) => {
+	const fileName = key.split('/').pop();
+	return fileName === target || fileName?.startsWith(`${target}.`);
 });
 
-// If logo is provided in config, find it. Otherwise automatically look for 'logo.svg'
-const imageKey = logoName
-	? Object.keys(images).find(
-			(key) => key.endsWith(`/${logoName}`) || key.endsWith(`/${logoName}.svg`) || key.endsWith(`/${logoName}.png`)
-		)
-	: Object.keys(images).find((key) => key.endsWith(`/logo.svg`));
-
-const userLogo = imageKey ? images[imageKey].default : null;
-
+const userLogo = imageKey ? (await images[imageKey]()).default : null;
 const gradId = `lyvo-color-${id}`;
 
 // Provide the original Lyvo logo as the default inline SVG
@@ -46,16 +41,19 @@ const defaultLogo = `
 	href="/"
 	class="flex items-center gap-2 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
 >
-	{userLogo ? (
-		<Image
-			src={userLogo as any}
-			alt={`${titleText || 'Lyvo'} Logo`}
-			width={size}
-			height={size}
-			class="object-contain"
-		/>
-	) : (
-		<Fragment set:html={defaultLogo} />
-	)}
-	{titleText !== '' && <span>{titleText ?? 'Lyvo Docs'}</span>}
+	{
+		userLogo ? (
+			<Image
+				src={userLogo as any}
+				alt={`${config.title || 'Lyvo'} Logo`}
+				width={size}
+				height={size}
+				densities={[1.5, 2]}
+				class="object-contain"
+			/>
+		) : (
+			<Fragment set:html={defaultLogo} />
+		)
+	}
+	{config.title !== '' && <span>{config.title}</span>}
 </a>
