@@ -10,7 +10,7 @@ import Logo from '@lyvo/components/base/Logo.astro';
 <header
 	class="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4 md:hidden"
 >
-	<Logo />
+	<Logo id="mobile-header" />
 	<div class="flex items-center gap-2">
 		<button
 			id="mobile-menu-open"
@@ -36,7 +36,7 @@ import Logo from '@lyvo/components/base/Logo.astro';
 	<div
 		class="mb-6 flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 text-left"
 	>
-		<Logo />
+		<Logo id="mobile-menu" />
 		<button
 			id="mobile-menu-close"
 			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
@@ -54,7 +54,7 @@ import Logo from '@lyvo/components/base/Logo.astro';
 <!-- Desktop Sidebar -->
 <aside class="sticky top-0 hidden h-screen w-72 shrink-0 flex-col md:flex">
 	<div class="flex shrink-0 items-center p-6">
-		<Logo />
+		<Logo id="desktop-sidebar" />
 	</div>
 
 	<SidebarModeToggle />
