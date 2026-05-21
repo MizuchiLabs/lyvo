@@ -60,6 +60,7 @@ export default defineConfig({
   integrations: [
     lyvo({
       title: "Demo Docs",
+      logo: "dragon.png",
       repo: {
         url: "https://github.com/mizuchilabs/lyvo",
         branch: "main",
