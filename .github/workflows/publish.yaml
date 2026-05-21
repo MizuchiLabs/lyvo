@@ -32,7 +32,7 @@ jobs:
       - name: Bump package version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION="${GITHUB_REF#refs/tags/v}"
           echo "Bumping @mizuchilabs/lyvo to $VERSION"
           pnpm --filter @mizuchilabs/lyvo exec npm version $VERSION --no-git-tag-version
 
