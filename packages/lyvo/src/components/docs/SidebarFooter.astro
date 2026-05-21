@@ -1,70 +1,55 @@
 ---
 import { ExternalLink } from '@lucide/astro';
-import RepoIcon from '@lyvo/components/base/RepoIcon.astro';
-import SocialIcon from '@lyvo/components/base/SocialIcon.astro';
+import Icon from '@lyvo/components/base/Icon.astro';
 import config from 'virtual:lyvo-config';
-import { getProvider } from '@lyvo/lib/repo';
 
-const repoURL = config.repo?.url;
-const repoType = getProvider(repoURL, config.repo?.provider);
 const extraLinks = config.extraLinks;
-const socialLinks = config.socials;
+const socials = config.socials;
+
+const hasContent = (extraLinks && extraLinks.length > 0) || (socials && socials.length > 0);
 ---
 
-<div class="mt-auto p-4">
-	{
-		extraLinks && extraLinks.length > 0 && (
-			<div class="mb-4 flex flex-col gap-1">
-				{extraLinks.map((link) => (
-					<a
-						href={link.href}
-						target="_blank"
-						rel="noreferrer"
-						class="flex items-center justify-between rounded-md p-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-					>
-						{link.title}
-						<ExternalLink size={12} class="opacity-50" />
-					</a>
-				))}
-			</div>
-		)
-	}
-
-	<div class="h-px w-full bg-border/40"></div>
-	<div class="mt-4 flex items-center justify-between">
-		<div class="flex items-center gap-1">
-			{
-				repoURL && (
-					<a
-						href={repoURL}
-						target="_blank"
-						rel="noreferrer"
-						class="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-						title={`View on ${repoType}`}
-					>
-						<RepoIcon class="size-5 dark:invert" />
-						<span class="sr-only">{repoType}</span>
-					</a>
-				)
-			}
-
-			{
-				Object.entries(socialLinks).map(([platform, url]) => {
-					if (!url) return null;
-					return (
+{
+	hasContent && (
+		<div class="mt-auto p-4">
+			{extraLinks && extraLinks.length > 0 && (
+				<div class="mb-4 flex flex-col gap-1">
+					{extraLinks.map((link) => (
 						<a
-							href={url}
+							href={link.href}
+							target="_blank"
+							rel="noreferrer"
+							class="flex items-center justify-between rounded-md p-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+						>
+							{link.title}
+							<ExternalLink size={12} class="opacity-50" />
+						</a>
+					))}
+				</div>
+			)}
+
+			{extraLinks && extraLinks.length > 0 && socials && socials.length > 0 && (
+				<div class="h-px w-full bg-border/40" />
+			)}
+
+			{socials && socials.length > 0 && (
+				<div class="mt-4 flex items-center gap-1">
+					{socials.map((social) => (
+						<a
+							href={social.href}
 							target="_blank"
 							rel="noreferrer"
 							class="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-							title={platform.charAt(0).toUpperCase() + platform.slice(1)}
+							title={social.label}
 						>
-							<SocialIcon platform={platform} className="size-5 dark:invert" />
-							<span class="sr-only">{platform}</span>
+							<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+								<Icon name={social.icon} />
+							</span>
+							<span class="sr-only">{social.label}</span>
 						</a>
-					);
-				})
-			}
+					))}
+				</div>
+			)}
 		</div>
-	</div>
-</div>
+	)
+}

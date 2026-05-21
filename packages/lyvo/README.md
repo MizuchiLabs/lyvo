@@ -55,10 +55,23 @@ export default defineConfig({
   integrations: [
     lyvo({
       title: "My Docs",
+      logo: "brand-logo.svg", // Resolves from src/assets/brand-logo.svg
       repo: {
         url: "https://github.com/your-org/your-repo",
         branch: "main",
       },
+      nav: [
+        { title: "Home", href: "/" },
+        { title: "Docs", href: "/docs" },
+        { title: "API", href: "/api" },
+      ],
+      socials: [
+        {
+          label: "GitHub",
+          href: "https://github.com/your-org/your-repo",
+          icon: "github.svg", // Resolves from src/assets/github.svg
+        },
+      ],
       openapi: {
         input: "public/openapi.json",
         groupBy: "tag",
@@ -98,17 +111,19 @@ export const collections = { docs, api };
 
 The `lyvo()` integration accepts the following options:
 
-| Option            | Type                     | Description                                           |
-| :---------------- | :----------------------- | :---------------------------------------------------- |
-| `title`           | `string`                 | The title of your documentation site.                 |
-| `repo.url`        | `string`                 | URL to your GitHub/GitLab repository.                 |
-| `repo.branch`     | `string`                 | The default branch (used for "Edit this page" links). |
-| `socials`         | `Record<string, string>` | Map of social platform names to profile URLs.         |
-| `extraLinks`      | `Array<{title, href}>`   | Additional links to show in the header.               |
-| `docs.edit`       | `boolean`                | Whether to show "Edit this page" links.               |
-| `docs.feedback`   | `boolean`                | Whether to show "Give feedback" links.                |
-| `openapi.input`   | `string`                 | Path to your OpenAPI JSON file.                       |
-| `openapi.groupBy` | `'tag' \| 'path'`        | How to group API endpoints.                           |
+| Option            | Type                     | Description                                                                 |
+| :---------------- | :----------------------- | :-------------------------------------------------------------------------- |
+| `title`           | `string`                 | The title of your documentation site. Set to `""` to hide the text.         |
+| `logo`            | `string`                 | Filename of an SVG in your `src/assets/` folder (e.g., `"brand.svg"`).      |
+| `nav`             | `Array<{title, href}>`   | Override the default top navigation bar links.                              |
+| `repo.url`        | `string`                 | URL to your GitHub/GitLab repository.                                       |
+| `repo.branch`     | `string`                 | The default branch (used for "Edit this page" links).                       |
+| `socials`         | `Array<{label, href, icon}>` | Array of social links. `icon` should match a filename in `src/assets/`. |
+| `extraLinks`      | `Array<{title, href}>`   | Additional text links to show in the sidebar footer.                        |
+| `docs.edit`       | `boolean`                | Whether to show "Edit this page" links.                                     |
+| `docs.feedback`   | `boolean`                | Whether to show "Give feedback" links.                                      |
+| `openapi.input`   | `string`                 | Path to your OpenAPI JSON file.                                             |
+| `openapi.groupBy` | `'tag' \| 'path'`        | How to group API endpoints.                                                 |
 
 ## Built-in MDX Components
 

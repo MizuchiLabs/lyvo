@@ -10,10 +10,25 @@ export const LyvoOptionsSchema = z.object({
     .object({
       url: z.string().optional(),
       branch: z.string().optional(),
-      provider: z.string().optional(),
     })
     .optional(),
-  socials: z.record(z.string(), z.string().optional()).optional(),
+  socials: z
+    .array(
+      z.object({
+        label: z.string(),
+        href: z.string(),
+        icon: z.string(),
+      }),
+    )
+    .optional(),
+  nav: z
+    .array(
+      z.object({
+        title: z.string(),
+        href: z.string(),
+      }),
+    )
+    .optional(),
   extraLinks: z
     .array(
       z.object({
@@ -71,7 +86,8 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
                     const config = {
                       title: options.title,
                       repo: options.repo,
-                      socials: options.socials || {},
+                      socials: options.socials || [],
+                      nav: options.nav,
                       logo: options.logo,
                       extraLinks: options.extraLinks || [],
                       docs: {

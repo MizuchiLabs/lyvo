@@ -65,12 +65,24 @@ export default defineConfig({
         url: "https://github.com/mizuchilabs/lyvo",
         branch: "main",
       },
-      socials: {
-        discord: "",
-        x: "",
-        youtube: "",
-        bluesky: "",
-      },
+      socials: [
+        {
+          label: "GitHub",
+          href: "https://github.com/mizuchilabs/lyvo",
+          icon: "github",
+        },
+        {
+          label: "Discord",
+          href: "https://discord.com",
+          icon: "discord.svg",
+        },
+      ],
+      nav: [
+        { title: "Home", href: "/" },
+        { title: "Docs", href: "/docs" },
+        { title: "API", href: "/api" },
+        { title: "Blog", href: "/blog" },
+      ],
       extraLinks: [
         { title: "Support", href: "https://example.com/support" },
         { title: "Status", href: "https://status.example.com" },

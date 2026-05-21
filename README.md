@@ -41,6 +41,27 @@ To get started with development:
 - **Built-in Search:** Lightning-fast offline search powered by Pagefind.
 - **Dark Mode:** Native dark mode with a toggle.
 
+## Configuration Options
+
+The `lyvo()` integration accepts the following main options:
+
+```javascript
+lyvo({
+  title: "My Docs", // Set to "" to hide text
+  logo: "logo.svg", // Resolves to src/assets/logo.svg automatically
+  nav: [
+    { title: "Home", href: "/" },
+  ],
+  socials: [
+    { label: "GitHub", href: "https://...", icon: "github.svg" },
+  ],
+  repo: { url: "https://github.com/...", branch: "main" },
+  openapi: { input: "public/openapi.json" },
+})
+```
+
+For a full list of configuration options, check the [Package README](./packages/lyvo/README.md).
+
 ## Building the Demo
 
 To build the demo application for production (which also runs the Pagefind indexer):

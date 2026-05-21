@@ -7,9 +7,9 @@ declare module "virtual:lyvo-config" {
     repo?: {
       url?: string;
       branch?: string;
-      provider?: string;
     };
-    socials: Record<string, string>;
+    socials: Array<{ label: string; href: string; icon: string }>;
+    nav?: Array<{ title: string; href: string }>;
     extraLinks: Array<{ title: string; href: string }>;
     docs: {
       edit: boolean;
