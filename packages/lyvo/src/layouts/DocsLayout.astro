@@ -48,14 +48,14 @@ const lastUpdated = () => {
 		<Sidebar />
 
 		{/* Main Content */}
-		<div class="flex h-full flex-1 flex-col overflow-hidden md:py-3 md:pr-3">
+		<div class="flex h-full flex-1 flex-col overflow-hidden md:rounded-xl md:py-3 md:pr-3">
 			<main
 				id="main-scroll-area"
-				class="no-scrollbar relative flex-1 overflow-y-auto bg-background md:rounded-2xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
+				class="no-scrollbar relative flex-1 overflow-y-auto bg-background md:rounded-xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
 			>
 				{/* Header */}
 				<div
-					class="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 rounded-t-xl border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md"
+					class="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md md:rounded-t-xl"
 				>
 					<Breadcrumbs title={title} />
 					{!isApi && <MobileToC headings={headings} title={title} />}
