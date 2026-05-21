@@ -35,7 +35,7 @@ pnpm add @mizuchilabs/lyvo
 You will also need to install its peer dependencies if they aren't already in your project:
 
 ```bash
-pnpm add @astrojs/mdx @astrojs/react @tailwindcss/vite tailwindcss
+pnpm add @astrojs/mdx @tailwindcss/vite tailwindcss
 ```
 
 ## Quick Start
@@ -47,7 +47,6 @@ Add the `lyvo` integration to your `astro.config.mjs`:
 ```javascript
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
 import lyvo from "@mizuchilabs/lyvo";
 
@@ -77,7 +76,6 @@ export default defineConfig({
         groupBy: "tag",
       },
     }),
-    react(),
     mdx(),
   ],
   vite: {
@@ -111,19 +109,19 @@ export const collections = { docs, api };
 
 The `lyvo()` integration accepts the following options:
 
-| Option            | Type                     | Description                                                                 |
-| :---------------- | :----------------------- | :-------------------------------------------------------------------------- |
-| `title`           | `string`                 | The title of your documentation site. Set to `""` to hide the text.         |
-| `logo`            | `string`                 | Filename of an SVG in your `src/assets/` folder (e.g., `"brand.svg"`).      |
-| `nav`             | `Array<{title, href}>`   | Override the default top navigation bar links.                              |
-| `repo.url`        | `string`                 | URL to your GitHub/GitLab repository.                                       |
-| `repo.branch`     | `string`                 | The default branch (used for "Edit this page" links).                       |
+| Option            | Type                         | Description                                                             |
+| :---------------- | :--------------------------- | :---------------------------------------------------------------------- |
+| `title`           | `string`                     | The title of your documentation site. Set to `""` to hide the text.     |
+| `logo`            | `string`                     | Filename of an SVG in your `src/assets/` folder (e.g., `"brand.svg"`).  |
+| `nav`             | `Array<{title, href}>`       | Override the default top navigation bar links.                          |
+| `repo.url`        | `string`                     | URL to your GitHub/GitLab repository.                                   |
+| `repo.branch`     | `string`                     | The default branch (used for "Edit this page" links).                   |
 | `socials`         | `Array<{label, href, icon}>` | Array of social links. `icon` should match a filename in `src/assets/`. |
-| `extraLinks`      | `Array<{title, href}>`   | Additional text links to show in the sidebar footer.                        |
-| `docs.edit`       | `boolean`                | Whether to show "Edit this page" links.                                     |
-| `docs.feedback`   | `boolean`                | Whether to show "Give feedback" links.                                      |
-| `openapi.input`   | `string`                 | Path to your OpenAPI JSON file.                                             |
-| `openapi.groupBy` | `'tag' \| 'path'`        | How to group API endpoints.                                                 |
+| `extraLinks`      | `Array<{title, href}>`       | Additional text links to show in the sidebar footer.                    |
+| `docs.edit`       | `boolean`                    | Whether to show "Edit this page" links.                                 |
+| `docs.feedback`   | `boolean`                    | Whether to show "Give feedback" links.                                  |
+| `openapi.input`   | `string`                     | Path to your OpenAPI JSON file.                                         |
+| `openapi.groupBy` | `'tag' \| 'path'`            | How to group API endpoints.                                             |
 
 ## Built-in MDX Components
 

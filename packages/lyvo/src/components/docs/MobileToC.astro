@@ -138,7 +138,6 @@ const circumference = 2 * Math.PI * radius;
 			const offset = circumference - (progress / 100) * circumference;
 			progressCircle.style.strokeDashoffset = offset;
 
-			// Update title logic (similar to React version)
 			if (progress <= 5) {
 				activeText.textContent = defaultTitle;
 			}

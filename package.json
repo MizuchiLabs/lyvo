@@ -9,7 +9,7 @@
 		"update-deps": "pnpm up -r -i -L"
 	},
 	"devDependencies": {
-		"oxlint": "^1.65.0",
+		"oxlint": "^1.66.0",
 		"pagefind": "^1.5.2",
 		"prettier": "3.8.3",
 		"prettier-plugin-astro": "0.14.1",
