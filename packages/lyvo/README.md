@@ -35,7 +35,7 @@ pnpm add @mizuchilabs/lyvo
 You will also need to install its peer dependencies if they aren't already in your project:
 
 ```bash
-pnpm add @astrojs/mdx @tailwindcss/vite tailwindcss
+pnpm add  @tailwindcss/vite tailwindcss
 ```
 
 ## Quick Start
@@ -47,7 +47,6 @@ Add the `lyvo` integration to your `astro.config.mjs`:
 ```javascript
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
-import mdx from "@astrojs/mdx";
 import lyvo from "@mizuchilabs/lyvo";
 
 export default defineConfig({
@@ -76,7 +75,6 @@ export default defineConfig({
         groupBy: "tag",
       },
     }),
-    mdx(),
   ],
   vite: {
     plugins: [tailwindcss()],

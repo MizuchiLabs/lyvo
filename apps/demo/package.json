@@ -10,17 +10,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.6",
-    "@astrojs/sitemap": "^3.7.2",
     "@lucide/astro": "^1.16.0",
     "@mizuchilabs/lyvo": "workspace:*",
+    "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^6.3.3",
-    "rehype-autolink-headings": "^7.1.0",
-    "rehype-slug": "^6.0.0",
+    "astro": "^6.3.7",
     "sharp": "^0.34.5",
-    "tailwindcss": "^4.3.0",
-    "vite-plugin-svgr": "^5.2.0"
+    "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

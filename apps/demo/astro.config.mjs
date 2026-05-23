@@ -1,17 +1,12 @@
 // @ts-check
 import { defineConfig, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
-import mdx from "@astrojs/mdx";
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import svgr from "vite-plugin-svgr";
 import lyvo from "@mizuchilabs/lyvo";
-import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   site: "https://example.com",
   vite: {
-    plugins: [tailwindcss(), svgr()],
+    plugins: [tailwindcss()],
   },
 
   markdown: {
@@ -23,20 +18,6 @@ export default defineConfig({
       },
       wrap: true,
     },
-    rehypePlugins: [
-      rehypeSlug,
-      [
-        rehypeAutolinkHeadings,
-        {
-          behavior: "append",
-          properties: {
-            class: "heading-link",
-            "aria-hidden": "true",
-            tabIndex: -1,
-          },
-        },
-      ],
-    ],
   },
 
   fonts: [
@@ -95,7 +76,5 @@ export default defineConfig({
         groupBy: "tag",
       },
     }),
-    sitemap(),
-    mdx(),
   ],
 });

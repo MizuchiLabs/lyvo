@@ -2,6 +2,10 @@ import type { AstroIntegration } from "astro";
 import { z } from "astro/zod";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import sitemap from "@astrojs/sitemap";
+import mdx from "@astrojs/mdx";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 export const LyvoOptionsSchema = z.object({
   title: z.string().optional(),
@@ -57,6 +61,7 @@ export const LyvoOptionsSchema = z.object({
       groupBy: z.enum(["tag", "path"]).optional(),
     })
     .optional(),
+  customCss: z.array(z.string()).optional(),
 });
 
 export type LyvoOptions = z.infer<typeof LyvoOptionsSchema>;
@@ -67,10 +72,27 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
   return {
     name: "lyvo",
     hooks: {
-      "astro:config:setup": ({ updateConfig, injectRoute }) => {
+      "astro:config:setup": ({ updateConfig, injectRoute, injectScript }) => {
         const srcDir = fileURLToPath(new URL("./", import.meta.url)).replace(/\/$/, "");
 
         updateConfig({
+          markdown: {
+            rehypePlugins: [
+              rehypeSlug,
+              [
+                rehypeAutolinkHeadings,
+                {
+                  behavior: "append",
+                  properties: {
+                    class: "heading-link",
+                    "aria-hidden": "true",
+                    tabIndex: -1,
+                  },
+                },
+              ],
+            ],
+          },
+          integrations: [mdx(), sitemap()],
           vite: {
             resolve: {
               alias: [
@@ -134,6 +156,13 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
             pattern: "/api",
             entrypoint: "@mizuchilabs/lyvo/routes/api/index.astro",
           });
+        }
+
+        injectScript("page-ssr", `import "@mizuchilabs/lyvo/style.css";`);
+        if (options.customCss) {
+          for (const cssPath of options.customCss) {
+            injectScript("page-ssr", `import "${cssPath}";`);
+          }
         }
       },
       "astro:build:done": ({ dir, logger }) => {
