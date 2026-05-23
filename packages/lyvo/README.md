@@ -74,6 +74,7 @@ export default defineConfig({
         input: "public/openapi.json",
         groupBy: "tag",
       },
+      customCss: "./src/styles/custom.css",
     }),
   ],
   vite: {
