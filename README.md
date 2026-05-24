@@ -1,7 +1,7 @@
 <p align="center">
 <img src="./.github/logo.svg" width="80">
 <br><br>
-<img alt="npm version" src="https://img.shields.io/npm/v/@mizuchilabs/lyvo?color=brightgreen">
+<img alt="npm Version" src="https://img.shields.io/npm/v/%40mizuchilabs%2Flyvo?link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2F%40mizuchilabs%2Flyvo">
 <img alt="GitHub License" src="https://img.shields.io/github/license/MizuchiLabs/lyvo">
 <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/MizuchiLabs/lyvo">
 </p>
@@ -49,15 +49,11 @@ The `lyvo()` integration accepts the following main options:
 lyvo({
   title: "My Docs", // Set to "" to hide text
   logo: "logo.svg", // Resolves to src/assets/logo.svg automatically
-  nav: [
-    { title: "Home", href: "/" },
-  ],
-  socials: [
-    { label: "GitHub", href: "https://...", icon: "github.svg" },
-  ],
+  nav: [{ title: "Home", href: "/" }],
+  socials: [{ label: "GitHub", href: "https://...", icon: "github.svg" }],
   repo: { url: "https://github.com/...", branch: "main" },
   openapi: { input: "public/openapi.json" },
-})
+});
 ```
 
 For a full list of configuration options, check the [Package README](./packages/lyvo/README.md).
