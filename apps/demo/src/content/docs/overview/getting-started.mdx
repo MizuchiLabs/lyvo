@@ -7,7 +7,7 @@ order: 1
 Getting up and running with Lyvo Docs is incredibly straightforward. Since you have access to the raw source code, there are no complicated abstractions to fight against.
 
 <Callout type="default" title="Requirements">
-	Ensure you have **Node.js 20+** and your preferred package manager installed before you begin.
+  Ensure you have **Node.js 20+** and your preferred package manager installed before you begin.
 </Callout>
 
 ## Quick Start
@@ -27,18 +27,18 @@ Getting up and running with Lyvo Docs is incredibly straightforward. Since you h
     Install the project dependencies using your preferred package manager. We recommend `pnpm` for the fastest experience.
 
 <Tabs>
-	<TabItem value="pnpm">
-		<Code code="pnpm install" lang="bash" />
-	</TabItem>
-	<TabItem value="npm">
-		<Code code="npm install" lang="bash" />
-	</TabItem>
-	<TabItem value="yarn">
-		<Code code="yarn install" lang="bash" />
-	</TabItem>
-	<TabItem value="bun">
-		<Code code="bun install" lang="bash" />
-	</TabItem>
+  <TabItem value="pnpm">
+    <Code code="pnpm install" lang="bash" />
+  </TabItem>
+  <TabItem value="npm">
+    <Code code="npm install" lang="bash" />
+  </TabItem>
+  <TabItem value="yarn">
+    <Code code="yarn install" lang="bash" />
+  </TabItem>
+  <TabItem value="bun">
+    <Code code="bun install" lang="bash" />
+  </TabItem>
 </Tabs>
 
   </Step>
@@ -47,18 +47,18 @@ Getting up and running with Lyvo Docs is incredibly straightforward. Since you h
     Fire up the local development server to see your documentation live.
 
 <Tabs>
-	<TabItem value="pnpm">
-		<Code code="pnpm dev" lang="bash" />
-	</TabItem>
-	<TabItem value="npm">
-		<Code code="npm run dev" lang="bash" />
-	</TabItem>
-	<TabItem value="yarn">
-		<Code code="yarn dev" lang="bash" />
-	</TabItem>
-	<TabItem value="bun">
-		<Code code="bun run dev" lang="bash" />
-	</TabItem>
+  <TabItem value="pnpm">
+    <Code code="pnpm dev" lang="bash" />
+  </TabItem>
+  <TabItem value="npm">
+    <Code code="npm run dev" lang="bash" />
+  </TabItem>
+  <TabItem value="yarn">
+    <Code code="yarn dev" lang="bash" />
+  </TabItem>
+  <TabItem value="bun">
+    <Code code="bun run dev" lang="bash" />
+  </TabItem>
 </Tabs>
 
     Your site is now running at [http://localhost:4321](http://localhost:4321). Any changes you make to the `.mdx` files will instantly reflect in your browser!
@@ -71,34 +71,34 @@ Getting up and running with Lyvo Docs is incredibly straightforward. Since you h
 Lyvo Docs keeps its structure extremely minimal, utilizing Astro's standard routing and layout paradigms so you can easily understand where everything lives.
 
 <FileTree>
-	<Folder name="src" defaultOpen>
-		<Folder name="assets">
-			<File name="logo.svg" />
-		</Folder>
-		<Folder name="components" defaultOpen>
-			<Folder name="ui">
-				<File name="accordion.tsx" />
-				<File name="button.tsx" />
-			</Folder>
-			<File name="Callout.tsx" />
-			<File name="Sidebar.tsx" />
-		</Folder>
-		<Folder name="content" defaultOpen>
-			<Folder name="docs" defaultOpen>
-				<File name="getting-started.mdx" />
-			</Folder>
-		</Folder>
-		<Folder name="layouts">
-			<File name="DocsLayout.astro" />
-		</Folder>
-		<Folder name="pages">
-			<File name="index.astro" />
-		</Folder>
-		<File name="config.ts" />
-	</Folder>
-	<File name="astro.config.mjs" />
-	<File name="package.json" />
-	<File name="tailwind.config.mjs" />
+  <Folder name="src" defaultOpen>
+    <Folder name="assets">
+      <File name="logo.svg" />
+    </Folder>
+    <Folder name="components" defaultOpen>
+      <Folder name="ui">
+        <File name="accordion.tsx" />
+        <File name="button.tsx" />
+      </Folder>
+      <File name="Callout.tsx" />
+      <File name="Sidebar.tsx" />
+    </Folder>
+    <Folder name="content" defaultOpen>
+      <Folder name="docs" defaultOpen>
+        <File name="getting-started.mdx" />
+      </Folder>
+    </Folder>
+    <Folder name="layouts">
+      <File name="DocsLayout.astro" />
+    </Folder>
+    <Folder name="pages">
+      <File name="index.astro" />
+    </Folder>
+    <File name="config.ts" />
+  </Folder>
+  <File name="astro.config.mjs" />
+  <File name="package.json" />
+  <File name="tailwind.config.mjs" />
 </FileTree>
 
 ## Building for Production

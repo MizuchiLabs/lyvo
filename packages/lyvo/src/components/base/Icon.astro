@@ -13,7 +13,9 @@ const svgs = import.meta.glob('/src/assets/*.svg', {
 	eager: true
 });
 
-const svgKey = Object.keys(svgs).find((key) => key.endsWith(`/${name}`) || key.endsWith(`/${name}.svg`));
+const svgKey = Object.keys(svgs).find(
+	(key) => key.endsWith(`/${name}`) || key.endsWith(`/${name}.svg`)
+);
 const svgContent = svgKey ? (svgs[svgKey] as string) : null;
 
 const rendered =

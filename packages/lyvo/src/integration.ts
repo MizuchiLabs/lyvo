@@ -107,7 +107,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
                 name: "vite-plugin-lyvo-config",
                 resolveId(id) {
                   if (id === "virtual:lyvo-config") {
-                    return "\0virtual:lyvo-config";
+                    return "\0" + id;
                   }
                   return null;
                 },
@@ -131,6 +131,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
                     };
                     return `export default ${JSON.stringify(config)};`;
                   }
+
                   return null;
                 },
               },
@@ -158,11 +159,12 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
           });
         }
 
-        injectScript("page-ssr", `import "@mizuchilabs/lyvo/style.css";`);
-        if (options.customCss) {
+        if (options.customCss && options.customCss.length > 0) {
           for (const cssPath of options.customCss) {
             injectScript("page-ssr", `import "${cssPath}";`);
           }
+        } else {
+          injectScript("page-ssr", `import "@mizuchilabs/lyvo/style.css";`);
         }
       },
       "astro:build:done": ({ dir, logger }) => {

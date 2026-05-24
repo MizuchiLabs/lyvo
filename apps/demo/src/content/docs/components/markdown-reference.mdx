@@ -42,8 +42,8 @@ You can use **bold**, _italic_, ~~strikethrough~~, or `inline code` to emphasize
 
 - Item one
 - Item two
-    - Nested item A
-    - Nested item B
+  - Nested item A
+  - Nested item B
 - Item three
 
 ### Ordered List
@@ -71,19 +71,19 @@ To install dependencies, run `npm install`.
 Lyvo Docs uses Shiki for high-quality syntax highlighting.
 
 ```tsx
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function Counter() {
-	const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
 
-	return <button onClick={() => setCount(count + 1)}>Count is {count}</button>;
+  return <button onClick={() => setCount(count + 1)}>Count is {count}</button>;
 }
 ```
 
 <Code code={`const foo = 'bar';`} lang="js" />
 <Code code={`const foo = 'bar';`} lang="js" theme="catppuccin-mocha" />
 <p>
-	<Code code={`const foo = 'bar';`} lang="js" inline />
+  <Code code={`const foo = 'bar';`} lang="js" inline />
 </p>
 ---
 

@@ -36,17 +36,22 @@ const primarySocial = config.socials?.[0];
 			</button>
 		</a>
 
-		{primarySocial && (
-			<a href={primarySocial.href} target="_blank" rel="noreferrer" class="w-full sm:w-auto">
-				<button
-					class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-6 font-semibold text-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+		{
+			primarySocial && (
+				<a
+					href={primarySocial.href}
+					target="_blank"
+					rel="noreferrer"
+					class="w-full sm:w-auto"
 				>
-					<span class="[&>svg]:size-5 [&>svg]:dark:invert">
-						<Icon name={primarySocial.icon} />
-					</span>
-					{primarySocial.label}
-				</button>
-			</a>
-		)}
+					<button class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-6 font-semibold text-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto">
+						<span class="[&>svg]:size-5 [&>svg]:dark:invert">
+							<Icon name={primarySocial.icon} />
+						</span>
+						{primarySocial.label}
+					</button>
+				</a>
+			)
+		}
 	</div>
 </div>

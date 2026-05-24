@@ -74,7 +74,7 @@ export default defineConfig({
         input: "public/openapi.json",
         groupBy: "tag",
       },
-      customCss: "./src/styles/custom.css",
+      customCss: ["./src/styles/custom.css"],
     }),
   ],
   vite: {
@@ -83,7 +83,21 @@ export default defineConfig({
 });
 ```
 
-### 2. Set up Content Collections
+### 2. Configure Custom Theme (Optional)
+
+If you specified a `customCss` file to override the default theme, you MUST import the default styles inside it. Create `src/styles/custom.css`:
+
+```css
+@import "tailwindcss";
+@import "@mizuchilabs/lyvo/style.css";
+
+/* Your custom theme overrides here */
+@theme {
+  --color-primary: oklch(0.5 0.2 250);
+}
+```
+
+### 3. Set up Content Collections
 
 Create `src/content.config.ts` to define your documentation and API collections:
 

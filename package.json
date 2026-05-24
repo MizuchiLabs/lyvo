@@ -1,19 +1,19 @@
 {
-	"name": "lyvo-monorepo",
-	"private": true,
-	"scripts": {
-		"dev": "pnpm --filter demo dev",
-		"build": "pnpm --filter demo build",
-		"format": "prettier --write .",
-		"lint": "oxlint --fix",
-		"update-deps": "pnpm up -r -i -L"
-	},
-	"devDependencies": {
-		"oxlint": "^1.66.0",
-		"pagefind": "^1.5.2",
-		"prettier": "3.8.3",
-		"prettier-plugin-astro": "0.14.1",
-		"prettier-plugin-tailwindcss": "^0.8.0"
-	},
-	"packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499"
+  "name": "lyvo-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter demo dev",
+    "build": "pnpm --filter demo build",
+    "format": "prettier --write .",
+    "lint": "oxlint --fix",
+    "update-deps": "pnpm up -r -i -L"
+  },
+  "devDependencies": {
+    "oxlint": "^1.66.0",
+    "pagefind": "^1.5.2",
+    "prettier": "3.8.3",
+    "prettier-plugin-astro": "0.14.1",
+    "prettier-plugin-tailwindcss": "^0.8.0"
+  },
+  "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499"
 }

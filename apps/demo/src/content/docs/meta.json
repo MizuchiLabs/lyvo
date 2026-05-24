@@ -1,9 +1,9 @@
 {
-	"order": ["introduction", "overview", "components", "changelog"],
-	"labels": {
-		"introduction": "Introduction",
-		"overview": "Overview",
-		"components": "Components",
-		"changelog": "Changelog"
-	}
+  "order": ["introduction", "overview", "components", "changelog"],
+  "labels": {
+    "introduction": "Introduction",
+    "overview": "Overview",
+    "components": "Components",
+    "changelog": "Changelog"
+  }
 }
