@@ -2,7 +2,7 @@
 import { Sun, Moon } from '@lucide/astro';
 ---
 
-<theme-toggle>
+<theme-toggle {...Astro.props}>
 	<button
 		class="inline-flex size-11 items-center justify-center rounded-full p-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-accent hover:text-accent-foreground md:size-9"
 		title="Toggle theme"
