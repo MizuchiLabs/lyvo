@@ -19,7 +19,7 @@ declare module "virtual:lyvo-config" {
       input?: string;
       groupBy?: "tag" | "path";
     };
-    customCss?: string;
+    customCss?: string[];
   }
 
   const config: Config;
