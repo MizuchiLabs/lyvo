@@ -35,7 +35,7 @@ pnpm add @mizuchilabs/lyvo
 You will also need to install its peer dependencies if they aren't already in your project:
 
 ```bash
-pnpm add  @tailwindcss/vite tailwindcss
+pnpm add @tailwindcss/vite tailwindcss
 ```
 
 ## Quick Start
