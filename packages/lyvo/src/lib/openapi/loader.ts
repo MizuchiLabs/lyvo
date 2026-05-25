@@ -7,7 +7,19 @@ const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "head", "options"
 
 function toTitle(value: any) {
   if (!value) return "Untitled";
-  const normalized = value
+  
+  let stringValue = String(value);
+  
+  if (stringValue.includes('.') && !stringValue.includes(' ')) {
+    const parts = stringValue.split('.');
+    const lastPart = parts[parts.length - 1];
+    
+    if (/^[A-Z][a-zA-Z0-9]*$/.test(lastPart)) {
+      stringValue = lastPart;
+    }
+  }
+
+  const normalized = stringValue
     .replaceAll(/[{}]/g, "")
     .replaceAll(/([a-z0-9])([A-Z])/g, "$1 $2")
     .replaceAll(/[._-]+/g, " ")
@@ -566,7 +578,11 @@ function buildNavigation(operations: any[], webhooks: any[], groupBy: string) {
         .replaceAll(/^-+|-+$/g, ""),
       title: toTitle(title),
       items: items.sort((a: any, b: any) => {
-        if (a.path === b.path) return a.method.localeCompare(b.method);
+        const methodAIndex = HTTP_METHODS.indexOf(a.method);
+        const methodBIndex = HTTP_METHODS.indexOf(b.method);
+        if (methodAIndex !== methodBIndex) {
+          return methodAIndex - methodBIndex;
+        }
         return a.path.localeCompare(b.path);
       }),
     }));
@@ -648,7 +664,11 @@ export function openapiLoader(options: OpenAPILoaderOptions): Loader {
       }
 
       operations.sort((a, b) => {
-        if (a.path === b.path) return a.method.localeCompare(b.method);
+        const methodAIndex = HTTP_METHODS.indexOf(a.method);
+        const methodBIndex = HTTP_METHODS.indexOf(b.method);
+        if (methodAIndex !== methodBIndex) {
+          return methodAIndex - methodBIndex;
+        }
         return a.path.localeCompare(b.path);
       });
 
