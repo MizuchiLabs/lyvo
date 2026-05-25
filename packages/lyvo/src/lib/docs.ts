@@ -1,5 +1,5 @@
 import { getCollection } from "astro:content";
-import fs from "node:fs";
+import config from "virtual:lyvo-config";
 
 interface MetaConfig {
   order?: string[];
@@ -9,15 +9,7 @@ interface MetaConfig {
 export async function getDocsHierarchy() {
   const docs = await getCollection("docs");
 
-  let meta: MetaConfig = {};
-  const metaPath = "src/content/docs/meta.json";
-  if (fs.existsSync(metaPath)) {
-    try {
-      meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
-    } catch (e) {
-      console.warn("Could not read meta.json for docs sidebar ordering", e);
-    }
-  }
+  const meta: MetaConfig = config.docs?.sidebar || {};
 
   const orderArr: string[] = meta.order || [];
   const labelsObj: Record<string, string> = meta.labels || {};

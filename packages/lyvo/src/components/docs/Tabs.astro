@@ -1,10 +1,16 @@
 ---
 const html = await Astro.slots.render('default');
-const regex = /data-tab-panel="([^"]+)"[^>]*data-tab-label="([^"]+)"/g;
-const tabs = [...html.matchAll(regex)].map((match) => ({
-	value: match[1],
-	label: match[2]
-}));
+
+// Robustly extract data-tab-panel and data-tab-label using regex
+// This allows users to avoid duplicating labels in the <Tabs> component
+const tabs: { value: string; label: string }[] = [];
+const panelRegex = /data-tab-panel="([^"]+)"/g;
+const labelRegex = /data-tab-label="([^"]+)"/g;
+
+let panelMatch, labelMatch;
+while ((panelMatch = panelRegex.exec(html)) !== null && (labelMatch = labelRegex.exec(html)) !== null) {
+	tabs.push({ value: panelMatch[1], label: labelMatch[1] });
+}
 ---
 
 <div class="tabs-root my-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm">

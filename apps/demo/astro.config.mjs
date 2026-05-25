@@ -41,6 +41,7 @@ export default defineConfig({
   integrations: [
     lyvo({
       title: "Demo Docs",
+      lang: "en",
       repo: {
         url: "https://github.com/mizuchilabs/lyvo",
         branch: "main",
@@ -70,6 +71,15 @@ export default defineConfig({
       docs: {
         edit: true,
         feedback: true,
+        sidebar: {
+          order: ["introduction", "overview", "components", "changelog"],
+          labels: {
+            introduction: "Introduction",
+            overview: "Overview",
+            components: "Components",
+            changelog: "Changelog",
+          },
+        },
       },
       openapi: {
         input: "public/openapi.json",

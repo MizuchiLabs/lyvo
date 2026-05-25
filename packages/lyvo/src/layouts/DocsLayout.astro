@@ -10,7 +10,9 @@ import PageHeader from '@lyvo/components/docs/PageHeader.astro';
 import Pagination from '@lyvo/components/docs/Pagination.astro';
 import fs from 'node:fs';
 import child_process from 'node:child_process';
+import util from 'node:util';
 import { cn } from '@lyvo/lib/utils';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	title: string;
@@ -22,13 +24,13 @@ interface Props {
 
 const { title, description, headings = [], entry, isApi = false } = Astro.props;
 
-const lastUpdated = () => {
+const execAsync = util.promisify(child_process.exec);
+
+const lastUpdated = async () => {
 	if (entry?.filePath) {
 		try {
-			const gitTime = child_process
-				.execSync(`git log -1 --format="%ct" -- "${entry.filePath}"`)
-				.toString()
-				.trim();
+			const { stdout } = await execAsync(`git log -1 --format="%ct" -- "${entry.filePath}"`);
+			const gitTime = stdout.toString().trim();
 			if (gitTime) {
 				return new Intl.DateTimeFormat(undefined, {
 					month: 'short',
@@ -53,10 +55,12 @@ const lastUpdated = () => {
 	}
 	return '';
 };
+
+const lastUpdatedText = await lastUpdated();
 ---
 
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang={config.lang ?? 'en'} class="scroll-smooth">
 	<BaseHead title={title} description={description} />
 
 	<body
@@ -100,7 +104,7 @@ const lastUpdated = () => {
 								<PageHeader
 									title={title}
 									description={description}
-									lastUpdated={lastUpdated()}
+									lastUpdated={lastUpdatedText}
 								/>
 							)
 						}

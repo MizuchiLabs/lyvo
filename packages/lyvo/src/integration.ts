@@ -9,6 +9,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 export const LyvoOptionsSchema = z.object({
   title: z.string().optional(),
+  lang: z.string().optional(),
   logo: z
     .union([
       z.string(),
@@ -53,6 +54,7 @@ export const LyvoOptionsSchema = z.object({
     .object({
       edit: z.boolean().optional(),
       feedback: z.boolean().optional(),
+      sidebar: z.any().optional(),
     })
     .optional(),
   openapi: z
@@ -115,6 +117,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
                   if (id === "\0virtual:lyvo-config") {
                     const config = {
                       title: options.title,
+                      lang: options.lang,
                       repo: options.repo,
                       socials: options.socials || [],
                       nav: options.nav,

@@ -53,6 +53,7 @@ export default defineConfig({
   integrations: [
     lyvo({
       title: "My Docs",
+      lang: "en",
       logo: "brand-logo.svg", // Resolves from src/assets/brand-logo.svg
       repo: {
         url: "https://github.com/your-org/your-repo",
@@ -70,6 +71,14 @@ export default defineConfig({
           icon: "github.svg", // Resolves from src/assets/github.svg
         },
       ],
+      docs: {
+        sidebar: {
+          order: ["introduction", "components"],
+          labels: {
+            introduction: "Introduction"
+          }
+        }
+      },
       openapi: {
         input: "public/openapi.json",
         groupBy: "tag",
@@ -125,6 +134,7 @@ The `lyvo()` integration accepts the following options:
 | Option            | Type                         | Description                                                             |
 | :---------------- | :--------------------------- | :---------------------------------------------------------------------- |
 | `title`           | `string`                     | The title of your documentation site. Set to `""` to hide the text.     |
+| `lang`            | `string`                     | The language attribute for the HTML tag (e.g., `"en"`).                 |
 | `logo`            | `string`                     | Filename of an SVG in your `src/assets/` folder (e.g., `"brand.svg"`).  |
 | `nav`             | `Array<{title, href}>`       | Override the default top navigation bar links.                          |
 | `repo.url`        | `string`                     | URL to your GitHub/GitLab repository.                                   |
@@ -133,6 +143,7 @@ The `lyvo()` integration accepts the following options:
 | `extraLinks`      | `Array<{title, href}>`       | Additional text links to show in the sidebar footer.                    |
 | `docs.edit`       | `boolean`                    | Whether to show "Edit this page" links.                                 |
 | `docs.feedback`   | `boolean`                    | Whether to show "Give feedback" links.                                  |
+| `docs.sidebar`    | `object`                     | Sidebar structure defining `order` array and `labels` mapping.          |
 | `openapi.input`   | `string`                     | Path to your OpenAPI JSON file.                                         |
 | `openapi.groupBy` | `'tag' \| 'path'`            | How to group API endpoints.                                             |
 
@@ -140,7 +151,17 @@ The `lyvo()` integration accepts the following options:
 
 Lyvo includes several components to help you write better documentation:
 
-- `<Tabs>` and `<TabItem>`: For switching between different code languages or contexts.
+- `<Tabs>` and `<TabItem>`: For switching between different code languages or contexts. Example:
+  ```mdx
+  <Tabs>
+    <TabItem value="npm">
+      <Code code="npm install" lang="bash" />
+    </TabItem>
+    <TabItem value="yarn">
+      <Code code="yarn add" lang="bash" />
+    </TabItem>
+  </Tabs>
+  ```
 - `<Callout>`: For highlighting important information (info, warning, error, etc.).
 - `<Steps>` and `<Step>`: For step-by-step tutorials.
 - `<Accordion>`: For collapsible content.

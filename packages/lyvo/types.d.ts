@@ -3,6 +3,7 @@
 declare module "virtual:lyvo-config" {
   interface Config {
     title?: string;
+    lang?: string;
     logo?: string | { light: string; dark: string };
     repo?: {
       url?: string;
@@ -14,6 +15,7 @@ declare module "virtual:lyvo-config" {
     docs: {
       edit: boolean;
       feedback: boolean;
+      sidebar?: any;
     };
     openapi: {
       input?: string;
