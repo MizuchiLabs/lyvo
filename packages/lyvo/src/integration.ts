@@ -1,9 +1,9 @@
 import type { AstroIntegration } from "astro";
 import { z } from "astro/zod";
-import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
+import pagefind from "astro-pagefind";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
@@ -92,7 +92,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
               ],
             ],
           },
-          integrations: [mdx(), sitemap()],
+          integrations: [mdx(), sitemap(), pagefind()],
           vite: {
             resolve: {
               alias: [
@@ -165,14 +165,6 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
           }
         } else {
           injectScript("page-ssr", `import "@mizuchilabs/lyvo/style.css";`);
-        }
-      },
-      "astro:build:done": ({ dir, logger }) => {
-        logger.info("[lyvo] Running Pagefind indexer...");
-        try {
-          execSync(`npx pagefind --site "${fileURLToPath(dir)}"`, { stdio: "inherit" });
-        } catch (error) {
-          logger.error(`[lyvo] Pagefind indexing failed: ${error}`);
         }
       },
     },

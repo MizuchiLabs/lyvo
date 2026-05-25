@@ -10,6 +10,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@pagefind/component-ui": "^1.5.0",
     "@lucide/astro": "^1.16.0",
     "@mizuchilabs/lyvo": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",

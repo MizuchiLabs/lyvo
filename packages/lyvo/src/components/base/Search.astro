@@ -1,262 +1,96 @@
 ---
-import { SearchIcon } from '@lucide/astro';
+import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
 ---
 
-<lyvo-search class="contents" {...Astro.props}>
-	<button
-		id="search-trigger"
-		aria-label="Search documentation"
-		class="inline-flex items-center rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:h-9 sm:w-9 sm:justify-center md:relative md:w-64 md:justify-start md:border md:border-input md:bg-background md:px-4 md:pr-12 md:shadow-sm"
-	>
-		{/* Desktop Text */}
-		<span class="hidden md:inline-flex">Search...</span>
+<PagefindConfig />
+<div class="mt-1">
+	<pagefind-modal-trigger shortcut="/" placeholder="Search..."></pagefind-modal-trigger>
+</div>
 
-		{/* Tablet Icon */}
-		<SearchIcon class="md:hidden" size={20} />
-
-		{/* Desktop Keyboard Shortcut */}
-		<kbd
-			class="pointer-events-none absolute top-1/2 right-1.5 hidden h-5 -translate-y-1/2 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 select-none md:flex"
-		>
-			<span>⌘</span>
-			<span>K</span>
-		</kbd>
-	</button>
-
-	<dialog
-		id="search-dialog"
-		class="fixed top-[20%] left-1/2 z-50 w-full max-w-lg -translate-x-1/2 rounded-xl border bg-background p-0 shadow-lg focus:outline-none sm:top-1/3"
-	>
-		<div class="flex flex-col overflow-hidden">
-			<div class="flex items-center border-b px-3">
-				<SearchIcon class="mr-2 h-4 w-4 shrink-0 opacity-50" />
-				<input
-					id="search-input"
-					class="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-					placeholder="Search documentation..."
-					autocomplete="off"
-					autocorrect="off"
-					spellcheck="false"
-				/>
-			</div>
-			<div
-				id="search-results-container"
-				class="max-h-75 overflow-x-hidden overflow-y-auto p-1"
-			>
-				<div id="search-empty" class="py-6 text-center text-sm text-muted-foreground">
-					Type to search...
-				</div>
-				<div id="search-results" class="hidden flex-col gap-1">
-					<!-- Results will be injected here -->
-				</div>
-			</div>
-		</div>
-	</dialog>
-</lyvo-search>
-
-<script>
-	let pagefind: any = null;
-
-	class LyvoSearch extends HTMLElement {
-		private handleKeydown: (e: KeyboardEvent) => void;
-
-		constructor() {
-			super();
-			this.handleKeydown = () => {};
-		}
-
-		connectedCallback() {
-			const trigger = this.querySelector('#search-trigger');
-			const dialog = this.querySelector('#search-dialog') as HTMLDialogElement;
-			const input = this.querySelector('#search-input') as HTMLInputElement;
-			const resultsContainer = this.querySelector('#search-results');
-			const emptyState = this.querySelector('#search-empty');
-
-			if (!trigger || !dialog || !input || !resultsContainer || !emptyState) return;
-
-			const prefetchPagefind = async () => {
-				if (pagefind) return;
-				try {
-					// @ts-ignore
-					pagefind = await import(
-						/* @vite-ignore */ window.location.origin + '/pagefind/pagefind.js'
-					);
-					pagefind.init();
-				} catch (e) {
-					console.error(
-						'Pagefind not found. Search only works after building with `pnpm build`.',
-						e
-					);
-				}
-			};
-
-			const openSearch = () => {
-				dialog.showModal();
-				input.focus();
-				prefetchPagefind();
-			};
-
-			const closeSearch = () => {
-				dialog.close();
-				input.value = '';
-				updateResults([]);
-			};
-
-			trigger.addEventListener('click', openSearch);
-			trigger.addEventListener('mouseenter', prefetchPagefind);
-
-			// Keyboard shortcut
-			this.handleKeydown = (e: KeyboardEvent) => {
-				if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-					e.preventDefault();
-					dialog.open ? closeSearch() : openSearch();
-				}
-			};
-			document.addEventListener('keydown', this.handleKeydown);
-
-			// Close on click outside
-			dialog.addEventListener('click', (e) => {
-				if (e.target === dialog) {
-					closeSearch();
-				}
-			});
-
-			const updateResults = (results: any[]) => {
-				resultsContainer.innerHTML = '';
-
-				if (input.value === '') {
-					emptyState.textContent = 'Type to search...';
-					emptyState.style.display = 'block';
-					resultsContainer.style.display = 'none';
-					return;
-				}
-
-				if (results.length === 0) {
-					emptyState.textContent = 'No results found.';
-					emptyState.style.display = 'block';
-					resultsContainer.style.display = 'none';
-					return;
-				}
-
-				emptyState.style.display = 'none';
-				resultsContainer.style.display = 'flex';
-
-				const group = document.createElement('div');
-				group.className = 'px-2 py-1.5 text-xs font-medium text-muted-foreground';
-				group.textContent = 'Results';
-				resultsContainer.appendChild(group);
-
-				results.forEach((res, index) => {
-					const item = document.createElement('button');
-					item.className =
-						'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground';
-					item.setAttribute('role', 'option');
-					item.setAttribute('tabindex', index === 0 ? '0' : '-1');
-
-					item.innerHTML = `
-						<div class="flex w-full flex-col gap-1 text-foreground items-start text-left">
-							<span class="text-sm font-medium">${res.meta.title}</span>
-							<span class="line-clamp-1 text-xs text-muted-foreground">${res.excerpt}</span>
-						</div>
-					`;
-
-					item.addEventListener('click', () => {
-						window.location.href = res.url;
-						closeSearch();
-					});
-
-					// Simple keyboard navigation
-					item.addEventListener('keydown', (e) => {
-						if (e.key === 'ArrowDown') {
-							e.preventDefault();
-							(item.nextElementSibling as HTMLElement)?.focus();
-						} else if (e.key === 'ArrowUp') {
-							e.preventDefault();
-							(item.previousElementSibling as HTMLElement)?.focus();
-						} else if (e.key === 'Enter') {
-							e.preventDefault();
-							item.click();
-						}
-					});
-
-					resultsContainer.appendChild(item);
-				});
-			};
-
-			let debounceTimeout: any;
-			input.addEventListener('input', (e) => {
-				const query = (e.target as HTMLInputElement).value;
-
-				clearTimeout(debounceTimeout);
-				debounceTimeout = setTimeout(async () => {
-					if (!query) {
-						updateResults([]);
-						return;
-					}
-					if (!pagefind) await prefetchPagefind();
-					if (pagefind) {
-						const searchRes = await pagefind.search(query);
-						const data = await Promise.all(
-							searchRes.results.slice(0, 5).map((r: any) => r.data())
-						);
-						updateResults(data);
-					}
-				}, 150);
-			});
-
-			input.addEventListener('keydown', (e) => {
-				if (e.key === 'ArrowDown' && resultsContainer.children.length > 1) {
-					e.preventDefault();
-					(resultsContainer.children[1] as HTMLElement)?.focus(); // Skip the "Results" heading
-				}
-			});
-		}
-
-		disconnectedCallback() {
-			if (this.handleKeydown) {
-				document.removeEventListener('keydown', this.handleKeydown);
+<script is:inline>
+	// Fix: @pagefind/component-ui doesn't deregister components on disconnect.
+	// After a View Transition, old dead elements stay registered in the Instance
+	// and getUtilities("modal")[0] returns the old detached modal.
+	// Clear component registrations before swap so new elements register fresh.
+	if (!window.__pagefindVTFix) {
+		window.__pagefindVTFix = true;
+		document.addEventListener('astro:before-swap', () => {
+			const el =
+				document.querySelector('pagefind-config') ||
+				document.querySelector('pagefind-modal') ||
+				document.querySelector('pagefind-modal-trigger');
+			if (el && el.instance) {
+				el.instance.components = [];
+				el.instance.componentsByType = {};
+				el.instance.listeners = {};
+				el.instance.activeShortcuts = [];
 			}
-		}
+		});
 	}
 
-	if (!customElements.get('lyvo-search')) {
-		customElements.define('lyvo-search', LyvoSearch);
+	// Sync pagefind theme with dark mode (only set up observer once)
+	if (!window.__pagefindThemeSync) {
+		window.__pagefindThemeSync = true;
+		const sync = () => {
+			const dark = document.documentElement.classList.contains('dark');
+			document.documentElement.setAttribute('data-pf-theme', dark ? 'dark' : 'light');
+		};
+		sync();
+		new MutationObserver(sync).observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['class']
+		});
+	} else {
+		// Just sync current state on subsequent navigations
+		const dark = document.documentElement.classList.contains('dark');
+		document.documentElement.setAttribute('data-pf-theme', dark ? 'dark' : 'light');
 	}
 </script>
 
-<style>
-	/* Prevent scrolling body when dialog is open */
-	body:has(dialog[open]) {
-		overflow: hidden;
+<div><pagefind-modal reset-on-close></pagefind-modal></div>
+
+<style is:global>
+	html[data-pf-theme='light'] {
+		--pf-text: var(--foreground);
+		--pf-text-secondary: var(--muted-foreground);
+		--pf-text-muted: var(--muted-foreground);
+		--pf-background: var(--background);
+		--pf-border: var(--border);
+		--pf-border-focus: var(--ring);
+		--pf-hover: var(--accent);
+		--pf-skeleton: var(--muted);
+		--pf-skeleton-shine: var(--muted-foreground);
+		--pf-mark: var(--foreground);
+		--pf-scroll-shadow: rgba(0, 0, 0, 0.08);
+		--pf-outline-focus: var(--ring);
+		--pf-shadow-lg: var(--shadow-2xl);
+		--pf-modal-max-width: 32rem;
+		--pf-modal-max-height: min(70dvh, 600px);
+		--pf-input-height: 32px;
+		--pf-border-radius: var(--radius);
+		--pf-font: var(--font-sans);
 	}
 
-	/* Polyfill open state styling for animate in */
-	dialog[open] {
-		animation: dialog-fade-in 100ms ease-out;
-	}
-
-	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.75);
-		animation: dialog-backdrop-in 100ms ease-out;
-	}
-
-	@keyframes dialog-fade-in {
-		from {
-			opacity: 0;
-			transform: translateY(-2%);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	@keyframes dialog-backdrop-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
+	html[data-pf-theme='dark'] {
+		--pf-text: var(--foreground);
+		--pf-text-secondary: var(--muted-foreground);
+		--pf-text-muted: var(--muted-foreground);
+		--pf-background: var(--background);
+		--pf-border: var(--border);
+		--pf-border-focus: var(--ring);
+		--pf-hover: var(--accent);
+		--pf-skeleton: var(--muted);
+		--pf-skeleton-shine: var(--muted-foreground);
+		--pf-mark: var(--foreground);
+		--pf-scroll-shadow: rgba(255, 255, 255, 0.1);
+		--pf-outline-focus: var(--ring);
+		--pf-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+		--pf-shadow-lg: var(--shadow-2xl);
+		--pf-modal-backdrop: rgba(0, 0, 0, 0.6);
+		--pf-modal-max-width: 32rem;
+		--pf-modal-max-height: min(70dvh, 600px);
+		--pf-input-height: 32px;
+		--pf-border-radius: var(--radius);
+		--pf-font: var(--font-sans);
 	}
 </style>
