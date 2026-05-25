@@ -9,6 +9,7 @@ import Breadcrumbs from '@lyvo/components/docs/Breadcrumbs.astro';
 import PageHeader from '@lyvo/components/docs/PageHeader.astro';
 import Pagination from '@lyvo/components/docs/Pagination.astro';
 import fs from 'node:fs';
+import child_process from 'node:child_process';
 import { cn } from '@lyvo/lib/utils';
 
 interface Props {
@@ -23,6 +24,22 @@ const { title, description, headings = [], entry, isApi = false } = Astro.props;
 
 const lastUpdated = () => {
 	if (entry?.filePath) {
+		try {
+			const gitTime = child_process
+				.execSync(`git log -1 --format="%ct" -- "${entry.filePath}"`)
+				.toString()
+				.trim();
+			if (gitTime) {
+				return new Intl.DateTimeFormat(undefined, {
+					month: 'short',
+					day: 'numeric',
+					year: 'numeric'
+				}).format(new Date(parseInt(gitTime) * 1000));
+			}
+		} catch (e) {
+			// Fallback to fs.statSync if git fails
+		}
+
 		try {
 			const stats = fs.statSync(entry.filePath);
 			return new Intl.DateTimeFormat(undefined, {

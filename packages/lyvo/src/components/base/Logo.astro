@@ -85,5 +85,5 @@ const defaultLogo = `
 			<Fragment set:html={defaultLogo} />
 		)
 	}
-	{config.title !== '' && <span>{config.title}</span>}
+	{config.title?.length ? <span>{config.title}</span> : null}
 </a>

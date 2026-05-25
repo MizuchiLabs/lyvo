@@ -1,11 +1,45 @@
 ---
 import { Slash, ChevronRight } from '@lucide/astro';
+import { getDocsHierarchy } from '@lyvo/lib/docs';
 
 interface Props {
-	title: string;
+	title?: string;
 }
 
 const { title } = Astro.props;
+const { topLevelItems } = await getDocsHierarchy();
+
+const pathname = Astro.url.pathname;
+const originalParts = pathname.split('/').filter(Boolean);
+
+const renderParts = originalParts
+	.map((part, index) => {
+		return {
+			part,
+			isLast: index === originalParts.length - 1,
+			href: '/' + originalParts.slice(0, index + 1).join('/'),
+			shouldRender: part !== 'docs'
+		};
+	})
+	.filter((p) => p.shouldRender);
+
+renderParts.forEach((p) => {
+	if (!p.isLast) {
+		const category = topLevelItems.find(
+			(item) => item.type === 'category' && item.originalId === p.part
+		);
+		if (category && category.items && category.items.length > 0) {
+			p.href = `/docs/${category.items[0].id}`;
+		}
+	}
+});
+
+function formatLabel(part: string) {
+	return part
+		.split('-')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
+}
 ---
 
 <div class="hidden items-center space-x-2 text-sm text-muted-foreground xl:flex">
@@ -15,6 +49,22 @@ const { title } = Astro.props;
 	>
 		<Slash size={16} />
 	</a>
-	<ChevronRight size={16} />
-	<span>{title}</span>
+	{
+		renderParts.map((p) => {
+			const label = p.isLast && title ? title : formatLabel(p.part);
+
+			return (
+				<>
+					<ChevronRight size={16} />
+					{p.isLast ? (
+						<span class="text-foreground">{label}</span>
+					) : (
+						<a href={p.href} class="transition-colors hover:text-foreground">
+							{label}
+						</a>
+					)}
+				</>
+			);
+		})
+	}
 </div>

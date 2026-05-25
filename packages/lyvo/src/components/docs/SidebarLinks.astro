@@ -37,7 +37,12 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 
 						return (
 							<div class="pb-1">
-								<details class="group" open={isGroupActive}>
+								<details 
+									class="group sidebar-group-details" 
+									open={isGroupActive}
+									data-group-id={`api-${item.title}`}
+									data-active={isGroupActive ? 'true' : 'false'}
+								>
 									<summary
 										class={cn(
 											'flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-1.5 text-sm font-semibold transition-colors select-none [&::-webkit-details-marker]:hidden',
@@ -121,7 +126,12 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 
 						return (
 							<div class="pb-1">
-								<details class="group" open>
+								<details 
+									class="group sidebar-group-details" 
+									open={isCategoryActive}
+									data-group-id={`docs-${item.originalId}`}
+									data-active={isCategoryActive ? 'true' : 'false'}
+								>
 									<summary
 										class={cn(
 											'flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-1.5 text-sm font-semibold transition-colors select-none [&::-webkit-details-marker]:hidden',
@@ -163,3 +173,37 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 		}
 	</div>
 </div>
+
+<script is:inline>
+	function setupSidebarState() {
+		const detailsElements = document.querySelectorAll('.sidebar-group-details');
+		
+		detailsElements.forEach(details => {
+			const id = details.getAttribute('data-group-id');
+			const isActive = details.getAttribute('data-active') === 'true';
+			const storedState = localStorage.getItem(`sidebar-group-${id}`);
+			
+			// Initialize state
+			if (isActive) {
+				details.open = true;
+				localStorage.setItem(`sidebar-group-${id}`, 'open');
+			} else if (storedState === 'open') {
+				details.open = true;
+			} else if (storedState === 'closed') {
+				details.open = false;
+			}
+			
+			// Prevent duplicate event listeners
+			if (details._toggleHandler) {
+				details.removeEventListener('toggle', details._toggleHandler);
+			}
+			
+			details._toggleHandler = () => {
+				localStorage.setItem(`sidebar-group-${id}`, details.open ? 'open' : 'closed');
+			};
+			details.addEventListener('toggle', details._toggleHandler);
+		});
+	}
+	
+	document.addEventListener('astro:page-load', setupSidebarState);
+</script>

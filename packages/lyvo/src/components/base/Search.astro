@@ -50,7 +50,7 @@ import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
 <div><pagefind-modal reset-on-close></pagefind-modal></div>
 
 <style is:global>
-	html[data-pf-theme='light'] {
+	[data-pf-theme] {
 		--pf-text: var(--foreground);
 		--pf-text-secondary: var(--muted-foreground);
 		--pf-text-muted: var(--muted-foreground);
@@ -71,26 +71,8 @@ import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
 		--pf-font: var(--font-sans);
 	}
 
-	html[data-pf-theme='dark'] {
-		--pf-text: var(--foreground);
-		--pf-text-secondary: var(--muted-foreground);
-		--pf-text-muted: var(--muted-foreground);
-		--pf-background: var(--background);
-		--pf-border: var(--border);
-		--pf-border-focus: var(--ring);
-		--pf-hover: var(--accent);
-		--pf-skeleton: var(--muted);
-		--pf-skeleton-shine: var(--muted-foreground);
-		--pf-mark: var(--foreground);
+	[data-pf-theme='dark'] {
 		--pf-scroll-shadow: rgba(255, 255, 255, 0.1);
-		--pf-outline-focus: var(--ring);
-		--pf-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-		--pf-shadow-lg: var(--shadow-2xl);
 		--pf-modal-backdrop: rgba(0, 0, 0, 0.6);
-		--pf-modal-max-width: 32rem;
-		--pf-modal-max-height: min(70dvh, 600px);
-		--pf-input-height: 32px;
-		--pf-border-radius: var(--radius);
-		--pf-font: var(--font-sans);
 	}
 </style>

@@ -18,7 +18,7 @@ const hasContent = (extraLinks && extraLinks.length > 0) || (socials && socials.
 						<a
 							href={link.href}
 							target="_blank"
-							rel="noreferrer"
+							rel="noopener noreferrer"
 							class="flex items-center justify-between rounded-md p-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
 						>
 							{link.title}
@@ -38,7 +38,7 @@ const hasContent = (extraLinks && extraLinks.length > 0) || (socials && socials.
 						<a
 							href={social.href}
 							target="_blank"
-							rel="noreferrer"
+							rel="noopener noreferrer"
 							class="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
 							title={social.label}
 						>
