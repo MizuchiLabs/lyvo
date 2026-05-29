@@ -62,9 +62,8 @@ const defaultLogo = `
 					src={lightLogo}
 					alt={`${config.title} Logo`}
 					width={size}
-					height={size}
 					densities={[1.5, 2]}
-					style={`width: ${size}px; height: ${size}px;`}
+					style={`width: ${size}px;`}
 					class={`object-contain ${darkLogo !== lightLogo ? 'block dark:hidden' : ''}`}
 				/>
 
@@ -74,9 +73,8 @@ const defaultLogo = `
 						src={darkLogo}
 						alt={`${config.title} Dark Logo`}
 						width={size}
-						height={size}
 						densities={[1.5, 2]}
-						style={`width: ${size}px; height: ${size}px;`}
+						style={`width: ${size}px;`}
 						class="hidden object-contain dark:block"
 					/>
 				)}

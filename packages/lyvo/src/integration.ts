@@ -6,6 +6,7 @@ import mdx from "@astrojs/mdx";
 import pagefind from "astro-pagefind";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import { unified } from "@astrojs/markdown-remark";
 
 export const LyvoOptionsSchema = z.object({
   title: z.string().optional(),
@@ -79,20 +80,22 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 
         updateConfig({
           markdown: {
-            rehypePlugins: [
-              rehypeSlug,
-              [
-                rehypeAutolinkHeadings,
-                {
-                  behavior: "append",
-                  properties: {
-                    class: "heading-link",
-                    "aria-hidden": "true",
-                    tabIndex: -1,
+            processor: unified({
+              rehypePlugins: [
+                rehypeSlug,
+                [
+                  rehypeAutolinkHeadings,
+                  {
+                    behavior: "append",
+                    properties: {
+                      class: "heading-link",
+                      "aria-hidden": "true",
+                      tabIndex: -1,
+                    },
                   },
-                },
+                ],
               ],
-            ],
+            }),
           },
           integrations: [mdx(), sitemap(), pagefind()],
           vite: {

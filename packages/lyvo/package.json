@@ -37,14 +37,15 @@
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^12.1.0",
-    "@astrojs/language-server": "^2.16.9",
-    "@astrojs/mdx": "^5.0.6",
-    "@astrojs/sitemap": "^3.7.2",
-    "@lucide/astro": "^1.16.0",
+    "@astrojs/language-server": "^2.16.10",
+    "@astrojs/markdown-remark": "^7.2.0",
+    "@astrojs/mdx": "^6.0.1",
+    "@astrojs/sitemap": "^3.7.3",
+    "@lucide/astro": "^1.17.0",
     "@tailwindcss/typography": "^0.5.19",
     "astro-pagefind": "^2.0.0",
     "clsx": "^2.1.1",
-    "openapi-sampler": "^1.7.3",
+    "openapi-sampler": "^1.7.4",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-slug": "^6.0.0",
     "tailwind-merge": "^3.6.0",
@@ -55,8 +56,8 @@
     "@astrojs/check": "^0.9.9",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^25.9.1",
-    "astro": "^6.3.7",
-    "oxlint": "^1.66.0",
+    "astro": "^6.4.2",
+    "oxlint": "^1.67.0",
     "prettier": "3.8.3",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "^0.8.0",
@@ -67,7 +68,7 @@
   "peerDependencies": {
     "@pagefind/component-ui": "^1.5.0",
     "@tailwindcss/vite": "^4.0.0",
-    "astro": "^6.0.0",
+    "astro": "^6.4.0",
     "tailwindcss": "^4.0.0"
   }
 }
