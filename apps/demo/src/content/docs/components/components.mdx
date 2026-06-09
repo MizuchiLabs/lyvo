@@ -12,33 +12,33 @@ Use callouts to highlight important information, warnings, or tips.
 
 ```mdx
 <Callout type="default" title="Note">
-  This is a standard default callout.
+	This is a standard default callout.
 </Callout>
 <Callout type="warning" title="Warning">
-  Make sure you read this before proceeding.
+	Make sure you read this before proceeding.
 </Callout>
 <Callout type="danger" title="Danger">
-  This action is destructive and cannot be undone.
+	This action is destructive and cannot be undone.
 </Callout>
 <Callout type="success" title="Success">
-  Your installation was completed successfully.
+	Your installation was completed successfully.
 </Callout>
 ```
 
 <Callout type="default" title="Note">
-  This is a standard default callout.
+	This is a standard default callout.
 </Callout>
 
 <Callout type="warning" title="Warning">
-  Make sure you read this before proceeding.
+	Make sure you read this before proceeding.
 </Callout>
 
 <Callout type="danger" title="Danger">
-  This action is destructive and cannot be undone.
+	This action is destructive and cannot be undone.
 </Callout>
 
 <Callout type="success" title="Success">
-  Your installation was completed successfully.
+	Your installation was completed successfully.
 </Callout>
 
 ---
@@ -48,11 +48,11 @@ Use callouts to highlight important information, warnings, or tips.
 Standard markdown code blocks are automatically enhanced with syntax highlighting (via Shiki) and a beautiful copy-to-clipboard button.
 
 ```tsx showLineNumbers
-import { useState } from "react";
+import { useState } from 'react';
 
 export function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
+	const [count, setCount] = useState(0);
+	return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
 }
 ```
 
@@ -66,28 +66,28 @@ Tabs are perfect for showing alternative instructions, such as different package
 
 ```mdx
 <Tabs>
-  <TabItem value="pnpm">
-    <Code code="pnpm add my-package" lang="bash" />
-  </TabItem>
-  <TabItem value="npm">
-    <Code code="npm install my-package" lang="bash" />
-  </TabItem>
-  <TabItem value="yarn">
-    <Code code="yarn add my-package" lang="bash" />
-  </TabItem>
+	<TabItem value="pnpm">
+		<Code code="pnpm add my-package" lang="bash" />
+	</TabItem>
+	<TabItem value="npm">
+		<Code code="npm install my-package" lang="bash" />
+	</TabItem>
+	<TabItem value="yarn">
+		<Code code="yarn add my-package" lang="bash" />
+	</TabItem>
 </Tabs>
 ```
 
 <Tabs>
-  <TabItem value="pnpm">
-    <Code code="pnpm add my-package" lang="bash" />
-  </TabItem>
-  <TabItem value="npm">
-    <Code code="npm install my-package" lang="bash" />
-  </TabItem>
-  <TabItem value="yarn">
-    <Code code="yarn add my-package" lang="bash" />
-  </TabItem>
+	<TabItem value="pnpm">
+		<Code code="pnpm add my-package" lang="bash" />
+	</TabItem>
+	<TabItem value="npm">
+		<Code code="npm install my-package" lang="bash" />
+	</TabItem>
+	<TabItem value="yarn">
+		<Code code="yarn add my-package" lang="bash" />
+	</TabItem>
 </Tabs>
 
 ---
@@ -98,24 +98,24 @@ The Steps component allows you to create clear, vertical tutorials.
 
 ```mdx
 <Steps>
-  <Step title="Create a new file">Create a new file in your `src/content/docs` directory.</Step>
-  <Step title="Add frontmatter">
-    Add the required `title` and `description` to the top of the file.
-  </Step>
-  <Step title="Write some content">
-    Start writing your markdown or MDX content right below the frontmatter.
-  </Step>
+	<Step title="Create a new file">Create a new file in your `src/content/docs` directory.</Step>
+	<Step title="Add frontmatter">
+		Add the required `title` and `description` to the top of the file.
+	</Step>
+	<Step title="Write some content">
+		Start writing your markdown or MDX content right below the frontmatter.
+	</Step>
 </Steps>
 ```
 
 <Steps>
-  <Step title="Create a new file">Create a new file in your `src/content/docs` directory.</Step>
-  <Step title="Add frontmatter">
-    Add the required `title` and `description` to the top of the file.
-  </Step>
-  <Step title="Write some content">
-    Start writing your markdown or MDX content right below the frontmatter.
-  </Step>
+	<Step title="Create a new file">Create a new file in your `src/content/docs` directory.</Step>
+	<Step title="Add frontmatter">
+		Add the required `title` and `description` to the top of the file.
+	</Step>
+	<Step title="Write some content">
+		Start writing your markdown or MDX content right below the frontmatter.
+	</Step>
 </Steps>
 
 ---
@@ -126,24 +126,24 @@ Display project directory structures cleanly with interactive, collapsible folde
 
 ```mdx
 <FileTree>
-  <Folder name="src" defaultOpen>
-    <Folder name="components">
-      <File name="Button.tsx" />
-    </Folder>
-    <File name="config.ts" />
-  </Folder>
-  <File name="package.json" />
+	<Folder name="src" defaultOpen>
+		<Folder name="components">
+			<File name="Button.tsx" />
+		</Folder>
+		<File name="config.ts" />
+	</Folder>
+	<File name="package.json" />
 </FileTree>
 ```
 
 <FileTree>
-  <Folder name="src" defaultOpen>
-    <Folder name="components">
-      <File name="Button.tsx" />
-    </Folder>
-    <File name="config.ts" />
-  </Folder>
-  <File name="package.json" />
+	<Folder name="src" defaultOpen>
+		<Folder name="components">
+			<File name="Button.tsx" />
+		</Folder>
+		<File name="config.ts" />
+	</Folder>
+	<File name="package.json" />
 </FileTree>
 
 ---
@@ -180,30 +180,30 @@ Use accordions to display a list of high-level options that can expand/collapse 
 
 ```mdx
 <Accordion
-  items={[
-    { title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
-    {
-      title: "Is it styled?",
-      content: "Yes. It comes with default styles that match the rest of the documentation.",
-    },
-    {
-      title: "Is it animated?",
-      content: "Yes. It's animated by default, but you can disable it if you prefer.",
-    },
-  ]}
+	items={[
+		{ title: 'Is it accessible?', content: 'Yes. It adheres to the WAI-ARIA design pattern.' },
+		{
+			title: 'Is it styled?',
+			content: 'Yes. It comes with default styles that match the rest of the documentation.'
+		},
+		{
+			title: 'Is it animated?',
+			content: "Yes. It's animated by default, but you can disable it if you prefer."
+		}
+	]}
 />
 ```
 
 <Accordion
-  items={[
-    { title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
-    {
-      title: "Is it styled?",
-      content: "Yes. It comes with default styles that match the rest of the documentation.",
-    },
-    {
-      title: "Is it animated?",
-      content: "Yes. It's animated by default, but you can disable it if you prefer.",
-    },
-  ]}
+	items={[
+		{ title: 'Is it accessible?', content: 'Yes. It adheres to the WAI-ARIA design pattern.' },
+		{
+			title: 'Is it styled?',
+			content: 'Yes. It comes with default styles that match the rest of the documentation.'
+		},
+		{
+			title: 'Is it animated?',
+			content: "Yes. It's animated by default, but you can disable it if you prefer."
+		}
+	]}
 />

@@ -1,17 +1,17 @@
 {
-  "useTabs": true,
-  "singleQuote": true,
-  "trailingComma": "none",
-  "printWidth": 100,
-  "tabWidth": 4,
-  "plugins": ["prettier-plugin-astro", "prettier-plugin-tailwindcss"],
-  "tailwindStylesheet": "./packages/lyvo/src/styles/global.css",
-  "overrides": [
-    {
-      "files": "*.astro",
-      "options": {
-        "parser": "astro"
-      }
-    }
-  ]
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"tabWidth": 4,
+	"plugins": ["prettier-plugin-astro", "prettier-plugin-tailwindcss"],
+	"tailwindStylesheet": "./packages/lyvo/src/styles/global.css",
+	"overrides": [
+		{
+			"files": "*.astro",
+			"options": {
+				"parser": "astro"
+			}
+		}
+	]
 }

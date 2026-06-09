@@ -45,50 +45,50 @@ pnpm add @tailwindcss/vite tailwindcss
 Add the `lyvo` integration to your `astro.config.mjs`:
 
 ```javascript
-import { defineConfig } from "astro/config";
-import tailwindcss from "@tailwindcss/vite";
-import lyvo from "@mizuchilabs/lyvo";
+import { defineConfig } from 'astro/config';
+import tailwindcss from '@tailwindcss/vite';
+import lyvo from '@mizuchilabs/lyvo';
 
 export default defineConfig({
-  integrations: [
-    lyvo({
-      title: "My Docs",
-      lang: "en",
-      logo: "brand-logo.svg", // Resolves from src/assets/brand-logo.svg
-      repo: {
-        url: "https://github.com/your-org/your-repo",
-        branch: "main",
-      },
-      nav: [
-        { title: "Home", href: "/" },
-        { title: "Docs", href: "/docs" },
-        { title: "API", href: "/api" },
-      ],
-      socials: [
-        {
-          label: "GitHub",
-          href: "https://github.com/your-org/your-repo",
-          icon: "github.svg", // Resolves from src/assets/github.svg
-        },
-      ],
-      docs: {
-        sidebar: {
-          order: ["introduction", "components"],
-          labels: {
-            introduction: "Introduction"
-          }
-        }
-      },
-      openapi: {
-        input: "public/openapi.json",
-        groupBy: "tag",
-      },
-      customCss: ["/src/styles/custom.css"],
-    }),
-  ],
-  vite: {
-    plugins: [tailwindcss()],
-  },
+	integrations: [
+		lyvo({
+			title: 'My Docs',
+			lang: 'en',
+			logo: 'brand-logo.svg', // Resolves from src/assets/brand-logo.svg
+			repo: {
+				url: 'https://github.com/your-org/your-repo',
+				branch: 'main'
+			},
+			nav: [
+				{ title: 'Home', href: '/' },
+				{ title: 'Docs', href: '/docs' },
+				{ title: 'API', href: '/api' }
+			],
+			socials: [
+				{
+					label: 'GitHub',
+					href: 'https://github.com/your-org/your-repo',
+					icon: 'github.svg' // Resolves from src/assets/github.svg
+				}
+			],
+			docs: {
+				sidebar: {
+					order: ['introduction', 'components'],
+					labels: {
+						introduction: 'Introduction'
+					}
+				}
+			},
+			openapi: {
+				input: 'public/openapi.json',
+				groupBy: 'tag'
+			},
+			customCss: ['/src/styles/custom.css']
+		})
+	],
+	vite: {
+		plugins: [tailwindcss()]
+	}
 });
 ```
 
@@ -97,12 +97,12 @@ export default defineConfig({
 If you specified a `customCss` file to override the default theme, you MUST import the default styles inside it. Create `src/styles/custom.css`:
 
 ```css
-@import "tailwindcss";
-@import "@mizuchilabs/lyvo/style.css";
+@import 'tailwindcss';
+@import '@mizuchilabs/lyvo/style.css';
 
 /* Your custom theme overrides here */
 @theme {
-  --color-primary: oklch(0.5 0.2 250);
+	--color-primary: oklch(0.5 0.2 250);
 }
 ```
 
@@ -111,17 +111,17 @@ If you specified a `customCss` file to override the default theme, you MUST impo
 Create `src/content.config.ts` to define your documentation and API collections:
 
 ```typescript
-import { defineCollection } from "astro:content";
-import { glob } from "astro/loaders";
-import { docsSchema, openapiLoader } from "@mizuchilabs/lyvo/schema";
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { docsSchema, openapiLoader } from '@mizuchilabs/lyvo/schema';
 
 const docs = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/docs" }),
-  schema: docsSchema,
+	loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
+	schema: docsSchema
 });
 
 const api = defineCollection({
-  loader: openapiLoader({ input: "public/openapi.json", groupBy: "tag" }),
+	loader: openapiLoader({ input: 'public/openapi.json', groupBy: 'tag' })
 });
 
 export const collections = { docs, api };
@@ -152,16 +152,16 @@ The `lyvo()` integration accepts the following options:
 Lyvo includes several components to help you write better documentation:
 
 - `<Tabs>` and `<TabItem>`: For switching between different code languages or contexts. Example:
-  ```mdx
-  <Tabs>
-    <TabItem value="npm">
-      <Code code="npm install" lang="bash" />
-    </TabItem>
-    <TabItem value="yarn">
-      <Code code="yarn add" lang="bash" />
-    </TabItem>
-  </Tabs>
-  ```
+    ```mdx
+    <Tabs>
+    	<TabItem value="npm">
+    		<Code code="npm install" lang="bash" />
+    	</TabItem>
+    	<TabItem value="yarn">
+    		<Code code="yarn add" lang="bash" />
+    	</TabItem>
+    </Tabs>
+    ```
 - `<Callout>`: For highlighting important information (info, warning, error, etc.).
 - `<Steps>` and `<Step>`: For step-by-step tutorials.
 - `<Accordion>`: For collapsible content.

@@ -74,9 +74,9 @@ function formatJson(value: unknown): string {
 					</h1>
 					{
 						(endpoint.description ?? endpoint.summary) && (
-							<div 
-								class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-p:text-base prose-p:text-muted-foreground md:prose-p:text-lg"
-								set:html={await marked.parse(endpoint.description ?? endpoint.summary)}
+							<div
+								class="prose max-w-none prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-p:text-base prose-p:text-muted-foreground md:prose-p:text-lg prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+								set:html={marked.parse((endpoint.description ?? endpoint.summary) as string)}
 							/>
 						)
 					}

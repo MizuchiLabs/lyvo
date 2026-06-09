@@ -8,7 +8,10 @@ const panelRegex = /data-tab-panel="([^"]+)"/g;
 const labelRegex = /data-tab-label="([^"]+)"/g;
 
 let panelMatch, labelMatch;
-while ((panelMatch = panelRegex.exec(html)) !== null && (labelMatch = labelRegex.exec(html)) !== null) {
+while (
+	(panelMatch = panelRegex.exec(html)) !== null &&
+	(labelMatch = labelRegex.exec(html)) !== null
+) {
 	tabs.push({ value: panelMatch[1], label: labelMatch[1] });
 }
 ---

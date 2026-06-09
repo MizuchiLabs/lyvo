@@ -1,40 +1,40 @@
 name: Test
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "**/*.js"
-      - "**/*.ts"
-      - "**/*.astro"
-  pull_request:
-    branches: [main]
-    paths:
-      - "**/*.js"
-      - "**/*.ts"
-      - "**/*.astro"
-      - "**/package.json"
-      - "**/pnpm-lock.yaml"
-  workflow_dispatch:
+    push:
+        branches: [main]
+        paths:
+            - '**/*.js'
+            - '**/*.ts'
+            - '**/*.astro'
+    pull_request:
+        branches: [main]
+        paths:
+            - '**/*.js'
+            - '**/*.ts'
+            - '**/*.astro'
+            - '**/package.json'
+            - '**/pnpm-lock.yaml'
+    workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "lts/*"
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 'lts/*'
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: latest
+            - uses: pnpm/action-setup@v6
+              with:
+                  version: latest
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-      - name: Lint and Build
-        run: |
-          pnpm lint
-          pnpm build
+            - name: Lint and Build
+              run: |
+                  pnpm lint
+                  pnpm build

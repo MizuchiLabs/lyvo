@@ -12,28 +12,28 @@ The primary configuration file for your site is `src/config.ts`. Here you can co
 
 ```ts title="src/config.ts"
 export const SITE = {
-  title: "Lyvo Docs",
-  description: "A modern, minimalistic documentation theme for Astro.",
-  repo: {
-    url: "https://github.com/mizuchilabs/lyvo",
-    type: "github", // Supports: github, gitlab, gitea
-  },
-  openapi: {
-    url: "/openapi.json", // Auto-generates an API reference page!
-  },
-  social: {
-    discord: "https://discord.gg/...",
-    x: "https://x.com/...",
-  },
-  nav: [{ title: "Documentation", href: "/docs/introduction" }],
-  logo: {
-    type: "both", // "text", "logo", or "both"
-    src: "logo.svg", // Loaded from src/assets/
-    width: 28,
-    height: 28,
-  },
-  enableEdit: true, // Enables the "Edit Page" button on docs
-  categoryOrder: ["introduction", "overview", "components", "changelog"], // Sidebar sorting
+	title: 'Lyvo Docs',
+	description: 'A modern, minimalistic documentation theme for Astro.',
+	repo: {
+		url: 'https://github.com/mizuchilabs/lyvo',
+		type: 'github' // Supports: github, gitlab, gitea
+	},
+	openapi: {
+		url: '/openapi.json' // Auto-generates an API reference page!
+	},
+	social: {
+		discord: 'https://discord.gg/...',
+		x: 'https://x.com/...'
+	},
+	nav: [{ title: 'Documentation', href: '/docs/introduction' }],
+	logo: {
+		type: 'both', // "text", "logo", or "both"
+		src: 'logo.svg', // Loaded from src/assets/
+		width: 28,
+		height: 28
+	},
+	enableEdit: true, // Enables the "Edit Page" button on docs
+	categoryOrder: ['introduction', 'overview', 'components', 'changelog'] // Sidebar sorting
 };
 ```
 
@@ -58,20 +58,20 @@ You can easily change the primary accent colors, background colors, and border s
 
 ```css title="src/styles/global.css"
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  /* ... */
+	--background: 0 0% 100%;
+	--foreground: 0 0% 3.9%;
+	/* ... */
 }
 
 .dark {
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 98%;
-  /* ... */
+	--background: 0 0% 3.9%;
+	--foreground: 0 0% 98%;
+	/* ... */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  /* ... */
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	/* ... */
 }
 ```

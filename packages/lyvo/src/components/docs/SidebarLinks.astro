@@ -28,32 +28,31 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 <div class="no-scrollbar flex-1 overflow-y-auto p-4">
 	<div class="flex flex-col gap-1 pb-4">
 		{
-			activeMode === 'api'
-				? (
-					<>
-						<div class="pb-2">
-							<a
-								href="/api"
-								class={cn(
-									'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
-									currentPath === '/api' || currentPath === '/api/'
-										? 'text-foreground bg-accent/50'
-										: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-								)}
-							>
-								Overview
-							</a>
-						</div>
-						{apiGroups.map((item) => {
-							const isGroupActive = item.items.some((endpoint) => {
+			activeMode === 'api' ? (
+				<>
+					<div class="pb-2">
+						<a
+							href="/api"
+							class={cn(
+								'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
+								currentPath === '/api' || currentPath === '/api/'
+									? 'bg-accent/50 text-foreground'
+									: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+							)}
+						>
+							Overview
+						</a>
+					</div>
+					{apiGroups.map((item) => {
+						const isGroupActive = item.items.some((endpoint) => {
 							const href = `/api/${endpoint.slug}`;
 							return currentPath === href || currentPath === href + '/';
 						});
 
 						return (
 							<div class="pb-1">
-								<details 
-									class="group sidebar-group-details" 
+								<details
+									class="group sidebar-group-details"
 									open={isGroupActive}
 									data-group-id={`api-${item.title}`}
 									data-active={isGroupActive ? 'true' : 'false'}
@@ -116,77 +115,78 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 						);
 					})}
 				</>
-				)
-				: topLevelItems.map((item) => {
-						if (item.type === 'doc') {
-							const href = `/docs/${item.doc.id}`;
-							const isActive = currentPath === href || currentPath === href + '/';
-							return (
-								<a
-									href={href}
+			) : (
+				topLevelItems.map((item) => {
+					if (item.type === 'doc') {
+						const href = `/docs/${item.doc.id}`;
+						const isActive = currentPath === href || currentPath === href + '/';
+						return (
+							<a
+								href={href}
+								class={cn(
+									'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
+									isActive
+										? 'text-foreground'
+										: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+								)}
+							>
+								{item.title}
+							</a>
+						);
+					}
+
+					const isCategoryActive = item.items.some((doc: any) => {
+						const href = `/docs/${doc.id}`;
+						return currentPath === href || currentPath === href + '/';
+					});
+
+					return (
+						<div class="pb-1">
+							<details
+								class="group sidebar-group-details"
+								open={isCategoryActive}
+								data-group-id={`docs-${item.originalId}`}
+								data-active={isCategoryActive ? 'true' : 'false'}
+							>
+								<summary
 									class={cn(
-										'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
-										isActive
+										'flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-1.5 text-sm font-semibold transition-colors select-none [&::-webkit-details-marker]:hidden',
+										isCategoryActive
 											? 'text-foreground'
 											: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
 									)}
 								>
 									{item.title}
-								</a>
-							);
-						}
-
-						const isCategoryActive = item.items.some((doc: any) => {
-							const href = `/docs/${doc.id}`;
-							return currentPath === href || currentPath === href + '/';
-						});
-
-						return (
-							<div class="pb-1">
-								<details 
-									class="group sidebar-group-details" 
-									open={isCategoryActive}
-									data-group-id={`docs-${item.originalId}`}
-									data-active={isCategoryActive ? 'true' : 'false'}
-								>
-									<summary
-										class={cn(
-											'flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-1.5 text-sm font-semibold transition-colors select-none [&::-webkit-details-marker]:hidden',
-											isCategoryActive
-												? 'text-foreground'
-												: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-										)}
-									>
-										{item.title}
-										<ChevronRight
-											class="opacity-50 transition-transform group-open:rotate-90"
-											size={16}
-										/>
-									</summary>
-									<div class="mt-1 ml-4 flex flex-col gap-1 border-l border-border/70 pl-2 text-sm">
-										{item.items.map((doc: any) => {
-											const href = `/docs/${doc.id}`;
-											const isActive =
-												currentPath === href || currentPath === href + '/';
-											return (
-												<a
-													href={href}
-													class={cn(
-														'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm transition-colors select-none',
-														isActive
-															? 'bg-accent/50 font-medium text-foreground'
-															: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-													)}
-												>
-													{doc.data.title}
-												</a>
-											);
-										})}
-									</div>
-								</details>
-							</div>
-						);
-					})
+									<ChevronRight
+										class="opacity-50 transition-transform group-open:rotate-90"
+										size={16}
+									/>
+								</summary>
+								<div class="mt-1 ml-4 flex flex-col gap-1 border-l border-border/70 pl-2 text-sm">
+									{item.items.map((doc: any) => {
+										const href = `/docs/${doc.id}`;
+										const isActive =
+											currentPath === href || currentPath === href + '/';
+										return (
+											<a
+												href={href}
+												class={cn(
+													'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm transition-colors select-none',
+													isActive
+														? 'bg-accent/50 font-medium text-foreground'
+														: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+												)}
+											>
+												{doc.data.title}
+											</a>
+										);
+									})}
+								</div>
+							</details>
+						</div>
+					);
+				})
+			)
 		}
 	</div>
 </div>
@@ -194,12 +194,12 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 <script is:inline>
 	function setupSidebarState() {
 		const detailsElements = document.querySelectorAll('.sidebar-group-details');
-		
-		detailsElements.forEach(details => {
+
+		detailsElements.forEach((details) => {
 			const id = details.getAttribute('data-group-id');
 			const isActive = details.getAttribute('data-active') === 'true';
 			const storedState = localStorage.getItem(`sidebar-group-${id}`);
-			
+
 			// Initialize state
 			if (isActive) {
 				details.open = true;
@@ -209,18 +209,18 @@ const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
 			} else if (storedState === 'closed') {
 				details.open = false;
 			}
-			
+
 			// Prevent duplicate event listeners
 			if (details._toggleHandler) {
 				details.removeEventListener('toggle', details._toggleHandler);
 			}
-			
+
 			details._toggleHandler = () => {
 				localStorage.setItem(`sidebar-group-${id}`, details.open ? 'open' : 'closed');
 			};
 			details.addEventListener('toggle', details._toggleHandler);
 		});
 	}
-	
+
 	document.addEventListener('astro:page-load', setupSidebarState);
 </script>
