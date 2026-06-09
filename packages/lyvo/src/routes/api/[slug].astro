@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
+import { marked } from 'marked';
 import {
 	getOpenAPIOperationBySlug,
 	getOpenAPIWebhookBySlug,
@@ -73,9 +74,10 @@ function formatJson(value: unknown): string {
 					</h1>
 					{
 						(endpoint.description ?? endpoint.summary) && (
-							<p class="text-base text-muted-foreground md:text-lg">
-								{endpoint.description ?? endpoint.summary}
-							</p>
+							<div 
+								class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-p:text-base prose-p:text-muted-foreground md:prose-p:text-lg"
+								set:html={await marked.parse(endpoint.description ?? endpoint.summary)}
+							/>
 						)
 					}
 					{

@@ -1,12 +1,94 @@
 ---
+import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
 import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
+import { marked } from 'marked';
 
 const model = await tryReadOpenAPIModel();
-const firstEndpoint = model?.navigation?.[0]?.items?.[0];
 
-if (firstEndpoint) {
-	return Astro.redirect(`/api/${firstEndpoint.slug}`);
+if (!model) {
+	return Astro.redirect('/404');
 }
-
-return Astro.redirect('/docs');
 ---
+
+<DocsLayout
+	title={model.info?.title ?? 'API Overview'}
+	description={model.info?.description ?? 'Overview of the API documentation.'}
+	isApi={true}
+>
+	<div class="px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:px-12 mx-auto max-w-4xl">
+		<div class="mb-10 space-y-6">
+			<div class="flex items-center gap-4">
+				<h1 class="scroll-m-20 text-3xl font-bold tracking-tight md:text-4xl">
+					{model.info?.title ?? 'API Reference'}
+				</h1>
+				{model.info?.version && (
+					<span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary uppercase tracking-wide border border-primary/20 mt-1.5">
+						v{model.info.version}
+					</span>
+				)}
+			</div>
+			
+			{model.info?.description && (
+				<div 
+					class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline" 
+					set:html={await marked.parse(model.info.description)} 
+				/>
+			)}
+            
+			<div class="mt-8 space-y-4 rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
+				<h2 class="text-lg font-semibold tracking-tight">API Details</h2>
+				<dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					{model.info?.contact?.name && (
+						<div>
+							<dt class="text-sm font-medium text-muted-foreground">Contact</dt>
+							<dd class="mt-1 text-sm font-medium">
+								{model.info.contact.url ? (
+									<a href={model.info.contact.url} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{model.info.contact.name}</a>
+								) : model.info.contact.email ? (
+									<a href={`mailto:${model.info.contact.email}`} class="text-primary hover:underline">{model.info.contact.name}</a>
+								) : (
+									model.info.contact.name
+								)}
+							</dd>
+						</div>
+					)}
+					
+					{model.info?.license?.name && (
+						<div>
+							<dt class="text-sm font-medium text-muted-foreground">License</dt>
+							<dd class="mt-1 text-sm font-medium">
+								{model.info.license.url ? (
+									<a href={model.info.license.url} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{model.info.license.name}</a>
+								) : (
+									model.info.license.name
+								)}
+							</dd>
+						</div>
+					)}
+					
+					{model.info?.termsOfService && (
+						<div>
+							<dt class="text-sm font-medium text-muted-foreground">Terms of Service</dt>
+							<dd class="mt-1 text-sm font-medium">
+								<a href={model.info.termsOfService} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">View Terms</a>
+							</dd>
+						</div>
+					)}
+					
+					{model.source && (
+						<div class="sm:col-span-2 pt-2">
+							<a 
+								href={model.source.startsWith('public/') ? `/${model.source.replace(/^public\//, '')}` : `/${model.source}`}
+								download
+								class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+								Download OpenAPI Schema
+							</a>
+						</div>
+					)}
+				</dl>
+			</div>
+		</div>
+	</div>
+</DocsLayout>
