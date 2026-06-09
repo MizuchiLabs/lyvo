@@ -1,6 +1,6 @@
 {
   "name": "@mizuchilabs/lyvo",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Documentation theme with Astro",
   "keywords": [
     "astro",
@@ -39,10 +39,10 @@
     "@apidevtools/swagger-parser": "^12.1.0",
     "@astrojs/language-server": "^2.16.10",
     "@astrojs/markdown-remark": "^7.2.0",
-    "@astrojs/mdx": "^6.0.1",
+    "@astrojs/mdx": "^6.0.2",
     "@astrojs/sitemap": "^3.7.3",
     "@lucide/astro": "^1.17.0",
-    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/typography": "^0.5.20",
     "astro-pagefind": "^2.0.0",
     "clsx": "^2.1.1",
     "openapi-sampler": "^1.7.4",
@@ -55,9 +55,9 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@tailwindcss/vite": "^4.3.0",
-    "@types/node": "^25.9.1",
-    "astro": "^6.4.2",
-    "oxlint": "^1.67.0",
+    "@types/node": "^25.9.2",
+    "astro": "^6.4.4",
+    "oxlint": "^1.69.0",
     "prettier": "3.8.3",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "^0.8.0",

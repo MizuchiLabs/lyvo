@@ -13,9 +13,9 @@
     "@lucide/astro": "^1.17.0",
     "@mizuchilabs/lyvo": "workspace:*",
     "@pagefind/component-ui": "^1.5.2",
-    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^6.4.2",
+    "astro": "^6.4.4",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0"
   },
