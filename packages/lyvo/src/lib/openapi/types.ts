@@ -7,6 +7,17 @@ export interface OpenAPIModel {
     title: string;
     version: string;
     description?: string;
+    termsOfService?: string;
+    contact?: {
+      name?: string;
+      url?: string;
+      email?: string;
+    };
+    license?: {
+      name: string;
+      url?: string;
+      identifier?: string;
+    };
   };
   servers: OpenAPIServer[];
   tags: OpenAPITag[];
