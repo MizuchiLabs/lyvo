@@ -22,6 +22,7 @@
     "./components/docs/*": "./src/components/docs/*",
     "./components/openapi/*": "./src/components/openapi/*",
     "./layouts/*": "./src/layouts/*",
+    "./collections": "./src/lib/collections.ts",
     "./schema": "./src/schema.ts",
     "./style.css": "./src/styles/global.css",
     "./routes/*": "./src/routes/*",
