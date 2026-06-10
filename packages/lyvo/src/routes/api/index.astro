@@ -2,11 +2,12 @@
 import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
 import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
 import { marked } from 'marked';
+import { staticRedirect } from '@lyvo/lib/utils';
 
 const model = await tryReadOpenAPIModel();
 
 if (!model) {
-	return Astro.redirect('/404');
+	return staticRedirect('/404');
 }
 ---
 

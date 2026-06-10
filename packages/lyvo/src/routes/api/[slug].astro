@@ -18,6 +18,7 @@ import Responses from '@lyvo/components/openapi/Responses.astro';
 import Authorization from '@lyvo/components/openapi/Authorization.astro';
 import EndpointPath from '@lyvo/components/openapi/EndpointPath.astro';
 import { ExternalLink } from '@lucide/astro';
+import { staticRedirect } from '@lyvo/lib/utils';
 
 const model = await tryReadOpenAPIModel();
 
@@ -33,7 +34,7 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 
 if (!model) {
-	return Astro.redirect('/404');
+	return staticRedirect('/404');
 }
 
 const operation = getOpenAPIOperationBySlug(model, slug ?? '');
@@ -41,7 +42,7 @@ const webhook = operation ? null : getOpenAPIWebhookBySlug(model, slug ?? '');
 const endpoint = operation ?? webhook;
 
 if (!endpoint) {
-	return Astro.redirect('/404');
+	return staticRedirect('/404');
 }
 
 const isWebhook = webhook !== null;

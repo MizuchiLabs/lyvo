@@ -1,12 +1,13 @@
 ---
 import { getDocsHierarchy } from '@lyvo/lib/docs';
+import { staticRedirect } from '@lyvo/lib/utils';
 
 const { topLevelItems } = await getDocsHierarchy();
 const sortedDocs = topLevelItems.flatMap((item) => (item.type === 'doc' ? [item.doc] : item.items));
 
 if (sortedDocs.length > 0) {
-	return Astro.redirect(`/docs/${sortedDocs[0].id}`);
+	return staticRedirect(`/docs/${sortedDocs[0].id}`);
 }
 
-return Astro.redirect('/');
+return staticRedirect('/');
 ---
