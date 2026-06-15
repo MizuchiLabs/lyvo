@@ -106,26 +106,37 @@ import config from 'virtual:lyvo-config';
 </style>
 
 <script>
-	function sendFeedback(helpful: boolean, path: string) {
-		const w = window as any;
+	declare global {
+		interface Window {
+			umami?: { track: (event: string, data?: Record<string, any>) => void };
+			plausible?: any;
+			gtag?: any;
+			fathom?: any;
+			_paq?: any;
+			posthog?: any;
+		}
+	}
 
-		if (w.umami?.track) {
-			w.umami.track('feedback', { helpful, path });
+	function sendFeedback(helpful: boolean, path: string) {
+		const helpfulStr = helpful ? 'Yes' : 'No';
+
+		if (window.umami?.track) {
+			window.umami.track('feedback', { helpful: helpfulStr });
 		}
-		if (w.plausible) {
-			w.plausible('Feedback', { props: { helpful: String(helpful), path } });
+		if (window.plausible) {
+			window.plausible('Feedback', { props: { helpful: helpfulStr, path } });
 		}
-		if (w.gtag) {
-			w.gtag('event', 'feedback', { helpful, path });
+		if (window.gtag) {
+			window.gtag('event', 'feedback', { helpful, path });
 		}
-		if (w.fathom?.trackEvent) {
-			w.fathom.trackEvent(`feedback_${helpful ? 'yes' : 'no'}`);
+		if (window.fathom?.trackEvent) {
+			window.fathom.trackEvent(`feedback_${helpfulStr.toLowerCase()}`);
 		}
-		if (w._paq) {
-			w._paq.push(['trackEvent', 'Feedback', helpful ? 'yes' : 'no', path]);
+		if (window._paq) {
+			window._paq.push(['trackEvent', 'Feedback', helpfulStr, path]);
 		}
-		if (w.posthog?.capture) {
-			w.posthog.capture('feedback', { helpful, path });
+		if (window.posthog?.capture) {
+			window.posthog.capture('feedback', { helpful, path });
 		}
 	}
 
@@ -135,6 +146,10 @@ import config from 'virtual:lyvo-config';
 			const thanks = widget.querySelector<HTMLElement>('.feedback-thanks')!;
 
 			widget.querySelectorAll<HTMLButtonElement>('.feedback-btn').forEach((btn) => {
+				// Prevent double-binding if View Transitions re-runs the script incorrectly
+				if (btn.dataset.initialized) return;
+				btn.dataset.initialized = 'true';
+
 				btn.addEventListener('click', () => {
 					const helpful = btn.dataset.helpful === 'true';
 
@@ -144,12 +159,10 @@ import config from 'virtual:lyvo-config';
 						console.error('Failed to send feedback event', e);
 					}
 
-					// Animate the clicked button
 					btn.classList.add(
 						helpful ? 'feedback-btn-yes-active' : 'feedback-btn-no-active'
 					);
 
-					// After button animation, swap to thank you
 					setTimeout(
 						() => {
 							prompt.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
