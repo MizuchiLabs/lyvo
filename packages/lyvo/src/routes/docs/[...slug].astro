@@ -1,8 +1,9 @@
 ---
-import { render } from 'astro:content';
+import { render, getCollection } from 'astro:content';
+import { staticRedirect } from '@lyvo/lib/utils';
+import { getDocsHierarchy } from '@lyvo/lib/docs';
 import Accordion from '@lyvo/components/docs/Accordion.astro';
 import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
-import { getCollection } from 'astro:content';
 import Tabs from '@lyvo/components/docs/Tabs.astro';
 import TabItem from '@lyvo/components/docs/TabItem.astro';
 import CodeBlock from '@lyvo/components/base/CodeBlock.astro';
@@ -29,6 +30,15 @@ type Props = {
 };
 
 const { entry } = Astro.props as Props;
+
+if (!entry) {
+	const { topLevelItems } = await getDocsHierarchy();
+	const sortedDocs = topLevelItems.flatMap((item: any) =>
+		item.type === 'doc' ? [item.doc] : item.items
+	);
+	return staticRedirect(sortedDocs.length > 0 ? `/docs/${sortedDocs[0].id}` : '/');
+}
+
 const { Content, headings } = await render(entry);
 
 const components = {
