@@ -1,6 +1,7 @@
 import type { AstroIntegration } from 'astro';
 import { z } from 'astro/zod';
 import { fileURLToPath } from 'node:url';
+import { writeFile, readFile, access } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import pagefind from 'astro-pagefind';
@@ -75,6 +76,19 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 	return {
 		name: 'lyvo',
 		hooks: {
+			'astro:build:done': async ({ dir }) => {
+				const headersPath = new URL('./_headers', dir);
+				const entry = '/docs\n  Cache-Control: no-cache, must-revalidate\n/docs/\n  Cache-Control: no-cache, must-revalidate\n';
+				try {
+					await access(headersPath);
+					const existing = await readFile(headersPath, 'utf-8');
+					if (!existing.includes('/docs\n  Cache-Control: no-cache')) {
+						await writeFile(headersPath, existing + '\n' + entry);
+					}
+				} catch {
+					await writeFile(headersPath, entry);
+				}
+			},
 			'astro:config:setup': ({ updateConfig, injectRoute, injectScript }) => {
 				const srcDir = fileURLToPath(new URL('./', import.meta.url)).replace(/\/$/, '');
 
@@ -150,7 +164,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 					entrypoint: '@mizuchilabs/lyvo/routes/docs/[...slug].astro'
 				});
 				injectRoute({
-					pattern: '/docs',
+					pattern: '/docs/',
 					entrypoint: '@mizuchilabs/lyvo/routes/docs/index.astro'
 				});
 
