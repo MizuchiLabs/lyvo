@@ -26,34 +26,42 @@ const { title, description, headings = [], entry, isApi = false } = Astro.props;
 
 const execAsync = util.promisify(child_process.exec);
 
-const lastUpdated = async () => {
-	if (entry?.filePath) {
-		try {
-			const { stdout } = await execAsync(`git log -1 --format="%ct" -- "${entry.filePath}"`);
-			const gitTime = stdout.toString().trim();
-			if (gitTime) {
-				return new Intl.DateTimeFormat(undefined, {
-					month: 'short',
-					day: 'numeric',
-					year: 'numeric'
-				}).format(new Date(parseInt(gitTime) * 1000));
-			}
-		} catch (e) {
-			// Fallback to fs.statSync if git fails
-		}
+const gitDateCache = new Map<string, string>();
 
-		try {
-			const stats = fs.statSync(entry.filePath);
-			return new Intl.DateTimeFormat(undefined, {
+const lastUpdated = async () => {
+	if (!entry?.filePath) return '';
+
+	const cached = gitDateCache.get(entry.filePath);
+	if (cached !== undefined) return cached;
+
+	try {
+		const { stdout } = await execAsync(`git log -1 --format="%ct" -- "${entry.filePath}"`);
+		const gitTime = stdout.toString().trim();
+		if (gitTime) {
+			const formatted = new Intl.DateTimeFormat(undefined, {
 				month: 'short',
 				day: 'numeric',
 				year: 'numeric'
-			}).format(stats.mtime);
-		} catch (e) {
-			return '';
+			}).format(new Date(parseInt(gitTime) * 1000));
+			gitDateCache.set(entry.filePath, formatted);
+			return formatted;
 		}
+	} catch (e) {
+		// Fallback to fs.statSync if git fails
 	}
-	return '';
+
+	try {
+		const stats = fs.statSync(entry.filePath);
+		const formatted = new Intl.DateTimeFormat(undefined, {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric'
+		}).format(stats.mtime);
+		gitDateCache.set(entry.filePath, formatted);
+		return formatted;
+	} catch (e) {
+		return '';
+	}
 };
 
 const lastUpdatedText = await lastUpdated();
