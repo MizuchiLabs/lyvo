@@ -11,7 +11,7 @@
 	},
 	"devDependencies": {
 		"oxlint": "^1.72.0",
-		"prettier": "3.9.5",
+		"prettier": "3.9.6",
 		"prettier-plugin-astro": "0.14.1",
 		"prettier-plugin-tailwindcss": "^0.8.0"
 	},
