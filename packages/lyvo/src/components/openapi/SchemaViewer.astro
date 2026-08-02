@@ -16,6 +16,14 @@ function getRefTypeName(value: any): string | undefined {
 	return parts[parts.length - 1] || undefined;
 }
 
+function getOptionLabel(option: any, index: number): string {
+	const ref = getRefTypeName(option);
+	if (ref) return ref;
+	const label = getTypeLabel(option);
+	if (label && label !== 'any' && label !== 'object') return label;
+	return `Option ${index + 1}`;
+}
+
 function getBaseType(value: any): string {
 	if (!value || typeof value !== 'object') return 'any';
 
@@ -24,8 +32,11 @@ function getBaseType(value: any): string {
 	if (value.items) return 'array';
 	if (value.properties) return 'object';
 	if (Array.isArray(value.allOf) && value.allOf.length > 0) return 'object';
-	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) return 'object';
-	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) return 'object';
+	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) return 'union';
+	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) return 'union';
+	if (value.additionalProperties && typeof value.additionalProperties === 'object') {
+		return 'object';
+	}
 	if (getRefTypeName(value)) return 'object';
 
 	return 'any';
@@ -45,9 +56,18 @@ function getTypeLabel(value: any): string {
 
 	if (typeof value.type === 'string') return value.type;
 	if (value.properties) return 'object';
+
+	if (value.additionalProperties && typeof value.additionalProperties === 'object') {
+		return `Record<string, ${getTypeLabel(value.additionalProperties)}>`;
+	}
+
+	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) {
+		return `one of ${value.oneOf.length}`;
+	}
+	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) {
+		return `any of ${value.anyOf.length}`;
+	}
 	if (Array.isArray(value.allOf) && value.allOf.length > 0) return 'object';
-	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) return 'object';
-	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) return 'object';
 
 	return 'any';
 }
@@ -103,6 +123,7 @@ const typeColor = {
 	boolean: 'text-rose-600 dark:text-rose-400',
 	array: 'text-amber-600 dark:text-amber-400',
 	object: 'text-fuchsia-600 dark:text-fuchsia-400',
+	union: 'text-cyan-600 dark:text-cyan-400',
 	any: 'text-muted-foreground'
 } as Record<string, string>;
 
@@ -115,7 +136,9 @@ const badgeColor = typeColor[baseType] || typeColor.any;
 			<div class="flex flex-wrap items-center gap-2">
 				<code class="text-sm font-semibold">
 					{name}
-					{!required && <span class="-ml-1 font-normal text-muted-foreground/60">?</span>}
+					{!required && (
+						<span class="ml-0.5 font-normal text-muted-foreground/60">?</span>
+					)}
 				</code>
 
 				<div class="flex flex-wrap items-center gap-1.5">
@@ -168,6 +191,40 @@ const badgeColor = typeColor[baseType] || typeColor.any;
 				<code class="rounded border border-border bg-emerald-500/10 px-1.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400">
 					{String(schema.const)}
 				</code>
+			</div>
+		)
+	}
+
+	{
+		(schema.oneOf || schema.anyOf) && (
+			<div class="space-y-1.5">
+				<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+					{schema.oneOf ? 'One of' : 'Any of'}
+				</p>
+				{(schema.oneOf ?? schema.anyOf).map((option: any, i: number) => (
+					<Astro.self
+						schema={option}
+						name={getOptionLabel(option, i)}
+						required={false}
+						level={level + 1}
+					/>
+				))}
+			</div>
+		)
+	}
+
+	{
+		schema.additionalProperties && typeof schema.additionalProperties === 'object' && (
+			<div class="space-y-1.5">
+				<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+					Map value
+				</p>
+				<Astro.self
+					schema={schema.additionalProperties}
+					name="[key: string]"
+					required={false}
+					level={level + 1}
+				/>
 			</div>
 		)
 	}
