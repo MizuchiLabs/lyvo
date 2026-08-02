@@ -3,7 +3,7 @@ import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
 ---
 
 <PagefindConfig />
-<div class="mt-1">
+<div class="mt-1 hidden md:block">
 	<pagefind-modal-trigger shortcut="/" placeholder="Search..."></pagefind-modal-trigger>
 </div>
 
@@ -50,6 +50,27 @@ import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
 <div><pagefind-modal reset-on-close></pagefind-modal></div>
 
 <style is:global>
+	.pagefind-header-trigger .pf-trigger-btn {
+		width: 2.5rem !important;
+		height: 2.5rem !important;
+		padding: 0 !important;
+		justify-content: center !important;
+		background: transparent !important;
+		border: none !important;
+		color: inherit !important;
+		opacity: 0.5;
+		transition: opacity 0.15s ease;
+	}
+	.pagefind-header-trigger .pf-trigger-btn:hover {
+		border-color: transparent !important;
+		opacity: 1;
+	}
+	.pagefind-header-trigger .pf-trigger-icon {
+		width: 18px !important;
+		height: 18px !important;
+		background: var(--pf-text-muted);
+	}
+
 	[data-pf-theme] {
 		--pf-text: var(--foreground);
 		--pf-text-secondary: var(--muted-foreground);

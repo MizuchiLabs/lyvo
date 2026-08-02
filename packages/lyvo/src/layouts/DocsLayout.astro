@@ -42,11 +42,11 @@ const lastUpdatedText = await getLastUpdated(entry?.filePath);
 			>
 				{/* Header */}
 				<div
-					class="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md md:rounded-t-xl"
+					class="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md md:rounded-t-xl"
 				>
 					<Breadcrumbs title={title} />
 					{!isApi && <MobileToC headings={headings} title={title} />}
-					<div class="flex items-center gap-3">
+					<div class="ml-auto flex items-center gap-3">
 						<Search />
 						<ThemeToggle transition:persist />
 					</div>
