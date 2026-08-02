@@ -16,67 +16,69 @@ const apiEnabled =
 	<BaseHead />
 
 	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
-		<header
-			class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
-		>
-			<div
-				class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
+		<slot name="header">
+			<header
+				class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
 			>
-				<div class="flex items-center gap-6">
-					<Logo id="header" />
-					<div class="hidden items-center gap-1 md:flex">
-						{
-							config.nav ? (
-								config.nav.map((item) => (
-									<a
-										href={item.href}
-										class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-									>
-										{item.title}
-									</a>
-								))
-							) : (
-								<>
-									<a
-										href="/docs"
-										class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-									>
-										Documentation
-									</a>
-									{apiEnabled && (
+				<div
+					class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
+				>
+					<div class="flex items-center gap-6">
+						<Logo id="header" />
+						<div class="hidden items-center gap-1 md:flex">
+							{
+								config.nav ? (
+									config.nav.map((item) => (
 										<a
-											href="/api"
+											href={item.href}
 											class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 										>
-											OpenAPI
+											{item.title}
 										</a>
-									)}
-								</>
-							)
+									))
+								) : (
+									<>
+										<a
+											href="/docs"
+											class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+										>
+											Documentation
+										</a>
+										{apiEnabled && (
+											<a
+												href="/api"
+												class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+											>
+												OpenAPI
+											</a>
+										)}
+									</>
+								)
+							}
+						</div>
+					</div>
+					<div class="flex items-center space-x-2">
+						{
+							config.socials.map((social) => (
+								<a
+									href={social.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+									title={social.label}
+								>
+									<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+										<Icon name={social.icon} />
+									</span>
+									<span class="sr-only">{social.label}</span>
+								</a>
+							))
 						}
+						<ThemeToggle />
 					</div>
 				</div>
-				<div class="flex items-center space-x-2">
-					{
-						config.socials.map((social) => (
-							<a
-								href={social.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-								title={social.label}
-							>
-								<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
-									<Icon name={social.icon} />
-								</span>
-								<span class="sr-only">{social.label}</span>
-							</a>
-						))
-					}
-					<ThemeToggle />
-				</div>
-			</div>
-		</header>
+			</header>
+		</slot>
 		<slot />
 	</body>
 </html>
