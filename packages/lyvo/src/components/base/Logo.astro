@@ -7,7 +7,8 @@ interface Props {
 	id?: string;
 }
 
-const { size = 28, id = 'default' } = Astro.props;
+const { size = 28, id: propId } = Astro.props;
+const id = propId ?? `logo-${crypto.randomUUID().slice(0, 8)}`;
 
 const images = import.meta.glob<{ default: ImageMetadata }>(
 	'/src/assets/*.{svg,png,jpg,jpeg,webp,avif,gif}'
