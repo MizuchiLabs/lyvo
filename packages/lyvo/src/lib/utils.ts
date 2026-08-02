@@ -1,16 +1,16 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+	return twMerge(clsx(inputs));
 }
 
 export function isExternal(href?: string): boolean {
-  return !!href && (href.startsWith("http://") || href.startsWith("https://"));
+	return !!href && (href.startsWith('http://') || href.startsWith('https://'));
 }
 
 export function staticRedirect(target: string): Response {
-  const html = `<!doctype html>
+	const html = `<!doctype html>
 <html>
 	<head>
 		<meta charset="utf-8" />
@@ -22,10 +22,10 @@ export function staticRedirect(target: string): Response {
 	<body></body>
 </html>`;
 
-  return new Response(html, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html",
-    },
-  });
+	return new Response(html, {
+		status: 200,
+		headers: {
+			'Content-Type': 'text/html'
+		}
+	});
 }

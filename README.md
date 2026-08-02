@@ -23,15 +23,15 @@ To get started with development:
 
 1. **Install dependencies:**
 
-   ```bash
-   pnpm install
-   ```
+    ```bash
+    pnpm install
+    ```
 
 2. **Start the dev server:**
-   ```bash
-   pnpm dev
-   ```
-   This will spin up the `apps/demo` site where you can preview changes to the package.
+    ```bash
+    pnpm dev
+    ```
+    This will spin up the `apps/demo` site where you can preview changes to the package.
 
 ## Features
 
@@ -47,12 +47,12 @@ The `lyvo()` integration accepts the following main options:
 
 ```javascript
 lyvo({
-  title: "My Docs", // Set to "" to hide text
-  logo: "logo.svg", // Resolves to src/assets/logo.svg automatically
-  nav: [{ title: "Home", href: "/" }],
-  socials: [{ label: "GitHub", href: "https://...", icon: "github.svg" }],
-  repo: { url: "https://github.com/...", branch: "main" },
-  openapi: { input: "public/openapi.json" },
+	title: 'My Docs', // Set to "" to hide text
+	logo: 'logo.svg', // Resolves to src/assets/logo.svg automatically
+	nav: [{ title: 'Home', href: '/' }],
+	socials: [{ label: 'GitHub', href: 'https://...', icon: 'github.svg' }],
+	repo: { url: 'https://github.com/...', branch: 'main' },
+	openapi: { input: 'public/openapi.json' }
 });
 ```
 
