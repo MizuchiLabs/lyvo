@@ -1,14 +1,19 @@
 import type { OpenAPIModel } from '@lyvo/lib/openapi/types';
 import { getEntry } from 'astro:content';
 
+let cached: OpenAPIModel | null | undefined;
+
 export async function readOpenAPIModel(): Promise<OpenAPIModel> {
+	if (cached) return cached;
+
 	const entry = await getEntry('api', 'openapi-model');
 	if (!entry) {
 		throw new Error(
 			'OpenAPI model not found. Ensure the API collection is configured correctly.'
 		);
 	}
-	return entry.data as unknown as OpenAPIModel;
+	cached = entry.data as unknown as OpenAPIModel;
+	return cached;
 }
 
 export async function tryReadOpenAPIModel(): Promise<OpenAPIModel | null> {
