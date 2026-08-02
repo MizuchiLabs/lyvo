@@ -141,107 +141,125 @@ const { headings } = Astro.props;
 		maskElement.style.maskSize = '100% 100%';
 	}
 
-	function initScrollspy() {
+	let ticking = false;
+
+	function updateActive() {
+		const mainScrollArea = document.querySelector('#main-scroll-area');
+		const indicator = document.querySelector('.toc-indicator') as HTMLElement | null;
+		if (!mainScrollArea || !indicator) return;
+
 		const headings = document.querySelectorAll('article h2, article h3');
 		if (!headings.length) return;
 
-		const mainScrollArea = document.querySelector('#main-scroll-area');
+		const viewportHeight = mainScrollArea.clientHeight;
+		const scrollHeight = mainScrollArea.scrollHeight;
+		const scrollY = mainScrollArea.scrollTop;
+		const containerBounds = mainScrollArea.getBoundingClientRect();
+
+		let activeIds: string[] = [];
+		const headingElements = Array.from(headings);
+
+		const viewTop = 80;
+		const viewBottom = viewportHeight - 80;
+
+		for (let i = 0; i < headingElements.length; i++) {
+			const current = headingElements[i];
+			const next = headingElements[i + 1];
+
+			const currentTop = current.getBoundingClientRect().top - containerBounds.top;
+			const nextTop = next
+				? next.getBoundingClientRect().top - containerBounds.top
+				: scrollHeight;
+
+			if (currentTop < viewBottom && nextTop > viewTop) {
+				const id = current.getAttribute('id');
+				if (id) activeIds.push(id);
+			}
+		}
+
+		const scrolledBottom = scrollY + viewportHeight;
+		if (scrolledBottom >= scrollHeight - 20 && activeIds.length === 0) {
+			const last = headingElements[headingElements.length - 1];
+			if (last) activeIds.push(last.getAttribute('id') || '');
+		}
+
+		if (scrollY < 50 && activeIds.length === 0 && headingElements.length > 0) {
+			activeIds.push(headingElements[0].getAttribute('id') || '');
+		}
+
+		const newState = activeIds.join(',');
+		if (newState !== activeState) {
+			activeState = newState;
+			updateToc(activeIds);
+		}
+	}
+
+	let activeState = '';
+
+	function onScroll() {
+		if (ticking) return;
+		ticking = true;
+		requestAnimationFrame(() => {
+			ticking = false;
+			updateActive();
+		});
+	}
+
+	function updateToc(targetIds: string[]) {
 		const indicator = document.querySelector('.toc-indicator') as HTMLElement | null;
+		if (!targetIds.length || !indicator) return;
+
+		document.querySelectorAll('.toc-link').forEach((link) => {
+			link.classList.remove('text-foreground', 'font-medium');
+			link.classList.add('text-muted-foreground');
+		});
+
+		const activeLinks = targetIds
+			.map((id) => document.querySelector(`.toc-link[data-id="${id}"]`) as HTMLElement)
+			.filter(Boolean);
+
+		if (activeLinks.length > 0) {
+			activeLinks.forEach((link) => {
+				link.classList.remove('text-muted-foreground');
+				link.classList.add('text-foreground', 'font-medium');
+			});
+
+			const firstLink = activeLinks[0];
+			const lastLink = activeLinks[activeLinks.length - 1];
+
+			const firstStyle = window.getComputedStyle(firstLink);
+			const firstPaddingTop = parseFloat(firstStyle.paddingTop) || 0;
+
+			const lastStyle = window.getComputedStyle(lastLink);
+			const lastPaddingBottom = parseFloat(lastStyle.paddingBottom) || 0;
+
+			const top = firstLink.offsetTop + firstPaddingTop;
+			const bottom = lastLink.offsetTop + lastLink.offsetHeight - lastPaddingBottom;
+			const height = bottom - top;
+
+			indicator.style.top = `${top}px`;
+			indicator.style.height = `${height}px`;
+		}
+	}
+
+	function initScrollspy() {
+		const mainScrollArea = document.querySelector('#main-scroll-area');
 		if (!mainScrollArea) return;
 
 		updateLayout();
-		window.addEventListener('resize', updateLayout);
-
-		let activeState = '';
-
-		function updateActive() {
-			if (!mainScrollArea) return;
-			const viewportHeight = mainScrollArea.clientHeight;
-			const scrollHeight = mainScrollArea.scrollHeight;
-			const scrollY = mainScrollArea.scrollTop;
-			const containerBounds = mainScrollArea.getBoundingClientRect();
-
-			let activeIds: string[] = [];
-			const headingElements = Array.from(headings);
-
-			const viewTop = 80;
-			const viewBottom = viewportHeight - 80;
-
-			for (let i = 0; i < headingElements.length; i++) {
-				const current = headingElements[i];
-				const next = headingElements[i + 1];
-
-				const currentTop = current.getBoundingClientRect().top - containerBounds.top;
-				const nextTop = next
-					? next.getBoundingClientRect().top - containerBounds.top
-					: scrollHeight;
-
-				if (currentTop < viewBottom && nextTop > viewTop) {
-					const id = current.getAttribute('id');
-					if (id) activeIds.push(id);
-				}
-			}
-
-			const scrolledBottom = scrollY + viewportHeight;
-			if (scrolledBottom >= scrollHeight - 20 && activeIds.length === 0) {
-				const last = headingElements[headingElements.length - 1];
-				if (last) activeIds.push(last.getAttribute('id') || '');
-			}
-
-			if (scrollY < 50 && activeIds.length === 0 && headingElements.length > 0) {
-				activeIds.push(headingElements[0].getAttribute('id') || '');
-			}
-
-			const newState = activeIds.join(',');
-			if (newState !== activeState) {
-				activeState = newState;
-				updateToc(activeIds);
-			}
-		}
-
-		mainScrollArea.addEventListener('scroll', updateActive, { passive: true });
-
-		function updateToc(targetIds: string[]) {
-			if (!targetIds.length || !indicator) return;
-
-			document.querySelectorAll('.toc-link').forEach((link) => {
-				link.classList.remove('text-foreground', 'font-medium');
-				link.classList.add('text-muted-foreground');
-			});
-
-			const activeLinks = targetIds
-				.map((id) => document.querySelector(`.toc-link[data-id="${id}"]`) as HTMLElement)
-				.filter(Boolean);
-
-			if (activeLinks.length > 0) {
-				activeLinks.forEach((link) => {
-					link.classList.remove('text-muted-foreground');
-					link.classList.add('text-foreground', 'font-medium');
-				});
-
-				const firstLink = activeLinks[0];
-				const lastLink = activeLinks[activeLinks.length - 1];
-
-				const firstStyle = window.getComputedStyle(firstLink);
-				const firstPaddingTop = parseFloat(firstStyle.paddingTop) || 0;
-
-				const lastStyle = window.getComputedStyle(lastLink);
-				const lastPaddingBottom = parseFloat(lastStyle.paddingBottom) || 0;
-
-				const top = firstLink.offsetTop + firstPaddingTop;
-				const bottom = lastLink.offsetTop + lastLink.offsetHeight - lastPaddingBottom;
-				const height = bottom - top;
-
-				indicator.style.top = `${top}px`;
-				indicator.style.height = `${height}px`;
-			}
-		}
-
 		updateActive();
+
+		// Bind scroll only once per scroll container (fresh element each page).
+		if (!mainScrollArea.dataset.tocBound) {
+			mainScrollArea.dataset.tocBound = 'true';
+			mainScrollArea.addEventListener('scroll', onScroll, { passive: true });
+		}
 	}
 
-	initScrollspy();
-	document.addEventListener('astro:page-load', () => {
-		initScrollspy();
-	});
+	if (!window.__lyvoTocSetup) {
+		window.__lyvoTocSetup = true;
+		// Resize + lifecycle listeners are registered once; DOM is re-queried per page.
+		window.addEventListener('resize', updateLayout);
+		document.addEventListener('astro:page-load', initScrollspy);
+	}
 </script>
