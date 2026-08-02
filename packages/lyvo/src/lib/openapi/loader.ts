@@ -275,6 +275,16 @@ function buildSnippets({ method, url, headers, bodyExample }: any) {
 	const headerString = headerLine(headers);
 	const jsonBody = toJsonBlock(bodyExample);
 
+	// Embed the pretty-printed JSON body inside a multi-line string literal for
+	// languages that require a quoted body, so the \n aren't shown escaped.
+	// Falls back to an escaped string if the delimiter appears in the payload.
+	const rawBody = (delim: string) =>
+		jsonBody === undefined
+			? ''
+			: jsonBody.includes(delim)
+				? JSON.stringify(jsonBody)
+				: delim + jsonBody + delim;
+
 	const curlLines = [`curl -X ${methodUpper} '${url}'`];
 	if (headerString) curlLines.push(headerString);
 	if (jsonBody) {
@@ -322,7 +332,7 @@ function buildSnippets({ method, url, headers, bodyExample }: any) {
 		'',
 		'func main() {',
 		...(jsonBody
-			? [`  body := bytes.NewBuffer([]byte(${JSON.stringify(jsonBody)}))`]
+			? [`  body := bytes.NewBuffer([]byte(${rawBody('`')}))`]
 			: ['  var body io.Reader = nil']),
 		`  req, err := http.NewRequest("${methodUpper}", "${url}", body)`,
 		'  if err != nil { panic(err) }',
@@ -352,8 +362,8 @@ function buildSnippets({ method, url, headers, bodyExample }: any) {
 		...Object.entries(headers).map(([k, v]) => `request.Headers.Add("${k}", "${v}");`),
 		...(jsonBody
 			? [
-					`request.Content = new StringContent(`,
-					`    ${JSON.stringify(jsonBody)},`,
+					'request.Content = new StringContent(',
+					`    ${rawBody('""""')},`,
 					`    System.Text.Encoding.UTF8,`,
 					`    "application/json"`,
 					`);`
@@ -378,7 +388,7 @@ function buildSnippets({ method, url, headers, bodyExample }: any) {
 		`      .uri(URI.create("${url}"))`,
 		...Object.entries(headers).map(([k, v]) => `      .header("${k}", "${v}")`),
 		...(jsonBody ? ['      .header("Content-Type", "application/json")'] : []),
-		`      .method("${methodUpper}", ${jsonBody ? `HttpRequest.BodyPublishers.ofString(${JSON.stringify(jsonBody)})` : 'HttpRequest.BodyPublishers.noBody()'})`,
+		`      .method("${methodUpper}", ${jsonBody ? `HttpRequest.BodyPublishers.ofString(${rawBody('"""')})` : 'HttpRequest.BodyPublishers.noBody()'})`,
 		'      .build();',
 		'',
 		'    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());',
