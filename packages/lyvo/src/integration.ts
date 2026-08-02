@@ -65,6 +65,7 @@ export const LyvoOptionsSchema = z.object({
 			groupBy: z.enum(['tag', 'path']).optional()
 		})
 		.optional(),
+	head: z.string().optional(),
 	customCss: z.array(z.string()).optional()
 });
 
@@ -78,7 +79,8 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 		hooks: {
 			'astro:build:done': async ({ dir }) => {
 				const headersPath = new URL('./_headers', dir);
-				const entry = '/docs\n  Cache-Control: no-cache, must-revalidate\n/docs/\n  Cache-Control: no-cache, must-revalidate\n';
+				const entry =
+					'/docs\n  Cache-Control: no-cache, must-revalidate\n/docs/\n  Cache-Control: no-cache, must-revalidate\n';
 				try {
 					await access(headersPath);
 					const existing = await readFile(headersPath, 'utf-8');
@@ -147,7 +149,8 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 											},
 											openapi: {
 												...options.openapi
-											}
+											},
+											head: options.head
 										};
 										return `export default ${JSON.stringify(config)};`;
 									}

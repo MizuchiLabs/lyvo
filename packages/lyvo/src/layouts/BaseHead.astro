@@ -50,6 +50,10 @@ const displayTitle = () => {
 	<Font cssVariable="--font-serif-default" />
 	<Font cssVariable="--font-mono-default" />
 
+	{
+		config.head && <Fragment set:html={config.head} />
+	}
+
 	<!-- Transitions -->
 	<ClientRouter />
 
