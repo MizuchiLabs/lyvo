@@ -4,6 +4,7 @@ import BaseHead from '@lyvo/layouts/BaseHead.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
 import Icon from '@lyvo/components/base/Icon.astro';
 import config from 'virtual:lyvo-config';
+import { isExternal } from '@lyvo/lib/utils';
 import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
 
 const openapiModel = await tryReadOpenAPIModel();
@@ -28,14 +29,19 @@ const apiEnabled =
 						<div class="hidden items-center gap-1 md:flex">
 							{
 								config.nav ? (
-									config.nav.map((item) => (
-										<a
-											href={item.href}
-											class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-										>
-											{item.title}
-										</a>
-									))
+									config.nav.map((item) => {
+										const external = isExternal(item.href);
+										return (
+											<a
+												href={item.href}
+												target={external ? '_blank' : undefined}
+												rel={external ? 'noopener noreferrer' : undefined}
+												class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+											>
+												{item.title}
+											</a>
+										);
+									})
 								) : (
 									<>
 										<a

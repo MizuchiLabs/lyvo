@@ -1,16 +1,17 @@
 ---
 import { ExternalLink } from '@lucide/astro';
+import { isExternal } from '@lyvo/lib/utils';
 
 const { href, ...props } = Astro.props;
-const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
+const external = isExternal(href);
 ---
 
 <a
 	href={href}
 	{...props}
-	target={isExternal ? '_blank' : undefined}
-	rel={isExternal ? 'noopener noreferrer' : undefined}
+	target={external ? '_blank' : undefined}
+	rel={external ? 'noopener noreferrer' : undefined}
 >
 	<slot />
-	{isExternal && <ExternalLink size={14} class="-mt-0.5 ml-1 inline-block opacity-70" />}
+	{external && <ExternalLink size={14} class="-mt-0.5 ml-1 inline-block opacity-70" />}
 </a>
