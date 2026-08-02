@@ -8,10 +8,8 @@ import ToC from '@lyvo/components/docs/ToC.astro';
 import Breadcrumbs from '@lyvo/components/docs/Breadcrumbs.astro';
 import PageHeader from '@lyvo/components/docs/PageHeader.astro';
 import Pagination from '@lyvo/components/docs/Pagination.astro';
-import fs from 'node:fs';
-import child_process from 'node:child_process';
-import util from 'node:util';
 import { cn } from '@lyvo/lib/utils';
+import { getLastUpdated } from '@lyvo/lib/lastUpdated';
 import config from 'virtual:lyvo-config';
 
 interface Props {
@@ -24,47 +22,7 @@ interface Props {
 
 const { title, description, headings = [], entry, isApi = false } = Astro.props;
 
-const execAsync = util.promisify(child_process.exec);
-
-const gitDateCache = new Map<string, string>();
-
-const lastUpdated = async () => {
-	if (!entry?.filePath) return '';
-
-	const cached = gitDateCache.get(entry.filePath);
-	if (cached !== undefined) return cached;
-
-	try {
-		const { stdout } = await execAsync(`git log -1 --format="%ct" -- "${entry.filePath}"`);
-		const gitTime = stdout.toString().trim();
-		if (gitTime) {
-			const formatted = new Intl.DateTimeFormat(undefined, {
-				month: 'short',
-				day: 'numeric',
-				year: 'numeric'
-			}).format(new Date(parseInt(gitTime) * 1000));
-			gitDateCache.set(entry.filePath, formatted);
-			return formatted;
-		}
-	} catch (e) {
-		// Fallback to fs.statSync if git fails
-	}
-
-	try {
-		const stats = fs.statSync(entry.filePath);
-		const formatted = new Intl.DateTimeFormat(undefined, {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		}).format(stats.mtime);
-		gitDateCache.set(entry.filePath, formatted);
-		return formatted;
-	} catch (e) {
-		return '';
-	}
-};
-
-const lastUpdatedText = await lastUpdated();
+const lastUpdatedText = await getLastUpdated(entry?.filePath);
 ---
 
 <!doctype html>
