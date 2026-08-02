@@ -1,0 +1,52 @@
+---
+import { render } from 'astro:content';
+import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
+import Accordion from '@lyvo/components/docs/Accordion.astro';
+import Tabs from '@lyvo/components/docs/Tabs.astro';
+import TabItem from '@lyvo/components/docs/TabItem.astro';
+import CodeBlock from '@lyvo/components/base/CodeBlock.astro';
+import Link from '@lyvo/components/base/Link.astro';
+import Table from '@lyvo/components/docs/Table.astro';
+import ImageWrapper from '@lyvo/components/base/ImageWrapper.astro';
+import Callout from '@lyvo/components/docs/Callout.astro';
+import Steps from '@lyvo/components/docs/Steps.astro';
+import Step from '@lyvo/components/docs/Step.astro';
+import FileTree from '@lyvo/components/docs/FileTree.astro';
+import Folder from '@lyvo/components/docs/Folder.astro';
+import File from '@lyvo/components/docs/File.astro';
+
+interface Props {
+	entry: any;
+}
+
+const { entry } = Astro.props;
+
+const { Content, headings } = await render(entry);
+
+const components = {
+	Code: CodeBlock,
+	a: Link,
+	table: Table,
+	img: ImageWrapper,
+	Callout,
+	Steps,
+	Step,
+	Tabs,
+	TabItem,
+	FileTree,
+	Folder,
+	File,
+	Accordion
+};
+
+const filteredHeadings = headings.filter((h: any) => h.depth === 2 || h.depth === 3);
+---
+
+<DocsLayout
+	title={entry.data.title}
+	description={entry.data.description}
+	headings={filteredHeadings}
+	entry={entry}
+>
+	<Content components={components} />
+</DocsLayout>

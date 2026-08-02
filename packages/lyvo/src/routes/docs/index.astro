@@ -1,13 +1,13 @@
 ---
-import { getDocsHierarchy } from '@lyvo/lib/docs';
+import { getFirstDoc } from '@lyvo/lib/docs';
+import DocsPage from '@lyvo/components/docs/DocsPage.astro';
 import { staticRedirect } from '@lyvo/lib/utils';
 
-const { topLevelItems } = await getDocsHierarchy();
-const sortedDocs = topLevelItems.flatMap((item) => (item.type === 'doc' ? [item.doc] : item.items));
+const first = await getFirstDoc();
 
-if (sortedDocs.length > 0) {
-	return staticRedirect(`/docs/${sortedDocs[0].id}`);
+if (!first) {
+	return staticRedirect('/');
 }
-
-return staticRedirect('/');
 ---
+
+<DocsPage entry={first} />

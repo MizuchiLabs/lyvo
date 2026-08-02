@@ -6,11 +6,9 @@ interface MetaConfig {
 	labels?: Record<string, string>;
 }
 
-export async function getDocsHierarchy() {
-	const docs = await getCollection('docs');
+let hierarchyCache: ReturnType<typeof buildHierarchy> | null = null;
 
-	const meta: MetaConfig = config.docs?.sidebar || {};
-
+function buildHierarchy(docs: any[], meta: MetaConfig) {
 	const orderArr: string[] = meta.order || [];
 	const labelsObj: Record<string, string> = meta.labels || {};
 
@@ -83,13 +81,28 @@ export async function getDocsHierarchy() {
 	};
 }
 
+export function flattenDocs(topLevelItems: any[]): any[] {
+	return topLevelItems.flatMap((item) => (item.type === 'doc' ? [item.doc] : item.items));
+}
+
+export async function getDocsHierarchy() {
+	if (hierarchyCache) return hierarchyCache;
+
+	const docs = await getCollection('docs');
+	const meta: MetaConfig = config.docs?.sidebar || {};
+	hierarchyCache = buildHierarchy(docs, meta);
+	return hierarchyCache;
+}
+
+export async function getFirstDoc() {
+	const { topLevelItems } = await getDocsHierarchy();
+	return flattenDocs(topLevelItems)[0] ?? null;
+}
+
 export async function getPrevNextDocs(currentId: string) {
 	const { topLevelItems } = await getDocsHierarchy();
 
-	// Flatten the sorted hierarchy back into a pure array of docs
-	const sortedDocs = topLevelItems.flatMap((item) =>
-		item.type === 'doc' ? [item.doc] : item.items
-	);
+	const sortedDocs = flattenDocs(topLevelItems);
 
 	const currentIndex = sortedDocs.findIndex((d) => d.id === currentId);
 
