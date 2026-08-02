@@ -121,7 +121,7 @@ import config from 'virtual:lyvo-config';
 		const helpfulStr = helpful ? 'Yes' : 'No';
 
 		if (window.umami?.track) {
-			window.umami.track('feedback', { helpful: helpfulStr });
+			window.umami.track('feedback', { helpful: helpfulStr, path });
 		}
 		if (window.plausible) {
 			window.plausible('Feedback', { props: { helpful: helpfulStr, path } });
