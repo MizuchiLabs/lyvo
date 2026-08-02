@@ -3,6 +3,7 @@ export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 
 export interface OpenAPIModel {
 	generatedAt: string;
 	source: string;
+	openapi?: string;
 	info: {
 		title: string;
 		version: string;
@@ -20,6 +21,11 @@ export interface OpenAPIModel {
 		};
 	};
 	servers: OpenAPIServer[];
+	securitySchemes: OpenAPISecurityRequirement[];
+	externalDocs?: {
+		description?: string;
+		url: string;
+	};
 	tags: OpenAPITag[];
 	navigation: OpenAPINavigationGroup[];
 	operations: OpenAPIOperation[];

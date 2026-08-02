@@ -2,6 +2,7 @@ import path from 'node:path';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import OpenAPISampler from 'openapi-sampler';
 import type { Loader } from 'astro/loaders';
+import type { OpenAPISecurityRequirement } from '@lyvo/lib/openapi/types';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
 
@@ -214,6 +215,30 @@ function mapSecurity(operationSecurity: any, rootSecurity: any, components: any,
 					scopes: Array.isArray(scopes) ? scopes : []
 				};
 			});
+		})
+		.filter((item) => item.type !== 'unknown');
+}
+
+// Map the global security schemes defined in components.securitySchemes
+// into the same shape mapSecurity produces for per-operation requirements.
+function mapSecuritySchemes(components: any, document: any): OpenAPISecurityRequirement[] {
+	const source = components?.securitySchemes ?? {};
+	if (!source || typeof source !== 'object') return [];
+
+	return Object.entries(source)
+		.map(([name, raw]) => {
+			const scheme = deepResolve(raw, document);
+			return {
+				type: scheme?.type ?? 'unknown',
+				name,
+				description: scheme?.description,
+				in: scheme?.in,
+				scheme: scheme?.scheme,
+				bearerFormat: scheme?.bearerFormat,
+				flows: scheme?.flows,
+				openIdConnectUrl: scheme?.openIdConnectUrl,
+				scopes: []
+			};
 		})
 		.filter((item) => item.type !== 'unknown');
 }
@@ -687,6 +712,7 @@ export function openapiLoader(options: OpenAPILoaderOptions): Loader {
 			const model = {
 				generatedAt: new Date().toISOString(),
 				source: path.relative(process.cwd(), inputPath),
+				openapi: (document as any).openapi,
 				info: {
 					title: document.info?.title ?? 'API',
 					version: document.info?.version ?? '0.0.0',
@@ -696,6 +722,13 @@ export function openapiLoader(options: OpenAPILoaderOptions): Loader {
 					termsOfService: document.info?.termsOfService
 				},
 				servers: defaultServers,
+				securitySchemes: mapSecuritySchemes((document as any).components, document),
+				externalDocs: (document as any).externalDocs
+					? {
+							description: (document as any).externalDocs.description,
+							url: (document as any).externalDocs.url
+						}
+					: undefined,
 				tags: buildTags(document, operations),
 				navigation: buildNavigation(operations, webhooks, options.groupBy ?? 'tag'),
 				operations,
