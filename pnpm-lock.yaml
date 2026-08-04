@@ -739,12 +739,6 @@ packages:
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
 
-  '@napi-rs/wasm-runtime@1.1.6':
-    resolution: {integrity: sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg==}
-    peerDependencies:
-      '@emnapi/core': ^1.7.1
-      '@emnapi/runtime': ^1.7.1
-
   '@napi-rs/wasm-runtime@1.2.2':
     resolution: {integrity: sha512-JfB4kuJQjaoHuCTseIINHtHWeJnvgEcxjwA5t/Y00ZgaOO1Crz3fjT/p8kT28zA/Caz7oiUMn3d6H2yOVCVwuw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=23.5.0}
@@ -1168,56 +1162,28 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@shikijs/core@4.3.1':
-    resolution: {integrity: sha512-ANMDxuaPsNMdDC1m4vfvhlDmJweMwkE5XitTwrq2rWHx5jM+dlm4MmHt2PP6t0uejfR77SuhrhJ0zEijIF/uhA==}
-    engines: {node: '>=20'}
-
   '@shikijs/core@4.4.1':
     resolution: {integrity: sha512-VeR2CY6Nn9/WbisoYLOQZ7HZOnwTrpBuOw4wExjqLnBCi62BNWynBUO6K2uPIASPFJwAv7cX1fUu+LrPlSstcw==}
-    engines: {node: '>=20'}
-
-  '@shikijs/engine-javascript@4.3.1':
-    resolution: {integrity: sha512-JBItcnPuYq7jVJdZo/vMj94r+szT7XEjHFX+mvFDGSEIbVAXAGyHAHzhbWzpGOwYidCZrErJLLgn2PVeiokHnQ==}
     engines: {node: '>=20'}
 
   '@shikijs/engine-javascript@4.4.1':
     resolution: {integrity: sha512-6U4lJBh8LTvIkEVqRHv/rr3ruwtO6IweFQt1ME1ntHJMGHS+6N86vfYGO1o8c/DtOCTia2lfhdQBtBrps1sDfQ==}
     engines: {node: '>=20'}
 
-  '@shikijs/engine-oniguruma@4.3.1':
-    resolution: {integrity: sha512-OXyNMzg0pews+msMj4cHeqT4xiYKKvbnn6VbdAXxfoFl3SSx4fJTc8FadECuc5/H9p3BzhNAoAUXKwAu9rWYhg==}
-    engines: {node: '>=20'}
-
   '@shikijs/engine-oniguruma@4.4.1':
     resolution: {integrity: sha512-p23RugMKss0r5DAtRJW1yAXUDl60JvhQYV20yuxei//26JyDSJefV3umyWzzwep2weblMnJGDYahuti6XkcMgA==}
-    engines: {node: '>=20'}
-
-  '@shikijs/langs@4.3.1':
-    resolution: {integrity: sha512-m0l9nsDqgBHvbZbk7A0/kXz/impK3uB/c6rAn6Gpg/uPtdZRQ+alsN/17MU5thb68XTj/4DxkZAotrM0GGSpDQ==}
     engines: {node: '>=20'}
 
   '@shikijs/langs@4.4.1':
     resolution: {integrity: sha512-xb2kCMloBCIraIy2fS5MW0t/BxVY3q2nDyQKBoeSeq6KNrQbShHetCFlw2n35fGIJ6t3+hXDLQogP5ir9O9bvA==}
     engines: {node: '>=20'}
 
-  '@shikijs/primitive@4.3.1':
-    resolution: {integrity: sha512-CXQRQOYy1leqQ8ceTeJdmXv/bsUY++6QyLpXJ94LZAAYj5X2SKRdc5ipguv4NPyGVKItB2PPwUpRNe0Sjh5S1A==}
-    engines: {node: '>=20'}
-
   '@shikijs/primitive@4.4.1':
     resolution: {integrity: sha512-ko2OfDoG89YuQ7xL5LtcQiWKb7NIv1Ephb7g48TVU198OzAMLC8lXVEwaJGHK4sUMYrfAGJDqYmNLOLiW/Kz8w==}
     engines: {node: '>=20'}
 
-  '@shikijs/themes@4.3.1':
-    resolution: {integrity: sha512-dgpoJ4WqNi2yTmizQHBJ5zcX6j2lE6icN/0yt4l1kkf16jrY/pwPLoTb1ETsWMz0OBLf9ZNvwmxft+cH+N9qSA==}
-    engines: {node: '>=20'}
-
   '@shikijs/themes@4.4.1':
     resolution: {integrity: sha512-wudOaoFro+/Zl9gQv2W1Ur5XlVduqvTuYLI483Xi0wgc1A+cy1hfB2r6ac6ufBgF+ID7KJEW7L41MHrzQ4wH+w==}
-    engines: {node: '>=20'}
-
-  '@shikijs/types@4.3.1':
-    resolution: {integrity: sha512-CHFxE0jztBIZRHH6gxXE7DXUCFXjReEGxZ/j0rfSLGKZuwp2xBYycEP14875DSa9KLL/6700oxIq6oO6ef9K2g==}
     engines: {node: '>=20'}
 
   '@shikijs/types@4.4.1':
@@ -1337,9 +1303,6 @@ packages:
 
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
-
-  '@types/hast@3.0.4':
-    resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
   '@types/hast@3.0.5':
     resolution: {integrity: sha512-rp/ezSWaD1m44dPKICGhiskI13nVr7qTloFwDa/IYkhhf5nzwP+zIQcIJh3WIFSBOy/H1PzB40jPjMDksN4F+g==}
@@ -1494,9 +1457,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@ungap/structured-clone@1.3.2':
-    resolution: {integrity: sha512-5jsZFwgR5rTdKwidH9Qmat75RKwqfpKlWWB1frDkljN127mwqBu8K0PYo7/hFpF03IEJpfVPpCQDY/eDx3iHvA==}
-
   '@ungap/structured-clone@1.3.3':
     resolution: {integrity: sha512-60YRaenCQcVjYEKOcG824+DRGGIQ3VKErcBoAEDJZz5bKIs2ZG+X/H9Nk+Q6EVkwJk5QNApxbrc5QtBSwtrXAg==}
 
@@ -1510,15 +1470,30 @@ packages:
 
   '@volar/language-server@2.4.28':
     resolution: {integrity: sha512-NqcLnE5gERKuS4PUFwlhMxf6vqYo7hXtbMFbViXcbVkbZ905AIVWhnSo0ZNBC2V127H1/2zP7RvVOVnyITFfBw==}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   '@volar/language-service@2.4.28':
     resolution: {integrity: sha512-Rh/wYCZJrI5vCwMk9xyw/Z+MsWxlJY1rmMZPsxUoJKfzIRjS/NF1NmnuEcrMbEVGja00aVpCsInJfixQTMdvLw==}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   '@volar/source-map@2.4.28':
     resolution: {integrity: sha512-yX2BDBqJkRXfKw8my8VarTyjv48QwxdJtvRgUpNE5erCsgEUdI2DsLbpa+rOQVAJYshY99szEcRDmyHbF10ggQ==}
 
   '@volar/typescript@2.4.28':
     resolution: {integrity: sha512-Ja6yvWrbis2QtN4ClAKreeUZPVYMARDYZl9LMEv1iQ1QdepB6wn0jTRxA9MftYmYa4DQ4k/DaSZpFPUfxl8giw==}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   '@vscode/emmet-helper@2.11.0':
     resolution: {integrity: sha512-QLxjQR3imPZPQltfbWRnHU6JecWTF1QSWhx3GAKQpslx7y3Dp6sIIXhKjiUJ/BR9FX8PVthjr9PD6pNwOJfAzw==}
@@ -1983,10 +1958,6 @@ packages:
 
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
-    hasBin: true
-
-  js-yaml@4.3.0:
-    resolution: {integrity: sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q==}
     hasBin: true
 
   js-yaml@4.3.1:
@@ -2610,10 +2581,6 @@ packages:
   remark-rehype@11.1.2:
     resolution: {integrity: sha512-Dh7l57ianaEoIpzbp0PC9UKAdCSVklD8E5Rpw7ETfbTl3FqcOOgq5q2LVDhgGCkaBv7p24JXikPdvhhmHvKMsw==}
 
-  remark-smartypants@3.0.2:
-    resolution: {integrity: sha512-ILTWeOriIluwEvPjv67v7Blgrcx+LZOkAUVtKI3putuhlZm84FnqDORNXPPm+HY3NdZOMhyDwZ1E+eZB/Df5dA==}
-    engines: {node: '>=16.0.0'}
-
   remark-smartypants@3.0.3:
     resolution: {integrity: sha512-gCaK+ndZ0hYezlqFegHFCVh2CQemsi0Npdh1qVM9bxlUFknjkbP6VmojWhddOCrbK0PbbacmYLWfTULRiT1eWA==}
     engines: {node: '>=16.0.0'}
@@ -2683,10 +2650,6 @@ packages:
       '@types/node':
         optional: true
 
-  shiki@4.3.1:
-    resolution: {integrity: sha512-oR+qDVi2OjX1tmDpyv+3KviX01KzO6Af+0NNnKnsp9491UEGz2YpxTuJboS/6VhYpTdqzmuJBuiTlrAWWJAssw==}
-    engines: {node: '>=20'}
-
   shiki@4.4.1:
     resolution: {integrity: sha512-rFP+iYKzjLEIqiMiKANhARqiAbk4deDhWnBtnUO/K0D0dPxMGDH4N0FVfBY/VeI+lPrV4wNGCHQZp7EOr7NNBw==}
     engines: {node: '>=20'}
@@ -2702,10 +2665,6 @@ packages:
     resolution: {integrity: sha512-S6hzjGJSG3d6if0YoF5kTyeRJvia6FSTBroE5fQ0bu1QNxyJqhhinfUsXi9fH3MgtXODWvwo2BDyQSnhPQ88uQ==}
     engines: {node: '>=20.19.5', npm: '>=10.8.2'}
     hasBin: true
-
-  smol-toml@1.7.0:
-    resolution: {integrity: sha512-aqVvWoyO21L23mb+drl4RmMXbf6N7FdHjAhTRA9ZBL7apWBgfWC16KjrASI+1p9GAroljyMHj6fK67i0UiTNvQ==}
-    engines: {node: '>= 18'}
 
   smol-toml@1.7.1:
     resolution: {integrity: sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==}
@@ -3024,16 +2983,22 @@ packages:
     resolution: {integrity: sha512-9K2k72s4n7rV9s4bX0MyjbX9iBribvKZbBJKuEmTCZfeWJXs6Yh7bGpY4eoc7UufAjvpheBqwyZCOIPBvxCv0A==}
     peerDependencies:
       '@volar/language-service': ~2.4.0
+      typescript: '*'
     peerDependenciesMeta:
       '@volar/language-service':
+        optional: true
+      typescript:
         optional: true
 
   volar-service-typescript@0.0.71:
     resolution: {integrity: sha512-yTtM/BVT6hoyEYnDtaCyAtNhdNeS/mhTTABlBOdw3NNiRBUin3IznFJpgfjer4c6RYopiPjjQjc9VFhxVl1mLw==}
     peerDependencies:
       '@volar/language-service': ~2.4.0
+      typescript: '*'
     peerDependenciesMeta:
       '@volar/language-service':
+        optional: true
+      typescript:
         optional: true
 
   volar-service-yaml@0.0.71:
@@ -3227,13 +3192,13 @@ snapshots:
 
   '@astrojs/internal-helpers@0.10.2':
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       picomatch: 4.0.5
       retext-smartypants: 6.2.0
-      shiki: 4.3.1
-      smol-toml: 1.7.0
+      shiki: 4.4.1
+      smol-toml: 1.7.1
       unified: 11.0.5
 
   '@astrojs/language-server@2.16.13(prettier-plugin-astro@0.14.1)(prettier@3.9.6)(typescript@7.0.2)':
@@ -3243,17 +3208,17 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
       '@volar/kit': 2.4.28(typescript@7.0.2)
       '@volar/language-core': 2.4.28
-      '@volar/language-server': 2.4.28
-      '@volar/language-service': 2.4.28
+      '@volar/language-server': 2.4.28(typescript@7.0.2)
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
       muggle-string: 0.4.1
       tinyglobby: 0.2.17
-      volar-service-css: 0.0.71(@volar/language-service@2.4.28)
-      volar-service-emmet: 0.0.71(@volar/language-service@2.4.28)
-      volar-service-html: 0.0.71(@volar/language-service@2.4.28)
-      volar-service-prettier: 0.0.71(@volar/language-service@2.4.28)(prettier@3.9.6)
-      volar-service-typescript: 0.0.71(@volar/language-service@2.4.28)
-      volar-service-typescript-twoslash-queries: 0.0.71(@volar/language-service@2.4.28)
-      volar-service-yaml: 0.0.71(@volar/language-service@2.4.28)
+      volar-service-css: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))
+      volar-service-emmet: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))
+      volar-service-html: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))
+      volar-service-prettier: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))(prettier@3.9.6)
+      volar-service-typescript: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))(typescript@7.0.2)
+      volar-service-typescript-twoslash-queries: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))(typescript@7.0.2)
+      volar-service-yaml: 0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))
       vscode-html-languageservice: 5.6.2
       vscode-uri: 3.1.0
     optionalDependencies:
@@ -3275,7 +3240,7 @@ snapshots:
       remark-gfm: 4.0.1
       remark-parse: 11.0.0
       remark-rehype: 11.1.2
-      remark-smartypants: 3.0.2
+      remark-smartypants: 3.0.3
       unified: 11.0.5
       unist-util-remove-position: 5.0.0
       unist-util-visit: 5.1.0
@@ -3370,7 +3335,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.11.1
       '@emnapi/runtime': 1.11.1
-      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@napi-rs/wasm-runtime': 1.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
     optional: true
 
   '@bruits/satteri-win32-arm64-msvc@0.9.4':
@@ -3692,7 +3657,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
+  '@napi-rs/wasm-runtime@1.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
       '@emnapi/core': 1.11.1
       '@emnapi/runtime': 1.11.1
@@ -3931,14 +3896,6 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.62.2':
     optional: true
 
-  '@shikijs/core@4.3.1':
-    dependencies:
-      '@shikijs/primitive': 4.3.1
-      '@shikijs/types': 4.3.1
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
-      hast-util-to-html: 9.0.5
-
   '@shikijs/core@4.4.1':
     dependencies:
       '@shikijs/primitive': 4.4.1
@@ -3947,41 +3904,20 @@ snapshots:
       '@types/hast': 3.0.5
       hast-util-to-html: 9.0.5
 
-  '@shikijs/engine-javascript@4.3.1':
-    dependencies:
-      '@shikijs/types': 4.3.1
-      '@shikijs/vscode-textmate': 10.0.2
-      oniguruma-to-es: 4.3.6
-
   '@shikijs/engine-javascript@4.4.1':
     dependencies:
       '@shikijs/types': 4.4.1
       '@shikijs/vscode-textmate': 10.0.2
       oniguruma-to-es: 4.3.6
 
-  '@shikijs/engine-oniguruma@4.3.1':
-    dependencies:
-      '@shikijs/types': 4.3.1
-      '@shikijs/vscode-textmate': 10.0.2
-
   '@shikijs/engine-oniguruma@4.4.1':
     dependencies:
       '@shikijs/types': 4.4.1
       '@shikijs/vscode-textmate': 10.0.2
 
-  '@shikijs/langs@4.3.1':
-    dependencies:
-      '@shikijs/types': 4.3.1
-
   '@shikijs/langs@4.4.1':
     dependencies:
       '@shikijs/types': 4.4.1
-
-  '@shikijs/primitive@4.3.1':
-    dependencies:
-      '@shikijs/types': 4.3.1
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
 
   '@shikijs/primitive@4.4.1':
     dependencies:
@@ -3989,18 +3925,9 @@ snapshots:
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.5
 
-  '@shikijs/themes@4.3.1':
-    dependencies:
-      '@shikijs/types': 4.3.1
-
   '@shikijs/themes@4.4.1':
     dependencies:
       '@shikijs/types': 4.4.1
-
-  '@shikijs/types@4.3.1':
-    dependencies:
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
 
   '@shikijs/types@4.4.1':
     dependencies:
@@ -4097,10 +4024,6 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
-  '@types/hast@3.0.4':
-    dependencies:
-      '@types/unist': 3.0.3
-
   '@types/hast@3.0.5':
     dependencies:
       '@types/unist': 3.0.3
@@ -4195,14 +4118,12 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@ungap/structured-clone@1.3.2': {}
-
   '@ungap/structured-clone@1.3.3': {}
 
   '@volar/kit@2.4.28(typescript@7.0.2)':
     dependencies:
-      '@volar/language-service': 2.4.28
-      '@volar/typescript': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
+      '@volar/typescript': 2.4.28(typescript@7.0.2)
       typesafe-path: 0.2.2
       typescript: 7.0.2
       vscode-languageserver-textdocument: 1.0.12
@@ -4212,32 +4133,38 @@ snapshots:
     dependencies:
       '@volar/source-map': 2.4.28
 
-  '@volar/language-server@2.4.28':
+  '@volar/language-server@2.4.28(typescript@7.0.2)':
     dependencies:
       '@volar/language-core': 2.4.28
-      '@volar/language-service': 2.4.28
-      '@volar/typescript': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
+      '@volar/typescript': 2.4.28(typescript@7.0.2)
       path-browserify: 1.0.1
       request-light: 0.7.0
       vscode-languageserver: 9.0.1
       vscode-languageserver-protocol: 3.18.2
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
+    optionalDependencies:
+      typescript: 7.0.2
 
-  '@volar/language-service@2.4.28':
+  '@volar/language-service@2.4.28(typescript@7.0.2)':
     dependencies:
       '@volar/language-core': 2.4.28
       vscode-languageserver-protocol: 3.18.2
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
+    optionalDependencies:
+      typescript: 7.0.2
 
   '@volar/source-map@2.4.28': {}
 
-  '@volar/typescript@2.4.28':
+  '@volar/typescript@2.4.28(typescript@7.0.2)':
     dependencies:
       '@volar/language-core': 2.4.28
       path-browserify: 1.0.1
       vscode-uri: 3.1.0
+    optionalDependencies:
+      typescript: 7.0.2
 
   '@vscode/emmet-helper@2.11.0':
     dependencies:
@@ -4702,7 +4629,7 @@ snapshots:
 
   hast-util-from-html@2.0.3:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       devlop: 1.1.0
       hast-util-from-parse5: 8.0.3
       parse5: 7.3.0
@@ -4711,7 +4638,7 @@ snapshots:
 
   hast-util-from-parse5@8.0.3:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/unist': 3.0.3
       devlop: 1.1.0
       hastscript: 9.0.1
@@ -4730,13 +4657,13 @@ snapshots:
 
   hast-util-parse-selector@4.0.0:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
 
   hast-util-raw@9.1.0:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/unist': 3.0.3
-      '@ungap/structured-clone': 1.3.2
+      '@ungap/structured-clone': 1.3.3
       hast-util-from-parse5: 8.0.3
       hast-util-to-parse5: 8.0.1
       html-void-elements: 3.0.0
@@ -4805,7 +4732,7 @@ snapshots:
 
   hast-util-to-parse5@8.0.1:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       comma-separated-tokens: 2.0.3
       devlop: 1.1.0
       property-information: 7.2.0
@@ -4819,7 +4746,7 @@ snapshots:
 
   hast-util-to-text@4.0.2:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/unist': 3.0.3
       hast-util-is-element: 3.0.0
       unist-util-find-after: 5.0.0
@@ -4830,7 +4757,7 @@ snapshots:
 
   hastscript@9.0.1:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       comma-separated-tokens: 2.0.3
       hast-util-parse-selector: 4.0.0
       property-information: 7.2.0
@@ -4864,10 +4791,6 @@ snapshots:
   is-unsafe@2.0.0: {}
 
   jiti@2.7.0: {}
-
-  js-yaml@4.3.0:
-    dependencies:
-      argparse: 2.0.1
 
   js-yaml@4.3.1:
     dependencies:
@@ -5150,9 +5073,9 @@ snapshots:
 
   mdast-util-to-hast@13.2.1:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
-      '@ungap/structured-clone': 1.3.2
+      '@ungap/structured-clone': 1.3.3
       devlop: 1.1.0
       micromark-util-sanitize-uri: 2.0.1
       trim-lines: 3.0.1
@@ -5661,7 +5584,7 @@ snapshots:
 
   rehype-raw@7.0.0:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       hast-util-raw: 9.1.0
       vfile: 6.0.3
 
@@ -5683,7 +5606,7 @@ snapshots:
 
   rehype-stringify@10.0.1:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       hast-util-to-html: 9.0.5
       unified: 11.0.5
 
@@ -5716,18 +5639,11 @@ snapshots:
 
   remark-rehype@11.1.2:
     dependencies:
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       mdast-util-to-hast: 13.2.1
       unified: 11.0.5
       vfile: 6.0.3
-
-  remark-smartypants@3.0.2:
-    dependencies:
-      retext: 9.0.0
-      retext-smartypants: 6.2.0
-      unified: 11.0.5
-      unist-util-visit: 5.1.0
 
   remark-smartypants@3.0.3:
     dependencies:
@@ -5837,7 +5753,7 @@ snapshots:
   satteri@0.9.4:
     dependencies:
       '@types/estree-jsx': 1.0.5
-      '@types/hast': 3.0.4
+      '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
     optionalDependencies:
@@ -5888,17 +5804,6 @@ snapshots:
       '@img/sharp-win32-x64': 0.35.3
       '@types/node': 26.1.2
 
-  shiki@4.3.1:
-    dependencies:
-      '@shikijs/core': 4.3.1
-      '@shikijs/engine-javascript': 4.3.1
-      '@shikijs/engine-oniguruma': 4.3.1
-      '@shikijs/langs': 4.3.1
-      '@shikijs/themes': 4.3.1
-      '@shikijs/types': 4.3.1
-      '@shikijs/vscode-textmate': 10.0.2
-      '@types/hast': 3.0.4
-
   shiki@4.4.1:
     dependencies:
       '@shikijs/core': 4.4.1
@@ -5924,8 +5829,6 @@ snapshots:
       '@types/sax': 1.2.7
       arg: 5.0.2
       sax: 1.6.1
-
-  smol-toml@1.7.0: {}
 
   smol-toml@1.7.1: {}
 
@@ -6158,45 +6061,46 @@ snapshots:
     optionalDependencies:
       vite: 8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)
 
-  volar-service-css@0.0.71(@volar/language-service@2.4.28):
+  volar-service-css@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2)):
     dependencies:
       vscode-css-languageservice: 6.3.10
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
 
-  volar-service-emmet@0.0.71(@volar/language-service@2.4.28):
+  volar-service-emmet@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2)):
     dependencies:
       '@emmetio/css-parser': 0.4.1
       '@emmetio/html-matcher': 1.3.0
       '@vscode/emmet-helper': 2.11.0
       vscode-uri: 3.1.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
 
-  volar-service-html@0.0.71(@volar/language-service@2.4.28):
+  volar-service-html@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2)):
     dependencies:
       vscode-html-languageservice: 5.6.2
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
 
-  volar-service-prettier@0.0.71(@volar/language-service@2.4.28)(prettier@3.9.6):
+  volar-service-prettier@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))(prettier@3.9.6):
     dependencies:
       vscode-uri: 3.1.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
       prettier: 3.9.6
 
-  volar-service-typescript-twoslash-queries@0.0.71(@volar/language-service@2.4.28):
+  volar-service-typescript-twoslash-queries@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))(typescript@7.0.2):
     dependencies:
       vscode-uri: 3.1.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
+      typescript: 7.0.2
 
-  volar-service-typescript@0.0.71(@volar/language-service@2.4.28):
+  volar-service-typescript@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2))(typescript@7.0.2):
     dependencies:
       path-browserify: 1.0.1
       semver: 7.8.5
@@ -6205,14 +6109,15 @@ snapshots:
       vscode-nls: 5.2.0
       vscode-uri: 3.1.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
+      typescript: 7.0.2
 
-  volar-service-yaml@0.0.71(@volar/language-service@2.4.28):
+  volar-service-yaml@0.0.71(@volar/language-service@2.4.28(typescript@7.0.2)):
     dependencies:
       vscode-uri: 3.1.0
       yaml-language-server: 1.23.0
     optionalDependencies:
-      '@volar/language-service': 2.4.28
+      '@volar/language-service': 2.4.28(typescript@7.0.2)
 
   vscode-css-languageservice@6.3.10:
     dependencies:
