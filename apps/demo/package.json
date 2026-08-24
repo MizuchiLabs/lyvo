@@ -10,12 +10,12 @@
 		"astro": "astro"
 	},
 	"dependencies": {
-		"@lucide/astro": "^1.28.0",
+		"@lucide/astro": "^1.33.0",
 		"@mizuchilabs/lyvo": "workspace:*",
 		"@pagefind/component-ui": "^1.5.2",
 		"@tailwindcss/typography": "^0.5.20",
 		"@tailwindcss/vite": "^4.3.3",
-		"astro": "^7.1.6",
+		"astro": "^7.2.4",
 		"sharp": "^0.35.3",
 		"tailwindcss": "^4.3.3"
 	},
