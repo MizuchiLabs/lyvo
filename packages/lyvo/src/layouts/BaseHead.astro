@@ -41,10 +41,10 @@ const ogImage = config.og.generate
 	? siteUrl
 		? new URL(`/og${Astro.url.pathname.replace(/\/$/, '') || '/index'}.png`, siteUrl).href
 		: undefined
-	: config.ogImage
+	: config.og.image
 		? siteUrl
-			? new URL(config.ogImage, siteUrl).href
-			: config.ogImage
+			? new URL(config.og.image, siteUrl).href
+			: config.og.image
 		: undefined;
 
 const fontVariables = config.fonts ?? [];
@@ -78,11 +78,7 @@ const fontVariables = config.fonts ?? [];
 	<title>{displayTitle()}</title>
 
 	<!-- Fonts (only for fonts the user actually configured) -->
-	{
-		fontVariables.map((variable, index) => (
-			<Font cssVariable={variable} preload={index === 0} />
-		))
-	}
+	{fontVariables.map((variable, index) => <Font cssVariable={variable} preload={index === 0} />)}
 
 	{config.head && <Fragment set:html={config.head} />}
 
