@@ -7,11 +7,11 @@ describe('makeSlug', () => {
 	});
 
 	it('falls back to method + path', () => {
-		expect(makeSlug('get', '/planets/{planetId}', undefined)).toBe('get-planets-planetId');
+		expect(makeSlug('get', '/planets/{planetId}', '')).toBe('get-planets-planetId');
 	});
 
 	it('handles root paths', () => {
-		expect(makeSlug('post', '/', undefined)).toBe('post-root');
+		expect(makeSlug('post', '/', '')).toBe('post-root');
 	});
 });
 

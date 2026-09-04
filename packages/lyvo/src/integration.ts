@@ -1,5 +1,7 @@
 import type { AstroIntegration } from 'astro';
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs';
 import { writeFile, readFile, access } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
@@ -31,6 +33,65 @@ function injectVirtualConfig(config: LyvoConfig) {
 				return `export default ${JSON.stringify(config)};`;
 			}
 			return null;
+		}
+	};
+}
+
+const VIRTUAL_STYLES_ID = 'lyvo:styles';
+
+// Serves the theme stylesheet as ONE Tailwind root with the user's customCss
+// appended inline. Two separate roots would cascade-break responsive
+// utilities (a later root's .hidden beats the theme root's md:flex).
+function injectLyvoStyles(
+	options: LyvoConfig,
+	srcDir: string,
+	logger: { warn: (message: string) => void }
+) {
+	const stylePath = path.join(srcDir, 'styles', 'global.css');
+	const virtualId = `${stylePath}?lyvo-styles`;
+
+	function prepareUserCss(file: string): string {
+		const resolved = path.resolve(process.cwd(), file.replace(/^\//, ''));
+		let css = fs.readFileSync(resolved, 'utf-8');
+
+		// Users following older docs import the theme (or tailwind) themselves.
+		// Inline appending would create nested roots, so drop those imports.
+		css = css.replace(/^@import\s+['"](tailwindcss|@mizuchilabs\/lyvo\/style\.css|tw-animate-css)['"];\s*$/gm, '');
+
+		// Relative imports/urls must resolve from the user's file, but the
+		// combined module lives next to the theme stylesheet.
+		const userDir = path.dirname(resolved);
+		const themeDir = path.dirname(stylePath);
+		const rebase = (match: string, prefix: string, quote: string, target: string, suffix: string) => {
+			if (!target.startsWith('.')) return match;
+			const absolute = path.resolve(userDir, target);
+			const rebased = path.relative(themeDir, absolute).split(path.sep).join('/');
+			return `${prefix}${quote}${rebased}${suffix}`;
+		};
+		css = css.replace(/(@import\s+)(['"])([^'"]+)\2/g, rebase);
+		css = css.replace(/(url\()(\s*)(['"])([^'"]+)\3(\s*\))/g, rebase);
+
+		return `/* source: ${file} */\n${css}`;
+	}
+
+	return {
+		name: 'vite-plugin-lyvo-styles',
+		resolveId(id: string) {
+			if (id === VIRTUAL_STYLES_ID) return virtualId;
+			return null;
+		},
+		load(id: string) {
+			if (id !== virtualId) return null;
+
+			const parts = [fs.readFileSync(stylePath, 'utf-8')];
+			for (const file of options.customCss) {
+				try {
+					parts.push(prepareUserCss(file));
+				} catch {
+					logger.warn(`customCss file "${file}" could not be read, skipping.`);
+				}
+			}
+			return parts.join('\n');
 		}
 	};
 }
@@ -113,7 +174,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 								}
 							]
 						},
-						plugins: [injectVirtualConfig(options)]
+						plugins: [injectVirtualConfig(options), injectLyvoStyles(options, srcDir, logger)]
 					}
 				});
 
@@ -154,10 +215,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 					});
 				}
 
-				injectScript('page-ssr', `import "${PKG}/style.css";`);
-				for (const cssPath of options.customCss) {
-					injectScript('page-ssr', `import "${cssPath}";`);
-				}
+				injectScript('page-ssr', 'import "lyvo:styles";');
 			}
 		}
 	};

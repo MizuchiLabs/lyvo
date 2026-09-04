@@ -1,0 +1,152 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "Demo Docs" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - generic [aria-hidden] [ref=e4]: D
+    - generic [ref=e6]:
+      - button "Search" [ref=e8] [cursor=pointer]
+      - button "Open Menu" [ref=e10]
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - link "Demo Docs" [ref=e16] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=e17]: D
+      - button "Close Menu" [ref=e19]
+    - generic [ref=e24]:
+      - link "Guides" [ref=e25] [cursor=pointer]:
+        - /url: /docs
+      - link "Reference" [ref=e28] [cursor=pointer]:
+        - /url: /api
+    - generic [ref=e32]:
+      - link "Introduction" [ref=e33] [cursor=pointer]:
+        - /url: /docs/introduction
+      - group [ref=e35]:
+        - generic "Overview" [ref=e36] [cursor=pointer]
+      - group [ref=e40]:
+        - generic "Components" [ref=e41] [cursor=pointer]
+      - separator [ref=e44]
+      - group [ref=e46]:
+        - generic "Changelog" [ref=e47] [cursor=pointer]
+      - link "GitHub" [ref=e50] [cursor=pointer]:
+        - /url: https://github.com/mizuchilabs/lyvo
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - paragraph [ref=e53]: Language
+        - generic [ref=e58]:
+          - link "en" [ref=e59] [cursor=pointer]:
+            - /url: /docs/introduction
+          - link "Deutsch" [ref=e60] [cursor=pointer]:
+            - /url: /de/docs/introduction
+      - generic [ref=e62]:
+        - link "GitHub" [ref=e63] [cursor=pointer]:
+          - /url: https://github.com/mizuchilabs/lyvo
+        - link "Discord" [ref=e69] [cursor=pointer]:
+          - /url: https://discord.com
+  - main [ref=e75]:
+    - generic [ref=e76]:
+      - button "Introduction" [ref=e78] [cursor=pointer]
+      - button "Toggle theme" [ref=e90]
+    - generic [ref=e99]:
+      - generic [ref=e100]:
+        - heading "Introduction" [level=1] [ref=e101]
+        - paragraph [ref=e102]: Welcome to Lyvo Docs, a modern and minimal documentation boilerplate for Astro.
+      - generic [ref=e103]: Last updated on Jun 9, 2026
+      - article [ref=e106]:
+        - paragraph [ref=e107]:
+          - text: Welcome to
+          - strong [ref=e108]: Lyvo Docs
+          - text: ", a sleek, high-performance, and minimal documentation template built with"
+          - strong [ref=e109]: Astro
+          - text: ","
+          - strong [ref=e110]: React
+          - text: ", and"
+          - strong [ref=e111]: Tailwind CSS
+          - text: . It is designed to be as close to a “drop-in” solution as possible while still offering endless customizability through raw code.
+        - generic [ref=e116]:
+          - heading "Ready to build?" [level=5] [ref=e117]
+          - paragraph [ref=e119]: Lyvo Docs gives you full ownership of your documentation. You get a beautiful design out of the box, with the freedom to modify every single component.
+        - heading "Why Lyvo Docs?" [level=2] [ref=e120]:
+          - text: Why Lyvo Docs?
+          - link [aria-hidden] [ref=e121] [cursor=pointer]:
+            - /url: "#why-lyvo-docs"
+            - text: "#"
+        - paragraph [ref=e122]:
+          - text: "There are many documentation generators out there like Starlight, Docusaurus, and Nextra. Lyvo Docs takes a different approach:"
+          - strong [ref=e123]: Simplicity and Ownership
+          - text: .
+        - paragraph [ref=e124]:
+          - text: Instead of hiding everything behind complex configuration files and abstract core libraries, Lyvo Docs provides you with the raw source code for your layouts and components. You own the code. If you want to change how the sidebar works, you just open
+          - code [ref=e125]: Sidebar.tsx
+          - text: and change it.
+        - heading "Key Features" [level=3] [ref=e126]:
+          - text: Key Features
+          - link [aria-hidden] [ref=e127] [cursor=pointer]:
+            - /url: "#key-features"
+            - text: "#"
+        - paragraph [ref=e128]: "Here is a quick overview of what you get out of the box:"
+        - list [ref=e129]:
+          - listitem [ref=e130]:
+            - strong [ref=e131]: "Astro Powered:"
+            - text: Blazing fast performance.
+          - listitem [ref=e132]:
+            - strong [ref=e133]: "Tailwind CSS:"
+            - text: Beautiful, utility-first styling with dark mode support.
+          - listitem [ref=e134]:
+            - strong [ref=e135]: "Shadcn UI:"
+            - text: Pre-configured with the standard of modern UI components.
+          - listitem [ref=e136]:
+            - strong [ref=e137]: "MDX Support:"
+            - text: Write content in Markdown or MDX.
+          - listitem [ref=e138]:
+            - strong [ref=e139]: "Full-text Search:"
+            - text: Fast, offline-capable search using
+            - link "Pagefind" [ref=e140] [cursor=pointer]:
+              - /url: https://pagefind.app/
+            - text: .
+        - heading "Next Steps" [level=2] [ref=e145]:
+          - text: Next Steps
+          - link [aria-hidden] [ref=e146] [cursor=pointer]:
+            - /url: "#next-steps"
+            - text: "#"
+        - paragraph [ref=e147]: "Ready to get started? Check out the following sections to learn more:"
+        - list [ref=e148]:
+          - listitem [ref=e149]:
+            - link "Getting Started" [ref=e150] [cursor=pointer]:
+              - /url: /docs/getting-started
+            - text: ": Learn how to install and set up your project."
+          - listitem [ref=e151]:
+            - link "Writing Content" [ref=e152] [cursor=pointer]:
+              - /url: /docs/writing-content
+            - text: ": Learn how to structure your"
+            - code [ref=e153]: .mdx
+            - text: files.
+          - listitem [ref=e154]:
+            - link "Components" [ref=e155] [cursor=pointer]:
+              - /url: /docs/components
+            - text: ": Explore the available custom components."
+          - listitem [ref=e156]:
+            - link "Configuration" [ref=e157] [cursor=pointer]:
+              - /url: /docs/configuration
+            - text: ": Learn how to customize the theme and site metadata."
+      - generic [ref=e158]:
+        - generic [ref=e162]:
+          - generic [ref=e163]: Was this page helpful?
+          - generic [ref=e164]:
+            - button "Yes, Was this page helpful?" [ref=e165]: "Yes"
+            - button "No, Was this page helpful?" [ref=e168]: "No"
+        - link [ref=e172] [cursor=pointer]:
+          - /url: /docs/overview/getting-started
+          - generic [ref=e173]: Next
+          - generic [ref=e176]:
+            - paragraph [ref=e177]: Getting Started
+            - paragraph [ref=e178]: How to install, run, and start building with Lyvo Docs.
+  - generic:
+    - status [ref=e179]
+    - status [ref=e180]
+    - status [ref=e181]
+    - status [ref=e182]
+  - generic [ref=e185]:
+    - button [ref=e186]
+    - button [ref=e192]
+    - button [ref=e196]
+    - button [ref=e201]

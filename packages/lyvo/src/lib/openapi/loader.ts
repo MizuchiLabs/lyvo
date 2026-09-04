@@ -661,11 +661,6 @@ function buildTags(document: any, operations: any[]) {
 	return Array.from(tagMap.values()).sort((a: any, b: any) => a.name.localeCompare(b.name));
 }
 
-export interface OpenAPILoaderOptions {
-	input: string;
-	groupBy?: 'tag' | 'path';
-}
-
 export interface OpenAPILoaderSpec {
 	id: string;
 	input: string;

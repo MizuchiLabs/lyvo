@@ -106,16 +106,16 @@ export default defineConfig({
 
 ### 2. Configure Custom Theme (Optional)
 
-The default theme stylesheet is always loaded. Files listed in `customCss` are appended after it and can override theme tokens:
+The default theme stylesheet is always loaded, and files listed in `customCss` are appended into the same Tailwind root, so `@theme` overrides work directly:
 
 ```css
-@import 'tailwindcss';
-
 /* Your custom theme overrides here */
 @theme {
 	--color-primary: oklch(0.5 0.2 250);
 }
 ```
+
+An `@import 'tailwindcss'` or `@import '@mizuchilabs/lyvo/style.css'` in a custom file is stripped automatically, so configs written for earlier versions keep working. Custom CSS must live inside the project (absolute paths work too); relative `@import`/`url()` targets are rebased automatically.
 
 ### 3. Set up Content Collections
 

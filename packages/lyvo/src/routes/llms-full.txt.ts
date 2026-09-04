@@ -23,7 +23,8 @@ export const GET: APIRoute = async () => {
 	}
 
 	const all = await getCollection('docs');
-	const sections: Array<{ title: string; docs: Awaited<ReturnType<typeof getCollection<'docs'>>> }> = [
+	type DocEntry = Awaited<ReturnType<typeof getCollection>>[number];
+	const sections: Array<{ title: string; docs: DocEntry[] }> = [
 		{ title: 'Docs', docs: docsForLocale(all, null) }
 	];
 

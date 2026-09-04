@@ -59,7 +59,7 @@ async function resolvePageMeta(slugParam: string): Promise<PageMeta | null> {
 	if (location.startsWith(`${docsPrefix}/`) || location === docsPrefix) {
 		const pageId = location === docsPrefix ? '' : location.slice(docsPrefix.length + 1);
 		const docId = locale ? `${locale}/${pageId}` : pageId;
-		const doc = all.find((entry) => entry.id === docId);
+		const doc = all.find((entry: any) => entry.id === docId);
 		if (!doc) return null;
 		return { title: doc.data.title, description: doc.data.description };
 	}
