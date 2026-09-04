@@ -1,0 +1,10 @@
+---
+interface Props {
+	websiteId: string;
+	src?: string;
+	domains?: string;
+}
+const { websiteId, src = 'https://cloud.umami.is/script.js', domains } = Astro.props;
+---
+
+<script is:inline defer src={src} data-website-id={websiteId} data-domains={domains}></script>

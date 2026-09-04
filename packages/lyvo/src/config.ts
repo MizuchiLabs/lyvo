@@ -33,6 +33,36 @@ const specSchema = z.object({
 	title: z.string().optional()
 });
 
+const analyticsSchema = z
+	.object({
+		umami: z
+			.object({
+				websiteId: z.string(),
+				src: z.string().optional(),
+				domains: z.string().optional()
+			})
+			.optional(),
+		plausible: z
+			.object({
+				domain: z.string(),
+				src: z.string().optional()
+			})
+			.optional(),
+		posthog: z
+			.object({
+				apiKey: z.string(),
+				host: z.string().optional()
+			})
+			.optional(),
+		matomo: z
+			.object({
+				url: z.string(),
+				siteId: z.string()
+			})
+			.optional()
+	})
+	.optional();
+
 export const LyvoOptionsSchema = z.object({
 	title: z.string().optional(),
 	description: z.string().optional(),
@@ -102,9 +132,12 @@ export const LyvoOptionsSchema = z.object({
 	search: z.boolean().optional(),
 	sitemap: z.boolean().optional(),
 	cacheHeaders: z.boolean().optional(),
+	analytics: analyticsSchema,
 	head: z.string().optional(),
 	customCss: z.array(z.string()).optional()
 });
+
+export type AnalyticsConfig = NonNullable<z.infer<typeof analyticsSchema>>;
 
 export type LyvoOptions = z.infer<typeof LyvoOptionsSchema>;
 
@@ -162,6 +195,7 @@ export interface LyvoConfig {
 		sharpPath?: string | null;
 	};
 	llms: boolean;
+	analytics?: AnalyticsConfig;
 	features: {
 		search: boolean;
 		sitemap: boolean;
@@ -369,6 +403,7 @@ export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike)
 		},
 		og,
 		llms: raw.llms ?? true,
+		analytics: raw.analytics,
 		features: {
 			search: raw.search ?? true,
 			sitemap: raw.sitemap ?? true,

@@ -4,12 +4,12 @@ import config from 'virtual:lyvo-config';
 import { t } from '@lyvo/lib/i18n';
 import { currentLocale } from '@lyvo/lib/docs';
 
-const locale = currentLocale(Astro.url.pathname);
+const locale = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
 ---
 
 {
 	config.docs.feedback && (
-		<div class="feedback-widget">
+		<div class="feedback-widget" data-locale={locale}>
 			<div class="feedback-prompt flex flex-1 flex-col items-center gap-4 rounded-lg transition-all duration-300 sm:flex-row">
 				<span class="text-sm font-medium text-muted-foreground">
 					{t('helpful', locale)}
@@ -124,7 +124,12 @@ const locale = currentLocale(Astro.url.pathname);
 
 					window.dispatchEvent(
 						new CustomEvent('lyvo:feedback', {
-							detail: { helpful, path: window.location.pathname }
+							detail: {
+								helpful,
+								path: window.location.pathname,
+								title: document.title,
+								locale: widget.dataset.locale ?? ''
+							}
 						})
 					);
 

@@ -1,0 +1,20 @@
+---
+import config from 'virtual:lyvo-config';
+import Umami from './analytics/Umami.astro';
+import Plausible from './analytics/Plausible.astro';
+import Posthog from './analytics/Posthog.astro';
+import Matomo from './analytics/Matomo.astro';
+import Bridge from './analytics/Bridge.astro';
+
+const { analytics } = config;
+---
+
+{analytics?.umami && <Umami {...analytics.umami} />}
+
+{analytics?.plausible && <Plausible {...analytics.plausible} />}
+
+{analytics?.posthog && <Posthog {...analytics.posthog} />}
+
+{analytics?.matomo && <Matomo {...analytics.matomo} />}
+
+{analytics && <Bridge />}

@@ -151,7 +151,7 @@ The `lyvo()` integration accepts the following options:
 | `footer`                   | `{note?, columns?}`                           | Landing page footer with link columns.                                                                                                                                                                                                 |
 | `docs.prefix`              | `string`                                      | Route prefix for guides. Default `'/docs'`.                                                                                                                                                                                            |
 | `docs.edit`                | `boolean`                                     | Whether to show "Edit this page" links. Default `true`.                                                                                                                                                                                |
-| `docs.feedback`            | `boolean`                                     | Whether to show the feedback widget. Default `true`. Feedback is emitted as a `lyvo:feedback` CustomEvent on `window` with `{ helpful, path }`.                                                                                        |
+| `docs.feedback`            | `boolean`                                     | Whether to show the feedback widget. Default `true`. Feedback is emitted as a `lyvo:feedback` CustomEvent on `window` with `{ helpful, path, title, locale }`.                                                                         |
 | `docs.sidebar`             | `{items?}` or `{order?, labels?}`             | Sidebar structure. `items` supports strings (doc slugs or `'---'` separators), nested categories and external links. The legacy `order`/`labels` shape still works.                                                                    |
 | `openapi`                  | `{input, prefix?, groupBy?, title?}` or array | OpenAPI spec(s). Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`).                                                                                                                                               |
 | `i18n`                     | `{defaultLocale?, locales?, ui?}`             | Locale subfolder-based i18n. Default locale content lives at the content root, other locales in subfolders (`src/content/docs/de/`). `ui` maps locale codes to translated UI strings.                                                  |
@@ -160,10 +160,83 @@ The `lyvo()` integration accepts the following options:
 | `search`                   | `boolean`                                     | Enable Pagefind search. Default `true`.                                                                                                                                                                                                |
 | `sitemap`                  | `boolean`                                     | Inject the sitemap integration (skipped if you already use one). Default `true`.                                                                                                                                                       |
 | `cacheHeaders`             | `boolean`                                     | Append Cloudflare `_headers` rules with `no-cache` for the docs prefix. Default `false`.                                                                                                                                               |
+| `analytics`                | `{umami?, plausible?, posthog?, matomo?}`     | Load an analytics provider and forward built-in events to it. See [Analytics](#analytics).                                                                                                                                             |
 | `head`                     | `string`                                      | Raw HTML injected into `<head>` on every page. Great for analytics snippets.                                                                                                                                                           |
 | `customCss`                | `string[]`                                    | CSS files appended after the default theme stylesheet.                                                                                                                                                                                 |
 
 Unknown options are reported as build warnings, so typos don't fail silently.
+
+## Analytics
+
+Set the `analytics` option to load a supported provider and forward the docs feedback event to it. Providers included: Umami, Plausible, PostHog and Matomo.
+
+```js
+lyvo({
+	analytics: {
+		umami: {
+			websiteId: 'your-website-id',
+			// optional, defaults to the Umami Cloud script
+			src: 'https://eu.umami.is/script.js',
+			// optional, comma-separated list of domains
+			domains: 'docs.example.com'
+		}
+	}
+});
+```
+
+```js
+lyvo({
+	analytics: {
+		plausible: {
+			domain: 'docs.example.com',
+			// optional, defaults to https://plausible.io/js/script.js
+			src: 'https://plausible.example.com/js/script.js'
+		}
+	}
+});
+```
+
+```js
+lyvo({
+	analytics: {
+		posthog: {
+			apiKey: 'phc_your_project_token',
+			// optional, defaults to https://us.i.posthog.com
+			host: 'https://eu.i.posthog.com'
+		}
+	}
+});
+```
+
+```js
+lyvo({
+	analytics: {
+		matomo: {
+			url: 'https://analytics.example.com',
+			siteId: '1'
+		}
+	}
+});
+```
+
+When a provider is configured, clicking Yes or No on the feedback widget sends a `docs_feedback` event with the properties `helpful`, `path`, `title` and `locale`. Umami and Plausible only accept string event properties, so `helpful` arrives as `"true"`/`"false"` there. Matomo uses its native `trackEvent` API with category `docs` and action `feedback`.
+
+Pageview tracking for client-side navigation works out of the box for Umami, Plausible and PostHog. Matomo gets replayed pageviews via Astro's view transitions router.
+
+To use a different provider or send custom events, listen for the `lyvo:feedback` event yourself through the `head` option:
+
+```js
+lyvo({
+	head: `
+		<script>
+			window.addEventListener('lyvo:feedback', (e) => {
+				const { helpful, path, title, locale } = e.detail;
+				// send to your tracker of choice
+			});
+		</script>
+	`
+});
+```
 
 ## Customizing the Landing Header
 

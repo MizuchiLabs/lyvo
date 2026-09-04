@@ -1,0 +1,31 @@
+---
+interface Props {
+	url: string;
+	siteId: string;
+}
+const { url, siteId } = Astro.props;
+---
+
+<script is:inline define:vars={{ matomoUrl: url, matomoSiteId: siteId }}>
+	var _paq = (window._paq = window._paq || []);
+	_paq.push(['trackPageView']);
+	_paq.push(['enableLinkTracking']);
+	(function () {
+		var u = matomoUrl.endsWith('/') ? matomoUrl : matomoUrl + '/';
+		_paq.push(['setTrackerUrl', u + 'matomo.php']);
+		_paq.push(['setSiteId', String(matomoSiteId)]);
+		var d = document,
+			g = d.createElement('script'),
+			s = d.getElementsByTagName('script')[0];
+		g.async = true;
+		g.src = u + 'matomo.js';
+		s.parentNode.insertBefore(g, s);
+	})();
+
+	// Matomo has no built-in SPA support, replay pageviews on client-side navigation.
+	document.addEventListener('astro:after-swap', () => {
+		_paq.push(['setCustomUrl', window.location.pathname]);
+		_paq.push(['setDocumentTitle', document.title]);
+		_paq.push(['trackPageView']);
+	});
+</script>

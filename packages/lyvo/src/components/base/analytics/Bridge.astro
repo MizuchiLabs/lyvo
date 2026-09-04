@@ -1,0 +1,25 @@
+<!-- Maps the theme's internal lyvo events onto whatever analytics provider is configured. -->
+<script>
+	window.addEventListener('lyvo:feedback', (e) => {
+		const { helpful, path, title, locale } = (e as CustomEvent).detail;
+		const props = { helpful: String(helpful), path, title, locale };
+		const w = window as any;
+
+		if (w.umami?.track) w.umami.track('docs_feedback', props);
+		if (typeof w.plausible === 'function') {
+			w.plausible('docs_feedback', { props });
+		}
+		if (w.posthog?.capture) {
+			w.posthog.capture('docs_feedback', { helpful, path, title, locale });
+		}
+		if (w._paq?.push) {
+			w._paq.push([
+				'trackEvent',
+				'docs',
+				'feedback',
+				helpful ? 'helpful' : 'not_helpful',
+				path
+			]);
+		}
+	});
+</script>
