@@ -1,4 +1,7 @@
 import { z } from 'astro/zod';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const linkSchema = z.object({
 	title: z.string(),
@@ -149,6 +152,8 @@ export interface LyvoConfig {
 		siteName?: string;
 		image?: string;
 		generate: boolean;
+		/** Absolute paths to woff fonts, resolved by the integration at config time. */
+		fontPaths?: string[];
 	};
 	llms: boolean;
 	features: {
@@ -181,6 +186,35 @@ const UI_DEFAULTS: Record<string, string> = {
 	codeSamples: 'Code Samples',
 	exampleResponses: 'Example Responses'
 };
+
+function resolveFromTheme(spec: string): string | null {
+	const candidates = [
+		path.dirname(fileURLToPath(new URL('../package.json', import.meta.url))),
+		path.join(process.cwd(), 'package.json')
+	];
+	for (const candidate of candidates) {
+		try {
+			return createRequire(candidate).resolve(spec);
+		} catch {
+			// try next location
+		}
+	}
+	return null;
+}
+
+function resolveOgFontPaths(): string[] {
+	try {
+		const themeDir = path.dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
+		const require = createRequire(path.join(themeDir, 'package.json'));
+		const pkgRoot = path.dirname(require.resolve('@fontsource/inter'));
+		return [
+			path.join(pkgRoot, 'files/inter-latin-400-normal.woff'),
+			path.join(pkgRoot, 'files/inter-latin-700-normal.woff')
+		];
+	} catch {
+		return [];
+	}
+}
 
 function normalizePrefix(prefix: string): string {
 	const trimmed = prefix.trim();
@@ -263,10 +297,14 @@ export function normalizeOptions(
 		: undefined;
 
 	const ogRaw = raw.og;
+	const generateOg = ogRaw === true || (typeof ogRaw === 'object' && ogRaw?.generate === true);
 	const og = {
 		siteName: typeof ogRaw === 'object' && ogRaw ? ogRaw.siteName : undefined,
 		image: typeof ogRaw === 'object' && ogRaw ? ogRaw.image : undefined,
-		generate: ogRaw === true || (typeof ogRaw === 'object' && ogRaw?.generate === true)
+		generate: generateOg,
+		fontPaths: generateOg ? resolveOgFontPaths() : [],
+		satoriPath: generateOg ? resolveFromTheme('satori') : null,
+		sharpPath: generateOg ? resolveFromTheme('sharp') : null
 	};
 
 	const fonts = (astroConfig.fonts ?? [])

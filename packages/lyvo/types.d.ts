@@ -36,7 +36,14 @@ declare module 'virtual:lyvo-config' {
 			locales: Array<{ code: string; label: string }>;
 			ui: Record<string, Record<string, string>>;
 		};
-		og: { siteName?: string; image?: string; generate: boolean };
+		og: {
+			siteName?: string;
+			image?: string;
+			generate: boolean;
+			fontPaths?: string[];
+			satoriPath?: string | null;
+			sharpPath?: string | null;
+		};
 		llms: boolean;
 		features: { search: boolean; sitemap: boolean; cacheHeaders: boolean };
 		fonts: string[];

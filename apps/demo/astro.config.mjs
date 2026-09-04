@@ -81,9 +81,16 @@ export default defineConfig({
 					}
 				}
 			},
-			openapi: {
-				input: 'public/openapi.json',
-				groupBy: 'tag'
+			openapi: [
+				{
+					input: 'public/openapi.json',
+					prefix: '/api',
+					groupBy: 'tag'
+				}
+			],
+			og: {
+				siteName: 'Demo Docs',
+				generate: true
 			},
 			customCss: ['/src/styles/custom.css']
 		})
