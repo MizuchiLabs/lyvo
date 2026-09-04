@@ -1,0 +1,51 @@
+---
+import Icon from '@lyvo/components/base/Icon.astro';
+
+interface Feature {
+	title: string;
+	description?: string;
+	icon?: string;
+}
+
+interface Props {
+	title?: string;
+	subtitle?: string;
+	features: Feature[];
+}
+
+const { title, subtitle, features } = Astro.props;
+---
+
+<section class="container mx-auto max-w-screen-2xl px-4 py-16 md:px-8">
+	{
+		(title || subtitle) && (
+			<div class="mb-12 text-center">
+				{title && <h2 class="text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>}
+				{subtitle && (
+					<p class="mx-auto mt-3 max-w-2xl text-balance text-muted-foreground">
+						{subtitle}
+					</p>
+				)}
+			</div>
+		)
+	}
+	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+		{
+			features.map((feature) => (
+				<div class="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md">
+					{feature.icon && (
+						<div class="mb-4 inline-flex rounded-lg border border-border bg-muted/40 p-2.5 text-foreground transition-colors group-hover:text-primary [&>svg]:size-5">
+							<Icon name={feature.icon} />
+						</div>
+					)}
+					<h3 class="mb-2 text-base font-semibold tracking-tight">{feature.title}</h3>
+					{feature.description && (
+						<p class="text-sm leading-relaxed text-muted-foreground">
+							{feature.description}
+						</p>
+					)}
+				</div>
+			))
+		}
+	</div>
+</section>

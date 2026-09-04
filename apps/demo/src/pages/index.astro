@@ -1,12 +1,38 @@
 ---
 import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
-import Hero from '@/components/marketing/Hero.astro';
+import Hero from '@mizuchilabs/lyvo/components/landing/Hero.astro';
+import FeatureGrid from '@mizuchilabs/lyvo/components/landing/FeatureGrid.astro';
+import CTA from '@mizuchilabs/lyvo/components/landing/CTA.astro';
 import FeaturePreview from '@/components/marketing/FeaturePreview.astro';
 ---
 
 <Layout>
-	<main class="flex h-[calc(100vh-12rem)] flex-col items-center overflow-hidden">
-		<Hero />
+	<Hero
+		badge="Open Source Documentation Template"
+		title="Professional docs,"
+		highlight="built for developers."
+		description="A structured, highly-extensible documentation framework for Astro. Landing page, guides, and OpenAPI reference in one setup."
+		primary={{ label: 'Get Started', href: '/docs' }}
+		secondary={{ label: 'API Reference', href: '/api' }}
+	>
 		<FeaturePreview />
-	</main>
+	</Hero>
+	<FeatureGrid
+		title="Everything included"
+		subtitle="One integration wires up guides, API references, search, i18n and social images."
+		features={[
+			{ title: 'MDX guides', description: 'Rich built-in components: Tabs, Callouts, Steps, FileTree and more.' },
+			{ title: 'OpenAPI reference', description: 'Scalar-style two-column API docs generated straight from your spec, multiple versions supported.' },
+			{ title: 'Offline search', description: 'Lightning-fast full-text search powered by Pagefind, styled to match the theme.' },
+			{ title: 'i18n', description: 'Locale subfolders with translated UI strings and a language switcher.' },
+			{ title: 'OG images', description: 'Social images auto-generated per page at build time with satori.' },
+			{ title: 'AI-ready', description: 'llms.txt and llms-full.txt endpoints for LLM consumption out of the box.' }
+		]}
+	/>
+	<CTA
+		title="Ready to build your docs?"
+		description="Clone the repo, point the integration at your content and ship."
+		primary={{ label: 'Get Started', href: '/docs' }}
+		secondary={{ label: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo' }}
+	/>
 </Layout>

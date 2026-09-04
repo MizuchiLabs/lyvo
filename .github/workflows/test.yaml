@@ -32,7 +32,11 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Lint and Build
-              run: |
-                  pnpm lint
-                  pnpm build
+            - name: Lint (check only)
+              run: npx oxlint
+
+            - name: Unit tests
+              run: pnpm test
+
+            - name: Build demo
+              run: pnpm build

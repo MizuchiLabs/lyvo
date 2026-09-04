@@ -11,6 +11,7 @@ import Pagination from '@lyvo/components/docs/Pagination.astro';
 import { cn } from '@lyvo/lib/utils';
 import { getLastUpdated } from '@lyvo/lib/lastUpdated';
 import config from 'virtual:lyvo-config';
+import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
 
 interface Props {
 	title: string;
@@ -22,12 +23,20 @@ interface Props {
 
 const { title, description, headings = [], entry, isApi = false } = Astro.props;
 
+const routing: RoutingInfo = {
+	docsPrefix: config.docs.prefix,
+	apiRoot: config.api.root,
+	defaultLocale: config.i18n.defaultLocale,
+	locales: config.i18n.locales
+};
+const lang = localeFromPath(Astro.url.pathname, routing) ?? config.i18n.defaultLocale;
+
 const lastUpdatedText = entry ? await getLastUpdated(entry.filePath) : '';
 const showToc = !isApi && headings.length > 0;
 ---
 
 <!doctype html>
-<html lang={config.lang ?? 'en'} class="scroll-smooth">
+<html lang={lang} class="scroll-smooth">
 	<BaseHead title={title} description={description} />
 
 	<body

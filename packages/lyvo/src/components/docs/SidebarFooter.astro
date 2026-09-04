@@ -1,18 +1,78 @@
 ---
-import { ExternalLink } from '@lucide/astro';
+import { ExternalLink, Languages } from '@lucide/astro';
 import Icon from '@lyvo/components/base/Icon.astro';
 import { isExternal } from '@lyvo/lib/utils';
+import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
 import config from 'virtual:lyvo-config';
+
+const routing: RoutingInfo = {
+	docsPrefix: config.docs.prefix,
+	apiRoot: config.api.root,
+	defaultLocale: config.i18n.defaultLocale,
+	locales: config.i18n.locales
+};
+
+const currentLocale = localeFromPath(Astro.url.pathname, routing);
+const currentPath = Astro.url.pathname;
+
+// Best-effort mapping: keep the page path and swap the locale prefix.
+function localeHref(code: string): string {
+	const rest = currentLocale ? currentPath.slice(currentLocale.length + 1) : currentPath;
+	const inDocs = rest.startsWith(`${config.docs.prefix}/`) || rest === config.docs.prefix;
+	if (!inDocs) return `/${code}${config.docs.prefix}`;
+	return `/${code}${rest.endsWith('/') ? rest.slice(0, -1) : rest}`;
+}
 
 const extraLinks = config.extraLinks;
 const socials = config.socials;
+const locales = config.i18n.locales;
 
-const hasContent = (extraLinks && extraLinks.length > 0) || (socials && socials.length > 0);
+const hasContent =
+	locales.length > 0 ||
+	(extraLinks && extraLinks.length > 0) ||
+	(socials && socials.length > 0);
 ---
 
 {
 	hasContent && (
 		<div class="mt-auto p-4">
+			{locales.length > 0 && (
+				<div class="mb-4 flex flex-col gap-1">
+					<p class="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+						<Languages size={12} />
+						Language
+					</p>
+					<div class="flex flex-wrap gap-1 px-1">
+						<a
+							href={currentLocale ? localeHref(config.i18n.defaultLocale) : currentPath}
+							aria-current={!currentLocale ? 'page' : undefined}
+							class:list={[
+								'rounded-md px-2 py-1 text-xs font-medium transition-colors',
+								!currentLocale
+									? 'bg-accent/50 text-foreground'
+									: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+							]}
+						>
+							{config.i18n.defaultLocale}
+						</a>
+						{locales.map((locale) => (
+							<a
+								href={localeHref(locale.code)}
+								aria-current={currentLocale === locale.code ? 'page' : undefined}
+								class:list={[
+									'rounded-md px-2 py-1 text-xs font-medium transition-colors',
+									currentLocale === locale.code
+										? 'bg-accent/50 text-foreground'
+										: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+								]}
+							>
+								{locale.label}
+							</a>
+						))}
+					</div>
+				</div>
+			)}
+
 			{extraLinks && extraLinks.length > 0 && (
 				<div class="mb-4 flex flex-col gap-1">
 					{extraLinks.map((link) => {
@@ -32,9 +92,9 @@ const hasContent = (extraLinks && extraLinks.length > 0) || (socials && socials.
 				</div>
 			)}
 
-			{extraLinks && extraLinks.length > 0 && socials && socials.length > 0 && (
-				<div class="h-px w-full bg-border/40" />
-			)}
+			{((extraLinks && extraLinks.length > 0) || locales.length > 0) &&
+				socials &&
+				socials.length > 0 && <div class="h-px w-full bg-border/40" />}
 
 			{socials && socials.length > 0 && (
 				<div class="mt-4 flex items-center gap-1">

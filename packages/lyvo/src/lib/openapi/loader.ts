@@ -6,7 +6,7 @@ import type { OpenAPISecurityRequirement } from '@lyvo/lib/openapi/types';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
 
-function toTitle(value: any) {
+export function toTitle(value: any) {
 	if (!value) return 'Untitled';
 
 	let stringValue = String(value);
@@ -15,7 +15,7 @@ function toTitle(value: any) {
 		const parts = stringValue.split('.');
 		const lastPart = parts[parts.length - 1];
 
-		if (/^[A-Z][a-zA-Z0-9]*$/.test(lastPart)) {
+		if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(lastPart)) {
 			stringValue = lastPart;
 		}
 	}
@@ -35,7 +35,7 @@ function toTitle(value: any) {
 		.join(' ');
 }
 
-function normalizePathForSlug(value: string) {
+export function normalizePathForSlug(value: string) {
 	return value
 		.replaceAll(/\{([^}]+)\}/g, '$1')
 		.replaceAll(/[^a-zA-Z0-9/]+/g, '-')
@@ -43,7 +43,7 @@ function normalizePathForSlug(value: string) {
 		.replaceAll(/\/+/g, '/');
 }
 
-function makeSlug(method: string, apiPath: string, operationId: string) {
+export function makeSlug(method: string, apiPath: string, operationId: string) {
 	if (operationId && operationId.trim().length > 0) {
 		return operationId
 			.trim()

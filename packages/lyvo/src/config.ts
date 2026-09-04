@@ -74,7 +74,7 @@ export const LyvoOptionsSchema = z.object({
 			edit: z.boolean().optional(),
 			feedback: z.boolean().optional(),
 			sidebar: z
-				.union([legacySidebarSchema, z.object({ items: z.array(sidebarItemSchema) })])
+				.union([z.object({ items: z.array(sidebarItemSchema) }), legacySidebarSchema])
 				.optional()
 		})
 		.optional(),
@@ -230,18 +230,19 @@ interface AstroConfigLike {
 
 export class LyvoConfigError extends Error {}
 
-export function normalizeOptions(
-	raw: LyvoOptions,
-	astroConfig: AstroConfigLike,
+export function warnUnknownOptions(
+	raw: Record<string, unknown>,
 	warn: (message: string) => void
-): LyvoConfig {
+) {
 	const knownKeys = Object.keys(LyvoOptionsSchema.shape as Record<string, unknown>);
 	for (const key of Object.keys(raw)) {
 		if (!knownKeys.includes(key)) {
 			warn(`Unknown lyvo() option "${key}" was ignored.`);
 		}
 	}
+}
 
+export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike): LyvoConfig {
 	const locales: LocaleConfig[] = (raw.i18n?.locales ?? []).map((locale) => {
 		if (typeof locale === 'string') return { code: locale, label: locale };
 		return { code: locale.code, label: locale.label };
@@ -255,10 +256,10 @@ export function normalizeOptions(
 	}
 
 	const ui: Record<string, Record<string, string>> = {
-		[defaultLocale]: { ...UI_DEFAULTS, ...(raw.i18n?.ui?.[defaultLocale] ?? {}) }
+		[defaultLocale]: { ...UI_DEFAULTS, ...raw.i18n?.ui?.[defaultLocale] }
 	};
 	for (const locale of filteredLocales) {
-		ui[locale.code] = { ...UI_DEFAULTS, ...(raw.i18n?.ui?.[locale.code] ?? {}) };
+		ui[locale.code] = { ...UI_DEFAULTS, ...raw.i18n?.ui?.[locale.code] };
 	}
 	for (const [code, strings] of Object.entries(raw.i18n?.ui ?? {})) {
 		ui[code] = { ...(ui[code] ?? UI_DEFAULTS), ...strings };

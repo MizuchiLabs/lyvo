@@ -41,6 +41,7 @@ export default defineConfig({
 	integrations: [
 		lyvo({
 			title: 'Demo Docs',
+			description: 'A demo site exercising every lyvo feature: docs, API reference, i18n and OG images.',
 			lang: 'en',
 			repo: {
 				url: 'https://github.com/mizuchilabs/lyvo',
@@ -61,24 +62,52 @@ export default defineConfig({
 			nav: [
 				{ title: 'Home', href: '/' },
 				{ title: 'Docs', href: '/docs' },
-				{ title: 'API', href: '/api' },
-				{ title: 'Blog', href: '/blog' }
+				{ title: 'API', href: '/api' }
 			],
-			extraLinks: [
-				{ title: 'Support', href: 'https://example.com/support' },
-				{ title: 'Status', href: 'https://status.example.com' }
-			],
+			footer: {
+				note: 'Built with lyvo, an open source documentation theme for Astro.',
+				columns: [
+					{
+						title: 'Docs',
+						links: [
+							{ label: 'Introduction', href: '/docs/introduction' },
+							{ label: 'Getting Started', href: '/docs/overview/getting-started' }
+						]
+					},
+					{
+						title: 'API',
+						links: [
+							{ label: 'API Reference', href: '/api' },
+							{ label: 'API v2', href: '/api/v2' }
+						]
+					},
+					{
+						title: 'Community',
+						links: [
+							{ label: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo' },
+							{ label: 'Discord', href: 'https://discord.com' }
+						]
+					}
+				]
+			},
 			docs: {
 				edit: true,
 				feedback: true,
 				sidebar: {
-					order: ['introduction', 'overview', 'components', 'changelog'],
-					labels: {
-						introduction: 'Introduction',
-						overview: 'Overview',
-						components: 'Components',
-						changelog: 'Changelog'
-					}
+					items: [
+						'introduction',
+						{
+							title: 'Overview',
+							items: ['overview/getting-started', 'overview/configuration', 'overview/writing-content']
+						},
+						{
+							title: 'Components',
+							items: ['components/components', 'components/markdown-reference']
+						},
+						'---',
+						{ title: 'Changelog', items: ['changelog'] },
+						{ title: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo' }
+					]
 				}
 			},
 			openapi: [
@@ -86,8 +115,34 @@ export default defineConfig({
 					input: 'public/openapi.json',
 					prefix: '/api',
 					groupBy: 'tag'
+				},
+				{
+					input: 'public/openapi-v2.json',
+					prefix: '/api/v2',
+					title: 'API v2'
 				}
 			],
+			i18n: {
+				defaultLocale: 'en',
+				locales: [{ code: 'de', label: 'Deutsch' }],
+				ui: {
+					de: {
+						search: 'Suche',
+						onThisPage: 'Auf dieser Seite',
+						lastUpdated: 'Zuletzt aktualisiert am',
+						helpful: 'War diese Seite hilfreich?',
+						yes: 'Ja',
+						no: 'Nein',
+						thanks: 'Danke für dein Feedback!',
+						guides: 'Anleitungen',
+						reference: 'Referenz',
+						overview: 'Übersicht',
+						notFoundTitle: 'Seite nicht gefunden',
+						notFoundText: 'Diese Seite existiert nicht oder wurde verschoben.',
+						backHome: 'Zur Startseite'
+					}
+				}
+			},
 			og: {
 				siteName: 'Demo Docs',
 				generate: true

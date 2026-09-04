@@ -28,7 +28,7 @@ if (slug === undefined) {
 }
 
 const { docs } = await getDocsHierarchy(locale ?? null);
-const entry = docs.find((doc) => doc.id === slug);
+const entry = docs.find((doc) => docPageId(doc.id) === slug);
 ---
 
 {

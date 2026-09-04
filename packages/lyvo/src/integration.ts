@@ -7,7 +7,13 @@ import pagefind from 'astro-pagefind';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { unified } from '@astrojs/markdown-remark';
-import { LyvoOptionsSchema, normalizeOptions, type LyvoConfig, type LyvoOptions } from './config';
+import {
+	LyvoOptionsSchema,
+	normalizeOptions,
+	warnUnknownOptions,
+	type LyvoConfig,
+	type LyvoOptions
+} from './config';
 
 const PKG = '@mizuchilabs/lyvo';
 
@@ -62,11 +68,9 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 				injectScript,
 				logger
 			}) => {
-				options = normalizeOptions(
-					LyvoOptionsSchema.parse(userOptions),
-					astroConfig,
-					(message) => logger.warn(message)
-				);
+				warnUnknownOptions(userOptions as Record<string, unknown>, (message) => logger.warn(message));
+
+				options = normalizeOptions(LyvoOptionsSchema.parse(userOptions), astroConfig);
 
 				const srcDir = fileURLToPath(new URL('./', import.meta.url)).replace(/\/$/, '');
 

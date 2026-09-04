@@ -53,6 +53,7 @@ export default defineConfig({
 	integrations: [
 		lyvo({
 			title: 'My Docs',
+			description: 'Documentation for my project',
 			lang: 'en',
 			logo: 'brand-logo.svg', // Resolves from src/assets/brand-logo.svg
 			repo: {
@@ -73,15 +74,26 @@ export default defineConfig({
 			],
 			docs: {
 				sidebar: {
-					order: ['introduction', 'components'],
-					labels: {
-						introduction: 'Introduction'
-					}
+					items: [
+						'introduction',
+						{ title: 'Guides', items: ['guides/install', 'guides/deploy'] },
+						'---', // separator
+						{ title: 'Community', href: 'https://discord.gg/...' }
+					]
 				}
 			},
-			openapi: {
-				input: 'public/openapi.json',
-				groupBy: 'tag'
+			openapi: [
+				{ input: 'public/openapi.json', prefix: '/api', groupBy: 'tag' }
+				// add more specs with nested prefixes: { input: 'public/v2.json', prefix: '/api/v2' }
+			],
+			i18n: {
+				defaultLocale: 'en',
+				locales: [{ code: 'de', label: 'Deutsch' }],
+				ui: { de: { onThisPage: 'Auf dieser Seite' } }
+			},
+			og: {
+				siteName: 'My Docs',
+				generate: true // auto-generates per-page OG images with satori
 			},
 			customCss: ['/src/styles/custom.css']
 		})
@@ -94,11 +106,10 @@ export default defineConfig({
 
 ### 2. Configure Custom Theme (Optional)
 
-If you specified a `customCss` file to override the default theme, you MUST import the default styles inside it. Create `src/styles/custom.css`:
+The default theme stylesheet is always loaded. Files listed in `customCss` are appended after it and can override theme tokens:
 
 ```css
 @import 'tailwindcss';
-@import '@mizuchilabs/lyvo/style.css';
 
 /* Your custom theme overrides here */
 @theme {
@@ -124,22 +135,33 @@ export const collections = {
 
 The `lyvo()` integration accepts the following options:
 
-| Option            | Type                         | Description                                                                                               |
-| :---------------- | :--------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| `title`           | `string`                     | The title of your documentation site. Set to `""` to hide the text.                                       |
-| `lang`            | `string`                     | The language attribute for the HTML tag (e.g., `"en"`).                                                   |
-| `logo`            | `string`                     | Filename of an SVG in your `src/assets/` folder (e.g., `"brand.svg"`).                                    |
-| `nav`             | `Array<{title, href}>`       | Override the default top navigation bar links.                                                            |
-| `repo.url`        | `string`                     | URL to your GitHub/GitLab repository.                                                                     |
-| `repo.branch`     | `string`                     | The default branch (used for "Edit this page" links).                                                     |
-| `socials`         | `Array<{label, href, icon}>` | Array of social links. `icon` should match a filename in `src/assets/`.                                   |
-| `extraLinks`      | `Array<{title, href}>`       | Additional text links to show in the sidebar footer.                                                      |
-| `docs.edit`       | `boolean`                    | Whether to show "Edit this page" links.                                                                   |
-| `docs.feedback`   | `boolean`                    | Whether to show "Give feedback" links.                                                                    |
-| `docs.sidebar`    | `object`                     | Sidebar structure defining `order` array and `labels` mapping.                                            |
-| `openapi.input`   | `string`                     | Path to your OpenAPI JSON file.                                                                           |
-| `openapi.groupBy` | `'tag' \| 'path'`            | How to group API endpoints.                                                                               |
-| `head`            | `string`                     | Raw HTML/scripts injected into `<head>` on **every** page (landing + docs). Great for analytics snippets. |
+| Option | Type | Description |
+| :----- | :--- | :---------- |
+| `title` | `string` | The title of your documentation site. Set to `""` to hide the text. |
+| `description` | `string` | Site description, used as the meta/OG description fallback. |
+| `lang` | `string` | Default locale code. Shorthand for `i18n.defaultLocale`. |
+| `logo` | `string \| {light, dark}` | Filename of an image in your `src/assets/` folder. |
+| `favicon` | `{svg?, ico?}` | Override the default favicon paths. |
+| `nav` | `Array<{title, href}>` | Override the default top navigation bar links. |
+| `repo.url` / `repo.branch` | `string` | Repository URL and branch for "Edit this page" links. |
+| `socials` | `Array<{label, href, icon}>` | Social links shown in the header and footer. `icon` resolves from `src/assets/`. |
+| `extraLinks` | `Array<{title, href}>` | Additional text links shown in the sidebar footer. |
+| `footer` | `{note?, columns?}` | Landing page footer with link columns. |
+| `docs.prefix` | `string` | Route prefix for guides. Default `'/docs'`. |
+| `docs.edit` | `boolean` | Whether to show "Edit this page" links. Default `true`. |
+| `docs.feedback` | `boolean` | Whether to show the feedback widget. Default `true`. Feedback is emitted as a `lyvo:feedback` CustomEvent on `window` with `{ helpful, path }`. |
+| `docs.sidebar` | `{items?}` or `{order?, labels?}` | Sidebar structure. `items` supports strings (doc slugs or `'---'` separators), nested categories and external links. The legacy `order`/`labels` shape still works. |
+| `openapi` | `{input, prefix?, groupBy?, title?}` or array | OpenAPI spec(s). Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`). |
+| `i18n` | `{defaultLocale?, locales?, ui?}` | Locale subfolder-based i18n. Default locale content lives at the content root, other locales in subfolders (`src/content/docs/de/`). `ui` maps locale codes to translated UI strings. |
+| `og` | `boolean \| {siteName?, image?, generate?}` | Open Graph meta tags are always on. `og: true` or `og.generate: true` also generates a per-page OG image at build time (requires `sharp`, which Astro already installs). |
+| `llms` | `boolean` | Generate `/llms.txt` and `/llms-full.txt` endpoints. Default `true`. |
+| `search` | `boolean` | Enable Pagefind search. Default `true`. |
+| `sitemap` | `boolean` | Inject the sitemap integration (skipped if you already use one). Default `true`. |
+| `cacheHeaders` | `boolean` | Append Cloudflare `_headers` rules with `no-cache` for the docs prefix. Default `false`. |
+| `head` | `string` | Raw HTML injected into `<head>` on every page. Great for analytics snippets. |
+| `customCss` | `string[]` | CSS files appended after the default theme stylesheet. |
+
+Unknown options are reported as build warnings, so typos don't fail silently.
 
 ## Customizing the Landing Header
 
@@ -168,7 +190,61 @@ import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
 </Layout>
 ```
 
-When no `header` slot is provided, the generated navigation bar is used as a fallback. You can reuse the exported `Logo` and `ThemeToggle` components (`@mizuchilabs/lyvo/components/base/*`) inside your custom header if you want to keep those behaviors.
+When no `header` slot is provided, the generated navigation bar is used as a fallback. A `<slot name="header-actions">` lets you add items (e.g. search) to the generated header without replacing it, and `<slot name="footer">` replaces the generated footer.
+
+### Landing Building Blocks
+
+Lyvo ships a few props-driven blocks for landing pages under `@mizuchilabs/lyvo/components/landing/*`:
+
+```astro
+---
+import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
+import Hero from '@mizuchilabs/lyvo/components/landing/Hero.astro';
+import FeatureGrid from '@mizuchilabs/lyvo/components/landing/FeatureGrid.astro';
+import CTA from '@mizuchilabs/lyvo/components/landing/CTA.astro';
+---
+
+<Layout>
+	<Hero
+		badge="Open Source"
+		title="Docs that feel"
+		highlight="effortless."
+		description="Guides, API reference and landing page in one setup."
+		primary={{ label: 'Get Started', href: '/docs' }}
+		secondary={{ label: 'GitHub', href: 'https://github.com/...' }}
+	/>
+	<FeatureGrid
+		title="Everything included"
+		features={[
+			{ title: 'Search', description: 'Offline search via Pagefind.', icon: 'search.svg' }
+		]}
+	>
+		<!-- optional: extra content below the grid -->
+	</FeatureGrid>
+	<CTA
+		title="Ready to build?"
+		description="Clone and ship."
+		primary={{ label: 'Get Started', href: '/docs' }}
+	/>
+</Layout>
+```
+
+`Footer` (`@mizuchilabs/lyvo/components/base/Footer.astro`) renders automatically from the `footer` config option; a footer config is optional, and the footer is omitted when empty.
+
+## Internationalization
+
+Lyvo uses locale subfolders. The default locale lives at the content root, other locales in subfolders:
+
+```
+src/content/docs/
+├── introduction.mdx        ← English (default), served at /docs/introduction
+└── de/
+    └── introduction.mdx    ← German, served at /de/docs/introduction
+```
+
+UI strings ("On this page", "Was this page helpful?", etc.) come from the `i18n.ui` config. A language switcher appears in the sidebar footer when locales are configured. API reference pages are language-neutral.
+
+Note: editing the OpenAPI spec requires a dev server restart in dev; the sidebar and docs content hot-reload as usual.
 
 ## Built-in MDX Components
 

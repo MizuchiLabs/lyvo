@@ -6,6 +6,15 @@ import Icon from '@lyvo/components/base/Icon.astro';
 import Footer from '@lyvo/components/base/Footer.astro';
 import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
+import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
+
+const routing: RoutingInfo = {
+	docsPrefix: config.docs.prefix,
+	apiRoot: config.api.root,
+	defaultLocale: config.i18n.defaultLocale,
+	locales: config.i18n.locales
+};
+const lang = localeFromPath(Astro.url.pathname, routing) ?? config.i18n.defaultLocale;
 
 const navItems =
 	config.nav ??
@@ -16,7 +25,7 @@ const navItems =
 ---
 
 <!doctype html>
-<html lang={config.lang ?? 'en'} class="scroll-smooth">
+<html lang={lang} class="scroll-smooth">
 	<BaseHead />
 
 	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
