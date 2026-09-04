@@ -1,18 +1,31 @@
 ---
 import { TextAlignStart } from '@lucide/astro';
+import { t } from '@lyvo/lib/i18n';
+import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	headings: { depth: number; slug: string; text: string }[];
 }
+
 const { headings } = Astro.props;
+
+const routing: RoutingInfo = {
+	docsPrefix: config.docs.prefix,
+	apiRoot: config.api.root,
+	defaultLocale: config.i18n.defaultLocale,
+	locales: config.i18n.locales
+};
+
+const locale = localeFromPath(Astro.url.pathname, routing);
 ---
 
 {
 	headings.length > 0 && (
-		<div class="sticky top-20 z-10 hidden max-h-[calc(100vh-8rem)] w-64 shrink-0 overflow-y-auto text-muted-foreground select-none xl:block">
+		<div class="toc-desktop sticky top-20 z-10 hidden max-h-[calc(100vh-8rem)] w-64 shrink-0 overflow-y-auto text-muted-foreground select-none xl:block">
 			<p class="mb-2 flex items-center gap-2 text-foreground">
 				<TextAlignStart size={16} />
-				On this page
+				{t('onThisPage', locale)}
 			</p>
 			<div class="relative flex px-2">
 				<div class="toc-mask pointer-events-none absolute top-0 left-1 h-full w-10">
@@ -31,6 +44,7 @@ const { headings } = Astro.props;
 								<a
 									href={`#${heading.slug}`}
 									data-id={heading.slug}
+									data-toc-link
 									class="toc-link block py-1.5 pr-2 text-muted-foreground no-underline transition-colors hover:text-foreground"
 								>
 									{heading.text}
@@ -45,6 +59,8 @@ const { headings } = Astro.props;
 }
 
 <script>
+	import '@lyvo/lib/toc';
+
 	function buildRoundedPath(points: { x: number; y: number }[], radius: number) {
 		if (points.length === 0) return '';
 		if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
@@ -98,8 +114,8 @@ const { headings } = Astro.props;
 	}
 
 	function updateLayout() {
-		const linksWrapper = document.querySelector('.toc-links') as HTMLElement | null;
-		const maskElement = document.querySelector('.toc-mask') as HTMLElement | null;
+		const linksWrapper = document.querySelector('.toc-desktop .toc-links') as HTMLElement | null;
+		const maskElement = document.querySelector('.toc-desktop .toc-mask') as HTMLElement | null;
 		if (!linksWrapper || !maskElement) return;
 
 		const links = linksWrapper.querySelectorAll('.toc-link');
@@ -114,13 +130,9 @@ const { headings } = Astro.props;
 			const paddingLeft = parseFloat(li.style.paddingLeft) || 0;
 			const x = paddingLeft + halfStroke;
 
-			const style = window.getComputedStyle(link);
-			const paddingTop = parseFloat(style.paddingTop) || 0;
-			const paddingBottom = parseFloat(style.paddingBottom) || 0;
-
 			const linkEl = link as HTMLElement;
-			const top = linkEl.offsetTop + paddingTop;
-			const bottom = linkEl.offsetTop + linkEl.offsetHeight - paddingBottom;
+			const top = linkEl.offsetTop + halfStroke;
+			const bottom = linkEl.offsetTop + linkEl.offsetHeight - halfStroke;
 
 			points.push({ x, y: top });
 			points.push({ x, y: bottom });
@@ -136,130 +148,19 @@ const { headings } = Astro.props;
 		const encodedSvg = `url("data:image/svg+xml,${encodeURIComponent(svgData)}")`;
 
 		maskElement.style.maskImage = encodedSvg;
+		maskElement.style.webkitMaskImage = encodedSvg;
 		maskElement.style.maskRepeat = 'no-repeat';
 		maskElement.style.maskPosition = 'left top';
 		maskElement.style.maskSize = '100% 100%';
 	}
 
-	let ticking = false;
-
-	function updateActive() {
-		const mainScrollArea = document.querySelector('#main-scroll-area');
-		const indicator = document.querySelector('.toc-indicator') as HTMLElement | null;
-		if (!mainScrollArea || !indicator) return;
-
-		const headings = document.querySelectorAll('article h2, article h3');
-		if (!headings.length) return;
-
-		const viewportHeight = mainScrollArea.clientHeight;
-		const scrollHeight = mainScrollArea.scrollHeight;
-		const scrollY = mainScrollArea.scrollTop;
-		const containerBounds = mainScrollArea.getBoundingClientRect();
-
-		let activeIds: string[] = [];
-		const headingElements = Array.from(headings);
-
-		const viewTop = 80;
-		const viewBottom = viewportHeight - 80;
-
-		for (let i = 0; i < headingElements.length; i++) {
-			const current = headingElements[i];
-			const next = headingElements[i + 1];
-
-			const currentTop = current.getBoundingClientRect().top - containerBounds.top;
-			const nextTop = next
-				? next.getBoundingClientRect().top - containerBounds.top
-				: scrollHeight;
-
-			if (currentTop < viewBottom && nextTop > viewTop) {
-				const id = current.getAttribute('id');
-				if (id) activeIds.push(id);
-			}
-		}
-
-		const scrolledBottom = scrollY + viewportHeight;
-		if (scrolledBottom >= scrollHeight - 20 && activeIds.length === 0) {
-			const last = headingElements[headingElements.length - 1];
-			if (last) activeIds.push(last.getAttribute('id') || '');
-		}
-
-		if (scrollY < 50 && activeIds.length === 0 && headingElements.length > 0) {
-			activeIds.push(headingElements[0].getAttribute('id') || '');
-		}
-
-		const newState = activeIds.join(',');
-		if (newState !== activeState) {
-			activeState = newState;
-			updateToc(activeIds);
-		}
-	}
-
-	let activeState = '';
-
-	function onScroll() {
-		if (ticking) return;
-		ticking = true;
-		requestAnimationFrame(() => {
-			ticking = false;
-			updateActive();
-		});
-	}
-
-	function updateToc(targetIds: string[]) {
-		const indicator = document.querySelector('.toc-indicator') as HTMLElement | null;
-		if (!targetIds.length || !indicator) return;
-
-		document.querySelectorAll('.toc-link').forEach((link) => {
-			link.classList.remove('text-foreground', 'font-medium');
-			link.classList.add('text-muted-foreground');
-		});
-
-		const activeLinks = targetIds
-			.map((id) => document.querySelector(`.toc-link[data-id="${id}"]`) as HTMLElement)
-			.filter(Boolean);
-
-		if (activeLinks.length > 0) {
-			activeLinks.forEach((link) => {
-				link.classList.remove('text-muted-foreground');
-				link.classList.add('text-foreground', 'font-medium');
-			});
-
-			const firstLink = activeLinks[0];
-			const lastLink = activeLinks[activeLinks.length - 1];
-
-			const firstStyle = window.getComputedStyle(firstLink);
-			const firstPaddingTop = parseFloat(firstStyle.paddingTop) || 0;
-
-			const lastStyle = window.getComputedStyle(lastLink);
-			const lastPaddingBottom = parseFloat(lastStyle.paddingBottom) || 0;
-
-			const top = firstLink.offsetTop + firstPaddingTop;
-			const bottom = lastLink.offsetTop + lastLink.offsetHeight - lastPaddingBottom;
-			const height = bottom - top;
-
-			indicator.style.top = `${top}px`;
-			indicator.style.height = `${height}px`;
-		}
-	}
-
-	function initScrollspy() {
-		const mainScrollArea = document.querySelector('#main-scroll-area');
-		if (!mainScrollArea) return;
-
+	function initTocLayout() {
 		updateLayout();
-		updateActive();
-
-		// Bind scroll only once per scroll container (fresh element each page).
-		if (!mainScrollArea.dataset.tocBound) {
-			mainScrollArea.dataset.tocBound = 'true';
-			mainScrollArea.addEventListener('scroll', onScroll, { passive: true });
-		}
 	}
 
-	if (!window.__lyvoTocSetup) {
-		window.__lyvoTocSetup = true;
-		// Resize + lifecycle listeners are registered once; DOM is re-queried per page.
+	if (!window.__lyvoTocLayoutSetup) {
+		window.__lyvoTocLayoutSetup = true;
 		window.addEventListener('resize', updateLayout);
-		document.addEventListener('astro:page-load', initScrollspy);
+		document.addEventListener('astro:page-load', initTocLayout);
 	}
 </script>

@@ -43,7 +43,8 @@ const circumference = 2 * Math.PI * radius;
 				viewBox="0 0 24 24"
 			>
 				<circle
-					id="progress-circle"
+					data-toc-progress
+					data-circumference={circumference}
 					cx="12"
 					cy="12"
 					r={radius}
@@ -56,7 +57,7 @@ const circumference = 2 * Math.PI * radius;
 			</svg>
 		</div>
 		<div class="flex flex-1 items-center gap-1 overflow-hidden font-medium">
-			<span id="active-heading-text" class="truncate text-left">{title}</span>
+			<span data-toc-active-text class="truncate text-left">{title}</span>
 			{
 				headings.length > 0 && (
 					<ChevronRight
@@ -80,6 +81,8 @@ const circumference = 2 * Math.PI * radius;
 							<a
 								href={`#${heading.slug}`}
 								data-slug={heading.slug}
+								data-toc-link
+								data-id={heading.slug}
 								class:list={[
 									'mobile-toc-link block truncate py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
 									{ 'pl-4': heading.depth >= 3 }
@@ -97,96 +100,56 @@ const circumference = 2 * Math.PI * radius;
 	</div>
 </div>
 
-<script is:inline define:vars={{ circumference, headings }}>
-	function initMobileToc() {
+<script>
+	import '@lyvo/lib/toc';
+
+	// Single global listener; points at the current page's menu.
+	let activeRoot: Element | null = null;
+	let activeToggle: ((force: boolean) => void) | null = null;
+	let globalListenerBound = false;
+
+	function initMobileTocMenu() {
 		const root = document.querySelector('.mobile-toc-root');
 		if (!root) return;
 
 		const trigger = document.getElementById('mobile-toc-trigger');
 		const menu = document.getElementById('mobile-toc-menu');
 		const chevron = root.querySelector('.mobile-toc-chevron');
-		const progressCircle = document.getElementById('progress-circle');
-		const activeText = document.getElementById('active-heading-text');
-		const mainScrollArea = document.querySelector('#main-scroll-area');
-		const defaultTitle = root.getAttribute('data-title');
-
-		if (!mainScrollArea || !progressCircle || !activeText) return;
+		if (!trigger || !menu) return;
 
 		let isOpen = false;
 
-		function toggleMenu(force) {
+		function toggleMenu(force?: boolean) {
 			isOpen = force !== undefined ? force : !isOpen;
-			trigger.setAttribute('aria-expanded', isOpen);
+			trigger.setAttribute('aria-expanded', String(isOpen));
 			menu.classList.toggle('hidden', !isOpen);
 			if (chevron) chevron.classList.toggle('rotate-90', isOpen);
 		}
 
-		trigger.addEventListener('click', () => toggleMenu());
-
-		// Close on click outside
-		document.addEventListener('mousedown', (e) => {
-			if (isOpen && !root.contains(e.target)) {
-				toggleMenu(false);
-			}
-		});
-
-		// Scroll progress
-		function handleScroll() {
-			const scrollTop = mainScrollArea.scrollTop;
-			const scrollHeight = mainScrollArea.scrollHeight - mainScrollArea.clientHeight;
-			const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-			const offset = circumference - (progress / 100) * circumference;
-			progressCircle.style.strokeDashoffset = offset;
-
-			if (progress <= 5) {
-				activeText.textContent = defaultTitle;
-			}
+		if (!trigger.dataset.menuBound) {
+			trigger.dataset.menuBound = 'true';
+			trigger.addEventListener('click', () => toggleMenu());
 		}
 
-		mainScrollArea.addEventListener('scroll', handleScroll, { passive: true });
-		handleScroll();
+		activeRoot = root;
+		activeToggle = toggleMenu;
 
-		// Active heading tracking
-		const headingElements = document.querySelectorAll('article h2, article h3');
-		const tocLinks = document.querySelectorAll('.mobile-toc-link');
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						const id = entry.target.getAttribute('id');
-						updateActiveHeading(id);
-					}
-				});
-			},
-			{ root: mainScrollArea, rootMargin: '-20% 0px -60% 0px' }
-		);
-
-		headingElements.forEach((el) => observer.observe(el));
-
-		function updateActiveHeading(id) {
-			tocLinks.forEach((link) => {
-				const isActive = link.getAttribute('data-slug') === id;
-				link.classList.toggle('font-medium', isActive);
-				link.classList.toggle('text-foreground', isActive);
-				link.classList.toggle('text-muted-foreground', !isActive);
-
-				if (
-					isActive &&
-					mainScrollArea.scrollTop /
-						(mainScrollArea.scrollHeight - mainScrollArea.clientHeight) >
-						0.05
-				) {
-					activeText.textContent = link.textContent.trim();
+		if (!globalListenerBound) {
+			globalListenerBound = true;
+			document.addEventListener('mousedown', (e) => {
+				if (activeToggle && activeRoot && !activeRoot.contains(e.target as Node)) {
+					activeToggle(false);
 				}
+			});
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape') activeToggle?.(false);
 			});
 		}
 
-		// Smooth scroll and close menu
-		tocLinks.forEach((link) => {
+		menu.querySelectorAll<HTMLAnchorElement>('.mobile-toc-link').forEach((link) => {
 			link.addEventListener('click', (e) => {
 				const id = link.getAttribute('data-slug');
-				const el = document.getElementById(id);
+				const el = id ? document.getElementById(id) : null;
 				if (el) {
 					e.preventDefault();
 					el.scrollIntoView({ behavior: 'smooth' });
@@ -197,5 +160,5 @@ const circumference = 2 * Math.PI * radius;
 		});
 	}
 
-	document.addEventListener('astro:page-load', initMobileToc);
+	document.addEventListener('astro:page-load', initMobileTocMenu);
 </script>

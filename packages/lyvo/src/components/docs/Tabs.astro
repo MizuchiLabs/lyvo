@@ -1,8 +1,8 @@
 ---
 const html = await Astro.slots.render('default');
 
-// Robustly extract data-tab-panel and data-tab-label using regex
-// This allows users to avoid duplicating labels in the <Tabs> component
+// Extract tab values/labels from the rendered TabItem children so users don't
+// have to duplicate labels in the <Tabs> component.
 const tabs: { value: string; label: string }[] = [];
 const panelRegex = /data-tab-panel="([^"]+)"/g;
 const labelRegex = /data-tab-label="([^"]+)"/g;
@@ -14,13 +14,37 @@ while (
 ) {
 	tabs.push({ value: panelMatch[1], label: labelMatch[1] });
 }
+
+const instanceId = Math.random().toString(36).slice(2, 8);
+
+// Inject tabpanel semantics into the rendered panels.
+let panelIndex = 0;
+const enhanced = html.replaceAll(/data-tab-panel="([^"]+)"/g, (match, value: string) => {
+	panelIndex += 1;
+	const isFirst = panelIndex === 1;
+	return [
+		`role="tabpanel"`,
+		`id="${instanceId}-panel-${value}"`,
+		`aria-labelledby="${instanceId}-tab-${value}"`,
+		!isFirst ? 'hidden' : '',
+		match
+	]
+		.filter(Boolean)
+		.join(' ');
+});
 ---
 
-<div class="tabs-root my-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-	<div class="flex gap-4 border-b border-border bg-muted/40 px-4">
+<div class="tabs-root my-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm" data-tabs>
+	<div class="flex gap-4 border-b border-border bg-muted/40 px-4" role="tablist">
 		{
-			tabs.map((tab) => (
+			tabs.map((tab, index) => (
 				<button
+					type="button"
+					role="tab"
+					id={`${instanceId}-tab-${tab.value}`}
+					aria-controls={`${instanceId}-panel-${tab.value}`}
+					aria-selected={index === 0 ? 'true' : 'false'}
+					tabindex={index === 0 ? 0 : -1}
 					class="tab-btn relative py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 					data-tab={tab.value}
 				>
@@ -32,62 +56,81 @@ while (
 	</div>
 
 	<div class="tabs-panels p-4 [&_pre]:-m-4 [&_pre]:rounded-none [&_pre]:border-0 [&_pre]:p-4">
-		<slot />
+		<Fragment set:html={enhanced} />
 	</div>
 </div>
 
 <script>
 	function initTabs() {
-		document.querySelectorAll('.tabs-root').forEach((root) => {
-			if (root.hasAttribute('data-tabs-init')) return;
-			root.setAttribute('data-tabs-init', '');
+		document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+			if (root.dataset.tabsInit) return;
+			root.dataset.tabsInit = 'true';
 
-			const buttons = root.querySelectorAll<HTMLButtonElement>('.tab-btn');
+			const tablist = root.querySelector<HTMLElement>('[role="tablist"]');
+			const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
 			const panelContainer = root.querySelector('.tabs-panels');
-			if (!panelContainer) return;
+			if (!tablist || !panelContainer || buttons.length === 0) return;
 
-			const panels = panelContainer.querySelectorAll<HTMLElement>(
-				':scope > [data-tab-panel]'
+			const panels = Array.from(
+				panelContainer.querySelectorAll<HTMLElement>(':scope > [data-tab-panel]')
 			);
 
-			function activate(btn: HTMLButtonElement) {
+			function activate(btn: HTMLButtonElement, focus = false) {
 				const value = btn.dataset.tab;
 
 				buttons.forEach((b) => {
-					b.classList.remove('text-foreground');
-					b.classList.add('text-muted-foreground');
+					const selected = b === btn;
+					b.setAttribute('aria-selected', String(selected));
+					b.tabIndex = selected ? 0 : -1;
+					b.classList.toggle('text-foreground', selected);
+					b.classList.toggle('text-muted-foreground', !selected);
 					const ind = b.querySelector<HTMLElement>('.tab-indicator');
 					if (ind) {
-						ind.classList.remove('scale-x-100');
-						ind.classList.add('scale-x-0');
+						ind.classList.toggle('scale-x-100', selected);
+						ind.classList.toggle('scale-x-0', !selected);
 					}
 				});
 
-				btn.classList.remove('text-muted-foreground');
-				btn.classList.add('text-foreground');
-				const activeInd = btn.querySelector<HTMLElement>('.tab-indicator');
-				if (activeInd) {
-					activeInd.classList.remove('scale-x-0');
-					activeInd.classList.add('scale-x-100');
-				}
-
 				panels.forEach((p) => {
-					p.classList.toggle('hidden', p.dataset.tabPanel !== value);
+					const active = p.dataset.tabPanel === value;
+					p.classList.toggle('hidden', !active);
+					if (active) {
+						p.removeAttribute('hidden');
+					} else {
+						p.setAttribute('hidden', '');
+					}
 				});
+
+				if (focus) btn.focus();
 			}
 
-			panels.forEach((p, i) => {
-				if (i !== 0) p.classList.add('hidden');
-			});
+			tablist.addEventListener('keydown', (e) => {
+				const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement);
+				let nextIndex: number | null = null;
 
-			if (buttons.length > 0) activate(buttons[0]);
+				if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % buttons.length;
+				if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+				if (e.key === 'Home') nextIndex = 0;
+				if (e.key === 'End') nextIndex = buttons.length - 1;
+
+				if (nextIndex !== null) {
+					e.preventDefault();
+					activate(buttons[nextIndex], true);
+				}
+			});
 
 			buttons.forEach((btn) => {
 				btn.addEventListener('click', () => activate(btn));
 			});
+
+			// Initial state
+			panels.forEach((p, i) => {
+				p.classList.toggle('hidden', i !== 0);
+			});
+			if (buttons.length > 0) activate(buttons[0]);
 		});
 	}
 
 	initTabs();
-	document.addEventListener('astro:after-swap', initTabs);
+	document.addEventListener('astro:page-load', initTabs);
 </script>
