@@ -1,7 +1,7 @@
 ---
 import { getDocsHierarchy, getFirstDoc, docUrl } from '@lyvo/lib/docs';
 import DocsPage from '@lyvo/components/docs/DocsPage.astro';
-import { staticRedirect } from '@lyvo/lib/utils';
+import Redirect from '@lyvo/components/base/Redirect.astro';
 
 export async function getStaticPaths() {
 	const paths = [{ params: { slug: undefined }, props: {} }];
@@ -14,19 +14,22 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.params;
 
-if (slug === undefined) {
-	const first = await getFirstDoc();
-	if (first) {
-		return staticRedirect(docUrl(first.id));
+async function resolveEntry(slug: string | undefined) {
+	if (slug === undefined) {
+		const first = await getFirstDoc();
+		if (first) return { redirect: docUrl(first.id), entry: null };
 	}
+	const { docs } = await getDocsHierarchy(null);
+	return { redirect: null, entry: docs.find((doc) => doc.id === slug) ?? null };
 }
 
-const { docs } = await getDocsHierarchy(null);
-const entry = docs.find((doc) => doc.id === slug);
+const { redirect, entry } = await resolveEntry(slug);
 ---
 
 {
-	entry ? (
+	redirect ? (
+		<Redirect to={redirect} />
+	) : entry ? (
 		<DocsPage entry={entry} />
 	) : (
 		<DocsPage entry={undefined} notFound={true} />

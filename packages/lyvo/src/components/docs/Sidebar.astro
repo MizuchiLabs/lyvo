@@ -4,6 +4,10 @@ import SidebarModeToggle from '@lyvo/components/docs/SidebarModeToggle.astro';
 import SidebarLinks from '@lyvo/components/docs/SidebarLinks.astro';
 import SidebarFooter from '@lyvo/components/docs/SidebarFooter.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
+import { t } from '@lyvo/lib/i18n';
+import { currentLocale } from '@lyvo/lib/docs';
+
+const locale = currentLocale(Astro.url.pathname);
 ---
 
 <!-- Mobile Header -->
@@ -15,7 +19,7 @@ import Logo from '@lyvo/components/base/Logo.astro';
 		<pagefind-modal-trigger
 			compact
 			hide-shortcut
-			placeholder="Search"
+			placeholder={t('search', locale)}
 			class="pagefind-header-trigger"></pagefind-modal-trigger>
 		<button
 			id="mobile-menu-open"

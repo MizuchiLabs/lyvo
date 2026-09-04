@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LyvoOptionsSchema, normalizeOptions, warnUnknownOptions, LyvoConfigError } from '../src/config';
+import {
+	LyvoOptionsSchema,
+	normalizeOptions,
+	warnUnknownOptions,
+	LyvoConfigError
+} from '../src/config';
 
-function normalize(raw: Parameters<typeof normalizeOptions>[0], astroConfig: Parameters<typeof normalizeOptions>[1] = {}) {
+function normalize(
+	raw: Parameters<typeof normalizeOptions>[0],
+	astroConfig: Parameters<typeof normalizeOptions>[1] = {}
+) {
 	return normalizeOptions(LyvoOptionsSchema.parse(raw), astroConfig);
 }
 
@@ -33,6 +41,24 @@ describe('normalizeOptions', () => {
 		});
 		expect(config.i18n.locales.map((locale) => locale.code)).toEqual(['de', 'fr']);
 		expect(config.i18n.locales[1].label).toBe('Français');
+	});
+
+	it('keeps display labels for the default locale', () => {
+		const config = normalize({
+			i18n: {
+				defaultLocale: 'en',
+				locales: [
+					{ code: 'en', label: 'English' },
+					{ code: 'de', label: 'Deutsch' }
+				]
+			}
+		});
+		expect(config.i18n.labels).toEqual({ en: 'English', de: 'Deutsch' });
+	});
+
+	it('falls back to native locale names when no label is declared', () => {
+		const config = normalize({ i18n: { defaultLocale: 'en', locales: ['de', 'xx'] } });
+		expect(config.i18n.labels).toEqual({ en: 'English', de: 'Deutsch', xx: 'xx' });
 	});
 
 	it('fills missing UI strings from defaults and keeps overrides', () => {

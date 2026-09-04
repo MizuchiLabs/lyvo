@@ -1,8 +1,7 @@
 ---
 import { Calendar } from '@lucide/astro';
 import { t } from '@lyvo/lib/i18n';
-import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
-import config from 'virtual:lyvo-config';
+import { currentLocale } from '@lyvo/lib/docs';
 
 interface Props {
 	title: string;
@@ -12,14 +11,7 @@ interface Props {
 
 const { title, description, lastUpdated } = Astro.props;
 
-const routing: RoutingInfo = {
-	docsPrefix: config.docs.prefix,
-	apiRoot: config.api.root,
-	defaultLocale: config.i18n.defaultLocale,
-	locales: config.i18n.locales
-};
-
-const locale = localeFromPath(Astro.url.pathname, routing);
+const locale = currentLocale(Astro.url.pathname);
 ---
 
 <div class="space-y-2">

@@ -37,9 +37,7 @@ export const LyvoOptionsSchema = z.object({
 	title: z.string().optional(),
 	description: z.string().optional(),
 	lang: z.string().optional(),
-	logo: z
-		.union([z.string(), z.object({ light: z.string(), dark: z.string() })])
-		.optional(),
+	logo: z.union([z.string(), z.object({ light: z.string(), dark: z.string() })]).optional(),
 	favicon: z
 		.object({
 			svg: z.string().optional(),
@@ -52,7 +50,9 @@ export const LyvoOptionsSchema = z.object({
 			branch: z.string().optional()
 		})
 		.optional(),
-	socials: z.array(z.object({ label: z.string(), href: z.string(), icon: z.string() })).optional(),
+	socials: z
+		.array(z.object({ label: z.string(), href: z.string(), icon: z.string() }))
+		.optional(),
 	nav: z.array(linkSchema).optional(),
 	extraLinks: z.array(linkSchema).optional(),
 	footer: z
@@ -132,7 +132,10 @@ export interface LyvoConfig {
 	socials: Array<{ label: string; href: string; icon: string }>;
 	nav?: Array<{ title: string; href: string }>;
 	extraLinks: Array<{ title: string; href: string }>;
-	footer?: { note?: string; columns?: Array<{ title: string; links: Array<{ label: string; href: string }> }> };
+	footer?: {
+		note?: string;
+		columns?: Array<{ title: string; links: Array<{ label: string; href: string }> }>;
+	};
 	docs: {
 		prefix: string;
 		edit: boolean;
@@ -146,6 +149,7 @@ export interface LyvoConfig {
 	i18n: {
 		defaultLocale: string;
 		locales: LocaleConfig[];
+		labels: Record<string, string>;
 		ui: Record<string, Record<string, string>>;
 	};
 	og: {
@@ -154,6 +158,8 @@ export interface LyvoConfig {
 		generate: boolean;
 		/** Absolute paths to woff fonts, resolved by the integration at config time. */
 		fontPaths?: string[];
+		satoriPath?: string | null;
+		sharpPath?: string | null;
 	};
 	llms: boolean;
 	features: {
@@ -166,6 +172,20 @@ export interface LyvoConfig {
 	customCss: string[];
 }
 
+// Native name for a locale code via the platform's CLDR data, e.g.
+// en -> English, de -> Deutsch. Works for any valid code, no map to maintain.
+function localeLabel(code: string, configured?: string): string {
+	if (configured) return configured;
+	try {
+		const name = new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? code;
+		// of() echoes unknown codes back unchanged, keep those as-is.
+		if (name.toLowerCase() === code.toLowerCase()) return code;
+		return name.charAt(0).toUpperCase() + name.slice(1);
+	} catch {
+		return code;
+	}
+}
+
 const UI_DEFAULTS: Record<string, string> = {
 	search: 'Search',
 	onThisPage: 'On this page',
@@ -175,6 +195,8 @@ const UI_DEFAULTS: Record<string, string> = {
 	no: 'No',
 	thanks: 'Thank you for your feedback!',
 	editPage: 'Edit page',
+	previous: 'Previous',
+	next: 'Next',
 	guides: 'Guides',
 	reference: 'Reference',
 	overview: 'Overview',
@@ -219,7 +241,9 @@ function resolveOgFontPaths(): string[] {
 function normalizePrefix(prefix: string): string {
 	const trimmed = prefix.trim();
 	if (!trimmed) return '';
-	return trimmed.startsWith('/') ? trimmed.replace(/\/+$/, '') : `/${trimmed.replace(/\/+$/, '')}`;
+	return trimmed.startsWith('/')
+		? trimmed.replace(/\/+$/, '')
+		: `/${trimmed.replace(/\/+$/, '')}`;
 }
 
 interface AstroConfigLike {
@@ -230,10 +254,7 @@ interface AstroConfigLike {
 
 export class LyvoConfigError extends Error {}
 
-export function warnUnknownOptions(
-	raw: Record<string, unknown>,
-	warn: (message: string) => void
-) {
+export function warnUnknownOptions(raw: Record<string, unknown>, warn: (message: string) => void) {
 	const knownKeys = Object.keys(LyvoOptionsSchema.shape as Record<string, unknown>);
 	for (const key of Object.keys(raw)) {
 		if (!knownKeys.includes(key)) {
@@ -243,12 +264,17 @@ export function warnUnknownOptions(
 }
 
 export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike): LyvoConfig {
-	const locales: LocaleConfig[] = (raw.i18n?.locales ?? []).map((locale) => {
-		if (typeof locale === 'string') return { code: locale, label: locale };
-		return { code: locale.code, label: locale.label };
+	const localeEntries: LocaleConfig[] = (raw.i18n?.locales ?? []).map((locale) => {
+		if (typeof locale === 'string') return { code: locale, label: localeLabel(locale) };
+		return { code: locale.code, label: localeLabel(locale.code, locale.label) };
 	});
 	const defaultLocale = raw.i18n?.defaultLocale ?? raw.lang ?? 'en';
-	const filteredLocales = locales.filter((locale) => locale.code !== defaultLocale);
+	// Display labels for every declared locale, the default included.
+	const labels: Record<string, string> = { [defaultLocale]: localeLabel(defaultLocale) };
+	for (const locale of localeEntries) {
+		labels[locale.code] = locale.label;
+	}
+	const filteredLocales = localeEntries.filter((locale) => locale.code !== defaultLocale);
 	for (const locale of filteredLocales) {
 		if (locale.code.includes('/')) {
 			throw new LyvoConfigError(`Locale code "${locale.code}" must not contain slashes.`);
@@ -310,7 +336,9 @@ export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike)
 
 	const fonts = (astroConfig.fonts ?? [])
 		.map((font) => font.cssVariable)
-		.filter((variable): variable is string => Boolean(variable && variable.startsWith('--font')));
+		.filter((variable): variable is string =>
+			Boolean(variable && variable.startsWith('--font'))
+		);
 
 	return {
 		title: raw.title ?? 'Docs',
@@ -336,6 +364,7 @@ export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike)
 		i18n: {
 			defaultLocale,
 			locales: filteredLocales,
+			labels,
 			ui
 		},
 		og,

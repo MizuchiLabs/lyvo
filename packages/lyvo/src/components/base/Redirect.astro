@@ -1,0 +1,54 @@
+---
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+	to: string;
+}
+
+const { to } = Astro.props;
+---
+
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<ClientRouter />
+		<title>Redirecting...</title>
+	</head>
+	<body>
+		<meta name="lyvo-redirect" content={to} />
+		<noscript><meta http-equiv="refresh" content={`0;url=${to}`} /></noscript>
+		<script>
+			// Client-side redirect so in-site links to the docs prefix don't
+			// trigger a full page load through a meta-refresh stub.
+			try {
+				const { navigate } = await import('astro:transitions/client');
+				// Bundled module scripts execute only once per browser session,
+				// so this script cannot rely on being re-run when the ClientRouter
+				// swaps this stub in a second time. A document-level listener
+				// survives swaps, and astro:page-load fires on every navigation.
+				let lastTarget: string | null = null;
+				const maybeRedirect = () => {
+					const target = document
+						.querySelector('meta[name="lyvo-redirect"]')
+						?.getAttribute('content');
+					if (target && target !== lastTarget) {
+						lastTarget = target;
+						// Replace, don't push: otherwise the back button lands on
+						// this stub again and the redirect re-fires forever.
+						navigate(target, { history: 'replace' });
+					} else if (!target) {
+						lastTarget = null;
+					}
+				};
+				maybeRedirect();
+				document.addEventListener('astro:page-load', maybeRedirect);
+			} catch {
+				const fallback = document
+					.querySelector('meta[name="lyvo-redirect"]')
+					?.getAttribute('content');
+				window.location.replace(fallback ?? '/');
+			}
+		</script>
+	</body>
+</html>

@@ -2,16 +2,9 @@
 import { ThumbsUp, ThumbsDown, Check } from '@lucide/astro';
 import config from 'virtual:lyvo-config';
 import { t } from '@lyvo/lib/i18n';
-import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
+import { currentLocale } from '@lyvo/lib/docs';
 
-const routing: RoutingInfo = {
-	docsPrefix: config.docs.prefix,
-	apiRoot: config.api.root,
-	defaultLocale: config.i18n.defaultLocale,
-	locales: config.i18n.locales
-};
-
-const locale = localeFromPath(Astro.url.pathname, routing);
+const locale = currentLocale(Astro.url.pathname);
 ---
 
 {

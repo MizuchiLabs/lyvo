@@ -2,25 +2,18 @@
 import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import Feedback from '@lyvo/components/docs/Feedback.astro';
 import EditPageLink from '@lyvo/components/docs/EditPageLink.astro';
-import { getPrevNextDocs, docUrl } from '@lyvo/lib/docs';
-import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
-import config from 'virtual:lyvo-config';
+import { getPrevNextDocs, docUrl, currentLocale } from '@lyvo/lib/docs';
+import { t } from '@lyvo/lib/i18n';
 
 interface Props {
 	entry?: any;
 }
 const { entry } = Astro.props;
 
-const routing: RoutingInfo = {
-	docsPrefix: config.docs.prefix,
-	apiRoot: config.api.root,
-	defaultLocale: config.i18n.defaultLocale,
-	locales: config.i18n.locales
-};
-
 let prevDoc, nextDoc;
+const locale = currentLocale(Astro.url.pathname);
 if (entry) {
-	const res = await getPrevNextDocs(entry.id, localeFromPath(Astro.url.pathname, routing));
+	const res = await getPrevNextDocs(entry.id, locale);
 	prevDoc = res.prevDoc;
 	nextDoc = res.nextDoc;
 }
@@ -38,7 +31,7 @@ if (entry) {
 			<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
 				{prevDoc ? (
 					<a
-						href={docUrl(prevDoc.id)}
+						href={docUrl(prevDoc.id, locale)}
 						class="group flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 					>
 						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -46,7 +39,7 @@ if (entry) {
 								size={16}
 								class="transition-transform duration-300 group-hover:-translate-x-1"
 							/>
-							Previous
+							{t('previous', locale)}
 						</div>
 						<div class="transition-colors">
 							<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
@@ -65,11 +58,11 @@ if (entry) {
 
 				{nextDoc && (
 					<a
-						href={docUrl(nextDoc.id)}
+						href={docUrl(nextDoc.id, locale)}
 						class="group flex flex-col items-end gap-2 rounded-xl border border-border bg-card p-5 text-right text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 					>
 						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-							Next
+							{t('next', locale)}
 							<ChevronRight
 								size={16}
 								class="transition-transform duration-300 group-hover:translate-x-1"

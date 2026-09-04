@@ -1,10 +1,14 @@
 ---
 import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
+import { t } from '@lyvo/lib/i18n';
+import { currentLocale } from '@lyvo/lib/docs';
+
+const locale = currentLocale(Astro.url.pathname);
 ---
 
 <PagefindConfig />
 <div class="mt-1 hidden md:block">
-	<pagefind-modal-trigger shortcut="/" placeholder="Search..."></pagefind-modal-trigger>
+	<pagefind-modal-trigger shortcut="/" placeholder={t('search', locale)}></pagefind-modal-trigger>
 </div>
 
 <script is:inline>

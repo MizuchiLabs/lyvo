@@ -28,9 +28,16 @@ export function docPageId(id: string, localeCodes: string[]): string {
 	return splitDocId(id, localeCodes).pageId;
 }
 
-export function docsUrl(routing: RoutingInfo, id: string): string {
-	const { locale, pageId } = splitDocId(id, routing.locales.map((locale) => locale.code));
-	return joinUrl(locale ? `/${locale}` : '', routing.docsPrefix, pageId);
+export function docsUrl(routing: RoutingInfo, id: string, activeLocale?: string | null): string {
+	const { locale, pageId } = splitDocId(
+		id,
+		routing.locales.map((locale) => locale.code)
+	);
+	// Untranslated docs live in the default locale but are routed under the
+	// active locale too, so keep browsing sessions in the chosen language.
+	const prefix =
+		locale ?? (activeLocale && activeLocale !== routing.defaultLocale ? activeLocale : null);
+	return joinUrl(prefix ? `/${prefix}` : '', routing.docsPrefix, pageId);
 }
 
 export function apiPageUrl(routing: RoutingInfo, specSub: string, slug: string): string {

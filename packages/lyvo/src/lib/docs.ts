@@ -1,6 +1,12 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import config from 'virtual:lyvo-config';
-import { docsUrl, docPageId as splitPageId, splitDocId, type RoutingInfo } from './routing';
+import {
+	docsUrl,
+	docPageId as splitPageId,
+	splitDocId,
+	localeFromPath,
+	type RoutingInfo
+} from './routing';
 
 export type DocEntry = CollectionEntry<'docs'>;
 
@@ -13,6 +19,8 @@ export type NavItem =
 export interface DocsHierarchy {
 	nav: NavItem[];
 	docs: DocEntry[];
+	/** Locale docs merged with default-locale fallbacks for untranslated pages. */
+	routed: DocEntry[];
 }
 
 export interface DocsSidebarConfig {
@@ -34,12 +42,14 @@ export { localeCodes };
 
 const hierarchyCache = new Map<string, DocsHierarchy>();
 
+let warnedNoDocs = false;
+
 function isDev(): boolean {
 	return import.meta.env?.DEV === true;
 }
 
-export function docUrl(id: string): string {
-	return docsUrl(routing, id);
+export function docUrl(id: string, activeLocale?: string | null): string {
+	return docsUrl(routing, id, activeLocale);
 }
 
 export function docPageId(id: string): string {
@@ -48,6 +58,10 @@ export function docPageId(id: string): string {
 
 export function getRouting(): RoutingInfo {
 	return routing;
+}
+
+export function currentLocale(pathname: string): string | null {
+	return localeFromPath(pathname, routing);
 }
 
 export function docsForLocale(all: DocEntry[], locale: string | null): DocEntry[] {
@@ -65,7 +79,11 @@ function toTitleCase(value: string): string {
 		.join(' ');
 }
 
-function buildItemsNav(items: NonNullable<DocsSidebarConfig['items']>, docs: DocEntry[], locale: string | null): NavItem[] {
+function buildItemsNav(
+	items: NonNullable<DocsSidebarConfig['items']>,
+	docs: DocEntry[],
+	locale: string | null
+): NavItem[] {
 	const byPageId = new Map(docs.map((doc) => [pageIdOf(doc), doc]));
 	const scope = locale ? ` (locale "${locale}")` : '';
 
@@ -90,9 +108,7 @@ function buildItemsNav(items: NonNullable<DocsSidebarConfig['items']>, docs: Doc
 		return null;
 	};
 
-	return items
-		.map(resolve)
-		.filter((item): item is NavItem => item !== null);
+	return items.map(resolve).filter((item): item is NavItem => item !== null);
 }
 
 interface LegacyMetaConfig {
@@ -170,7 +186,31 @@ export async function getDocsHierarchy(locale: string | null = null): Promise<Do
 
 	const all = await getCollection('docs');
 	const docs = docsForLocale(all, locale);
-	const hierarchy: DocsHierarchy = { nav: buildNav(docs, locale), docs };
+
+	if (locale === null && docs.length === 0 && !warnedNoDocs) {
+		warnedNoDocs = true;
+		console.warn(
+			'[lyvo] No docs found in src/content/docs. Add markdown files there or the docs section will be empty.'
+		);
+	}
+
+	// The nav and localized routes fall back to the default locale for
+	// untranslated pages so the sidebar stays complete and nothing 404s.
+	// `docs` stays locale-only: it is the set of actually translated pages.
+	const localeDocs = docs;
+	let routed = docs;
+	if (locale) {
+		const byPageId = new Map<string, DocEntry>();
+		for (const doc of docs) byPageId.set(pageIdOf(doc), doc);
+		for (const doc of docsForLocale(all, null)) {
+			const pageId = pageIdOf(doc);
+			if (!byPageId.has(pageId)) byPageId.set(pageId, doc);
+		}
+		routed = Array.from(byPageId.values());
+	}
+
+	const navDocs = routed;
+	const hierarchy: DocsHierarchy = { nav: buildNav(navDocs, locale), docs: localeDocs, routed };
 	hierarchyCache.set(key, hierarchy);
 	return hierarchy;
 }

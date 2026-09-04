@@ -41,7 +41,8 @@ export default defineConfig({
 	integrations: [
 		lyvo({
 			title: 'Demo Docs',
-			description: 'A demo site exercising every lyvo feature: docs, API reference, i18n and OG images.',
+			description:
+				'A demo site exercising every lyvo feature: docs, API reference, i18n and OG images.',
 			lang: 'en',
 			repo: {
 				url: 'https://github.com/mizuchilabs/lyvo',
@@ -98,14 +99,18 @@ export default defineConfig({
 						'introduction',
 						{
 							title: 'Overview',
-							items: ['overview/getting-started', 'overview/configuration', 'overview/writing-content']
+							items: [
+								'overview/getting-started',
+								'overview/configuration',
+								'overview/writing-content'
+							]
 						},
 						{
 							title: 'Components',
 							items: ['components/components', 'components/markdown-reference']
 						},
 						'---',
-						{ title: 'Changelog', items: ['changelog'] },
+						'changelog',
 						{ title: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo' }
 					]
 				}
@@ -139,7 +144,10 @@ export default defineConfig({
 						overview: 'Übersicht',
 						notFoundTitle: 'Seite nicht gefunden',
 						notFoundText: 'Diese Seite existiert nicht oder wurde verschoben.',
-						backHome: 'Zur Startseite'
+						backHome: 'Zur Startseite',
+						language: 'Sprache',
+						previous: 'Zurück',
+						next: 'Weiter'
 					}
 				}
 			},

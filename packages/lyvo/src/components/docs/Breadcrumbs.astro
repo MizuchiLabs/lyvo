@@ -1,7 +1,7 @@
 ---
-import { ChevronRight } from '@lucide/astro';
-import { getDocsHierarchy, docUrl, type NavItem } from '@lyvo/lib/docs';
-import { localeFromPath, stripLocaleFromPath, type RoutingInfo } from '@lyvo/lib/routing';
+import { ChevronRight, Slash } from '@lucide/astro';
+import { getDocsHierarchy, docUrl, getRouting, currentLocale, type NavItem } from '@lyvo/lib/docs';
+import { stripLocaleFromPath } from '@lyvo/lib/routing';
 import config from 'virtual:lyvo-config';
 
 interface Props {
@@ -10,14 +10,9 @@ interface Props {
 
 const { title } = Astro.props;
 
-const routing: RoutingInfo = {
-	docsPrefix: config.docs.prefix,
-	apiRoot: config.api.root,
-	defaultLocale: config.i18n.defaultLocale,
-	locales: config.i18n.locales
-};
-
-const { nav } = await getDocsHierarchy(localeFromPath(Astro.url.pathname, routing));
+const routing = getRouting();
+const locale = currentLocale(Astro.url.pathname);
+const { nav } = await getDocsHierarchy(locale);
 
 const pathname = stripLocaleFromPath(Astro.url.pathname, routing);
 const parts = pathname.split('/').filter(Boolean);
@@ -28,17 +23,24 @@ let cursor: NavItem[] | null = nav;
 for (const part of parts) {
 	if (!cursor) break;
 
-	if (part === config.docs.prefix.replace(/^\//, '') || part === config.api.root.replace(/^\//, '')) {
+	if (
+		part === config.docs.prefix.replace(/^\//, '') ||
+		part === config.api.root.replace(/^\//, '')
+	) {
 		continue;
 	}
 
-	const categories = cursor.filter(
-		(item): item is Extract<NavItem, { type: 'category' }> => item.type === 'category'
+	type CategoryItem = Extract<NavItem, { type: 'category' }>;
+
+	const categories: CategoryItem[] = cursor.filter(
+		(item): item is CategoryItem => item.type === 'category'
 	);
-	const category =
-		categories.find((item) => item.title.toLowerCase() === decodeURIComponent(part.toLowerCase())) ??
+	const category: CategoryItem | undefined =
 		categories.find(
-			(item) => item.items.some((child) => child.type === 'doc' && child.id.includes(part))
+			(item) => item.title.toLowerCase() === decodeURIComponent(part.toLowerCase())
+		) ??
+		categories.find((item) =>
+			item.items.some((child) => child.type === 'doc' && child.id.includes(part))
 		);
 
 	if (category) {
@@ -48,20 +50,19 @@ for (const part of parts) {
 		cursor = null;
 	}
 }
-
 ---
 
-<div class="hidden items-center space-x-2 text-sm text-muted-foreground xl:flex">
+<div class="hidden items-center gap-2 text-sm text-muted-foreground xl:flex">
 	<a
 		href="/"
 		class="overflow-hidden text-ellipsis whitespace-nowrap transition-colors hover:text-foreground"
 	>
-		<ChevronRight size={14} class="-rotate-90" />
+		<Slash size={14} class="mr-2" />
 	</a>
 	{
 		crumbSections.map((section) => {
 			const firstDoc = section.items.find((item) => item.type === 'doc');
-			const href = firstDoc && firstDoc.type === 'doc' ? docUrl(firstDoc.id) : '/';
+			const href = firstDoc && firstDoc.type === 'doc' ? docUrl(firstDoc.id, locale) : '/';
 
 			return (
 				<>

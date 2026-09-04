@@ -1,14 +1,14 @@
 ---
 import { getDocsHierarchy, getFirstDoc, docUrl, docPageId, localeCodes } from '@lyvo/lib/docs';
 import DocsPage from '@lyvo/components/docs/DocsPage.astro';
-import { staticRedirect } from '@lyvo/lib/utils';
+import Redirect from '@lyvo/components/base/Redirect.astro';
 
 export async function getStaticPaths() {
 	const paths = [];
 	for (const locale of localeCodes) {
-		const { docs } = await getDocsHierarchy(locale);
+		const { routed } = await getDocsHierarchy(locale);
 		paths.push({ params: { locale, slug: undefined }, props: {} });
-		for (const doc of docs) {
+		for (const doc of routed) {
 			paths.push({
 				params: { locale, slug: docPageId(doc.id) },
 				props: { entry: doc }
@@ -20,19 +20,22 @@ export async function getStaticPaths() {
 
 const { locale, slug } = Astro.params;
 
-if (slug === undefined) {
-	const first = await getFirstDoc(locale ?? null);
-	if (first) {
-		return staticRedirect(docUrl(first.id));
+async function resolveEntry(locale: string | null, slug: string | undefined) {
+	if (slug === undefined) {
+		const first = await getFirstDoc(locale);
+		if (first) return { redirect: docUrl(first.id), entry: null };
 	}
+	const { routed } = await getDocsHierarchy(locale);
+	return { redirect: null, entry: routed.find((doc) => docPageId(doc.id) === slug) ?? null };
 }
 
-const { docs } = await getDocsHierarchy(locale ?? null);
-const entry = docs.find((doc) => docPageId(doc.id) === slug);
+const { redirect, entry } = await resolveEntry(locale ?? null, slug);
 ---
 
 {
-	entry ? (
+	redirect ? (
+		<Redirect to={redirect} />
+	) : entry ? (
 		<DocsPage entry={entry} />
 	) : (
 		<DocsPage entry={undefined} notFound={true} />
