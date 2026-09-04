@@ -36,9 +36,13 @@ To get started with development:
 ## Features
 
 - **Unified Layout:** Seamlessly switch between Markdown guides (`/docs`) and API references (`/api`) with a smooth, morphing transition.
-- **Scalar-like API Docs:** A dedicated, fully responsive two-column grid layout for OpenAPI references with sticky code snippets.
+- **Scalar-like API Docs:** A dedicated, fully responsive two-column grid layout for OpenAPI references. Multiple specs with nested prefixes are supported (`/api`, `/api/v2`).
 - **MDX Support:** Write content using MDX with rich built-in components (`Tabs`, `Callout`, `Steps`, etc.).
 - **Built-in Search:** Lightning-fast offline search powered by Pagefind.
+- **i18n:** Locale subfolders with translated UI strings and a sidebar language switcher.
+- **SEO:** Canonical URLs, Open Graph tags, and per-page OG images generated at build time.
+- **AI-ready:** `llms.txt` and `llms-full.txt` endpoints generated from your content.
+- **Landing Blocks:** Props-driven Hero, FeatureGrid, CTA and Footer components for combining a landing page with docs.
 - **Dark Mode:** Native dark mode with a toggle.
 
 ## Configuration Options
@@ -52,7 +56,14 @@ lyvo({
 	nav: [{ title: 'Home', href: '/' }],
 	socials: [{ label: 'GitHub', href: 'https://...', icon: 'github.svg' }],
 	repo: { url: 'https://github.com/...', branch: 'main' },
-	openapi: { input: 'public/openapi.json' }
+	docs: {
+		sidebar: {
+			items: ['introduction', { title: 'Guides', items: ['install'] }, '---']
+		}
+	},
+	openapi: [{ input: 'public/openapi.json', prefix: '/api' }],
+	i18n: { defaultLocale: 'en', locales: [{ code: 'de', label: 'Deutsch' }] },
+	og: { siteName: 'My Docs', generate: true }
 });
 ```
 

@@ -153,7 +153,7 @@ The `lyvo()` integration accepts the following options:
 | `docs.sidebar` | `{items?}` or `{order?, labels?}` | Sidebar structure. `items` supports strings (doc slugs or `'---'` separators), nested categories and external links. The legacy `order`/`labels` shape still works. |
 | `openapi` | `{input, prefix?, groupBy?, title?}` or array | OpenAPI spec(s). Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`). |
 | `i18n` | `{defaultLocale?, locales?, ui?}` | Locale subfolder-based i18n. Default locale content lives at the content root, other locales in subfolders (`src/content/docs/de/`). `ui` maps locale codes to translated UI strings. |
-| `og` | `boolean \| {siteName?, image?, generate?}` | Open Graph meta tags are always on. `og: true` or `og.generate: true` also generates a per-page OG image at build time (requires `sharp`, which Astro already installs). |
+| `og` | `boolean \| {siteName?, image?, generate?}` | Open Graph meta tags are always on. `og: true` or `og.generate: true` also generates a per-page OG image at build time. Requires `sharp` (Astro already depends on it, but pnpm users may need `pnpm add sharp` for image generation). |
 | `llms` | `boolean` | Generate `/llms.txt` and `/llms-full.txt` endpoints. Default `true`. |
 | `search` | `boolean` | Enable Pagefind search. Default `true`. |
 | `sitemap` | `boolean` | Inject the sitemap integration (skipped if you already use one). Default `true`. |
