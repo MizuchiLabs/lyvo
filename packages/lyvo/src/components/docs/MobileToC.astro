@@ -112,10 +112,12 @@ const circumference = 2 * Math.PI * radius;
 		const root = document.querySelector('.mobile-toc-root');
 		if (!root) return;
 
-		const trigger = document.getElementById('mobile-toc-trigger');
-		const menu = document.getElementById('mobile-toc-menu');
+		const triggerEl = document.getElementById('mobile-toc-trigger');
+		const menuEl = document.getElementById('mobile-toc-menu');
 		const chevron = root.querySelector('.mobile-toc-chevron');
-		if (!trigger || !menu) return;
+		if (!triggerEl || !menuEl) return;
+		const trigger: HTMLElement = triggerEl;
+		const menu: HTMLElement = menuEl;
 
 		let isOpen = false;
 

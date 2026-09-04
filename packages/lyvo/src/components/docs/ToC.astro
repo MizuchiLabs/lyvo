@@ -1,8 +1,7 @@
 ---
 import { TextAlignStart } from '@lucide/astro';
 import { t } from '@lyvo/lib/i18n';
-import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
-import config from 'virtual:lyvo-config';
+import { currentLocale } from '@lyvo/lib/docs';
 
 interface Props {
 	headings: { depth: number; slug: string; text: string }[];
@@ -10,14 +9,7 @@ interface Props {
 
 const { headings } = Astro.props;
 
-const routing: RoutingInfo = {
-	docsPrefix: config.docs.prefix,
-	apiRoot: config.api.root,
-	defaultLocale: config.i18n.defaultLocale,
-	locales: config.i18n.locales
-};
-
-const locale = localeFromPath(Astro.url.pathname, routing);
+const locale = currentLocale(Astro.url.pathname);
 ---
 
 {
@@ -114,7 +106,9 @@ const locale = localeFromPath(Astro.url.pathname, routing);
 	}
 
 	function updateLayout() {
-		const linksWrapper = document.querySelector('.toc-desktop .toc-links') as HTMLElement | null;
+		const linksWrapper = document.querySelector(
+			'.toc-desktop .toc-links'
+		) as HTMLElement | null;
 		const maskElement = document.querySelector('.toc-desktop .toc-mask') as HTMLElement | null;
 		if (!linksWrapper || !maskElement) return;
 
@@ -148,7 +142,8 @@ const locale = localeFromPath(Astro.url.pathname, routing);
 		const encodedSvg = `url("data:image/svg+xml,${encodeURIComponent(svgData)}")`;
 
 		maskElement.style.maskImage = encodedSvg;
-		maskElement.style.webkitMaskImage = encodedSvg;
+		const style = maskElement.style as CSSStyleDeclaration & { webkitMaskImage: string };
+		style.webkitMaskImage = encodedSvg;
 		maskElement.style.maskRepeat = 'no-repeat';
 		maskElement.style.maskPosition = 'left top';
 		maskElement.style.maskSize = '100% 100%';
@@ -158,8 +153,9 @@ const locale = localeFromPath(Astro.url.pathname, routing);
 		updateLayout();
 	}
 
-	if (!window.__lyvoTocLayoutSetup) {
-		window.__lyvoTocLayoutSetup = true;
+	const win = window as Window & { __lyvoTocLayoutSetup?: boolean };
+	if (!win.__lyvoTocLayoutSetup) {
+		win.__lyvoTocLayoutSetup = true;
 		window.addEventListener('resize', updateLayout);
 		document.addEventListener('astro:page-load', initTocLayout);
 	}
