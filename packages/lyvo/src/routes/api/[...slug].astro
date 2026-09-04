@@ -1,0 +1,43 @@
+---
+import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
+import { readAllApiSpecs, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import ApiOverview from '@lyvo/components/openapi/ApiOverview.astro';
+import ApiEndpoint from '@lyvo/components/openapi/ApiEndpoint.astro';
+
+export async function getStaticPaths() {
+	const specs = await readAllApiSpecs();
+	const paths = [];
+
+	for (const spec of specs) {
+		paths.push({
+			params: { slug: spec.sub || undefined },
+			props: { isIndex: true, spec }
+		});
+
+		for (const endpoint of [...spec.model.operations, ...spec.model.webhooks]) {
+			paths.push({
+				params: { slug: spec.sub ? `${spec.sub}/${endpoint.slug}` : endpoint.slug },
+				props: { isIndex: false, spec, slug: endpoint.slug }
+			});
+		}
+	}
+
+	return paths;
+}
+
+interface Props {
+	isIndex: boolean;
+	spec: LoadedApiSpec;
+	slug?: string;
+}
+
+const { isIndex, spec, slug } = Astro.props as Props;
+---
+
+<DocsLayout
+	title={spec.model.info?.title ?? spec.title}
+	description={spec.model.info?.description ?? 'API reference.'}
+	isApi={true}
+>
+	{isIndex ? <ApiOverview spec={spec} /> : <ApiEndpoint spec={spec} slug={slug ?? ''} />}
+</DocsLayout>

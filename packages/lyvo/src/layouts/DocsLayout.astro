@@ -22,7 +22,8 @@ interface Props {
 
 const { title, description, headings = [], entry, isApi = false } = Astro.props;
 
-const lastUpdatedText = await getLastUpdated(entry?.filePath);
+const lastUpdatedText = entry ? await getLastUpdated(entry.filePath) : '';
+const showToc = !isApi && headings.length > 0;
 ---
 
 <!doctype html>
@@ -47,7 +48,7 @@ const lastUpdatedText = await getLastUpdated(entry?.filePath);
 					<Breadcrumbs title={title} />
 					{!isApi && <MobileToC headings={headings} title={title} />}
 					<div class="ml-auto flex items-center gap-3">
-						<Search />
+						{config.features.search && <Search />}
 						<ThemeToggle transition:persist />
 					</div>
 				</div>
@@ -76,13 +77,13 @@ const lastUpdatedText = await getLastUpdated(entry?.filePath);
 						}
 
 						<article
-							data-pagefind-body
 							class={cn(
 								'prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-a:font-medium prose-a:underline prose-a:underline-offset-4 prose-pre:border prose-pre:border-border/50',
 								!isApi
 									? 'prose max-w-none py-8'
 									: 'flex w-full min-w-0 flex-1 flex-col text-foreground'
 							)}
+							data-pagefind-body={isApi || entry ? true : undefined}
 						>
 							<slot />
 						</article>
@@ -90,7 +91,7 @@ const lastUpdatedText = await getLastUpdated(entry?.filePath);
 						{!isApi && <Pagination entry={entry} />}
 					</div>
 
-					{!isApi && <ToC headings={headings} />}
+					{!isApi && <ToC headings={showToc ? headings : []} />}
 				</div>
 			</main>
 		</div>

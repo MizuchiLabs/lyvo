@@ -1,20 +1,34 @@
 ---
-import { getCollection } from 'astro:content';
+import { getDocsHierarchy, getFirstDoc, docUrl } from '@lyvo/lib/docs';
 import DocsPage from '@lyvo/components/docs/DocsPage.astro';
+import { staticRedirect } from '@lyvo/lib/utils';
 
 export async function getStaticPaths() {
-	const docs = await getCollection('docs');
-	return docs.map((entry: any) => ({
-		params: { slug: entry.id },
-		props: { entry }
-	}));
+	const paths = [{ params: { slug: undefined }, props: {} }];
+	const { docs } = await getDocsHierarchy(null);
+	for (const doc of docs) {
+		paths.push({ params: { slug: doc.id }, props: { entry: doc } });
+	}
+	return paths;
 }
 
-type Props = {
-	entry: any;
-};
+const { slug } = Astro.params;
 
-const { entry } = Astro.props as Props;
+if (slug === undefined) {
+	const first = await getFirstDoc();
+	if (first) {
+		return staticRedirect(docUrl(first.id));
+	}
+}
+
+const { docs } = await getDocsHierarchy(null);
+const entry = docs.find((doc) => doc.id === slug);
 ---
 
-<DocsPage entry={entry} />
+{
+	entry ? (
+		<DocsPage entry={entry} />
+	) : (
+		<DocsPage entry={undefined} notFound={true} />
+	)
+}

@@ -1,0 +1,40 @@
+---
+import { getDocsHierarchy, getFirstDoc, docUrl, docPageId, localeCodes } from '@lyvo/lib/docs';
+import DocsPage from '@lyvo/components/docs/DocsPage.astro';
+import { staticRedirect } from '@lyvo/lib/utils';
+
+export async function getStaticPaths() {
+	const paths = [];
+	for (const locale of localeCodes) {
+		const { docs } = await getDocsHierarchy(locale);
+		paths.push({ params: { locale, slug: undefined }, props: {} });
+		for (const doc of docs) {
+			paths.push({
+				params: { locale, slug: docPageId(doc.id) },
+				props: { entry: doc }
+			});
+		}
+	}
+	return paths;
+}
+
+const { locale, slug } = Astro.params;
+
+if (slug === undefined) {
+	const first = await getFirstDoc(locale ?? null);
+	if (first) {
+		return staticRedirect(docUrl(first.id));
+	}
+}
+
+const { docs } = await getDocsHierarchy(locale ?? null);
+const entry = docs.find((doc) => doc.id === slug);
+---
+
+{
+	entry ? (
+		<DocsPage entry={entry} />
+	) : (
+		<DocsPage entry={undefined} notFound={true} />
+	)
+}

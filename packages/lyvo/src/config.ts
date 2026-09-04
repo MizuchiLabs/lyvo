@@ -1,0 +1,313 @@
+import { z } from 'astro/zod';
+
+const linkSchema = z.object({
+	title: z.string(),
+	href: z.string()
+});
+
+export type SidebarInput = string | { title: string; href?: string; items?: SidebarInput[] };
+
+const sidebarItemSchema: z.ZodType<SidebarInput> = z.lazy(() =>
+	z.union([
+		z.string(),
+		z.object({
+			title: z.string(),
+			href: z.string().optional(),
+			items: z.array(sidebarItemSchema).optional()
+		})
+	])
+);
+
+const legacySidebarSchema = z.object({
+	order: z.array(z.string()).optional(),
+	labels: z.record(z.string(), z.string()).optional()
+});
+
+const specSchema = z.object({
+	input: z.string(),
+	prefix: z.string().optional(),
+	groupBy: z.enum(['tag', 'path']).optional(),
+	title: z.string().optional()
+});
+
+export const LyvoOptionsSchema = z.object({
+	title: z.string().optional(),
+	description: z.string().optional(),
+	lang: z.string().optional(),
+	logo: z
+		.union([z.string(), z.object({ light: z.string(), dark: z.string() })])
+		.optional(),
+	favicon: z
+		.object({
+			svg: z.string().optional(),
+			ico: z.string().optional()
+		})
+		.optional(),
+	repo: z
+		.object({
+			url: z.string().optional(),
+			branch: z.string().optional()
+		})
+		.optional(),
+	socials: z.array(z.object({ label: z.string(), href: z.string(), icon: z.string() })).optional(),
+	nav: z.array(linkSchema).optional(),
+	extraLinks: z.array(linkSchema).optional(),
+	footer: z
+		.object({
+			note: z.string().optional(),
+			columns: z
+				.array(
+					z.object({
+						title: z.string(),
+						links: z.array(z.object({ label: z.string(), href: z.string() }))
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	docs: z
+		.object({
+			prefix: z.string().optional(),
+			edit: z.boolean().optional(),
+			feedback: z.boolean().optional(),
+			sidebar: z
+				.union([legacySidebarSchema, z.object({ items: z.array(sidebarItemSchema) })])
+				.optional()
+		})
+		.optional(),
+	openapi: z.union([specSchema, z.array(specSchema)]).optional(),
+	i18n: z
+		.object({
+			defaultLocale: z.string().optional(),
+			locales: z
+				.array(z.union([z.string(), z.object({ code: z.string(), label: z.string() })]))
+				.optional(),
+			ui: z.record(z.string(), z.record(z.string(), z.string())).optional()
+		})
+		.optional(),
+	og: z
+		.union([
+			z.boolean(),
+			z.object({
+				siteName: z.string().optional(),
+				image: z.string().optional(),
+				generate: z.boolean().optional()
+			})
+		])
+		.optional(),
+	llms: z.boolean().optional(),
+	search: z.boolean().optional(),
+	sitemap: z.boolean().optional(),
+	cacheHeaders: z.boolean().optional(),
+	head: z.string().optional(),
+	customCss: z.array(z.string()).optional()
+});
+
+export type LyvoOptions = z.infer<typeof LyvoOptionsSchema>;
+
+export interface LocaleConfig {
+	code: string;
+	label: string;
+}
+
+export interface ApiSpecConfig {
+	id: string;
+	input: string;
+	root: string;
+	sub: string;
+	groupBy: 'tag' | 'path';
+	title: string;
+}
+
+export interface LyvoConfig {
+	title: string;
+	description?: string;
+	lang: string;
+	logo?: string | { light: string; dark: string };
+	favicon?: { svg?: string; ico?: string };
+	repo?: { url?: string; branch?: string };
+	socials: Array<{ label: string; href: string; icon: string }>;
+	nav?: Array<{ title: string; href: string }>;
+	extraLinks: Array<{ title: string; href: string }>;
+	footer?: { note?: string; columns?: Array<{ title: string; links: Array<{ label: string; href: string }> }> };
+	docs: {
+		prefix: string;
+		edit: boolean;
+		feedback: boolean;
+		sidebar?: { items?: SidebarInput[]; order?: string[]; labels?: Record<string, string> };
+	};
+	api: {
+		root: string;
+		specs: ApiSpecConfig[];
+	};
+	i18n: {
+		defaultLocale: string;
+		locales: LocaleConfig[];
+		ui: Record<string, Record<string, string>>;
+	};
+	og: {
+		siteName?: string;
+		image?: string;
+		generate: boolean;
+	};
+	llms: boolean;
+	features: {
+		search: boolean;
+		sitemap: boolean;
+		cacheHeaders: boolean;
+	};
+	fonts: string[];
+	head?: string;
+	customCss: string[];
+}
+
+const UI_DEFAULTS: Record<string, string> = {
+	search: 'Search',
+	onThisPage: 'On this page',
+	lastUpdated: 'Last updated on',
+	helpful: 'Was this page helpful?',
+	yes: 'Yes',
+	no: 'No',
+	thanks: 'Thank you for your feedback!',
+	editPage: 'Edit page',
+	guides: 'Guides',
+	reference: 'Reference',
+	overview: 'Overview',
+	notFoundTitle: 'Page not found',
+	notFoundText: 'This page does not exist or has been moved.',
+	backHome: 'Back to home',
+	language: 'Language',
+	externalDocs: 'Read external documentation',
+	codeSamples: 'Code Samples',
+	exampleResponses: 'Example Responses'
+};
+
+function normalizePrefix(prefix: string): string {
+	const trimmed = prefix.trim();
+	if (!trimmed) return '';
+	return trimmed.startsWith('/') ? trimmed.replace(/\/+$/, '') : `/${trimmed.replace(/\/+$/, '')}`;
+}
+
+interface AstroConfigLike {
+	site?: string;
+	fonts?: Array<{ cssVariable?: string }>;
+	integrations?: Array<{ name: string }>;
+}
+
+export class LyvoConfigError extends Error {}
+
+export function normalizeOptions(
+	raw: LyvoOptions,
+	astroConfig: AstroConfigLike,
+	warn: (message: string) => void
+): LyvoConfig {
+	const knownKeys = Object.keys(LyvoOptionsSchema.shape as Record<string, unknown>);
+	for (const key of Object.keys(raw)) {
+		if (!knownKeys.includes(key)) {
+			warn(`Unknown lyvo() option "${key}" was ignored.`);
+		}
+	}
+
+	const locales: LocaleConfig[] = (raw.i18n?.locales ?? []).map((locale) => {
+		if (typeof locale === 'string') return { code: locale, label: locale };
+		return { code: locale.code, label: locale.label };
+	});
+	const defaultLocale = raw.i18n?.defaultLocale ?? raw.lang ?? 'en';
+	const filteredLocales = locales.filter((locale) => locale.code !== defaultLocale);
+	for (const locale of filteredLocales) {
+		if (locale.code.includes('/')) {
+			throw new LyvoConfigError(`Locale code "${locale.code}" must not contain slashes.`);
+		}
+	}
+
+	const ui: Record<string, Record<string, string>> = {
+		[defaultLocale]: { ...UI_DEFAULTS, ...(raw.i18n?.ui?.[defaultLocale] ?? {}) }
+	};
+	for (const locale of filteredLocales) {
+		ui[locale.code] = { ...UI_DEFAULTS, ...(raw.i18n?.ui?.[locale.code] ?? {}) };
+	}
+	for (const [code, strings] of Object.entries(raw.i18n?.ui ?? {})) {
+		ui[code] = { ...(ui[code] ?? UI_DEFAULTS), ...strings };
+	}
+
+	let specs: ApiSpecConfig[] = [];
+	const rawSpecs = Array.isArray(raw.openapi) ? raw.openapi : raw.openapi ? [raw.openapi] : [];
+	if (rawSpecs.length > 0) {
+		const root = normalizePrefix(rawSpecs[0].prefix ?? '/api');
+		specs = rawSpecs.map((spec, index) => {
+			const prefix = normalizePrefix(spec.prefix ?? '/api');
+			if (!prefix.startsWith(root)) {
+				throw new LyvoConfigError(
+					`All OpenAPI spec prefixes must share the root "${root}", got "${prefix}". ` +
+						`Use nested prefixes like "${root}" and "${root}/v2".`
+				);
+			}
+			const sub = prefix.slice(root.length).replace(/^\/+|\/+$/g, '');
+			return {
+				id: sub || (index === 0 ? 'default' : `spec-${index}`),
+				input: spec.input,
+				root,
+				sub,
+				groupBy: spec.groupBy ?? 'tag',
+				title: spec.title ?? 'API Reference'
+			};
+		});
+	}
+
+	const docsPrefix = normalizePrefix(raw.docs?.prefix ?? '/docs');
+	const sidebar = raw.docs?.sidebar;
+	const sidebarConfig: LyvoConfig['docs']['sidebar'] = sidebar
+		? 'items' in sidebar
+			? { items: sidebar.items }
+			: { order: sidebar.order, labels: sidebar.labels }
+		: undefined;
+
+	const ogRaw = raw.og;
+	const og = {
+		siteName: typeof ogRaw === 'object' && ogRaw ? ogRaw.siteName : undefined,
+		image: typeof ogRaw === 'object' && ogRaw ? ogRaw.image : undefined,
+		generate: ogRaw === true || (typeof ogRaw === 'object' && ogRaw?.generate === true)
+	};
+
+	const fonts = (astroConfig.fonts ?? [])
+		.map((font) => font.cssVariable)
+		.filter((variable): variable is string => Boolean(variable && variable.startsWith('--font')));
+
+	return {
+		title: raw.title ?? 'Docs',
+		description: raw.description,
+		lang: defaultLocale,
+		logo: raw.logo,
+		favicon: raw.favicon,
+		repo: raw.repo,
+		socials: raw.socials ?? [],
+		nav: raw.nav,
+		extraLinks: raw.extraLinks ?? [],
+		footer: raw.footer,
+		docs: {
+			prefix: docsPrefix,
+			edit: raw.docs?.edit ?? true,
+			feedback: raw.docs?.feedback ?? true,
+			sidebar: sidebarConfig
+		},
+		api: {
+			root: specs[0]?.root ?? '/api',
+			specs
+		},
+		i18n: {
+			defaultLocale,
+			locales: filteredLocales,
+			ui
+		},
+		og,
+		llms: raw.llms ?? true,
+		features: {
+			search: raw.search ?? true,
+			sitemap: raw.sitemap ?? true,
+			cacheHeaders: raw.cacheHeaders ?? false
+		},
+		fonts,
+		head: raw.head,
+		customCss: raw.customCss ?? []
+	};
+}

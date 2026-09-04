@@ -2,16 +2,25 @@
 import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import Feedback from '@lyvo/components/docs/Feedback.astro';
 import EditPageLink from '@lyvo/components/docs/EditPageLink.astro';
-import { getPrevNextDocs } from '@lyvo/lib/docs';
+import { getPrevNextDocs, docUrl } from '@lyvo/lib/docs';
+import { localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
+import config from 'virtual:lyvo-config';
 
 interface Props {
 	entry?: any;
 }
 const { entry } = Astro.props;
 
+const routing: RoutingInfo = {
+	docsPrefix: config.docs.prefix,
+	apiRoot: config.api.root,
+	defaultLocale: config.i18n.defaultLocale,
+	locales: config.i18n.locales
+};
+
 let prevDoc, nextDoc;
 if (entry) {
-	const res = await getPrevNextDocs(entry.id);
+	const res = await getPrevNextDocs(entry.id, localeFromPath(Astro.url.pathname, routing));
 	prevDoc = res.prevDoc;
 	nextDoc = res.nextDoc;
 }
@@ -29,7 +38,7 @@ if (entry) {
 			<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
 				{prevDoc ? (
 					<a
-						href={`/docs/${prevDoc.id}`}
+						href={docUrl(prevDoc.id)}
 						class="group flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 					>
 						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -56,7 +65,7 @@ if (entry) {
 
 				{nextDoc && (
 					<a
-						href={`/docs/${nextDoc.id}`}
+						href={docUrl(nextDoc.id)}
 						class="group flex flex-col items-end gap-2 rounded-xl border border-border bg-card p-5 text-right text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 					>
 						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -74,7 +83,7 @@ if (entry) {
 								<p class="line-clamp-1 text-sm text-muted-foreground/80">
 									{nextDoc.data.description}
 								</p>
-							)}{' '}
+							)}
 						</div>
 					</a>
 				)}

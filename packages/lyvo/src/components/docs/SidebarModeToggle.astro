@@ -1,14 +1,16 @@
 ---
-import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
+import { tryReadDefaultApiModel } from '@lyvo/lib/openapi/model';
 import { cn } from '@lyvo/lib/utils';
 import { BookOpen, Terminal } from '@lucide/astro';
+import { t } from '@lyvo/lib/i18n';
+import config from 'virtual:lyvo-config';
 
-const openapiModel = await tryReadOpenAPIModel();
+const openapiModel = await tryReadDefaultApiModel();
 const hasApiMode =
 	(openapiModel?.operations?.length ?? 0) + (openapiModel?.webhooks?.length ?? 0) > 0;
 
 const currentPath = Astro.url.pathname;
-const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs';
+const activeMode = hasApiMode && currentPath.startsWith(config.api.root) ? 'api' : 'docs';
 ---
 
 {
@@ -16,7 +18,7 @@ const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs'
 		<div class="px-6">
 			<div class="flex items-center justify-between rounded-lg bg-muted/40 p-0.5 ring-1 ring-border/50 ring-inset">
 				<a
-					href="/docs"
+					href={config.docs.prefix}
 					class={cn(
 						'flex w-full items-center justify-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold transition-all duration-200',
 						activeMode === 'docs'
@@ -25,10 +27,10 @@ const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs'
 					)}
 				>
 					<BookOpen size={14} />
-					Guides
+					{t('guides')}
 				</a>
 				<a
-					href="/api"
+					href={config.api.root}
 					class={cn(
 						'flex w-full items-center justify-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold transition-all duration-200',
 						activeMode === 'api'
@@ -37,7 +39,7 @@ const activeMode = hasApiMode && currentPath.startsWith('/api') ? 'api' : 'docs'
 					)}
 				>
 					<Terminal size={14} />
-					Reference
+					{t('reference')}
 				</a>
 			</div>
 		</div>

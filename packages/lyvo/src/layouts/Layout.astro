@@ -3,13 +3,16 @@ import ThemeToggle from '@lyvo/components/base/ThemeToggle.astro';
 import BaseHead from '@lyvo/layouts/BaseHead.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
 import Icon from '@lyvo/components/base/Icon.astro';
+import Footer from '@lyvo/components/base/Footer.astro';
 import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
-import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
 
-const openapiModel = await tryReadOpenAPIModel();
-const apiEnabled =
-	(openapiModel?.operations?.length ?? 0) + (openapiModel?.webhooks?.length ?? 0) > 0;
+const navItems =
+	config.nav ??
+	[
+		{ title: 'Docs', href: config.docs.prefix },
+		...(config.api.specs.length > 0 ? [{ title: 'API', href: config.api.root }] : [])
+	];
 ---
 
 <!doctype html>
@@ -28,42 +31,24 @@ const apiEnabled =
 						<Logo id="header" />
 						<div class="hidden items-center gap-1 md:flex">
 							{
-								config.nav ? (
-									config.nav.map((item) => {
-										const external = isExternal(item.href);
-										return (
-											<a
-												href={item.href}
-												target={external ? '_blank' : undefined}
-												rel={external ? 'noopener noreferrer' : undefined}
-												class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-											>
-												{item.title}
-											</a>
-										);
-									})
-								) : (
-									<>
+								navItems.map((item) => {
+									const external = isExternal(item.href);
+									return (
 										<a
-											href="/docs"
+											href={item.href}
+											target={external ? '_blank' : undefined}
+											rel={external ? 'noopener noreferrer' : undefined}
 											class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 										>
-											Documentation
+											{item.title}
 										</a>
-										{apiEnabled && (
-											<a
-												href="/api"
-												class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-											>
-												OpenAPI
-											</a>
-										)}
-									</>
-								)
+									);
+								})
 							}
 						</div>
 					</div>
 					<div class="flex items-center space-x-2">
+						<slot name="header-actions" />
 						{
 							config.socials.map((social) => (
 								<a
@@ -85,6 +70,11 @@ const apiEnabled =
 				</div>
 			</header>
 		</slot>
-		<slot />
+		<div class="flex-1">
+			<slot />
+		</div>
+		<slot name="footer">
+			<Footer />
+		</slot>
 	</body>
 </html>

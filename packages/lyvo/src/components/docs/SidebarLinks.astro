@@ -2,8 +2,11 @@
 import { cn } from '@lyvo/lib/utils';
 import { Webhook } from '@lucide/astro';
 import SidebarGroup from '@lyvo/components/docs/SidebarGroup.astro';
-import { getDocsHierarchy } from '@lyvo/lib/docs';
-import { tryReadOpenAPIModel } from '@lyvo/lib/openapi/model';
+import { getDocsHierarchy, docUrl, type NavItem } from '@lyvo/lib/docs';
+import { readAllApiSpecs, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { apiPageUrl, localeFromPath, type RoutingInfo } from '@lyvo/lib/routing';
+import { t } from '@lyvo/lib/i18n';
+import config from 'virtual:lyvo-config';
 
 const methodClassMap = {
 	get: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -16,14 +19,19 @@ const methodClassMap = {
 	trace: 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20'
 } as const;
 
-// Fetch categorized and ordered hierarchy from library function
-const { topLevelItems } = await getDocsHierarchy();
-
-const model = await tryReadOpenAPIModel();
-const apiGroups = model?.navigation ?? [];
+const routing: RoutingInfo = {
+	docsPrefix: config.docs.prefix,
+	apiRoot: config.api.root,
+	defaultLocale: config.i18n.defaultLocale,
+	locales: config.i18n.locales
+};
 
 const currentPath = Astro.url.pathname;
-const activeMode = currentPath.startsWith('/api') ? 'api' : 'docs';
+const locale = localeFromPath(currentPath, routing);
+const activeMode = currentPath.startsWith(config.api.root) ? 'api' : 'docs';
+
+const { nav } = await getDocsHierarchy(locale);
+const apiSpecs = activeMode === 'api' ? await readAllApiSpecs() : [];
 
 const linkClass = (isActive: boolean) =>
 	cn(
@@ -32,84 +40,110 @@ const linkClass = (isActive: boolean) =>
 			? 'bg-accent/50 font-medium text-foreground'
 			: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
 	);
+
+const isActiveHref = (href: string) => currentPath === href || currentPath === `${href}/`;
+
 ---
 
 <div class="no-scrollbar flex-1 overflow-y-auto p-4">
 	<div class="flex flex-col gap-1 pb-4">
 		{
 			activeMode === 'api' ? (
-				<>
+				<Fragment>
 					<div class="pb-2">
 						<a
-							href="/api"
+							href={config.api.root}
 							class={cn(
 								'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
-								currentPath === '/api' || currentPath === '/api/'
+								isActiveHref(config.api.root) || isActiveHref(`${config.api.root}/`)
 									? 'bg-accent/50 text-foreground'
 									: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
 							)}
 						>
-							Overview
+							{t('overview', locale)}
 						</a>
 					</div>
-					{apiGroups.map((item) => {
-						const isGroupActive = item.items.some((endpoint) => {
-							const href = `/api/${endpoint.slug}`;
-							return currentPath === href || currentPath === href + '/';
-						});
+					{apiSpecs.map((spec: LoadedApiSpec) => (
+						<Fragment>
+							{apiSpecs.length > 1 && (
+								<p class="px-2 pt-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+									{spec.title}
+								</p>
+							)}
+							{spec.model.navigation.map((item) => {
+								const isGroupActive = item.items.some((endpoint) => {
+									const href = apiPageUrl(routing, spec.sub, endpoint.slug);
+									return isActiveHref(href);
+								});
 
-						return (
-							<div class="pb-1">
-								<SidebarGroup
-									title={item.title}
-									dataGroupId={`api-${item.title}`}
-									isActive={isGroupActive}
-								>
-									{item.items.map((endpoint) => {
-										const href = `/api/${endpoint.slug}`;
-										const isActive =
-											currentPath === href || currentPath === href + '/';
+								return (
+									<div class="pb-1">
+										<SidebarGroup
+											title={item.title}
+											dataGroupId={`api-${spec.specId}-${item.id}`}
+											isActive={isGroupActive}
+										>
+											{item.items.map((endpoint) => {
+												const href = apiPageUrl(routing, spec.sub, endpoint.slug);
+												const isActive = isActiveHref(href);
 
-										return (
-											<a
-												href={href}
-												class={cn(
-													linkClass(isActive),
-													'justify-between gap-2'
-												)}
-											>
-												<span class="line-clamp-2 flex-1 overflow-hidden leading-5 text-ellipsis">
-													{endpoint.label}
-												</span>
-
-												{endpoint.isWebhook ? (
-													<span class="ms-auto inline-flex shrink-0 items-center gap-1 rounded border border-fuchsia-500/30 bg-fuchsia-500/10 px-1 py-0 text-[10px] leading-4 font-semibold text-fuchsia-600 uppercase dark:text-fuchsia-300">
-														<Webhook size={10} />
-														{endpoint.method}
-													</span>
-												) : (
-													<span
-														class={cn(
-															'ms-auto shrink-0 rounded border px-1 py-0 text-[10px] leading-4 font-semibold uppercase',
-															methodClassMap[endpoint.method]
-														)}
+												return (
+													<a
+														href={href}
+														class={cn(linkClass(isActive), 'justify-between gap-2')}
 													>
-														{endpoint.method}
-													</span>
-												)}
-											</a>
-										);
-									})}
-								</SidebarGroup>
-							</div>
-						);
-					})}
-				</>
+														<span class="line-clamp-2 flex-1 overflow-hidden leading-5 text-ellipsis">
+															{endpoint.label}
+														</span>
+
+														{endpoint.isWebhook ? (
+															<span class="ms-auto inline-flex shrink-0 items-center gap-1 rounded border border-fuchsia-500/30 bg-fuchsia-500/10 px-1 py-0 text-[10px] leading-4 font-semibold text-fuchsia-600 uppercase dark:text-fuchsia-300">
+																<Webhook size={10} />
+																{endpoint.method}
+															</span>
+														) : (
+															<span
+																class={cn(
+																	'ms-auto shrink-0 rounded border px-1 py-0 text-[10px] leading-4 font-semibold uppercase',
+																	methodClassMap[endpoint.method]
+																)}
+															>
+																{endpoint.method}
+															</span>
+														)}
+													</a>
+												);
+											})}
+										</SidebarGroup>
+									</div>
+								);
+							})}
+						</Fragment>
+					))}
+				</Fragment>
 			) : (
-				topLevelItems.map((item) => {
+				nav.map((item: NavItem) => {
+					if (item.type === 'separator') {
+						return <div class="mx-2 my-2 border-t border-border/50" role="separator" />;
+					}
+
+					if (item.type === 'link') {
+						const external = item.href.startsWith('http');
+						return (
+							<a
+								href={item.href}
+								target={external ? '_blank' : undefined}
+								rel={external ? 'noopener noreferrer' : undefined}
+								class={linkClass(false)}
+							>
+								{item.title}
+							</a>
+						);
+					}
+
 					if (item.type === 'doc') {
-						const href = `/docs/${item.doc.id}`;
-						const isActive = currentPath === href || currentPath === href + '/';
+						const href = docUrl(item.id);
+						const isActive = isActiveHref(href);
 						return (
 							<a
 								href={href}
@@ -125,25 +159,29 @@ const linkClass = (isActive: boolean) =>
 						);
 					}
 
-					const isCategoryActive = item.items.some((doc: any) => {
-						const href = `/docs/${doc.id}`;
-						return currentPath === href || currentPath === href + '/';
-					});
+					const isCategoryActive = item.items.some(
+						(child) => child.type === 'doc' && isActiveHref(`${config.docs.prefix}/${child.id}`)
+					);
 
 					return (
 						<div class="pb-1">
 							<SidebarGroup
 								title={item.title}
-								dataGroupId={`docs-${item.originalId}`}
+								dataGroupId={`docs-${item.title.toLowerCase().replaceAll(/\s+/g, '-')}`}
 								isActive={isCategoryActive}
 							>
-								{item.items.map((doc: any) => {
-									const href = `/docs/${doc.id}`;
-									const isActive =
-										currentPath === href || currentPath === href + '/';
+								{item.items.map((child) => {
+									if (child.type === 'separator') {
+										return <div class="mx-2 my-2 border-t border-border/50" role="separator" />;
+									}
+									if (child.type !== 'doc') {
+										return null;
+									}
+									const href = `${config.docs.prefix}/${child.id}`;
+									const isActive = isActiveHref(href);
 									return (
 										<a href={href} class={linkClass(isActive)}>
-											{doc.data.title}
+											{child.title}
 										</a>
 									);
 								})}

@@ -14,14 +14,17 @@ import Step from '@lyvo/components/docs/Step.astro';
 import FileTree from '@lyvo/components/docs/FileTree.astro';
 import Folder from '@lyvo/components/docs/Folder.astro';
 import File from '@lyvo/components/docs/File.astro';
+import NotFound from '@lyvo/components/base/NotFound.astro';
 
 interface Props {
-	entry: any;
+	entry?: any;
+	notFound?: boolean;
 }
 
-const { entry } = Astro.props;
+const { entry, notFound = false } = Astro.props;
 
-const { Content, headings } = await render(entry);
+const rendered = entry ? await render(entry) : null;
+const { Content, headings } = rendered ?? { Content: null, headings: [] };
 
 const components = {
 	Code: CodeBlock,
@@ -42,11 +45,19 @@ const components = {
 const filteredHeadings = headings.filter((h: any) => h.depth === 2 || h.depth === 3);
 ---
 
-<DocsLayout
-	title={entry.data.title}
-	description={entry.data.description}
-	headings={filteredHeadings}
-	entry={entry}
->
-	<Content components={components} />
-</DocsLayout>
+{
+	notFound || !entry ? (
+		<DocsLayout title="404">
+			<NotFound />
+		</DocsLayout>
+	) : (
+		<DocsLayout
+			title={entry.data.title}
+			description={entry.data.description}
+			headings={filteredHeadings}
+			entry={entry}
+		>
+			<Content components={components} />
+		</DocsLayout>
+	)
+}

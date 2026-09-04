@@ -12,11 +12,14 @@ export function defineLyvoCollections() {
 		})
 	};
 
-	if (lyvoConfig.openapi?.input) {
+	if (lyvoConfig.api.specs.length > 0) {
 		collections.api = defineCollection({
 			loader: openapiLoader({
-				input: lyvoConfig.openapi.input,
-				groupBy: lyvoConfig.openapi.groupBy || 'tag'
+				specs: lyvoConfig.api.specs.map((spec: { id: string; input: string; groupBy: 'tag' | 'path' }) => ({
+					id: spec.id,
+					input: spec.input,
+					groupBy: spec.groupBy
+				}))
 			})
 		});
 	}

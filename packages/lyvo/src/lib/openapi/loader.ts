@@ -666,95 +666,117 @@ export interface OpenAPILoaderOptions {
 	groupBy?: 'tag' | 'path';
 }
 
+export interface OpenAPILoaderSpec {
+	id: string;
+	input: string;
+	groupBy: 'tag' | 'path';
+}
+
+export interface OpenAPILoaderOptions {
+	specs: OpenAPILoaderSpec[];
+}
+
 export function openapiLoader(options: OpenAPILoaderOptions): Loader {
 	return {
 		name: 'openapi-loader',
 		load: async ({ store, logger }) => {
-			const inputPath = path.resolve(options.input);
-
-			logger.info(`Validating OpenAPI document at ${options.input}...`);
-			const document = await SwaggerParser.validate(inputPath, {
-				validate: { schema: true, spec: true },
-				dereference: { circular: 'ignore' }
-			});
-
-			const defaultServers = Array.isArray((document as any).servers)
-				? (document as any).servers.map((server: any) => ({
-						url: server.url,
-						description: server.description
-					}))
-				: [];
-
-			const rootSecurity = Array.isArray(document.security) ? document.security : [];
-
-			const operations = [];
-			for (const [apiPath, rawPathItem] of Object.entries(document.paths ?? {})) {
-				const pathItem = deepResolve(rawPathItem, document);
-				for (const method of HTTP_METHODS) {
-					const operation = pathItem?.[method];
-					if (!operation) continue;
-
-					operations.push(
-						mapOperation({
-							document,
-							apiPath,
-							method,
-							pathItem,
-							operation,
-							defaultServers,
-							rootSecurity
-						})
-					);
-				}
-			}
-
-			operations.sort((a, b) => {
-				const methodAIndex = HTTP_METHODS.indexOf(a.method);
-				const methodBIndex = HTTP_METHODS.indexOf(b.method);
-				if (methodAIndex !== methodBIndex) {
-					return methodAIndex - methodBIndex;
-				}
-				return a.path.localeCompare(b.path);
-			});
-
-			const webhooks = mapWebhooks(document, defaultServers, rootSecurity);
-
-			const model = {
-				generatedAt: new Date().toISOString(),
-				source: path.relative(process.cwd(), inputPath),
-				openapi: (document as any).openapi,
-				info: {
-					title: document.info?.title ?? 'API',
-					version: document.info?.version ?? '0.0.0',
-					description: document.info?.description,
-					contact: document.info?.contact,
-					license: document.info?.license,
-					termsOfService: document.info?.termsOfService
-				},
-				servers: defaultServers,
-				securitySchemes: mapSecuritySchemes((document as any).components, document),
-				externalDocs: (document as any).externalDocs
-					? {
-							description: (document as any).externalDocs.description,
-							url: (document as any).externalDocs.url
-						}
-					: undefined,
-				tags: buildTags(document, operations),
-				navigation: buildNavigation(operations, webhooks, options.groupBy ?? 'tag'),
-				operations,
-				webhooks
-			};
-
 			store.clear();
+			for (const spec of options.specs) {
+				const model = await loadSpec(spec, logger);
+				if (!model) continue;
 
-			store.set({
-				id: 'openapi-model',
-				data: model
-			});
+				store.set({
+					id: `openapi:${spec.id}`,
+					data: model
+				});
 
-			logger.info(
-				`Loaded OpenAPI model with ${operations.length} operations and ${webhooks.length} webhooks.`
-			);
+				logger.info(
+					`Loaded OpenAPI spec "${spec.id}" with ${model.operations.length} operations and ${model.webhooks.length} webhooks.`
+				);
+			}
 		}
 	};
+}
+
+async function loadSpec(spec: OpenAPILoaderSpec, logger: { info: (message: string) => void }) {
+	try {
+		const inputPath = path.resolve(spec.input);
+
+		logger.info(`Validating OpenAPI document at ${spec.input}...`);
+		const document = await SwaggerParser.validate(inputPath, {
+			validate: { schema: true, spec: true },
+			dereference: { circular: 'ignore' }
+		});
+
+		const defaultServers = Array.isArray((document as any).servers)
+			? (document as any).servers.map((server: any) => ({
+					url: server.url,
+					description: server.description
+				}))
+			: [];
+
+		const rootSecurity = Array.isArray(document.security) ? document.security : [];
+
+		const operations = [];
+		for (const [apiPath, rawPathItem] of Object.entries(document.paths ?? {})) {
+			const pathItem = deepResolve(rawPathItem, document);
+			for (const method of HTTP_METHODS) {
+				const operation = pathItem?.[method];
+				if (!operation) continue;
+
+				operations.push(
+					mapOperation({
+						document,
+						apiPath,
+						method,
+						pathItem,
+						operation,
+						defaultServers,
+						rootSecurity
+					})
+				);
+			}
+		}
+
+		operations.sort((a, b) => {
+			const methodAIndex = HTTP_METHODS.indexOf(a.method);
+			const methodBIndex = HTTP_METHODS.indexOf(b.method);
+			if (methodAIndex !== methodBIndex) {
+				return methodAIndex - methodBIndex;
+			}
+			return a.path.localeCompare(b.path);
+		});
+
+		const webhooks = mapWebhooks(document, defaultServers, rootSecurity);
+
+		return {
+			source: path.relative(process.cwd(), inputPath),
+			openapi: (document as any).openapi,
+			info: {
+				title: document.info?.title ?? 'API',
+				version: document.info?.version ?? '0.0.0',
+				description: document.info?.description,
+				contact: document.info?.contact,
+				license: document.info?.license,
+				termsOfService: document.info?.termsOfService
+			},
+			servers: defaultServers,
+			securitySchemes: mapSecuritySchemes((document as any).components, document),
+			externalDocs: (document as any).externalDocs
+				? {
+						description: (document as any).externalDocs.description,
+						url: (document as any).externalDocs.url
+					}
+				: undefined,
+			tags: buildTags(document, operations),
+			navigation: buildNavigation(operations, webhooks, spec.groupBy),
+			operations,
+			webhooks
+		};
+	} catch (error) {
+		logger.info(
+			`Failed to load OpenAPI spec "${spec.id}": ${error instanceof Error ? error.message : String(error)}`
+		);
+		return null;
+	}
 }

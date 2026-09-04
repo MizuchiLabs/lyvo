@@ -1,5 +1,4 @@
 import type { AstroIntegration } from 'astro';
-import { z } from 'astro/zod';
 import { fileURLToPath } from 'node:url';
 import { writeFile, readFile, access } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
@@ -8,96 +7,80 @@ import pagefind from 'astro-pagefind';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { unified } from '@astrojs/markdown-remark';
+import { LyvoOptionsSchema, normalizeOptions, type LyvoConfig, type LyvoOptions } from './config';
 
-export const LyvoOptionsSchema = z.object({
-	title: z.string().optional(),
-	lang: z.string().optional(),
-	logo: z
-		.union([
-			z.string(),
-			z.object({
-				light: z.string(),
-				dark: z.string()
-			})
-		])
-		.optional(),
-	repo: z
-		.object({
-			url: z.string().optional(),
-			branch: z.string().optional()
-		})
-		.optional(),
-	socials: z
-		.array(
-			z.object({
-				label: z.string(),
-				href: z.string(),
-				icon: z.string()
-			})
-		)
-		.optional(),
-	nav: z
-		.array(
-			z.object({
-				title: z.string(),
-				href: z.string()
-			})
-		)
-		.optional(),
-	extraLinks: z
-		.array(
-			z.object({
-				title: z.string(),
-				href: z.string()
-			})
-		)
-		.optional(),
-	docs: z
-		.object({
-			edit: z.boolean().optional(),
-			feedback: z.boolean().optional(),
-			sidebar: z.any().optional()
-		})
-		.optional(),
-	openapi: z
-		.object({
-			input: z.string().optional(),
-			groupBy: z.enum(['tag', 'path']).optional()
-		})
-		.optional(),
-	head: z.string().optional(),
-	customCss: z.array(z.string()).optional()
-});
+const PKG = '@mizuchilabs/lyvo';
 
-export type LyvoOptions = z.infer<typeof LyvoOptionsSchema>;
+function injectVirtualConfig(config: LyvoConfig) {
+	return {
+		name: 'vite-plugin-lyvo-config',
+		resolveId(id: string) {
+			if (id === 'virtual:lyvo-config') {
+				return '\0' + id;
+			}
+			return null;
+		},
+		load(id: string) {
+			if (id === '\0virtual:lyvo-config') {
+				return `export default ${JSON.stringify(config)};`;
+			}
+			return null;
+		}
+	};
+}
+
+function cacheHeadersEntry(prefix: string): string {
+	return `/${prefix}\n  Cache-Control: no-cache, must-revalidate\n/${prefix}/\n  Cache-Control: no-cache, must-revalidate\n`;
+}
 
 export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
-	const options = LyvoOptionsSchema.parse(userOptions);
+	let options: LyvoConfig | null = null;
 
 	return {
 		name: 'lyvo',
 		hooks: {
-			'astro:build:done': async ({ dir }) => {
+			'astro:build:done': async ({ dir, logger }) => {
+				if (!options?.features.cacheHeaders) return;
+
 				const headersPath = new URL('./_headers', dir);
-				const entry =
-					'/docs\n  Cache-Control: no-cache, must-revalidate\n/docs/\n  Cache-Control: no-cache, must-revalidate\n';
+				const entry = cacheHeadersEntry(options.docs.prefix);
 				try {
 					await access(headersPath);
 					const existing = await readFile(headersPath, 'utf-8');
-					if (!existing.includes('/docs\n  Cache-Control: no-cache')) {
+					if (!existing.includes(cacheHeadersEntry(options.docs.prefix))) {
 						await writeFile(headersPath, existing + '\n' + entry);
 					}
 				} catch {
 					await writeFile(headersPath, entry);
 				}
+				logger.info('Wrote Cloudflare _headers for docs pages.');
 			},
-			'astro:config:setup': ({ updateConfig, injectRoute, injectScript }) => {
+			'astro:config:setup': ({
+				config: astroConfig,
+				updateConfig,
+				injectRoute,
+				injectScript,
+				logger
+			}) => {
+				options = normalizeOptions(
+					LyvoOptionsSchema.parse(userOptions),
+					astroConfig,
+					(message) => logger.warn(message)
+				);
+
 				const srcDir = fileURLToPath(new URL('./', import.meta.url)).replace(/\/$/, '');
 
+				const userMarkdown = astroConfig.markdown ?? {};
+
 				updateConfig({
+					// Astro 7 routes markdown through a processor; rehypePlugins in
+					// updateConfig are ignored unless wrapped in unified(). User plugins
+					// are merged so their own markdown config keeps working.
 					markdown: {
 						processor: unified({
+							remarkPlugins: [...(userMarkdown.remarkPlugins ?? [])],
 							rehypePlugins: [
+								...(userMarkdown.rehypePlugins ?? []),
 								rehypeSlug,
 								[
 									rehypeAutolinkHeadings,
@@ -110,10 +93,13 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 										}
 									}
 								]
-							]
+							],
+							remarkRehype: userMarkdown.remarkRehype,
+							gfm: userMarkdown.gfm,
+							smartypants: userMarkdown.smartypants
 						})
 					},
-					integrations: [mdx(), sitemap(), pagefind()],
+					integrations: buildIntegrations(astroConfig, options, logger),
 					vite: {
 						resolve: {
 							alias: [
@@ -123,73 +109,77 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 								}
 							]
 						},
-						plugins: [
-							{
-								name: 'vite-plugin-lyvo-config',
-								resolveId(id) {
-									if (id === 'virtual:lyvo-config') {
-										return '\0' + id;
-									}
-									return null;
-								},
-								load(id) {
-									if (id === '\0virtual:lyvo-config') {
-										const config = {
-											title: options.title,
-											lang: options.lang,
-											repo: options.repo,
-											socials: options.socials || [],
-											nav: options.nav,
-											logo: options.logo,
-											extraLinks: options.extraLinks || [],
-											docs: {
-												edit: true,
-												feedback: true,
-												...options.docs
-											},
-											openapi: {
-												...options.openapi
-											},
-											head: options.head
-										};
-										return `export default ${JSON.stringify(config)};`;
-									}
-
-									return null;
-								}
-							}
-						]
+						plugins: [injectVirtualConfig(options)]
 					}
 				});
 
 				injectRoute({
-					pattern: '/docs/[...slug]',
-					entrypoint: '@mizuchilabs/lyvo/routes/docs/[...slug].astro'
-				});
-				injectRoute({
-					pattern: '/docs/',
-					entrypoint: '@mizuchilabs/lyvo/routes/docs/index.astro'
+					pattern: `${options.docs.prefix}/[...slug]`,
+					entrypoint: `${PKG}/routes/docs/[...slug].astro`
 				});
 
-				if (options.openapi?.input) {
+				if (options.i18n.locales.length > 0) {
 					injectRoute({
-						pattern: '/api/[slug]',
-						entrypoint: '@mizuchilabs/lyvo/routes/api/[slug].astro'
-					});
-					injectRoute({
-						pattern: '/api',
-						entrypoint: '@mizuchilabs/lyvo/routes/api/index.astro'
+						pattern: `/[locale]${options.docs.prefix}/[...slug]`,
+						entrypoint: `${PKG}/routes/docs/localized/[...slug].astro`
 					});
 				}
 
-				if (options.customCss && options.customCss.length > 0) {
-					for (const cssPath of options.customCss) {
-						injectScript('page-ssr', `import "${cssPath}";`);
-					}
-				} else {
-					injectScript('page-ssr', `import "@mizuchilabs/lyvo/style.css";`);
+				if (options.api.specs.length > 0) {
+					injectRoute({
+						pattern: `${options.api.root}/[...slug]`,
+						entrypoint: `${PKG}/routes/api/[...slug].astro`
+					});
+				}
+
+				if (options.og.generate) {
+					injectRoute({
+						pattern: '/og/[...slug]',
+						entrypoint: `${PKG}/routes/og/[...slug].ts`
+					});
+				}
+
+				if (options.llms) {
+					injectRoute({
+						pattern: '/llms.txt',
+						entrypoint: `${PKG}/routes/llms.txt.ts`
+					});
+					injectRoute({
+						pattern: '/llms-full.txt',
+						entrypoint: `${PKG}/routes/llms-full.txt.ts`
+					});
+				}
+
+				injectScript('page-ssr', `import "${PKG}/style.css";`);
+				for (const cssPath of options.customCss) {
+					injectScript('page-ssr', `import "${cssPath}";`);
 				}
 			}
 		}
 	};
+}
+
+function buildIntegrations(
+	astroConfig: { integrations?: Array<{ name: string }> },
+	options: LyvoConfig,
+	logger: { warn: (message: string) => void }
+) {
+	const existing = new Set((astroConfig.integrations ?? []).map((integration) => integration.name));
+	const extra = [];
+
+	if (!existing.has('@astrojs/mdx')) {
+		extra.push(mdx());
+	} else {
+		logger.warn('MDX integration already configured, lyvo will use the existing one.');
+	}
+
+	if (options.features.sitemap && !existing.has('@astrojs/sitemap')) {
+		extra.push(sitemap());
+	}
+
+	if (options.features.search && !existing.has('astro-pagefind')) {
+		extra.push(pagefind());
+	}
+
+	return extra;
 }
