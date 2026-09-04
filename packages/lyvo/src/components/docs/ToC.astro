@@ -53,56 +53,48 @@ const locale = currentLocale(Astro.url.pathname);
 <script>
 	import '@lyvo/lib/toc';
 
-	function buildRoundedPath(points: { x: number; y: number }[], radius: number) {
-		if (points.length === 0) return '';
-		if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+	interface TocRow {
+		x: number;
+		top: number;
+		bottom: number;
+	}
 
-		const commands = [`M ${points[0].x} ${points[0].y}`];
+	// Vertical through each row, with a small S-bend bridging depth changes
+	// at the row boundary (fumadocs style), not a step or a full-row diagonal.
+	function buildTocPath(rows: TocRow[], transition: number) {
+		if (rows.length === 0) return '';
 
-		for (let i = 1; i < points.length; i++) {
-			const point = points[i];
-			const prev = points[i - 1];
-
-			if (i === points.length - 1) {
-				commands.push(` L ${point.x} ${point.y}`);
-				continue;
-			}
-
-			const next = points[i + 1];
-			const prevVecX = point.x - prev.x;
-			const prevVecY = point.y - prev.y;
-			const nextVecX = next.x - point.x;
-			const nextVecY = next.y - point.y;
-			const prevLen = Math.hypot(prevVecX, prevVecY);
-			const nextLen = Math.hypot(nextVecX, nextVecY);
-
-			if (prevLen === 0 || nextLen === 0) {
-				commands.push(` L ${point.x} ${point.y}`);
-				continue;
-			}
-
-			const prevDirX = prevVecX / prevLen;
-			const prevDirY = prevVecY / prevLen;
-			const nextDirX = nextVecX / nextLen;
-			const nextDirY = nextVecY / nextLen;
-			const dot = prevDirX * nextDirX + prevDirY * nextDirY;
-
-			if (Math.abs(dot) > 0.999) {
-				commands.push(` L ${point.x} ${point.y}`);
-				continue;
-			}
-
-			const cornerRadius = Math.min(radius, prevLen / 2, nextLen / 2);
-			const entryX = point.x - prevDirX * cornerRadius;
-			const entryY = point.y - prevDirY * cornerRadius;
-			const exitX = point.x + nextDirX * cornerRadius;
-			const exitY = point.y + nextDirY * cornerRadius;
-
-			commands.push(` L ${entryX} ${entryY}`);
-			commands.push(` Q ${point.x} ${point.y} ${exitX} ${exitY}`);
+		const topSpans = rows.map(() => 0);
+		const bottomSpans = rows.map(() => 0);
+		for (let i = 1; i < rows.length; i++) {
+			if (rows[i].x === rows[i - 1].x) continue;
+			const span = Math.max(
+				1,
+				Math.min(
+					transition,
+					(rows[i - 1].bottom - rows[i - 1].top) / 2 - 1,
+					(rows[i].bottom - rows[i].top) / 2 - 1
+				)
+			);
+			bottomSpans[i - 1] = span;
+			topSpans[i] = span;
 		}
 
-		return commands.join('');
+		let d = `M ${rows[0].x} ${rows[0].top + topSpans[0]}`;
+		for (let i = 0; i < rows.length; i++) {
+			const row = rows[i];
+			d += ` L ${row.x} ${row.bottom - bottomSpans[i]}`;
+			const next = rows[i + 1];
+			if (next && next.x !== row.x) {
+				const y1 = row.bottom - bottomSpans[i];
+				const y2 = next.top + topSpans[i + 1];
+				const ym = (y1 + y2) / 2;
+				// Control points at the mid-height keep tangents vertical on
+				// both ends, so the bend blends into the straight segments.
+				d += ` C ${row.x} ${ym} ${next.x} ${ym} ${next.x} ${y2}`;
+			}
+		}
+		return d;
 	}
 
 	function updateLayout() {
@@ -113,7 +105,7 @@ const locale = currentLocale(Astro.url.pathname);
 		if (!linksWrapper || !maskElement) return;
 
 		const links = linksWrapper.querySelectorAll('.toc-link');
-		const points: { x: number; y: number }[] = [];
+		const rows: TocRow[] = [];
 		let maxW = 0;
 		const strokeWidth = 1.5;
 		const halfStroke = strokeWidth / 2;
@@ -128,13 +120,11 @@ const locale = currentLocale(Astro.url.pathname);
 			const top = linkEl.offsetTop + halfStroke;
 			const bottom = linkEl.offsetTop + linkEl.offsetHeight - halfStroke;
 
-			points.push({ x, y: top });
-			points.push({ x, y: bottom });
-
+			rows.push({ x, top, bottom });
 			maxW = Math.max(maxW, x + halfStroke);
 		});
 
-		const svgPath = buildRoundedPath(points, 4);
+		const svgPath = buildTocPath(rows, 10);
 		const svgWidth = Math.max(40, maxW + 10);
 		const lineHeight = linksWrapper.scrollHeight;
 

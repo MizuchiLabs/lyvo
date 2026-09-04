@@ -42,11 +42,12 @@ function updateToc() {
 			)
 		: null;
 	if (indicator && desktopLink) {
-		const style = window.getComputedStyle(desktopLink);
-		const paddingTop = parseFloat(style.paddingTop) || 0;
-		const paddingBottom = parseFloat(style.paddingBottom) || 0;
-		indicator.style.top = `${desktopLink.offsetTop + paddingTop}px`;
-		indicator.style.height = `${desktopLink.offsetHeight - paddingTop - paddingBottom}px`;
+		// Span the full row so the highlight covers exactly what the grey rail
+		// shows there, with no grey peeking out above or below. The mask clips
+		// it to the rail shape, so S-bend tails at depth changes stay on-path.
+		const strokeWidth = 1.5;
+		indicator.style.top = `${desktopLink.offsetTop + strokeWidth / 2}px`;
+		indicator.style.height = `${desktopLink.offsetHeight - strokeWidth}px`;
 	}
 
 	// Mobile active label
