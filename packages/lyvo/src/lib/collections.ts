@@ -15,11 +15,13 @@ export function defineLyvoCollections() {
 	if (lyvoConfig.api.specs.length > 0) {
 		collections.api = defineCollection({
 			loader: openapiLoader({
-				specs: lyvoConfig.api.specs.map((spec: { id: string; input: string; groupBy: 'tag' | 'path' }) => ({
-					id: spec.id,
-					input: spec.input,
-					groupBy: spec.groupBy
-				}))
+				specs: lyvoConfig.api.specs.map(
+					(spec: { id: string; input: string; groupBy: 'tag' | 'path' }) => ({
+						id: spec.id,
+						input: spec.input,
+						groupBy: spec.groupBy
+					})
+				)
 			})
 		});
 	}

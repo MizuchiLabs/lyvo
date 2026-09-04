@@ -13,7 +13,9 @@ export async function readApiModel(specId: string): Promise<OpenAPIModel> {
 
 	const entry = await getEntry('api', `openapi:${specId}`);
 	if (!entry) {
-		throw new Error(`OpenAPI model "${specId}" not found. Ensure the API collection is configured.`);
+		throw new Error(
+			`OpenAPI model "${specId}" not found. Ensure the API collection is configured.`
+		);
 	}
 
 	const model = entry.data as unknown as OpenAPIModel;

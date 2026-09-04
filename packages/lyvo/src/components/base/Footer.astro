@@ -39,34 +39,36 @@ const hasContent = columns.length > 0 || config.socials.length > 0;
 						)}
 					</div>
 
-					{
-						columns.length > 0 && (
-							<div class="grid grid-cols-2 gap-8 sm:grid-cols-3">
-								{columns.map((column) => (
-									<div class="space-y-3">
-										<h3 class="text-sm font-semibold">{column.title}</h3>
-										<ul class="space-y-2">
-											{column.links.map((link) => {
-												const external = isExternal(link.href);
-												return (
-													<li>
-														<a
-															href={link.href}
-															target={external ? '_blank' : undefined}
-															rel={external ? 'noopener noreferrer' : undefined}
-															class="text-sm text-muted-foreground transition-colors hover:text-foreground"
-														>
-															{link.label}
-														</a>
-													</li>
-												);
-											})}
-										</ul>
-									</div>
-								))}
-							</div>
-						)
-					}
+					{columns.length > 0 && (
+						<div class="grid grid-cols-2 gap-8 sm:grid-cols-3">
+							{columns.map((column) => (
+								<div class="space-y-3">
+									<h3 class="text-sm font-semibold">{column.title}</h3>
+									<ul class="space-y-2">
+										{column.links.map((link) => {
+											const external = isExternal(link.href);
+											return (
+												<li>
+													<a
+														href={link.href}
+														target={external ? '_blank' : undefined}
+														rel={
+															external
+																? 'noopener noreferrer'
+																: undefined
+														}
+														class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+													>
+														{link.label}
+													</a>
+												</li>
+											);
+										})}
+									</ul>
+								</div>
+							))}
+						</div>
+					)}
 				</div>
 
 				<div class="mt-10 border-t border-border/40 pt-6 text-xs text-muted-foreground">

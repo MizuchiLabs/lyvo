@@ -28,7 +28,9 @@ const { badge, title, highlight, description, primary, secondary } = Astro.props
 			</div>
 		)
 	}
-	<h1 class="mb-4 max-w-4xl text-4xl font-extrabold tracking-tighter text-balance sm:text-5xl md:text-6xl lg:text-7xl">
+	<h1
+		class="mb-4 max-w-4xl text-4xl font-extrabold tracking-tighter text-balance sm:text-5xl md:text-6xl lg:text-7xl"
+	>
 		{title}
 		{highlight && <span class="text-primary italic"> {highlight}</span>}
 	</h1>

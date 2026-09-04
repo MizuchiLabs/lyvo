@@ -24,14 +24,11 @@ const { title, description, primary, secondary } = Astro.props;
 			class="pointer-events-none absolute inset-0"
 			aria-hidden="true"
 			style="background: radial-gradient(60% 80% at 50% 0%, color-mix(in oklch, var(--primary) 12%, transparent), transparent);"
-		/>
+		>
+		</div>
 		<div class="relative mx-auto max-w-2xl">
 			<h2 class="text-3xl font-bold tracking-tight text-balance md:text-4xl">{title}</h2>
-			{
-				description && (
-					<p class="mt-4 text-balance text-muted-foreground">{description}</p>
-				)
-			}
+			{description && <p class="mt-4 text-balance text-muted-foreground">{description}</p>}
 			{
 				(primary || secondary) && (
 					<div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

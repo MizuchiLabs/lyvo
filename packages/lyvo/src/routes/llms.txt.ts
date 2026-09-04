@@ -19,7 +19,9 @@ export const GET: APIRoute = async () => {
 	if (defaultDocs.length > 0) {
 		lines.push('', '## Docs', '');
 		for (const doc of defaultDocs) {
-			lines.push(`- [${doc.data.title}](${docUrl(doc.id)}): ${doc.data.description ?? ''}`.trimEnd());
+			lines.push(
+				`- [${doc.data.title}](${docUrl(doc.id)}): ${doc.data.description ?? ''}`.trimEnd()
+			);
 		}
 	}
 
@@ -28,7 +30,9 @@ export const GET: APIRoute = async () => {
 		if (localeDocs.length === 0) continue;
 		lines.push('', `## Docs (${locale.label})`, '');
 		for (const doc of localeDocs) {
-			lines.push(`- [${doc.data.title}](${docUrl(doc.id)}): ${doc.data.description ?? ''}`.trimEnd());
+			lines.push(
+				`- [${doc.data.title}](${docUrl(doc.id)}): ${doc.data.description ?? ''}`.trimEnd()
+			);
 		}
 	}
 

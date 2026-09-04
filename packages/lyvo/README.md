@@ -40,6 +40,8 @@ pnpm add @tailwindcss/vite tailwindcss
 
 ## Quick Start
 
+Lyvo works with an empty `lyvo()` call. Out of the box you get: a `/docs` section with an auto-generated sidebar from your folder structure, dark mode, offline search, sitemap, `llms.txt`, and native locale labels (English, Deutsch, ...) via `Intl.DisplayNames`. Everything below is customization.
+
 ### 1. Configure Astro
 
 Add the `lyvo` integration to your `astro.config.mjs`:
@@ -135,31 +137,31 @@ export const collections = {
 
 The `lyvo()` integration accepts the following options:
 
-| Option | Type | Description |
-| :----- | :--- | :---------- |
-| `title` | `string` | The title of your documentation site. Set to `""` to hide the text. |
-| `description` | `string` | Site description, used as the meta/OG description fallback. |
-| `lang` | `string` | Default locale code. Shorthand for `i18n.defaultLocale`. |
-| `logo` | `string \| {light, dark}` | Filename of an image in your `src/assets/` folder. |
-| `favicon` | `{svg?, ico?}` | Override the default favicon paths. |
-| `nav` | `Array<{title, href}>` | Override the default top navigation bar links. |
-| `repo.url` / `repo.branch` | `string` | Repository URL and branch for "Edit this page" links. |
-| `socials` | `Array<{label, href, icon}>` | Social links shown in the header and footer. `icon` resolves from `src/assets/`. |
-| `extraLinks` | `Array<{title, href}>` | Additional text links shown in the sidebar footer. |
-| `footer` | `{note?, columns?}` | Landing page footer with link columns. |
-| `docs.prefix` | `string` | Route prefix for guides. Default `'/docs'`. |
-| `docs.edit` | `boolean` | Whether to show "Edit this page" links. Default `true`. |
-| `docs.feedback` | `boolean` | Whether to show the feedback widget. Default `true`. Feedback is emitted as a `lyvo:feedback` CustomEvent on `window` with `{ helpful, path }`. |
-| `docs.sidebar` | `{items?}` or `{order?, labels?}` | Sidebar structure. `items` supports strings (doc slugs or `'---'` separators), nested categories and external links. The legacy `order`/`labels` shape still works. |
-| `openapi` | `{input, prefix?, groupBy?, title?}` or array | OpenAPI spec(s). Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`). |
-| `i18n` | `{defaultLocale?, locales?, ui?}` | Locale subfolder-based i18n. Default locale content lives at the content root, other locales in subfolders (`src/content/docs/de/`). `ui` maps locale codes to translated UI strings. |
-| `og` | `boolean \| {siteName?, image?, generate?}` | Open Graph meta tags are always on. `og: true` or `og.generate: true` also generates a per-page OG image at build time. Requires `sharp` (Astro already depends on it, but pnpm users may need `pnpm add sharp` for image generation). |
-| `llms` | `boolean` | Generate `/llms.txt` and `/llms-full.txt` endpoints. Default `true`. |
-| `search` | `boolean` | Enable Pagefind search. Default `true`. |
-| `sitemap` | `boolean` | Inject the sitemap integration (skipped if you already use one). Default `true`. |
-| `cacheHeaders` | `boolean` | Append Cloudflare `_headers` rules with `no-cache` for the docs prefix. Default `false`. |
-| `head` | `string` | Raw HTML injected into `<head>` on every page. Great for analytics snippets. |
-| `customCss` | `string[]` | CSS files appended after the default theme stylesheet. |
+| Option                     | Type                                          | Description                                                                                                                                                                                                                            |
+| :------------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`                    | `string`                                      | The title of your documentation site. Set to `""` to hide the text.                                                                                                                                                                    |
+| `description`              | `string`                                      | Site description, used as the meta/OG description fallback.                                                                                                                                                                            |
+| `lang`                     | `string`                                      | Default locale code. Shorthand for `i18n.defaultLocale`.                                                                                                                                                                               |
+| `logo`                     | `string \| {light, dark}`                     | Filename of an image in your `src/assets/` folder.                                                                                                                                                                                     |
+| `favicon`                  | `{svg?, ico?}`                                | Override the default favicon paths.                                                                                                                                                                                                    |
+| `nav`                      | `Array<{title, href}>`                        | Override the default top navigation bar links.                                                                                                                                                                                         |
+| `repo.url` / `repo.branch` | `string`                                      | Repository URL and branch for "Edit this page" links.                                                                                                                                                                                  |
+| `socials`                  | `Array<{label, href, icon}>`                  | Social links shown in the header and footer. `icon` resolves from `src/assets/`.                                                                                                                                                       |
+| `extraLinks`               | `Array<{title, href}>`                        | Additional text links shown in the sidebar footer.                                                                                                                                                                                     |
+| `footer`                   | `{note?, columns?}`                           | Landing page footer with link columns.                                                                                                                                                                                                 |
+| `docs.prefix`              | `string`                                      | Route prefix for guides. Default `'/docs'`.                                                                                                                                                                                            |
+| `docs.edit`                | `boolean`                                     | Whether to show "Edit this page" links. Default `true`.                                                                                                                                                                                |
+| `docs.feedback`            | `boolean`                                     | Whether to show the feedback widget. Default `true`. Feedback is emitted as a `lyvo:feedback` CustomEvent on `window` with `{ helpful, path }`.                                                                                        |
+| `docs.sidebar`             | `{items?}` or `{order?, labels?}`             | Sidebar structure. `items` supports strings (doc slugs or `'---'` separators), nested categories and external links. The legacy `order`/`labels` shape still works.                                                                    |
+| `openapi`                  | `{input, prefix?, groupBy?, title?}` or array | OpenAPI spec(s). Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`).                                                                                                                                               |
+| `i18n`                     | `{defaultLocale?, locales?, ui?}`             | Locale subfolder-based i18n. Default locale content lives at the content root, other locales in subfolders (`src/content/docs/de/`). `ui` maps locale codes to translated UI strings.                                                  |
+| `og`                       | `boolean \| {siteName?, image?, generate?}`   | Open Graph meta tags are always on. `og: true` or `og.generate: true` also generates a per-page OG image at build time. Requires `sharp` (Astro already depends on it, but pnpm users may need `pnpm add sharp` for image generation). |
+| `llms`                     | `boolean`                                     | Generate `/llms.txt` and `/llms-full.txt` endpoints. Default `true`.                                                                                                                                                                   |
+| `search`                   | `boolean`                                     | Enable Pagefind search. Default `true`.                                                                                                                                                                                                |
+| `sitemap`                  | `boolean`                                     | Inject the sitemap integration (skipped if you already use one). Default `true`.                                                                                                                                                       |
+| `cacheHeaders`             | `boolean`                                     | Append Cloudflare `_headers` rules with `no-cache` for the docs prefix. Default `false`.                                                                                                                                               |
+| `head`                     | `string`                                      | Raw HTML injected into `<head>` on every page. Great for analytics snippets.                                                                                                                                                           |
+| `customCss`                | `string[]`                                    | CSS files appended after the default theme stylesheet.                                                                                                                                                                                 |
 
 Unknown options are reported as build warnings, so typos don't fail silently.
 

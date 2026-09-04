@@ -29,7 +29,10 @@ describe('joinUrl', () => {
 
 describe('splitDocId', () => {
 	it('splits declared locale prefixes', () => {
-		expect(splitDocId('de/guides/x', ['de', 'fr'])).toEqual({ locale: 'de', pageId: 'guides/x' });
+		expect(splitDocId('de/guides/x', ['de', 'fr'])).toEqual({
+			locale: 'de',
+			pageId: 'guides/x'
+		});
 	});
 
 	it('treats undeclared prefixes as page ids', () => {

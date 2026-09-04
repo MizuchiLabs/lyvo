@@ -84,7 +84,10 @@ async function resolvePageMeta(slugParam: string): Promise<PageMeta | null> {
 				spec.model.operations.find((operation) => operation.slug === slug) ??
 				spec.model.webhooks.find((webhook) => webhook.slug === slug);
 			if (endpoint) {
-				return { title: `${endpoint.method.toUpperCase()} ${endpoint.path}`, description: endpoint.summary };
+				return {
+					title: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
+					description: endpoint.summary
+				};
 			}
 		}
 		return null;
@@ -99,7 +102,12 @@ function loadFonts(): Array<{ name: string; data: Buffer; weight: 400 | 700; sty
 	const weights: Array<400 | 700> = [400, 700];
 	for (const [index, file] of files.entries()) {
 		try {
-			fonts.push({ name: 'Inter', data: fs.readFileSync(file), weight: weights[index] ?? 400, style: 'normal' });
+			fonts.push({
+				name: 'Inter',
+				data: fs.readFileSync(file),
+				weight: weights[index] ?? 400,
+				style: 'normal'
+			});
 		} catch {
 			// skip missing font file
 		}
@@ -193,7 +201,11 @@ export const GET: APIRoute = async ({ params }) => {
 								{
 									type: 'div',
 									props: {
-										style: { fontSize: '28px', color: 'rgba(255,255,255,0.7)', fontWeight: 700 },
+										style: {
+											fontSize: '28px',
+											color: 'rgba(255,255,255,0.7)',
+											fontWeight: 700
+										},
 										children: siteName
 									}
 								}
@@ -244,6 +256,9 @@ export const GET: APIRoute = async ({ params }) => {
 	const png = await sharp(Buffer.from(svg)).png().toBuffer();
 
 	return new Response(png, {
-		headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=31536000, immutable' }
+		headers: {
+			'Content-Type': 'image/png',
+			'Cache-Control': 'public, max-age=31536000, immutable'
+		}
 	});
 };

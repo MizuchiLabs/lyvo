@@ -56,13 +56,22 @@ function injectLyvoStyles(
 
 		// Users following older docs import the theme (or tailwind) themselves.
 		// Inline appending would create nested roots, so drop those imports.
-		css = css.replace(/^@import\s+['"](tailwindcss|@mizuchilabs\/lyvo\/style\.css|tw-animate-css)['"];\s*$/gm, '');
+		css = css.replace(
+			/^@import\s+['"](tailwindcss|@mizuchilabs\/lyvo\/style\.css|tw-animate-css)['"];\s*$/gm,
+			''
+		);
 
 		// Relative imports/urls must resolve from the user's file, but the
 		// combined module lives next to the theme stylesheet.
 		const userDir = path.dirname(resolved);
 		const themeDir = path.dirname(stylePath);
-		const rebase = (match: string, prefix: string, quote: string, target: string, suffix: string) => {
+		const rebase = (
+			match: string,
+			prefix: string,
+			quote: string,
+			target: string,
+			suffix: string
+		) => {
 			if (!target.startsWith('.')) return match;
 			const absolute = path.resolve(userDir, target);
 			const rebased = path.relative(themeDir, absolute).split(path.sep).join('/');
@@ -129,7 +138,9 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 				injectScript,
 				logger
 			}) => {
-				warnUnknownOptions(userOptions as Record<string, unknown>, (message) => logger.warn(message));
+				warnUnknownOptions(userOptions as Record<string, unknown>, (message) =>
+					logger.warn(message)
+				);
 
 				options = normalizeOptions(LyvoOptionsSchema.parse(userOptions), astroConfig);
 
@@ -174,7 +185,10 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 								}
 							]
 						},
-						plugins: [injectVirtualConfig(options), injectLyvoStyles(options, srcDir, logger)]
+						plugins: [
+							injectVirtualConfig(options),
+							injectLyvoStyles(options, srcDir, logger)
+						]
 					}
 				});
 
@@ -226,7 +240,9 @@ function buildIntegrations(
 	options: LyvoConfig,
 	logger: { warn: (message: string) => void }
 ) {
-	const existing = new Set((astroConfig.integrations ?? []).map((integration) => integration.name));
+	const existing = new Set(
+		(astroConfig.integrations ?? []).map((integration) => integration.name)
+	);
 	const extra = [];
 
 	if (!existing.has('@astrojs/mdx')) {
