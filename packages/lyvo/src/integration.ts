@@ -1,136 +1,86 @@
-import type { AstroIntegration } from 'astro';
+import type { AstroIntegration, AstroIntegrationLogger } from 'astro';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
-import { writeFile, readFile, access } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import pagefind from 'astro-pagefind';
+import tailwindcss from '@tailwindcss/vite';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeExternalLinks from './lib/rehype-external-links';
 import { unified } from '@astrojs/markdown-remark';
-import {
-	LyvoOptionsSchema,
-	normalizeOptions,
-	warnUnknownOptions,
-	type LyvoConfig,
-	type LyvoOptions
-} from './config';
+import { LyvoOptionsSchema, normalizeOptions, type LyvoConfig, type LyvoOptions } from './config';
 
 const PKG = '@mizuchilabs/lyvo';
-
-function injectVirtualConfig(config: LyvoConfig) {
-	return {
-		name: 'vite-plugin-lyvo-config',
-		resolveId(id: string) {
-			if (id === 'virtual:lyvo-config') {
-				return '\0' + id;
-			}
-			return null;
-		},
-		load(id: string) {
-			if (id === '\0virtual:lyvo-config') {
-				return `export default ${JSON.stringify(config)};`;
-			}
-			return null;
-		}
-	};
-}
-
+const VIRTUAL_CONFIG_ID = 'virtual:lyvo-config';
 const VIRTUAL_STYLES_ID = 'lyvo:styles';
 
-// Serves the theme stylesheet as ONE Tailwind root with the user's customCss
-// appended inline. Two separate roots would cascade-break responsive
-// utilities (a later root's .hidden beats the theme root's md:flex).
-function injectLyvoStyles(
-	options: LyvoConfig,
-	srcDir: string,
-	logger: { warn: (message: string) => void }
-) {
+function lyvoVitePlugin(config: LyvoConfig, srcDir: string, root: string) {
 	const stylePath = path.join(srcDir, 'styles', 'global.css');
-	const virtualId = `${stylePath}?lyvo-styles`;
-
-	function prepareUserCss(file: string): string {
-		const resolved = path.resolve(process.cwd(), file.replace(/^\//, ''));
-		let css = fs.readFileSync(resolved, 'utf-8');
-
-		// Users following older docs import the theme (or tailwind) themselves.
-		// Inline appending would create nested roots, so drop those imports.
-		css = css.replace(
-			/^@import\s+['"](tailwindcss|@mizuchilabs\/lyvo\/style\.css|tw-animate-css)['"];\s*$/gm,
-			''
-		);
-
-		// Relative imports/urls must resolve from the user's file, but the
-		// combined module lives next to the theme stylesheet.
-		const userDir = path.dirname(resolved);
-		const themeDir = path.dirname(stylePath);
-		const rebase = (
-			match: string,
-			prefix: string,
-			quote: string,
-			target: string,
-			suffix: string
-		) => {
-			if (!target.startsWith('.')) return match;
-			const absolute = path.resolve(userDir, target);
-			const rebased = path.relative(themeDir, absolute).split(path.sep).join('/');
-			return `${prefix}${quote}${rebased}${suffix}`;
-		};
-		css = css.replace(/(@import\s+)(['"])([^'"]+)\2/g, rebase);
-		css = css.replace(/(url\()(\s*)(['"])([^'"]+)\3(\s*\))/g, rebase);
-
-		return `/* source: ${file} */\n${css}`;
-	}
+	// A .css path keeps the module on Vite's CSS pipeline so Tailwind processes it.
+	const stylesModule = `${stylePath}?lyvo-styles`;
 
 	return {
-		name: 'vite-plugin-lyvo-styles',
+		name: 'vite-plugin-lyvo',
 		resolveId(id: string) {
-			if (id === VIRTUAL_STYLES_ID) return virtualId;
+			if (id === VIRTUAL_CONFIG_ID) return `\0${id}`;
+			if (id === VIRTUAL_STYLES_ID) return stylesModule;
 			return null;
 		},
 		load(id: string) {
-			if (id !== virtualId) return null;
+			if (id === `\0${VIRTUAL_CONFIG_ID}`) return `export default ${JSON.stringify(config)};`;
+			if (id !== stylesModule) return null;
 
-			const parts = [fs.readFileSync(stylePath, 'utf-8')];
-			for (const file of options.customCss) {
-				try {
-					parts.push(prepareUserCss(file));
-				} catch {
-					logger.warn(`customCss file "${file}" could not be read, skipping.`);
-				}
-			}
-			return parts.join('\n');
+			// One Tailwind root: user CSS is pulled in through @import so utilities
+			// aren't emitted twice (a second root's .hidden would beat md:flex).
+			const imports = [
+				stylePath,
+				...config.customCss.map((file) => resolveUserPath(root, file))
+			];
+			return imports.map((file) => `@import ${JSON.stringify(file)};`).join('\n');
 		}
 	};
 }
 
-function cacheHeadersEntry(prefix: string): string {
-	return `/${prefix}\n  Cache-Control: no-cache, must-revalidate\n/${prefix}/\n  Cache-Control: no-cache, must-revalidate\n`;
+function resolveUserPath(root: string, file: string): string {
+	return path.resolve(root, file.replace(/^\//, ''));
+}
+
+function hasUserFile(dir: string, pattern: RegExp): boolean {
+	try {
+		return fs.readdirSync(dir).some((file) => pattern.test(file));
+	} catch {
+		return false;
+	}
+}
+
+function hasTailwindPlugin(plugins: unknown[] = []): boolean {
+	return plugins.flat(Infinity).some((plugin) => {
+		const name = (plugin as { name?: string } | null)?.name;
+		return typeof name === 'string' && name.includes('tailwindcss');
+	});
+}
+
+function checkCustomCss(root: string, files: string[], logger: AstroIntegrationLogger) {
+	for (const file of files) {
+		const resolved = resolveUserPath(root, file);
+		if (!fs.existsSync(resolved)) {
+			throw new Error(`[lyvo] customCss file "${file}" not found at ${resolved}.`);
+		}
+		const css = fs.readFileSync(resolved, 'utf-8');
+		if (/@import\s+['"]tailwindcss['"]/.test(css)) {
+			logger.warn(
+				`"${file}" imports tailwindcss. lyvo already does that, remove the import or utilities get emitted twice.`
+			);
+		}
+	}
 }
 
 export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
-	let options: LyvoConfig | null = null;
-
 	return {
 		name: 'lyvo',
 		hooks: {
-			'astro:build:done': async ({ dir, logger }) => {
-				if (!options?.features.cacheHeaders) return;
-
-				const headersPath = new URL('./_headers', dir);
-				const entry = cacheHeadersEntry(options.docs.prefix);
-				try {
-					await access(headersPath);
-					const existing = await readFile(headersPath, 'utf-8');
-					if (!existing.includes(cacheHeadersEntry(options.docs.prefix))) {
-						await writeFile(headersPath, existing + '\n' + entry);
-					}
-				} catch {
-					await writeFile(headersPath, entry);
-				}
-				logger.info('Wrote Cloudflare _headers for docs pages.');
-			},
 			'astro:config:setup': ({
 				config: astroConfig,
 				updateConfig,
@@ -138,26 +88,43 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 				injectScript,
 				logger
 			}) => {
-				warnUnknownOptions(userOptions as Record<string, unknown>, (message) =>
-					logger.warn(message)
-				);
+				const parsed = LyvoOptionsSchema.safeParse(userOptions);
+				if (!parsed.success) {
+					const issues = parsed.error.issues
+						.map((issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+						.join('\n');
+					throw new Error(`[lyvo] Invalid options:\n${issues}`);
+				}
 
-				options = normalizeOptions(LyvoOptionsSchema.parse(userOptions), astroConfig);
-
+				const options = normalizeOptions(parsed.data, astroConfig);
+				const root = fileURLToPath(astroConfig.root);
 				const srcDir = fileURLToPath(new URL('./', import.meta.url)).replace(/\/$/, '');
+				const pagesDir = fileURLToPath(new URL('./pages/', astroConfig.srcDir));
+				const publicDir = fileURLToPath(astroConfig.publicDir);
+
+				if (!options.site) {
+					logger.warn(
+						'No `site` set in astro.config. Canonical URLs, OG images, the sitemap and robots.txt need it.'
+					);
+				}
+				checkCustomCss(root, options.customCss, logger);
 
 				const userMarkdown = astroConfig.markdown ?? {};
+				const vitePlugins: unknown[] = [lyvoVitePlugin(options, srcDir, root)];
+				if (!hasTailwindPlugin(astroConfig.vite?.plugins as unknown[])) {
+					vitePlugins.push(tailwindcss());
+				}
 
 				updateConfig({
-					// Astro 7 routes markdown through a processor; rehypePlugins in
-					// updateConfig are ignored unless wrapped in unified(). User plugins
-					// are merged so their own markdown config keeps working.
+					// Astro 7 routes markdown through a processor. rehypePlugins passed
+					// on their own are ignored, so merge the user's into unified().
 					markdown: {
 						processor: unified({
 							remarkPlugins: [...(userMarkdown.remarkPlugins ?? [])],
 							rehypePlugins: [
 								...(userMarkdown.rehypePlugins ?? []),
 								rehypeSlug,
+								[rehypeExternalLinks, { site: options.site, base: options.base }],
 								[
 									rehypeAutolinkHeadings,
 									{
@@ -175,61 +142,46 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 							smartypants: userMarkdown.smartypants
 						})
 					},
-					integrations: buildIntegrations(astroConfig, options, logger),
+					integrations: buildIntegrations(astroConfig, options),
 					vite: {
-						resolve: {
-							alias: [
-								{
-									find: '@lyvo',
-									replacement: srcDir
-								}
-							]
-						},
-						plugins: [
-							injectVirtualConfig(options),
-							injectLyvoStyles(options, srcDir, logger)
-						]
+						resolve: { alias: [{ find: '@lyvo', replacement: srcDir }] },
+						plugins: vitePlugins as never
 					}
 				});
 
-				injectRoute({
-					pattern: `${options.docs.prefix}/[...slug]`,
-					entrypoint: `${PKG}/routes/docs/[...slug].astro`
-				});
+				const route = (pattern: string, entrypoint: string) =>
+					injectRoute({ pattern, entrypoint: `${PKG}/routes/${entrypoint}` });
 
+				route(`${options.docs.prefix}/[...slug]`, 'docs/[...slug].astro');
 				if (options.i18n.locales.length > 0) {
-					injectRoute({
-						pattern: `/[locale]${options.docs.prefix}/[...slug]`,
-						entrypoint: `${PKG}/routes/docs/localized/[...slug].astro`
-					});
+					route(
+						`/[locale]${options.docs.prefix}/[...slug]`,
+						'docs/localized/[...slug].astro'
+					);
 				}
-
 				if (options.api.specs.length > 0) {
-					injectRoute({
-						pattern: `${options.api.root}/[...slug]`,
-						entrypoint: `${PKG}/routes/api/[...slug].astro`
-					});
+					route(`${options.api.root}/[...slug]`, 'api/[...slug].astro');
 				}
-
 				if (options.og.generate) {
-					injectRoute({
-						pattern: '/og/[...slug]',
-						entrypoint: `${PKG}/routes/og/[...slug].ts`
-					});
+					route('/og/[...slug]', 'og/[...slug].ts');
 				}
-
 				if (options.llms) {
-					injectRoute({
-						pattern: '/llms.txt',
-						entrypoint: `${PKG}/routes/llms.txt.ts`
-					});
-					injectRoute({
-						pattern: '/llms-full.txt',
-						entrypoint: `${PKG}/routes/llms-full.txt.ts`
-					});
+					route('/llms.txt', 'llms.txt.ts');
+					route('/llms-full.txt', 'llms-full.txt.ts');
+					route('/[...path].md', 'markdown.ts');
+				}
+				if (
+					options.robots &&
+					!hasUserFile(pagesDir, /^robots\.txt\./) &&
+					!hasUserFile(publicDir, /^robots\.txt$/)
+				) {
+					route('/robots.txt', 'robots.txt.ts');
+				}
+				if (!hasUserFile(pagesDir, /^404\./)) {
+					route('/404', '404.astro');
 				}
 
-				injectScript('page-ssr', 'import "lyvo:styles";');
+				injectScript('page-ssr', `import "${VIRTUAL_STYLES_ID}";`);
 			}
 		}
 	};
@@ -237,27 +189,34 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 
 function buildIntegrations(
 	astroConfig: { integrations?: Array<{ name: string }> },
-	options: LyvoConfig,
-	logger: { warn: (message: string) => void }
+	options: LyvoConfig
 ) {
-	const existing = new Set(
-		(astroConfig.integrations ?? []).map((integration) => integration.name)
-	);
+	const existing = new Set(astroConfig.integrations?.map((integration) => integration.name));
 	const extra = [];
 
-	if (!existing.has('@astrojs/mdx')) {
-		extra.push(mdx());
-	} else {
-		logger.warn('MDX integration already configured, lyvo will use the existing one.');
+	if (!existing.has('@astrojs/mdx')) extra.push(mdx());
+
+	if (options.sitemap && !existing.has('@astrojs/sitemap')) {
+		const { defaultLocale, locales } = options.i18n;
+		extra.push(
+			sitemap({
+				filter: (page) => !/\/404\/?$/.test(page),
+				i18n:
+					locales.length > 0
+						? {
+								defaultLocale,
+								locales: Object.fromEntries(
+									[defaultLocale, ...locales.map((locale) => locale.code)].map(
+										(code) => [code, code]
+									)
+								)
+							}
+						: undefined
+			})
+		);
 	}
 
-	if (options.features.sitemap && !existing.has('@astrojs/sitemap')) {
-		extra.push(sitemap());
-	}
-
-	if (options.features.search && !existing.has('astro-pagefind')) {
-		extra.push(pagefind());
-	}
+	if (options.search && !existing.has('astro-pagefind')) extra.push(pagefind());
 
 	return extra;
 }
