@@ -3,83 +3,116 @@ import { Font } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import Analytics from '@lyvo/components/base/Analytics.astro';
 import config from 'virtual:lyvo-config';
+import { stripBase, withBase } from '@lyvo/lib/url';
+import { absoluteUrl, defaultOgImage, normalizePath, type Alternate } from '@lyvo/lib/seo';
 
 interface Props {
 	title?: string;
 	description?: string;
+	lang?: string;
+	/** Path or URL of the social image. Falls back to the site image. */
+	image?: string;
+	type?: 'website' | 'article';
+	/** Canonical path when it differs from the current one, e.g. untranslated fallbacks. */
+	canonical?: string;
+	alternates?: Alternate[];
+	/** Path of the page's Markdown twin, advertised to LLM tools. */
+	markdown?: string;
+	jsonLd?: object[];
+	noindex?: boolean;
 }
-const { title, description } = Astro.props;
 
-const siteUrl = Astro.site ?? undefined;
+const {
+	title,
+	description,
+	lang = config.i18n.defaultLocale,
+	image = defaultOgImage(),
+	type = 'website',
+	canonical = Astro.url.pathname,
+	alternates = [],
+	markdown,
+	jsonLd = [],
+	noindex = false
+} = Astro.props;
 
-const displayTitle = () => {
-	const customTitle = config.title ?? 'Lyvo Docs';
-	let pageTitle = title;
-
-	if (!pageTitle) {
-		const parts = Astro.url.pathname.split('/').filter(Boolean);
-		if (parts.length > 0) {
-			pageTitle = parts[parts.length - 1]
-				.split('-')
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(' ');
-		}
+function pageTitle(): string {
+	let page = title;
+	if (!page) {
+		const last = stripBase(Astro.url.pathname).split('/').filter(Boolean).at(-1);
+		page = last
+			?.split('-')
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ');
 	}
+	return page && page !== config.title ? `${page} - ${config.title}` : config.title;
+}
 
-	if (!pageTitle) return customTitle;
-	if (pageTitle !== customTitle) return `${pageTitle} - ${customTitle}`;
-	return customTitle;
-};
-
+const fullTitle = pageTitle();
 const resolvedDescription =
-	description ?? config.description ?? `Documentation for ${config.title ?? 'this project'}.`;
-
-const canonicalUrl = siteUrl
-	? new URL(Astro.url.pathname.replace(/\/$/, '') || '/', siteUrl).href.replace(/\/$/, '')
-	: undefined;
-
-const ogImage = config.og.generate
-	? siteUrl
-		? new URL(`/og${Astro.url.pathname.replace(/\/$/, '') || '/index'}.png`, siteUrl).href
-		: undefined
-	: config.og.image
-		? siteUrl
-			? new URL(config.og.image, siteUrl).href
-			: config.og.image
-		: undefined;
-
-const fontVariables = config.fonts ?? [];
+	description ?? config.description ?? `Documentation for ${config.title}.`;
+const canonicalUrl = absoluteUrl(normalizePath(canonical));
+const imageUrl = image ? absoluteUrl(image) : undefined;
+const ogLocale = lang.replace('-', '_');
+const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defaultLocale);
 ---
 
 <head>
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="generator" content={Astro.generator} />
 	<meta name="description" content={resolvedDescription} />
+	{noindex && <meta name="robots" content="noindex" />}
 
-	<!-- Favicons -->
-	<link rel="icon" type="image/svg+xml" href={config.favicon?.svg ?? '/favicon.svg'} />
-	<link rel="shortcut icon" href={config.favicon?.ico ?? '/favicon.ico'} />
-	<link rel="sitemap" href="/sitemap-index.xml" />
+	<link rel="icon" type="image/svg+xml" href={withBase(config.favicon?.svg ?? '/favicon.svg')} />
+	<link rel="icon" href={withBase(config.favicon?.ico ?? '/favicon.ico')} sizes="32x32" />
+	{config.sitemap && <link rel="sitemap" href={withBase('/sitemap-index.xml')} />}
+	{config.llms && (
+		<link rel="alternate" type="text/plain" title="llms.txt" href={withBase('/llms.txt')} />
+	)}
+	{markdown && <link rel="alternate" type="text/markdown" href={markdown} />}
 
-	<!-- Canonical + Open Graph -->
-	{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-	<meta property="og:type" content="website" />
-	<meta property="og:site_name" content={config.og.siteName ?? config.title} />
-	<meta property="og:title" content={displayTitle()} />
+	{canonicalUrl && !noindex && <link rel="canonical" href={canonicalUrl} />}
+	{alternates.length > 1 &&
+		alternates.map((alt) => (
+			<link rel="alternate" hreflang={alt.lang} href={absoluteUrl(normalizePath(alt.path))} />
+		))}
+	{alternates.length > 1 && defaultAlternate && (
+		<link
+			rel="alternate"
+			hreflang="x-default"
+			href={absoluteUrl(normalizePath(defaultAlternate.path))}
+		/>
+	)}
+
+	<meta property="og:type" content={type} />
+	<meta property="og:site_name" content={config.title} />
+	<meta property="og:title" content={fullTitle} />
 	<meta property="og:description" content={resolvedDescription} />
+	<meta property="og:locale" content={ogLocale} />
 	{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
-	{ogImage && <meta property="og:image" content={ogImage} />}
-	<meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-	<meta name="twitter:title" content={displayTitle()} />
+	{imageUrl && <meta property="og:image" content={imageUrl} />}
+	{imageUrl && <meta property="og:image:width" content="1200" />}
+	{imageUrl && <meta property="og:image:height" content="630" />}
+	{imageUrl && <meta property="og:image:alt" content={title ?? config.title} />}
+	<meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
+	<meta name="twitter:title" content={fullTitle} />
 	<meta name="twitter:description" content={resolvedDescription} />
-	{ogImage && <meta name="twitter:image" content={ogImage} />}
+	{imageUrl && <meta name="twitter:image" content={imageUrl} />}
+
+	{jsonLd.map((data) => (
+		<script
+			type="application/ld+json"
+			set:html={JSON.stringify(data).replaceAll('<', '\\u003c')}
+		></script>
+	))}
 
 	<!-- Title -->
-	<title>{displayTitle()}</title>
+	<title>{fullTitle}</title>
 
 	<!-- Fonts (only for fonts the user actually configured) -->
-	{fontVariables.map((variable, index) => <Font cssVariable={variable} preload={index === 0} />)}
+	{config.fonts.map((variable, index) => (
+		<Font cssVariable={variable} preload={index === 0} />
+	))}
 
 	<Analytics />
 
@@ -90,28 +123,46 @@ const fontVariables = config.fonts ?? [];
 
 	<!-- Theme Script -->
 	<script is:inline>
-		function applyTheme() {
-			const theme = (() => {
-				if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+		// Theme preference: "light", "dark", or no stored value to follow the OS.
+		if (!window.__lyvoTheme) {
+			const media = window.matchMedia('(prefers-color-scheme: dark)');
+			const stored = () => {
+				try {
 					return localStorage.getItem('theme');
+				} catch {
+					return null;
 				}
-				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-					return 'dark';
+			};
+			const apply = () => {
+				const pref = stored();
+				const root = document.documentElement;
+				root.classList.toggle('dark', pref ? pref === 'dark' : media.matches);
+				root.dataset.themePref = pref ?? 'system';
+			};
+			window.__lyvoTheme = {
+				apply,
+				set(pref) {
+					try {
+						if (pref === 'system') localStorage.removeItem('theme');
+						else localStorage.setItem('theme', pref);
+					} catch {
+						// storage blocked, the choice lasts until reload
+					}
+					apply();
 				}
-				return 'light';
-			})();
-			document.documentElement.classList.toggle('dark', theme === 'dark');
+			};
+			media.addEventListener('change', apply);
+			document.addEventListener('astro:before-swap', (e) => {
+				const root = document.documentElement;
+				e.newDocument.documentElement.classList.toggle(
+					'dark',
+					root.classList.contains('dark')
+				);
+				e.newDocument.documentElement.dataset.themePref = root.dataset.themePref;
+			});
 		}
-
-		applyTheme();
-
-		document.addEventListener('astro:before-swap', (e) => {
-			const isDark = document.documentElement.classList.contains('dark');
-			e.newDocument?.documentElement?.classList.toggle('dark', isDark);
-		});
-		document.addEventListener('astro:after-swap', applyTheme);
+		window.__lyvoTheme.apply();
 	</script>
-
 	<!-- Code Copy Button -->
 	<script is:inline>
 		function setupCopyButtons() {
@@ -119,7 +170,8 @@ const fontVariables = config.fonts ?? [];
 			const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
 
 			document.querySelectorAll('pre').forEach((block) => {
-				if (block.querySelector('.copy-button')) return;
+				if (block.hasAttribute('data-no-copy') || block.querySelector('.copy-button'))
+					return;
 
 				const button = document.createElement('button');
 				button.className = 'copy-button';
@@ -131,6 +183,11 @@ const fontVariables = config.fonts ?? [];
 					const codeText = block.querySelector('code')?.innerText || '';
 					try {
 						await navigator.clipboard.writeText(codeText);
+						window.dispatchEvent(
+							new CustomEvent('lyvo:track', {
+								detail: { name: 'code_copy', props: { path: location.pathname } }
+							})
+						);
 						button.innerHTML = checkIcon;
 						button.classList.add('copied');
 						setTimeout(() => {
@@ -147,7 +204,6 @@ const fontVariables = config.fonts ?? [];
 		setupCopyButtons();
 		document.addEventListener('astro:page-load', setupCopyButtons);
 	</script>
-
 	<!-- Scroll restoration for the inner scroll container -->
 	<script>
 		const savedScroll = new Map<string, number>();

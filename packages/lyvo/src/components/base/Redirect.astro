@@ -14,10 +14,14 @@ const { to } = Astro.props;
 		<meta charset="utf-8" />
 		<ClientRouter />
 		<title>Redirecting...</title>
+		<meta name="robots" content="noindex" />
+		<link rel="canonical" href={to} />
 	</head>
 	<body>
 		<meta name="lyvo-redirect" content={to} />
-		<noscript><meta http-equiv="refresh" content={`0;url=${to}`} /></noscript>
+		<noscript>
+			<meta http-equiv="refresh" content={`0;url=${to}`} />
+		</noscript>
 		<script>
 			// Client-side redirect so in-site links to the docs prefix don't
 			// trigger a full page load through a meta-refresh stub.

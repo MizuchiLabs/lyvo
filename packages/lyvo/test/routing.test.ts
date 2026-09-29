@@ -7,6 +7,8 @@ import {
 	apiPageUrl,
 	localeFromPath,
 	stripLocaleFromPath,
+	applyBase,
+	removeBase,
 	type RoutingInfo
 } from '../src/lib/routing';
 
@@ -81,5 +83,38 @@ describe('stripLocaleFromPath', () => {
 	it('removes the locale prefix', () => {
 		expect(stripLocaleFromPath('/de/docs/x', routing)).toBe('/docs/x');
 		expect(stripLocaleFromPath('/docs/x', routing)).toBe('/docs/x');
+	});
+});
+
+describe('applyBase', () => {
+	it('prefixes site paths', () => {
+		expect(applyBase('/lyvo', '/docs/intro')).toBe('/lyvo/docs/intro');
+		expect(applyBase('/lyvo', '/')).toBe('/lyvo/');
+	});
+
+	it('leaves already based, external, relative and hash links alone', () => {
+		expect(applyBase('/lyvo', '/lyvo/docs')).toBe('/lyvo/docs');
+		expect(applyBase('/lyvo', '/lyvo')).toBe('/lyvo');
+		expect(applyBase('/lyvo', 'https://example.com/x')).toBe('https://example.com/x');
+		expect(applyBase('/lyvo', '//cdn.example.com/x')).toBe('//cdn.example.com/x');
+		expect(applyBase('/lyvo', '#intro')).toBe('#intro');
+		expect(applyBase('/lyvo', 'guide')).toBe('guide');
+	});
+
+	it('does nothing without a base', () => {
+		expect(applyBase('', '/docs')).toBe('/docs');
+	});
+
+	it('does not treat a shared name prefix as the base', () => {
+		expect(applyBase('/lyvo', '/lyvox/docs')).toBe('/lyvo/lyvox/docs');
+	});
+});
+
+describe('removeBase', () => {
+	it('strips the base from the current path', () => {
+		expect(removeBase('/lyvo', '/lyvo/de/docs/x')).toBe('/de/docs/x');
+		expect(removeBase('/lyvo', '/lyvo')).toBe('/');
+		expect(removeBase('/lyvo', '/lyvo/')).toBe('/');
+		expect(removeBase('', '/docs')).toBe('/docs');
 	});
 });

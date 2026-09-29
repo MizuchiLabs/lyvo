@@ -1,12 +1,10 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
+import type satoriFn from 'satori';
+import type sharpFn from 'sharp';
 import fs from 'node:fs';
-import { pathToFileURL } from 'node:url';
-import { getCollection } from 'astro:content';
 import config from 'virtual:lyvo-config';
-import { readAllApiSpecs } from '@lyvo/lib/openapi/model';
-import { splitDocId } from '@lyvo/lib/routing';
-
-const localeCodes = config.i18n.locales.map((locale) => locale.code);
+import { listPages } from '@lyvo/lib/pages';
+import { ogSlug } from '@lyvo/lib/seo';
 
 interface PageMeta {
 	title: string;
@@ -14,147 +12,61 @@ interface PageMeta {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-	const paths: Array<{ params: { slug: string } }> = [];
-	const all = await getCollection('docs');
-
-	paths.push({ params: { slug: 'index.png' } });
-
-	for (const doc of all) {
-		const { locale, pageId } = splitDocId(doc.id, localeCodes);
-		const pagePath = [locale, config.docs.prefix.replace(/^\//, ''), pageId]
-			.filter(Boolean)
-			.join('/');
-		paths.push({ params: { slug: `${pagePath}.png` } });
-	}
-
-	const specs = await readAllApiSpecs();
-	for (const spec of specs) {
-		const prefix = [config.api.root.replace(/^\//, ''), spec.sub].filter(Boolean).join('/');
-		paths.push({ params: { slug: `${prefix}.png` } });
-		for (const endpoint of [...spec.model.operations, ...spec.model.webhooks]) {
-			paths.push({ params: { slug: `${prefix}/${endpoint.slug}.png` } });
-		}
-	}
-
-	return paths;
+	const home = { title: config.title, description: config.description };
+	const pages = (await listPages()).map((page) => ({ path: page.path, meta: page }));
+	return [{ path: '/', meta: home }, ...pages].map(({ path, meta }) => ({
+		params: { slug: ogSlug(path) },
+		props: { meta: { title: meta.title, description: meta.description } }
+	}));
 };
 
-async function resolvePageMeta(slugParam: string): Promise<PageMeta | null> {
-	const all = await getCollection('docs');
+type Font = { name: string; data: Buffer; weight: 400 | 700; style: 'normal' };
 
-	if (slugParam === 'index.png') {
-		return {
-			title: config.title ?? 'Documentation',
-			description: config.description
-		};
-	}
+let fonts: Font[] | null = null;
 
-	const pagePath = slugParam.replace(/\.png$/, '');
-	const [first, ...rest] = pagePath.split('/');
-	const isLocale = localeCodes.includes(first);
-	const locale = isLocale ? first : null;
-	const location = isLocale ? rest.join('/') : pagePath;
-
-	const docsPrefix = config.docs.prefix.replace(/^\//, '');
-	if (location.startsWith(`${docsPrefix}/`) || location === docsPrefix) {
-		const pageId = location === docsPrefix ? '' : location.slice(docsPrefix.length + 1);
-		const docId = locale ? `${locale}/${pageId}` : pageId;
-		const doc = all.find((entry: any) => entry.id === docId);
-		if (!doc) return null;
-		return { title: doc.data.title, description: doc.data.description };
-	}
-
-	const apiRoot = config.api.root.replace(/^\//, '');
-	if (location === apiRoot || location.startsWith(`${apiRoot}/`)) {
-		const remainder = location === apiRoot ? '' : location.slice(apiRoot.length + 1);
-		const specs = await readAllApiSpecs();
-		for (const spec of specs) {
-			const specPrefix = spec.sub ? `${spec.sub}/` : '';
-			if (!remainder.startsWith(specPrefix)) continue;
-			const slug = remainder.slice(specPrefix.length);
-
-			if (!slug) {
-				return {
-					title: spec.model.info?.title ?? spec.title,
-					description: spec.model.info?.description
-				};
-			}
-
-			const endpoint =
-				spec.model.operations.find((operation) => operation.slug === slug) ??
-				spec.model.webhooks.find((webhook) => webhook.slug === slug);
-			if (endpoint) {
-				return {
-					title: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
-					description: endpoint.summary
-				};
-			}
-		}
-		return null;
-	}
-
-	return null;
-}
-
-function loadFonts(): Array<{ name: string; data: Buffer; weight: 400 | 700; style: 'normal' }> {
-	const files = config.og.fontPaths ?? [];
-	const fonts: Array<{ name: string; data: Buffer; weight: 400 | 700; style: 'normal' }> = [];
-	const weights: Array<400 | 700> = [400, 700];
-	for (const [index, file] of files.entries()) {
+function loadFonts(): Font[] {
+	fonts ??= config.og.fontPaths.flatMap((file, index) => {
 		try {
-			fonts.push({
-				name: 'Inter',
-				data: fs.readFileSync(file),
-				weight: weights[index] ?? 400,
-				style: 'normal'
-			});
+			return [
+				{
+					name: 'Inter',
+					data: fs.readFileSync(file),
+					weight: index === 0 ? 400 : 700,
+					style: 'normal'
+				} as Font
+			];
 		} catch {
-			// skip missing font file
+			return [];
 		}
-	}
+	});
 	return fonts;
 }
 
-function escapeXml(value: string): string {
-	return value
-		.replaceAll('&', '&amp;')
-		.replaceAll('<', '&lt;')
-		.replaceAll('>', '&gt;')
-		.replaceAll('"', '&quot;')
-		.replaceAll("'", '&apos;');
+// import() of a CommonJS module can wrap its exports in default, sometimes twice.
+function unwrap<T>(mod: any): T {
+	const value = mod?.default ?? mod;
+	return typeof value?.default === 'function' ? value.default : value;
+}
+
+async function renderers() {
+	const modules = config.og.modules;
+	if (!modules)
+		throw new Error('[lyvo] OG images need satori and sharp, reinstall dependencies.');
+	const [satori, sharp] = await Promise.all([import(modules.satori), import(modules.sharp)]);
+	return { satori: unwrap<typeof satoriFn>(satori), sharp: unwrap<typeof sharpFn>(sharp) };
 }
 
 function truncate(value: string, max: number): string {
 	return value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
 }
 
-export const GET: APIRoute = async ({ params }) => {
-	const meta = await resolvePageMeta(params.slug ?? '');
-	if (!meta) {
-		return new Response('Not found', { status: 404 });
-	}
-
-	if (!config.og.satoriPath || !config.og.sharpPath) {
-		return new Response('OG image generation is not configured', { status: 500 });
-	}
-
-	// CJS interop: import() of a .cjs module wraps exports, sometimes twice.
-	const unwrap = (mod: any) => {
-		let current = mod?.default ?? mod;
-		if (typeof current === 'object' && typeof current.default === 'function') {
-			current = current.default;
-		}
-		return current;
-	};
-
-	const satoriModule = await import(pathToFileURL(config.og.satoriPath).href);
-	const satori = unwrap(satoriModule);
-	const sharpModule = await import(pathToFileURL(config.og.sharpPath).href);
-	const sharp = unwrap(sharpModule);
-
-	const title = truncate(escapeXml(meta.title), 80);
-	const description = meta.description ? truncate(escapeXml(meta.description), 140) : null;
-	const siteName = escapeXml(config.og.siteName ?? config.title ?? '');
+export const GET: APIRoute = async ({ props }) => {
+	const meta = props.meta as PageMeta;
+	// Satori renders strings as text, no escaping needed.
+	const title = truncate(meta.title, 80);
+	const description = meta.description ? truncate(meta.description.split('\n')[0], 140) : null;
+	const siteName = config.title;
+	const { satori, sharp } = await renderers();
 
 	const svg = await satori(
 		{
@@ -195,7 +107,7 @@ export const GET: APIRoute = async ({ params }) => {
 											fontSize: '26px',
 											fontWeight: 700
 										},
-										children: (config.title ?? 'D').charAt(0).toUpperCase()
+										children: config.title.charAt(0).toUpperCase()
 									}
 								},
 								{

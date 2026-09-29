@@ -1,46 +1,37 @@
 import fs from 'node:fs';
-import child_process from 'node:child_process';
-import util from 'node:util';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
-const execAsync = util.promisify(child_process.exec);
+const execFileAsync = promisify(execFile);
+const cache = new Map<string, Date | null>();
 
-const cache = new Map<string, string>();
+export async function getLastUpdated(filePath: string | undefined): Promise<Date | null> {
+	if (!filePath) return null;
+	if (cache.has(filePath)) return cache.get(filePath)!;
 
-export async function getLastUpdated(filePath: string): Promise<string> {
-	if (!filePath) return '';
-
-	const cached = cache.get(filePath);
-	if (cached !== undefined) return cached;
-
-	let result = '';
-
+	let result: Date | null = null;
 	try {
-		const { stdout } = await execAsync(`git log -1 --format="%ct" -- "${filePath}"`);
-		const gitTime = stdout.toString().trim();
-		if (gitTime) {
-			result = formatTime(new Date(parseInt(gitTime) * 1000));
-		}
+		const { stdout } = await execFileAsync('git', [
+			'log',
+			'-1',
+			'--format=%ct',
+			'--',
+			filePath
+		]);
+		const seconds = Number.parseInt(stdout.trim(), 10);
+		if (seconds) result = new Date(seconds * 1000);
 	} catch {
-		// Fall back to fs mtime below
+		// not a git checkout, fall back to mtime
 	}
 
 	if (!result) {
 		try {
-			const stats = fs.statSync(filePath);
-			result = formatTime(stats.mtime);
+			result = fs.statSync(filePath).mtime;
 		} catch {
-			result = '';
+			result = null;
 		}
 	}
 
 	cache.set(filePath, result);
 	return result;
-}
-
-function formatTime(date: Date): string {
-	return new Intl.DateTimeFormat(undefined, {
-		month: 'short',
-		day: 'numeric',
-		year: 'numeric'
-	}).format(date);
 }

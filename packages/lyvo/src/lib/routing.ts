@@ -56,3 +56,20 @@ export function stripLocaleFromPath(pathname: string, routing: RoutingInfo): str
 	const rest = pathname.slice(locale.length + 1);
 	return rest.startsWith('/') ? rest : `/${rest}`;
 }
+
+/**
+ * Prefix a site path with Astro's `base`. Links that already carry the base,
+ * external URLs and relative or hash links are returned unchanged.
+ */
+export function applyBase(base: string, path: string): string {
+	if (!base || !path.startsWith('/') || path.startsWith('//')) return path;
+	if (path === base || path.startsWith(`${base}/`)) return path;
+	return path === '/' ? `${base}/` : `${base}${path}`;
+}
+
+/** Inverse of applyBase, for parsing the current URL. */
+export function removeBase(base: string, pathname: string): string {
+	if (!base) return pathname;
+	if (pathname === base) return '/';
+	return pathname.startsWith(`${base}/`) ? pathname.slice(base.length) : pathname;
+}
