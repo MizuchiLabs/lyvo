@@ -48,67 +48,63 @@ const groupOrder: Array<keyof typeof parameterGroups> = ['path', 'query', 'heade
 ---
 
 <>
-	{
-		groupOrder.map((groupKey) => {
-			const groupParams = parameterGroups[groupKey];
-			if (groupParams.length === 0) return null;
+	{groupOrder.map((groupKey) => {
+		const groupParams = parameterGroups[groupKey];
+		if (groupParams.length === 0) return null;
 
-			return (
-				<section>
-					<h2 class="mb-4 text-xl font-semibold tracking-tight capitalize">
-						{groupKey} Parameters
-					</h2>
-					<div class="divide-y divide-border border-y border-border">
-						{groupParams.map((parameter: OpenAPIParameter) => (
-							<div class="space-y-2 py-4">
-								<div class="flex flex-wrap items-center gap-2">
-									<span class="text-sm font-semibold text-foreground">
-										{parameter.name}
-										{!parameter.required && (
-											<span class="font-normal text-muted-foreground/75">
-												?
-											</span>
-										)}
+		return (
+			<section>
+				<h2 class="mb-4 text-xl font-semibold tracking-tight capitalize">
+					{groupKey} Parameters
+				</h2>
+				<div class="divide-y divide-border border-y border-border">
+					{groupParams.map((parameter: OpenAPIParameter) => (
+						<div class="space-y-2 py-4">
+							<div class="flex flex-wrap items-center gap-2">
+								<span class="text-sm font-semibold text-foreground">
+									{parameter.name}
+									{!parameter.required && (
+										<span class="font-normal text-muted-foreground/75">?</span>
+									)}
+								</span>
+								{parameter.type && (
+									<span
+										class:list={[
+											'font-mono text-[11px] font-medium',
+											typeColor[getBaseType(parameter.type)]
+										]}
+									>
+										{parameter.type}
+										{parameter.format ? ` <${parameter.format}>` : ''}
 									</span>
-									{parameter.type && (
-										<span
-											class:list={[
-												'font-mono text-[11px] font-medium',
-												typeColor[getBaseType(parameter.type)]
-											]}
-										>
-											{parameter.type}
-											{parameter.format ? ` <${parameter.format}>` : ''}
-										</span>
-									)}
-									{parameter.required && (
-										<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
-											required
-										</span>
-									)}
-								</div>
-								{parameter.description && (
-									<p class="text-sm leading-relaxed text-muted-foreground">
-										{parameter.description}
-									</p>
 								)}
-								<div class="flex flex-wrap gap-2">
-									{parameter.example !== undefined && (
-										<span class="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
-											Example {formatExample(parameter.example)}
-										</span>
-									)}
-									{parameter.examples && parameter.examples.length > 1 && (
-										<span class="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
-											{parameter.examples.length} examples
-										</span>
-									)}
-								</div>
+								{parameter.required && (
+									<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
+										required
+									</span>
+								)}
 							</div>
-						))}
-					</div>
-				</section>
-			);
-		})
-	}
+							{parameter.description && (
+								<p class="text-sm leading-relaxed text-muted-foreground">
+									{parameter.description}
+								</p>
+							)}
+							<div class="flex flex-wrap gap-2">
+								{parameter.example !== undefined && (
+									<span class="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
+										Example {formatExample(parameter.example)}
+									</span>
+								)}
+								{parameter.examples && parameter.examples.length > 1 && (
+									<span class="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
+										{parameter.examples.length} examples
+									</span>
+								)}
+							</div>
+						</div>
+					))}
+				</div>
+			</section>
+		);
+	})}
 </>

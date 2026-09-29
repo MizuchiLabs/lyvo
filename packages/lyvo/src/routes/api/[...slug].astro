@@ -1,43 +1,69 @@
 ---
 import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
-import { readAllApiSpecs, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import {
+	apiIndexHref,
+	findEndpoint,
+	findSchema,
+	readAllApiSpecs,
+	type LoadedApiSpec
+} from '@lyvo/lib/openapi/model';
 import ApiOverview from '@lyvo/components/openapi/ApiOverview.astro';
 import ApiEndpoint from '@lyvo/components/openapi/ApiEndpoint.astro';
+import SchemaPage from '@lyvo/components/openapi/SchemaPage.astro';
+import { joinUrl } from '@lyvo/lib/routing';
+import { t } from '@lyvo/lib/i18n';
+
+type Page =
+	| { kind: 'overview'; spec: LoadedApiSpec }
+	| { kind: 'endpoint'; spec: LoadedApiSpec; slug: string }
+	| { kind: 'schema'; spec: LoadedApiSpec; slug: string };
 
 export async function getStaticPaths() {
-	const specs = await readAllApiSpecs();
-	const paths = [];
-
-	for (const spec of specs) {
-		paths.push({
-			params: { slug: spec.sub || undefined },
-			props: { isIndex: true, spec }
-		});
-
+	const paths: Array<{ params: { slug: string | undefined }; props: { page: Page } }> = [];
+	for (const spec of await readAllApiSpecs()) {
+		const slug = (...parts: string[]) => joinUrl(spec.sub, ...parts).slice(1) || undefined;
+		paths.push({ params: { slug: slug() }, props: { page: { kind: 'overview', spec } } });
 		for (const endpoint of [...spec.model.operations, ...spec.model.webhooks]) {
 			paths.push({
-				params: { slug: spec.sub ? `${spec.sub}/${endpoint.slug}` : endpoint.slug },
-				props: { isIndex: false, spec, slug: endpoint.slug }
+				params: { slug: slug(endpoint.slug) },
+				props: { page: { kind: 'endpoint', spec, slug: endpoint.slug } }
+			});
+		}
+		for (const schema of spec.model.schemas) {
+			paths.push({
+				params: { slug: slug('schemas', schema.slug) },
+				props: { page: { kind: 'schema', spec, slug: schema.slug } }
 			});
 		}
 	}
-
 	return paths;
 }
 
-interface Props {
-	isIndex: boolean;
-	spec: LoadedApiSpec;
-	slug?: string;
-}
+const { page } = Astro.props as { page: Page };
+const { spec } = page;
+const info = spec.model.info;
+const specCrumb = { title: info.title ?? spec.title, href: apiIndexHref(spec) };
 
-const { isIndex, spec, slug } = Astro.props as Props;
+const endpoint = page.kind === 'endpoint' ? findEndpoint(spec.model, page.slug) : null;
+const schema = page.kind === 'schema' ? findSchema(spec.model, page.slug) : null;
+
+const title = endpoint?.title ?? schema?.name ?? info.title ?? spec.title;
+const description =
+	endpoint?.summary ??
+	(endpoint ? `${endpoint.method.toUpperCase()} ${endpoint.path}` : undefined) ??
+	schema?.description ??
+	info.description ??
+	'API reference.';
+const crumbs =
+	page.kind === 'overview'
+		? []
+		: page.kind === 'schema'
+			? [specCrumb, { title: t('schemas'), href: specCrumb.href }]
+			: [specCrumb];
 ---
 
-<DocsLayout
-	title={spec.model.info?.title ?? spec.title}
-	description={spec.model.info?.description ?? 'API reference.'}
-	isApi={true}
->
-	{isIndex ? <ApiOverview spec={spec} /> : <ApiEndpoint spec={spec} slug={slug ?? ''} />}
+<DocsLayout title={title} description={description.split('\n')[0]} isApi={true} crumbs={crumbs}>
+	{page.kind === 'overview' && <ApiOverview spec={spec} />}
+	{page.kind === 'endpoint' && <ApiEndpoint spec={spec} slug={page.slug} />}
+	{page.kind === 'schema' && schema && <SchemaPage spec={spec} entry={schema} />}
 </DocsLayout>

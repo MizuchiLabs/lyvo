@@ -1,120 +1,45 @@
 ---
+import { baseType, objectShape, schemaName, typeLabel } from '@lyvo/lib/openapi/schema';
+import type { LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { schemaHref } from '@lyvo/lib/openapi/model';
+
 interface Props {
 	schema: any;
+	spec?: LoadedApiSpec;
 	name?: string;
 	required?: boolean;
 	level?: number;
 }
 
-const { schema, name, required = false, level = 0 } = Astro.props;
+const { schema, spec, name, required = false, level = 0 } = Astro.props;
 
 if (!schema) return null;
 
-function getRefTypeName(value: any): string | undefined {
-	if (!value || typeof value.$ref !== 'string') return undefined;
-	const parts = value.$ref.split('/');
-	return parts[parts.length - 1] || undefined;
-}
+const MAX_LEVEL = 8;
+const refName = schemaName(schema);
+// Named models nested inside another schema link to their own page instead of
+// expanding again, which keeps big specs readable and stops recursion.
+const collapsed = level > 0 && refName !== undefined && spec !== undefined;
+const refHref = refName && spec ? schemaHref(spec, refName) : undefined;
 
-function getOptionLabel(option: any, index: number): string {
-	const ref = getRefTypeName(option);
-	if (ref) return ref;
-	const label = getTypeLabel(option);
-	if (label && label !== 'any' && label !== 'object') return label;
-	return `Option ${index + 1}`;
-}
+const shape = objectShape(schema);
+const entries = shape.properties;
+const type = typeLabel(schema);
+const kind = baseType(schema);
+const expand = !collapsed && level < MAX_LEVEL;
 
-function getBaseType(value: any): string {
-	if (!value || typeof value !== 'object') return 'any';
-
-	if (Array.isArray(value.type) && typeof value.type[0] === 'string') return value.type[0];
-	if (typeof value.type === 'string') return value.type;
-	if (value.items) return 'array';
-	if (value.properties) return 'object';
-	if (Array.isArray(value.allOf) && value.allOf.length > 0) return 'object';
-	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) return 'union';
-	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) return 'union';
-	if (value.additionalProperties && typeof value.additionalProperties === 'object') {
-		return 'object';
-	}
-	if (getRefTypeName(value)) return 'object';
-
-	return 'any';
-}
-
-function getTypeLabel(value: any): string {
-	if (!value || typeof value !== 'object') return 'any';
-
-	const refTypeName = getRefTypeName(value);
-	if (refTypeName) return refTypeName;
-
-	if (Array.isArray(value.type)) return value.type.join(' | ');
-
-	if (value.items) {
-		return `array<${getTypeLabel(value.items)}>`;
-	}
-
-	if (typeof value.type === 'string') return value.type;
-	if (value.properties) return 'object';
-
-	if (value.additionalProperties && typeof value.additionalProperties === 'object') {
-		return `Record<string, ${getTypeLabel(value.additionalProperties)}>`;
-	}
-
-	if (Array.isArray(value.oneOf) && value.oneOf.length > 0) {
-		return `one of ${value.oneOf.length}`;
-	}
-	if (Array.isArray(value.anyOf) && value.anyOf.length > 0) {
-		return `any of ${value.anyOf.length}`;
-	}
-	if (Array.isArray(value.allOf) && value.allOf.length > 0) return 'object';
-
-	return 'any';
-}
-
-function mergeObjectShape(value: any): { properties: Record<string, any>; required: Set<string> } {
-	const properties: Record<string, any> = {};
-	const required = new Set<string>();
-
-	function collect(node: any) {
-		if (!node || typeof node !== 'object') return;
-
-		if (node.properties && typeof node.properties === 'object') {
-			for (const [propName, propSchema] of Object.entries(node.properties)) {
-				properties[propName] = propSchema;
-			}
-		}
-
-		if (Array.isArray(node.required)) {
-			for (const propName of node.required) {
-				if (typeof propName === 'string') required.add(propName);
-			}
-		}
-	}
-
-	collect(value);
-
-	if (Array.isArray(value.allOf)) {
-		for (const node of value.allOf) collect(node);
-	}
-
-	return { properties, required };
-}
-
-const shape = mergeObjectShape(schema);
-const entries = Object.entries(shape.properties);
-const type = getTypeLabel(schema);
-const baseType = getBaseType(schema);
-
-const isObject = entries.length > 0 || baseType === 'object';
-const isArray = baseType === 'array' || schema.items;
-const shouldShowArrayItemDetails = Boolean(
-	schema.items?.properties ||
-	schema.items?.items ||
-	schema.items?.allOf ||
-	schema.items?.oneOf ||
-	schema.items?.anyOf
+const isObject = entries.length > 0 || kind === 'object';
+const items = schema.items;
+const showItems = Boolean(
+	items &&
+	!(spec && schemaName(items)) &&
+	(items.properties || items.items || items.allOf || items.oneOf || items.anyOf)
 );
+
+function optionLabel(option: any, index: number): string {
+	const label = typeLabel(option);
+	return label && label !== 'any' && label !== 'object' ? label : `Option ${index + 1}`;
+}
 
 const typeColor = {
 	string: 'text-emerald-600 dark:text-emerald-400',
@@ -127,131 +52,132 @@ const typeColor = {
 	any: 'text-muted-foreground'
 } as Record<string, string>;
 
-const badgeColor = typeColor[baseType] || typeColor.any;
+const badgeColor = typeColor[kind] || typeColor.any;
 ---
 
 <div class={`flex flex-col space-y-2 ${level > 0 ? 'mt-4 border-l pl-4 border-border/50' : ''}`}>
-	{
-		name ? (
-			<div class="flex flex-wrap items-center gap-2">
-				<code class="text-sm font-semibold">
-					{name}
-					{!required && (
-						<span class="ml-0.5 font-normal text-muted-foreground/60">?</span>
-					)}
-				</code>
+	{name ? (
+		<div class="flex flex-wrap items-center gap-2">
+			<code class="text-sm font-semibold">
+				{name}
+				{!required && <span class="ml-0.5 font-normal text-muted-foreground/60">?</span>}
+			</code>
 
-				<div class="flex flex-wrap items-center gap-1.5">
+			<div class="flex flex-wrap items-center gap-1.5">
+				{refHref ? (
+					<a
+						href={refHref}
+						class:list={[
+							'font-mono text-[11px] font-medium underline decoration-dotted underline-offset-2 hover:decoration-solid',
+							badgeColor
+						]}
+					>
+						{type}
+					</a>
+				) : (
 					<span class:list={['font-mono text-[11px] font-medium', badgeColor]}>
 						{type}
 						{schema.format ? ` <${schema.format}>` : ''}
 					</span>
+				)}
 
-					{required && (
-						<span class="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
-							Required
-						</span>
-					)}
-					{schema.default !== undefined && (
-						<span class="rounded border border-border bg-muted/30 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-muted-foreground">
-							Default: {String(schema.default)}
-						</span>
-					)}
-				</div>
-			</div>
-		) : (
-			<div class="flex items-center gap-2">
-				<span class:list={['font-mono text-[11px] font-medium', badgeColor]}>
-					{type}
-					{schema.format ? ` <${schema.format}>` : ''}
-				</span>
-			</div>
-		)
-	}
-
-	{schema.description && <p class="text-sm text-muted-foreground">{schema.description}</p>}
-
-	{
-		schema.enum && (
-			<div class="flex flex-wrap items-center gap-1 text-xs">
-				<span class="mr-1 font-medium text-muted-foreground">Enum:</span>
-				{schema.enum.map((v: any) => (
-					<span class="rounded border border-border bg-muted/50 px-1.5 py-0.5">
-						{typeof v === 'string' ? `"${v}"` : String(v)}
+				{required && (
+					<span class="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
+						Required
 					</span>
-				))}
+				)}
+				{schema.default !== undefined && (
+					<span class="rounded border border-border bg-muted/30 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-muted-foreground">
+						Default: {String(schema.default)}
+					</span>
+				)}
 			</div>
-		)
-	}
+		</div>
+	) : (
+		<div class="flex items-center gap-2">
+			<span class:list={['font-mono text-[11px] font-medium', badgeColor]}>
+				{type}
+				{schema.format ? ` <${schema.format}>` : ''}
+			</span>
+		</div>
+	)}
 
-	{
-		schema.const !== undefined && (
-			<div class="flex flex-wrap gap-1 text-xs">
-				<span class="mr-1 font-medium text-muted-foreground">Const:</span>
-				<code class="rounded border border-border bg-emerald-500/10 px-1.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400">
-					{String(schema.const)}
-				</code>
-			</div>
-		)
-	}
+	{schema.description && !collapsed && (
+		<p class="text-sm text-muted-foreground">{schema.description}</p>
+	)}
 
-	{
-		(schema.oneOf || schema.anyOf) && (
-			<div class="space-y-1.5">
-				<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-					{schema.oneOf ? 'One of' : 'Any of'}
-				</p>
-				{(schema.oneOf ?? schema.anyOf).map((option: any, i: number) => (
-					<Astro.self
-						schema={option}
-						name={getOptionLabel(option, i)}
-						required={false}
-						level={level + 1}
-					/>
-				))}
-			</div>
-		)
-	}
+	{schema.enum && (
+		<div class="flex flex-wrap items-center gap-1 text-xs">
+			<span class="mr-1 font-medium text-muted-foreground">Enum:</span>
+			{schema.enum.map((v: any) => (
+				<span class="rounded border border-border bg-muted/50 px-1.5 py-0.5">
+					{typeof v === 'string' ? `"${v}"` : String(v)}
+				</span>
+			))}
+		</div>
+	)}
 
-	{
-		schema.additionalProperties && typeof schema.additionalProperties === 'object' && (
-			<div class="space-y-1.5">
-				<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-					Map value
-				</p>
+	{schema.const !== undefined && (
+		<div class="flex flex-wrap gap-1 text-xs">
+			<span class="mr-1 font-medium text-muted-foreground">Const:</span>
+			<code class="rounded border border-border bg-emerald-500/10 px-1.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400">
+				{String(schema.const)}
+			</code>
+		</div>
+	)}
+
+	{expand && (schema.oneOf || schema.anyOf) && (
+		<div class="space-y-1.5">
+			<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+				{schema.oneOf ? 'One of' : 'Any of'}
+			</p>
+			{(schema.oneOf ?? schema.anyOf).map((option: any, i: number) => (
 				<Astro.self
-					schema={schema.additionalProperties}
-					name="[key: string]"
+					schema={option}
+					spec={spec}
+					name={optionLabel(option, i)}
 					required={false}
 					level={level + 1}
 				/>
-			</div>
-		)
-	}
+			))}
+		</div>
+	)}
 
-	{
-		isObject && (
-			<div class="flex flex-col gap-2 pt-1">
-				{entries.map(([propName, propSchema]: [string, any]) => {
-					const isRequired = shape.required.has(propName);
-					return (
-						<Astro.self
-							schema={propSchema}
-							name={propName}
-							required={isRequired}
-							level={level + 1}
-						/>
-					);
-				})}
-			</div>
-		)
-	}
+	{expand && schema.additionalProperties && typeof schema.additionalProperties === 'object' && (
+		<div class="space-y-1.5">
+			<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+				Map value
+			</p>
+			<Astro.self
+				schema={schema.additionalProperties}
+				spec={spec}
+				name="[key: string]"
+				required={false}
+				level={level + 1}
+			/>
+		</div>
+	)}
 
-	{
-		isArray && shouldShowArrayItemDetails && (
-			<div class="mt-2 text-sm text-muted-foreground">
-				<Astro.self schema={schema.items} required={false} level={level + 1} />
-			</div>
-		)
-	}
+	{expand && isObject && (
+		<div class="flex flex-col gap-2 pt-1">
+			{entries.map(([propName, propSchema]) => {
+				const isRequired = shape.required.has(propName);
+				return (
+					<Astro.self
+						schema={propSchema}
+						spec={spec}
+						name={propName}
+						required={isRequired}
+						level={level + 1}
+					/>
+				);
+			})}
+		</div>
+	)}
+
+	{expand && showItems && (
+		<div class="mt-2 text-sm text-muted-foreground">
+			<Astro.self schema={items} spec={spec} required={false} level={level + 1} />
+		</div>
+	)}
 </div>

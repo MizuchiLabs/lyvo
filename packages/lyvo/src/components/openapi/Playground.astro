@@ -1,0 +1,303 @@
+---
+import { Play, LoaderCircle } from '@lucide/astro';
+import type { OpenAPIOperation, OpenAPIParameter } from '@lyvo/lib/openapi/types';
+import { t } from '@lyvo/lib/i18n';
+import { currentLocale } from '@lyvo/lib/docs';
+
+interface Props {
+	endpoint: OpenAPIOperation;
+}
+
+const { endpoint } = Astro.props;
+const locale = currentLocale(Astro.url.pathname);
+
+// Browsers can't set cookies on cross-origin fetches, so cookie params are left out.
+const parameters = endpoint.parameters.filter((parameter) => parameter.in !== 'cookie');
+const auth = endpoint.security.find((item) => item.type !== 'apiKey' || item.in !== 'cookie');
+const authKind =
+	auth?.type === 'http' && auth.scheme === 'basic'
+		? 'basic'
+		: auth?.type === 'apiKey'
+			? 'apikey'
+			: auth
+				? 'bearer'
+				: null;
+
+const jsonBody = endpoint.requestBody?.content.find((item) => item.mediaType.includes('json'));
+const bodyText = jsonBody?.example !== undefined ? JSON.stringify(jsonBody.example, null, 2) : '';
+
+const fieldId = (suffix: string) => `pg-${endpoint.slug}-${suffix}`;
+const inputClass =
+	'h-9 w-full rounded-md border border-input bg-background px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+const labelClass = 'text-xs font-medium text-muted-foreground';
+
+function placeholder(parameter: OpenAPIParameter): string {
+	if (parameter.example === undefined) return parameter.type ?? '';
+	return typeof parameter.example === 'string'
+		? parameter.example
+		: JSON.stringify(parameter.example);
+}
+---
+
+<details class="playground group rounded-xl border border-border bg-card shadow-sm">
+	<summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold select-none hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+		<Play size={14} class="text-primary" />
+		{t('tryIt', locale)}
+	</summary>
+
+	<form
+		data-playground
+		data-astro-reload
+		data-method={endpoint.method.toUpperCase()}
+		data-path={endpoint.path}
+		data-sending={t('sending', locale)}
+		data-failed={t('requestFailed', locale)}
+		class="space-y-4 border-t border-border p-4"
+	>
+		{endpoint.servers.length > 1 ? (
+			<div class="space-y-1.5">
+				<label for={fieldId('server')} class={labelClass}>
+					Server
+				</label>
+				<select id={fieldId('server')} name="server" class={inputClass}>
+					{endpoint.servers.map((server) => (
+						<option value={server.url}>{server.url}</option>
+					))}
+				</select>
+			</div>
+		) : (
+			<input type="hidden" name="server" value={endpoint.servers[0]?.url ?? ''} />
+		)}
+
+		{authKind && auth && (
+			<fieldset class="space-y-1.5">
+				<legend class={labelClass}>Authorization ({auth.name})</legend>
+				{authKind === 'basic' ? (
+					<div class="grid grid-cols-2 gap-2">
+						<input
+							aria-label="Username"
+							placeholder="username"
+							data-auth="basic-user"
+							data-auth-key={auth.name}
+							class={inputClass}
+							autocomplete="off"
+						/>
+						<input
+							aria-label="Password"
+							placeholder="password"
+							type="password"
+							data-auth="basic-pass"
+							data-auth-key={auth.name}
+							class={inputClass}
+							autocomplete="off"
+						/>
+					</div>
+				) : (
+					<input
+						aria-label={authKind === 'apikey' ? (auth.paramName ?? auth.name) : 'Token'}
+						placeholder={
+							authKind === 'apikey' ? (auth.paramName ?? auth.name) : 'token'
+						}
+						type="password"
+						data-auth={authKind}
+						data-auth-key={auth.name}
+						data-param-name={auth.paramName}
+						data-param-in={auth.in}
+						class={inputClass}
+						autocomplete="off"
+					/>
+				)}
+			</fieldset>
+		)}
+
+		{parameters.length > 0 && (
+			<div class="grid gap-3 sm:grid-cols-2">
+				{parameters.map((parameter) => (
+					<div class="space-y-1.5">
+						<label
+							for={fieldId(`${parameter.in}-${parameter.name}`)}
+							class={labelClass}
+						>
+							<span class="font-mono text-foreground">{parameter.name}</span>
+							<span class="ml-1 opacity-70">
+								{parameter.in}
+								{parameter.required && ' · required'}
+							</span>
+						</label>
+						<input
+							id={fieldId(`${parameter.in}-${parameter.name}`)}
+							name={parameter.name}
+							data-in={parameter.in}
+							required={parameter.in === 'path' || parameter.required}
+							placeholder={placeholder(parameter)}
+							class={inputClass}
+						/>
+					</div>
+				))}
+			</div>
+		)}
+
+		{jsonBody && (
+			<div class="space-y-1.5">
+				<label for={fieldId('body')} class={labelClass}>
+					Body ({jsonBody.mediaType})
+				</label>
+				<textarea
+					id={fieldId('body')}
+					name="body"
+					rows={Math.min(14, Math.max(4, bodyText.split('\n').length))}
+					class={`${inputClass} h-auto py-2 leading-relaxed`}
+					spellcheck="false"
+				>{bodyText}</textarea>
+			</div>
+		)}
+
+		<button
+			type="submit"
+			class="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:opacity-60"
+		>
+			<Play size={14} data-icon="idle" />
+			<LoaderCircle size={14} data-icon="busy" class="hidden animate-spin" />
+			<span data-label>{t('send', locale)}</span>
+		</button>
+
+		<div data-result hidden class="space-y-2">
+			<div class="flex items-center gap-3 text-xs">
+				<span class="font-medium text-muted-foreground">{t('response', locale)}</span>
+				<span
+					data-status
+					class="rounded-md border px-2 py-0.5 font-mono font-semibold"
+				></span>
+				<span data-time class="text-muted-foreground"></span>
+			</div>
+			<pre
+				data-output
+				data-no-copy
+				class="max-h-96 overflow-auto rounded-lg border border-border bg-muted/40 p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-foreground"
+			></pre>
+		</div>
+	</form>
+</details>
+
+<script>
+	import { track } from '@lyvo/lib/track';
+
+	const STORAGE_PREFIX = 'lyvo-auth:';
+
+	function remember(key: string, value?: string): string | null {
+		try {
+			if (value === undefined) return sessionStorage.getItem(STORAGE_PREFIX + key);
+			sessionStorage.setItem(STORAGE_PREFIX + key, value);
+		} catch {
+			// storage blocked, credentials just won't be remembered for the session
+		}
+		return null;
+	}
+
+	function restoreAuth() {
+		for (const input of document.querySelectorAll<HTMLInputElement>(
+			'[data-playground] [data-auth]'
+		)) {
+			const saved = remember(`${input.dataset.authKey}:${input.dataset.auth}`);
+			if (saved && !input.value) input.value = saved;
+		}
+	}
+
+	function buildRequest(form: HTMLFormElement) {
+		const data = new FormData(form);
+		const base = String(data.get('server') ?? '') || window.location.origin;
+		let path = form.dataset.path ?? '/';
+		const query = new URLSearchParams();
+		const headers = new Headers();
+
+		for (const input of form.querySelectorAll<HTMLInputElement>('input[data-in]')) {
+			const value = input.value.trim();
+			if (!value) continue;
+			if (input.dataset.in === 'path') {
+				path = path.replace(`{${input.name}}`, encodeURIComponent(value));
+			} else if (input.dataset.in === 'query') query.append(input.name, value);
+			else if (input.dataset.in === 'header') headers.set(input.name, value);
+		}
+
+		const authInputs = form.querySelectorAll<HTMLInputElement>('[data-auth]');
+		const user = form.querySelector<HTMLInputElement>('[data-auth="basic-user"]')?.value ?? '';
+		const pass = form.querySelector<HTMLInputElement>('[data-auth="basic-pass"]')?.value ?? '';
+		for (const input of authInputs) {
+			const value = input.value.trim();
+			if (value) remember(`${input.dataset.authKey}:${input.dataset.auth}`, value);
+			if (input.dataset.auth === 'bearer' && value)
+				headers.set('Authorization', `Bearer ${value}`);
+			if (input.dataset.auth === 'apikey' && value && input.dataset.paramName) {
+				if (input.dataset.paramIn === 'query') query.set(input.dataset.paramName, value);
+				else headers.set(input.dataset.paramName, value);
+			}
+		}
+		if (user || pass) headers.set('Authorization', `Basic ${btoa(`${user}:${pass}`)}`);
+
+		const body = form.querySelector<HTMLTextAreaElement>('textarea[name="body"]')?.value.trim();
+		if (body) headers.set('Content-Type', 'application/json');
+
+		const url = new URL(base.replace(/\/$/, '') + path, window.location.href);
+		for (const [key, value] of query) url.searchParams.append(key, value);
+		return { url, init: { method: form.dataset.method, headers, body: body || undefined } };
+	}
+
+	async function send(form: HTMLFormElement) {
+		const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+		const label = button.querySelector('[data-label]')!;
+		const idleLabel = label.textContent;
+		const result = form.querySelector<HTMLElement>('[data-result]')!;
+		const status = form.querySelector<HTMLElement>('[data-status]')!;
+		const time = form.querySelector<HTMLElement>('[data-time]')!;
+		const output = form.querySelector<HTMLElement>('[data-output]')!;
+
+		button.disabled = true;
+		label.textContent = form.dataset.sending ?? '';
+		button.querySelector('[data-icon="idle"]')?.classList.add('hidden');
+		button.querySelector('[data-icon="busy"]')?.classList.remove('hidden');
+
+		const started = performance.now();
+		try {
+			const { url, init } = buildRequest(form);
+			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(30_000) });
+			const text = await response.text();
+			let pretty = text;
+			try {
+				pretty = JSON.stringify(JSON.parse(text), null, 2);
+			} catch {
+				// not JSON, show as-is
+			}
+			status.textContent = `${response.status} ${response.statusText}`.trim();
+			status.className = `rounded-md border px-2 py-0.5 font-mono font-semibold ${
+				response.ok
+					? 'border-primary/30 text-primary'
+					: 'border-destructive/40 text-destructive'
+			}`;
+			output.textContent = pretty || '(empty body)';
+			track('playground_request', {
+				endpoint: `${form.dataset.method} ${form.dataset.path}`,
+				status: response.status
+			});
+		} catch (error) {
+			status.textContent = 'Error';
+			status.className =
+				'rounded-md border border-destructive/40 px-2 py-0.5 font-mono font-semibold text-destructive';
+			output.textContent = `${form.dataset.failed}\n\n${error instanceof Error ? error.message : String(error)}`;
+		} finally {
+			time.textContent = `${Math.round(performance.now() - started)} ms`;
+			result.hidden = false;
+			button.disabled = false;
+			label.textContent = idleLabel;
+			button.querySelector('[data-icon="idle"]')?.classList.remove('hidden');
+			button.querySelector('[data-icon="busy"]')?.classList.add('hidden');
+		}
+	}
+
+	document.addEventListener('submit', (event) => {
+		const form = event.target as HTMLFormElement;
+		if (!form.matches('[data-playground]')) return;
+		event.preventDefault();
+		send(form);
+	});
+	document.addEventListener('astro:page-load', restoreAuth);
+</script>

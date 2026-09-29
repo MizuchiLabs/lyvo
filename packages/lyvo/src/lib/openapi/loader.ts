@@ -2,25 +2,47 @@ import path from 'node:path';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import OpenAPISampler from 'openapi-sampler';
 import type { Loader } from 'astro/loaders';
-import type { OpenAPISecurityRequirement } from '@lyvo/lib/openapi/types';
+import type { SnippetLanguage } from '../../config';
+import { buildSnippets } from './snippets';
+import { slugify } from '../utils';
+import { SCHEMA_NAME_KEY } from './schema';
+import type {
+	HttpMethod,
+	OpenAPIMediaType,
+	OpenAPIModel,
+	OpenAPINavigationGroup,
+	OpenAPIOperation,
+	OpenAPIParameter,
+	OpenAPISchemaEntry,
+	OpenAPISecurityRequirement,
+	OpenAPIServer,
+	OpenAPITag
+} from './types';
 
-const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
+// Spec nodes are dynamic JSON. Everything leaving this file is typed.
+type Node = Record<string, any>;
 
-export function toTitle(value: any) {
+const HTTP_METHODS: HttpMethod[] = [
+	'get',
+	'post',
+	'put',
+	'patch',
+	'delete',
+	'head',
+	'options',
+	'trace'
+];
+
+export function toTitle(value: unknown): string {
 	if (!value) return 'Untitled';
 
-	let stringValue = String(value);
-
-	if (stringValue.includes('.') && !stringValue.includes(' ')) {
-		const parts = stringValue.split('.');
-		const lastPart = parts[parts.length - 1];
-
-		if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(lastPart)) {
-			stringValue = lastPart;
-		}
+	let text = String(value);
+	if (text.includes('.') && !text.includes(' ')) {
+		const last = text.split('.').at(-1) ?? '';
+		if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(last)) text = last;
 	}
 
-	const normalized = stringValue
+	const normalized = text
 		.replaceAll(/[{}]/g, '')
 		.replaceAll(/([a-z0-9])([A-Z])/g, '$1 $2')
 		.replaceAll(/[._-]+/g, ' ')
@@ -28,10 +50,9 @@ export function toTitle(value: any) {
 		.trim();
 
 	if (!normalized) return 'Untitled';
-
 	return normalized
 		.split(' ')
-		.map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 		.join(' ');
 }
 
@@ -43,419 +64,89 @@ export function normalizePathForSlug(value: string) {
 		.replaceAll(/\/+/g, '/');
 }
 
-export function makeSlug(method: string, apiPath: string, operationId: string) {
-	if (operationId && operationId.trim().length > 0) {
-		return operationId
-			.trim()
-			.toLowerCase()
-			.replaceAll(/[^a-z0-9]+/g, '-')
-			.replaceAll(/^-+|-+$/g, '');
-	}
-
+export function makeSlug(method: string, apiPath: string, operationId?: string) {
+	if (operationId?.trim()) return slugify(operationId);
 	const pathPart = normalizePathForSlug(apiPath).replaceAll('/', '-');
 	return `${method}-${pathPart || 'root'}`;
 }
 
-function resolveRef(ref: any, document: any) {
-	if (typeof ref !== 'string' || !ref.startsWith('#/')) return undefined;
-
-	const parts = ref
-		.slice(2)
-		.split('/')
-		.map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'));
-
-	let current = document;
-	for (const key of parts) {
-		if (!current || typeof current !== 'object' || !(key in current)) {
-			return undefined;
-		}
-
-		current = current[key];
-	}
-
-	return current;
-}
-
-function deepResolve(value: any, document: any, stack = new Set()): any {
-	if (Array.isArray(value)) {
-		return value.map((item) => deepResolve(item, document, stack));
-	}
-
-	if (!value || typeof value !== 'object') {
-		return value;
-	}
-
-	if (typeof value.$ref === 'string') {
-		if (stack.has(value.$ref)) {
-			return { $ref: value.$ref };
-		}
-
-		const resolved = resolveRef(value.$ref, document);
-		if (!resolved) return value;
-
-		const nextStack = new Set(stack);
-		nextStack.add(value.$ref);
-
-		const merged = {
-			...resolved,
-			...Object.fromEntries(Object.entries(value).filter(([k]) => k !== '$ref'))
-		};
-
-		return deepResolve(merged, document, nextStack);
-	}
-
-	return value;
-}
-
-function collectExamples(examples: any) {
+function collectExamples(examples: unknown): unknown[] {
 	if (examples === undefined || examples === null) return [];
-
-	if (Array.isArray(examples)) {
-		return examples.filter((value) => value !== undefined);
-	}
-
+	if (Array.isArray(examples)) return examples.filter((value) => value !== undefined);
 	if (typeof examples !== 'object') return [examples];
 
-	const values = [];
-	for (const item of Object.values(examples)) {
-		if (item === undefined || item === null) continue;
-		if (typeof item === 'object' && 'value' in item) {
-			values.push((item as any).value);
-			continue;
-		}
-
-		values.push(item);
-	}
-
-	return values;
+	return Object.values(examples)
+		.filter((item) => item !== undefined && item !== null)
+		.map((item) => (typeof item === 'object' && 'value' in item ? item.value : item));
 }
 
-function resolveSchemaType(schema: any) {
-	if (!schema || typeof schema !== 'object') return undefined;
-
-	if (typeof schema.type === 'string') return schema.type;
-	if (Array.isArray(schema.type)) {
-		return (
-			schema.type.filter((value: any) => typeof value === 'string').join(' | ') || undefined
-		);
-	}
-
+function schemaType(schema: Node | undefined): string | undefined {
+	if (typeof schema?.type === 'string') return schema.type;
+	if (Array.isArray(schema?.type)) return schema.type.join(' | ') || undefined;
 	return undefined;
 }
 
-function sampleSchema(schema: any, document: any) {
-	if (!schema) return undefined;
+// Circular refs survive dereferencing as {$ref}. Resolve the outermost one so
+// the schema itself renders, nested ones stay refs and show up as links.
+function resolveRef(schema: Node | undefined, document: Node): Node | undefined {
+	let current = schema;
+	for (let hops = 0; typeof current?.$ref === 'string' && hops < 10; hops++) {
+		const pointer = current.$ref.replace(/^#\//, '').split('/');
+		current = pointer.reduce<Node | undefined>(
+			(node, key) => node?.[key.replaceAll('~1', '/').replaceAll('~0', '~')],
+			document
+		);
+	}
+	return current ?? schema;
+}
 
+type Direction = 'request' | 'response';
+
+function sample(schema: Node | undefined, document: Node, direction: Direction): unknown {
+	if (!schema) return undefined;
 	try {
-		return OpenAPISampler.sample(schema, undefined, document);
+		const options = direction === 'request' ? { skipReadOnly: true } : { skipWriteOnly: true };
+		return OpenAPISampler.sample(schema, options, document);
 	} catch {
 		return undefined;
 	}
 }
 
-function mapMediaContent(content: any, document: any) {
-	if (!content || typeof content !== 'object') return [];
+function pickExample(
+	owner: Node | undefined,
+	schema: Node | undefined,
+	document: Node,
+	direction: Direction = 'request'
+) {
+	const examples = [...collectExamples(owner?.examples), ...collectExamples(schema?.examples)];
+	return {
+		example:
+			owner?.example ?? schema?.example ?? examples[0] ?? sample(schema, document, direction),
+		examples: examples.length > 0 ? examples : undefined
+	};
+}
 
-	return Object.entries(content).map(([mediaType, mediaEntry]: [string, any]) => {
-		const resolved = deepResolve(mediaEntry, document);
-		const schema = deepResolve(resolved?.schema, document);
-		const examples = [
-			...collectExamples(resolved?.examples),
-			...collectExamples(schema?.examples)
-		];
-		const example =
-			resolved?.example ?? schema?.example ?? examples[0] ?? sampleSchema(schema, document);
-
-		return {
-			mediaType,
-			schema,
-			example,
-			examples: examples.length > 0 ? examples : undefined
-		};
+function mapMediaContent(
+	content: Node | undefined,
+	document: Node,
+	direction: Direction
+): OpenAPIMediaType[] {
+	if (!content) return [];
+	return Object.entries(content).map(([mediaType, entry]) => {
+		const schema = resolveRef(entry?.schema, document);
+		return { mediaType, schema, ...pickExample(entry, schema, document, direction) };
 	});
 }
 
-function mergeParameters(pathParameters: any, operationParameters: any) {
-	const merged = [];
-	const keys = new Set();
-
-	for (const source of [pathParameters ?? [], operationParameters ?? []]) {
-		for (const parameter of source) {
-			const key = `${parameter?.in ?? ''}:${parameter?.name ?? ''}`;
-			if (keys.has(key)) continue;
-			keys.add(key);
-			merged.push(parameter);
-		}
+function mapParameters(pathItem: Node, operation: Node, document: Node): OpenAPIParameter[] {
+	const seen = new Map<string, Node>();
+	// Operation-level parameters override path-level ones with the same name.
+	for (const parameter of [...(pathItem.parameters ?? []), ...(operation.parameters ?? [])]) {
+		if (parameter) seen.set(`${parameter.in}:${parameter.name}`, parameter);
 	}
 
-	return merged;
-}
-
-function mapSecurity(operationSecurity: any, rootSecurity: any, components: any, document: any) {
-	const requirements = operationSecurity ?? rootSecurity ?? [];
-	if (!Array.isArray(requirements)) return [];
-
-	return requirements
-		.flatMap((requirement) => {
-			if (!requirement || typeof requirement !== 'object') return [];
-
-			return Object.entries(requirement).map(([schemeName, scopes]) => {
-				const raw = components?.securitySchemes?.[schemeName];
-				const scheme = deepResolve(raw, document);
-
-				return {
-					type: scheme?.type ?? 'unknown',
-					name: schemeName,
-					description: scheme?.description,
-					in: scheme?.in,
-					scheme: scheme?.scheme,
-					bearerFormat: scheme?.bearerFormat,
-					flows: scheme?.flows,
-					openIdConnectUrl: scheme?.openIdConnectUrl,
-					scopes: Array.isArray(scopes) ? scopes : []
-				};
-			});
-		})
-		.filter((item) => item.type !== 'unknown');
-}
-
-// Map the global security schemes defined in components.securitySchemes
-// into the same shape mapSecurity produces for per-operation requirements.
-function mapSecuritySchemes(components: any, document: any): OpenAPISecurityRequirement[] {
-	const source = components?.securitySchemes ?? {};
-	if (!source || typeof source !== 'object') return [];
-
-	return Object.entries(source)
-		.map(([name, raw]) => {
-			const scheme = deepResolve(raw, document);
-			return {
-				type: scheme?.type ?? 'unknown',
-				name,
-				description: scheme?.description,
-				in: scheme?.in,
-				scheme: scheme?.scheme,
-				bearerFormat: scheme?.bearerFormat,
-				flows: scheme?.flows,
-				openIdConnectUrl: scheme?.openIdConnectUrl,
-				scopes: []
-			};
-		})
-		.filter((item) => item.type !== 'unknown');
-}
-
-function headerLine(headers: any) {
-	if (Object.keys(headers).length === 0) return '';
-
-	return Object.entries(headers)
-		.map(([key, value]) => `  -H "${key}: ${value}"`)
-		.join(' \\\n');
-}
-
-function buildUrl(baseUrl: string, apiPath: string, queryParameters: any[]) {
-	const query = queryParameters
-		.map(
-			(parameter) =>
-				`${encodeURIComponent(parameter.name)}=${encodeURIComponent(`<${parameter.name}>`)}`
-		)
-		.join('&');
-
-	const normalizedBase = (baseUrl || 'https://api.example.com').replace(/\/$/, '');
-	const url = `${normalizedBase}${apiPath}`;
-	if (query.length === 0) return url;
-	return `${url}?${query}`;
-}
-
-function toJsonBlock(value: any) {
-	if (value === undefined) return undefined;
-	return JSON.stringify(value, null, 2);
-}
-
-function buildSnippets({ method, url, headers, bodyExample }: any) {
-	const methodUpper = method.toUpperCase();
-	const headerString = headerLine(headers);
-	const jsonBody = toJsonBlock(bodyExample);
-
-	// Embed the pretty-printed JSON body inside a multi-line string literal for
-	// languages that require a quoted body, so the \n aren't shown escaped.
-	// Falls back to an escaped string if the delimiter appears in the payload.
-	const rawBody = (delim: string) =>
-		jsonBody === undefined
-			? ''
-			: jsonBody.includes(delim)
-				? JSON.stringify(jsonBody)
-				: delim + jsonBody + delim;
-
-	const curlLines = [`curl -X ${methodUpper} '${url}'`];
-	if (headerString) curlLines.push(headerString);
-	if (jsonBody) {
-		curlLines.push("  -H 'Content-Type: application/json'");
-		curlLines.push(`  -d '${jsonBody.replaceAll("'", "'\\''")}'`);
-	}
-
-	const jsHeaders: any = Object.keys(headers).length > 0 ? { ...headers } : {};
-	if (jsonBody) jsHeaders['Content-Type'] = 'application/json';
-
-	const jsSnippet = [
-		`const response = await fetch('${url}', {`,
-		`  method: '${methodUpper}',`,
-		`  headers: ${JSON.stringify(jsHeaders, null, 2)},`,
-		...(jsonBody ? [`  body: JSON.stringify(${jsonBody}),`] : []),
-		'});',
-		'',
-		'const data = await response.json();',
-		'console.log(data);'
-	].join('\n');
-
-	const pythonHeaders: any = Object.keys(headers).length > 0 ? { ...headers } : {};
-	if (jsonBody) pythonHeaders['Content-Type'] = 'application/json';
-
-	const pythonSnippet = [
-		'import requests',
-		'',
-		`url = '${url}'`,
-		`headers = ${JSON.stringify(pythonHeaders, null, 2)}`,
-		...(jsonBody ? [`payload = ${jsonBody}`] : []),
-		'',
-		`response = requests.${method}(url, headers=headers${jsonBody ? ', json=payload' : ''})`,
-		'print(response.json())'
-	].join('\n');
-
-	const goSnippet = [
-		'package main',
-		'',
-		'import (',
-		'  "bytes"',
-		'  "fmt"',
-		'  "io"',
-		'  "net/http"',
-		')',
-		'',
-		'func main() {',
-		...(jsonBody
-			? [`  body := bytes.NewBuffer([]byte(${rawBody('`')}))`]
-			: ['  var body io.Reader = nil']),
-		`  req, err := http.NewRequest("${methodUpper}", "${url}", body)`,
-		'  if err != nil { panic(err) }',
-		...Object.entries(headers).map(([key, value]) => `  req.Header.Set("${key}", "${value}")`),
-		...(jsonBody ? ['  req.Header.Set("Content-Type", "application/json")'] : []),
-		'',
-		'  res, err := http.DefaultClient.Do(req)',
-		'  if err != nil { panic(err) }',
-		'  defer res.Body.Close()',
-		'',
-		'  payload, err := io.ReadAll(res.Body)',
-		'  if err != nil { panic(err) }',
-		'  fmt.Println(string(payload))',
-		'}'
-	].join('\n');
-
-	const csharpMethod =
-		methodUpper === 'PATCH'
-			? 'Patch'
-			: methodUpper.charAt(0) + methodUpper.slice(1).toLowerCase();
-	const csharpSnippet = [
-		'using System.Net.Http;',
-		'using System.Net.Http.Headers;',
-		'',
-		'using var client = new HttpClient();',
-		`using var request = new HttpRequestMessage(HttpMethod.${csharpMethod}, "${url}");`,
-		...Object.entries(headers).map(([k, v]) => `request.Headers.Add("${k}", "${v}");`),
-		...(jsonBody
-			? [
-					'request.Content = new StringContent(',
-					`    ${rawBody('""""')},`,
-					`    System.Text.Encoding.UTF8,`,
-					`    "application/json"`,
-					`);`
-				]
-			: []),
-		'',
-		'using var response = await client.SendAsync(request);',
-		'response.EnsureSuccessStatusCode();',
-		'Console.WriteLine(await response.Content.ReadAsStringAsync());'
-	].join('\n');
-
-	const javaSnippet = [
-		'import java.net.URI;',
-		'import java.net.http.HttpClient;',
-		'import java.net.http.HttpRequest;',
-		'import java.net.http.HttpResponse;',
-		'',
-		'public class Main {',
-		'  public static void main(String[] args) throws Exception {',
-		'    HttpClient client = HttpClient.newHttpClient();',
-		'    HttpRequest request = HttpRequest.newBuilder()',
-		`      .uri(URI.create("${url}"))`,
-		...Object.entries(headers).map(([k, v]) => `      .header("${k}", "${v}")`),
-		...(jsonBody ? ['      .header("Content-Type", "application/json")'] : []),
-		`      .method("${methodUpper}", ${jsonBody ? `HttpRequest.BodyPublishers.ofString(${rawBody('"""')})` : 'HttpRequest.BodyPublishers.noBody()'})`,
-		'      .build();',
-		'',
-		'    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());',
-		'    System.out.println(response.body());',
-		'  }',
-		'}'
-	].join('\n');
-
-	return [
-		{ id: 'curl', label: 'cURL', language: 'bash', code: curlLines.join(' \\\n') },
-		{ id: 'javascript', label: 'JavaScript', language: 'javascript', code: jsSnippet },
-		{ id: 'python', label: 'Python', language: 'python', code: pythonSnippet },
-		{ id: 'go', label: 'Go', language: 'go', code: goSnippet },
-		{ id: 'csharp', label: 'C#', language: 'csharp', code: csharpSnippet },
-		{ id: 'java', label: 'Java', language: 'java', code: javaSnippet }
-	];
-}
-
-function defaultHeadersFromSecurity(security: any) {
-	const headers: any = {};
-
-	for (const item of security) {
-		if (item.type === 'http' && item.scheme === 'bearer') {
-			headers.Authorization = 'Bearer <token>';
-			continue;
-		}
-
-		if (item.type === 'http' && item.scheme === 'basic') {
-			headers.Authorization = 'Basic <base64-credentials>';
-			continue;
-		}
-
-		if (item.type === 'apiKey' && item.in === 'header') {
-			headers[item.name] = `<${item.name}>`;
-		}
-	}
-
-	return headers;
-}
-
-function mapOperation({
-	document,
-	apiPath,
-	method,
-	pathItem,
-	operation,
-	defaultServers,
-	rootSecurity
-}: any) {
-	const slug = makeSlug(method, apiPath, operation.operationId);
-	const id = `${method.toUpperCase()} ${apiPath}`;
-
-	const mergedParameters = mergeParameters(pathItem.parameters, operation.parameters)
-		.map((parameter: any) => deepResolve(parameter, document))
-		.filter(Boolean);
-
-	const mappedParameters = mergedParameters.map((parameter: any) => {
-		const schema = deepResolve(parameter.schema, document);
-		const examples = [
-			...collectExamples(parameter.examples),
-			...collectExamples(schema?.examples)
-		];
-		const example =
-			parameter.example ?? schema?.example ?? examples[0] ?? sampleSchema(schema, document);
-		const type = resolveSchemaType(schema);
-		const format = typeof schema?.format === 'string' ? schema.format : undefined;
-
+	return [...seen.values()].map((parameter) => {
+		const schema = resolveRef(parameter.schema, document);
 		return {
 			name: parameter.name,
 			in: parameter.in,
@@ -463,315 +154,309 @@ function mapOperation({
 			description: parameter.description,
 			deprecated: Boolean(parameter.deprecated),
 			schema,
-			type,
-			format,
-			example,
-			examples: examples.length > 0 ? examples : undefined
+			type: schemaType(schema),
+			format: typeof schema?.format === 'string' ? schema.format : undefined,
+			...pickExample(parameter, schema, document)
 		};
 	});
+}
 
-	const requestBodyResolved = operation.requestBody
-		? deepResolve(operation.requestBody, document)
-		: undefined;
+// Servers may template their URL, e.g. https://{region}.api.example.com.
+function mapServer(server: Node): OpenAPIServer {
+	const url = String(server.url ?? '').replaceAll(
+		/\{([^}]+)\}/g,
+		(match, name: string) => server.variables?.[name]?.default ?? match
+	);
+	return { url, description: server.description };
+}
 
-	const requestBody = requestBodyResolved
+function mapScheme(name: string, scheme: Node | undefined, scopes: string[] = []) {
+	if (!scheme?.type) return null;
+	return {
+		type: scheme.type,
+		name,
+		description: scheme.description,
+		in: scheme.in,
+		scheme: scheme.scheme?.toLowerCase(),
+		bearerFormat: scheme.bearerFormat,
+		flows: scheme.flows,
+		openIdConnectUrl: scheme.openIdConnectUrl,
+		// apiKey schemes are sent under their own parameter name, not the scheme key.
+		paramName: scheme.type === 'apiKey' ? scheme.name : undefined,
+		scopes
+	} satisfies OpenAPISecurityRequirement;
+}
+
+function mapSecurity(requirements: unknown, document: Node): OpenAPISecurityRequirement[] {
+	if (!Array.isArray(requirements)) return [];
+	const schemes = document.components?.securitySchemes ?? {};
+	return requirements
+		.flatMap((requirement: Node) =>
+			Object.entries(requirement ?? {}).map(([name, scopes]) =>
+				mapScheme(name, schemes[name], Array.isArray(scopes) ? scopes : [])
+			)
+		)
+		.filter((item) => item !== null);
+}
+
+function exampleHeaders(security: OpenAPISecurityRequirement[]): Record<string, string> {
+	const headers: Record<string, string> = {};
+	for (const item of security) {
+		if (item.type === 'http' && item.scheme === 'bearer')
+			headers.Authorization = 'Bearer <token>';
+		else if (item.type === 'http' && item.scheme === 'basic') {
+			headers.Authorization = 'Basic <base64-credentials>';
+		} else if (item.type === 'oauth2' || item.type === 'openIdConnect') {
+			headers.Authorization ??= 'Bearer <access-token>';
+		} else if (item.type === 'apiKey' && item.in === 'header' && item.paramName) {
+			headers[item.paramName] = `<${item.paramName}>`;
+		}
+	}
+	return headers;
+}
+
+function exampleUrl(baseUrl: string, apiPath: string, parameters: OpenAPIParameter[]): string {
+	const query = parameters
+		.filter((parameter) => parameter.in === 'query' && parameter.required)
+		.map((parameter) => `${encodeURIComponent(parameter.name)}=<${parameter.name}>`)
+		.join('&');
+	const url = `${baseUrl.replace(/\/$/, '')}${apiPath}`;
+	return query ? `${url}?${query}` : url;
+}
+
+interface OperationContext {
+	document: Node;
+	apiPath: string;
+	method: HttpMethod;
+	pathItem: Node;
+	operation: Node;
+	servers: OpenAPIServer[];
+	snippets: SnippetLanguage[];
+}
+
+function mapOperation(ctx: OperationContext): OpenAPIOperation {
+	const { document, apiPath, method, pathItem, operation } = ctx;
+
+	const parameters = mapParameters(pathItem, operation, document);
+	const requestBody = operation.requestBody
 		? {
-				required: Boolean(requestBodyResolved.required),
-				description: requestBodyResolved.description,
-				content: mapMediaContent(requestBodyResolved.content, document)
+				required: Boolean(operation.requestBody.required),
+				description: operation.requestBody.description,
+				content: mapMediaContent(operation.requestBody.content, document, 'request')
 			}
 		: undefined;
+	const responses = Object.entries(operation.responses ?? {}).map(([status, response]) => ({
+		status,
+		description: (response as Node)?.description,
+		content: mapMediaContent((response as Node)?.content, document, 'response')
+	}));
+	const security = mapSecurity(operation.security ?? document.security, document);
+	const servers: OpenAPIServer[] =
+		(operation.servers ?? pathItem.servers)
+			? (operation.servers ?? pathItem.servers).map(mapServer)
+			: ctx.servers;
 
-	const responses = Object.entries(operation.responses ?? {}).map(
-		([status, response]: [string, any]) => {
-			const resolved = deepResolve(response, document);
-			return {
-				status,
-				description: resolved?.description,
-				content: mapMediaContent(resolved?.content, document)
-			};
-		}
-	);
-
-	const security = mapSecurity(operation.security, rootSecurity, document.components, document);
-
-	const servers = (operation.servers ?? pathItem.servers ?? defaultServers ?? []).map(
-		(server: any) => ({
-			url: server.url,
-			description: server.description
-		})
-	);
-
-	const primaryServer = servers[0]?.url ?? defaultServers?.[0]?.url ?? 'https://api.example.com';
-	const queryParameters = mappedParameters.filter((parameter: any) => parameter.in === 'query');
-	const snippetUrl = buildUrl(primaryServer, apiPath, queryParameters);
-	const bodyExample =
-		requestBody?.content.find((item: any) => item.mediaType === 'application/json')?.example ??
+	const body =
+		requestBody?.content.find((item) => item.mediaType.includes('json'))?.example ??
 		requestBody?.content[0]?.example;
-	const securityHeaders = defaultHeadersFromSecurity(security);
-
-	const snippets = buildSnippets({
-		method,
-		url: snippetUrl,
-		headers: securityHeaders,
-		bodyExample
-	});
-
-	const fallbackTitle = `${method.toUpperCase()} ${apiPath}`;
 
 	return {
-		id,
-		slug,
+		id: `${method.toUpperCase()} ${apiPath}`,
+		slug: makeSlug(method, apiPath, operation.operationId),
 		method,
 		path: apiPath,
-		title: operation.summary ?? operation.operationId ?? fallbackTitle,
+		title: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${apiPath}`,
 		summary: operation.summary,
 		description: operation.description,
 		deprecated: Boolean(operation.deprecated),
-		tags: Array.isArray(operation.tags) ? operation.tags : ['General'],
+		tags:
+			Array.isArray(operation.tags) && operation.tags.length > 0
+				? operation.tags
+				: ['General'],
 		servers,
-		parameters: mappedParameters,
+		parameters,
 		requestBody,
 		responses,
 		security,
-		snippets,
-		raw: {
-			operationId: operation.operationId,
-			externalDocsUrl: operation.externalDocs?.url
-		}
+		snippets: buildSnippets(
+			{
+				method,
+				url: exampleUrl(servers[0]?.url ?? 'https://api.example.com', apiPath, parameters),
+				headers: exampleHeaders(security),
+				body
+			},
+			ctx.snippets
+		),
+		operationId: operation.operationId,
+		externalDocsUrl: operation.externalDocs?.url
 	};
 }
 
-function mapWebhooks(document: any, defaultServers: any, rootSecurity: any) {
-	if (!document.webhooks || typeof document.webhooks !== 'object') return [];
-
-	const output = [];
-	for (const [event, webhookPath] of Object.entries(document.webhooks)) {
-		const resolvedPath = deepResolve(webhookPath, document);
-
-		for (const method of HTTP_METHODS) {
-			if (!resolvedPath?.[method]) continue;
-
-			const operation = resolvedPath[method];
-			const mapped = mapOperation({
-				document,
-				apiPath: `/${event}`,
-				method,
-				pathItem: resolvedPath,
-				operation,
-				defaultServers,
-				rootSecurity
-			});
-			const webhookTitle = operation.summary ?? operation.operationId ?? toTitle(event);
-
-			output.push({
-				id: mapped.id,
-				slug: mapped.slug,
-				event,
-				method,
-				path: mapped.path,
-				title: webhookTitle,
-				summary: mapped.summary,
-				description: mapped.description,
-				deprecated: mapped.deprecated,
-				tags: mapped.tags.length > 0 ? mapped.tags : ['Webhooks'],
-				servers: mapped.servers,
-				parameters: mapped.parameters,
-				requestBody: mapped.requestBody,
-				responses: mapped.responses,
-				security: mapped.security,
-				snippets: mapped.snippets
-			});
-		}
-	}
-
-	return output;
+function sortOperations(a: OpenAPIOperation, b: OpenAPIOperation) {
+	return (
+		HTTP_METHODS.indexOf(a.method) - HTTP_METHODS.indexOf(b.method) ||
+		a.path.localeCompare(b.path)
+	);
 }
 
-function buildNavigation(operations: any[], webhooks: any[], groupBy: string) {
-	const groups = new Map();
-	const allItems = [...operations, ...webhooks.map((w) => ({ ...w, isWebhook: true }))];
+function buildNavigation(
+	operations: OpenAPIOperation[],
+	webhooks: OpenAPIOperation[],
+	groupBy: 'tag' | 'path'
+): OpenAPINavigationGroup[] {
+	const groups = new Map<string, OpenAPIOperation[]>();
+	const add = (key: string, operation: OpenAPIOperation) =>
+		groups.set(key, [...(groups.get(key) ?? []), operation]);
 
-	for (const operation of allItems) {
-		const keys =
-			groupBy === 'path'
-				? [operation.path.split('/').filter(Boolean)[0] ?? 'General']
-				: operation.tags.length > 0
-					? operation.tags
-					: ['General'];
+	for (const operation of operations) {
+		if (groupBy === 'path')
+			add(operation.path.split('/').filter(Boolean)[0] ?? 'General', operation);
+		else for (const tag of operation.tags) add(tag, operation);
+	}
+	for (const webhook of webhooks) add('Webhooks', webhook);
 
-		for (const key of keys) {
-			if (!groups.has(key)) groups.set(key, []);
-			groups.get(key).push({
+	return [...groups.entries()]
+		.sort(([a], [b]) => (a === 'Webhooks' ? 1 : b === 'Webhooks' ? -1 : a.localeCompare(b)))
+		.map(([title, items]) => ({
+			id: slugify(title),
+			title: toTitle(title),
+			items: items.sort(sortOperations).map((operation) => ({
 				id: operation.id,
 				slug: operation.slug,
 				label: operation.summary ?? operation.title,
 				method: operation.method,
 				path: operation.path,
 				deprecated: operation.deprecated,
-				isWebhook: operation.isWebhook
-			});
-		}
-	}
-
-	return Array.from(groups.entries())
-		.sort(([a], [b]) => a.localeCompare(b))
-		.map(([title, items]) => ({
-			id: title
-				.toLowerCase()
-				.replaceAll(/[^a-z0-9]+/g, '-')
-				.replaceAll(/^-+|-+$/g, ''),
-			title: toTitle(title),
-			items: items.sort((a: any, b: any) => {
-				const methodAIndex = HTTP_METHODS.indexOf(a.method);
-				const methodBIndex = HTTP_METHODS.indexOf(b.method);
-				if (methodAIndex !== methodBIndex) {
-					return methodAIndex - methodBIndex;
-				}
-				return a.path.localeCompare(b.path);
-			})
+				isWebhook: operation.event !== undefined
+			}))
 		}));
 }
 
-function buildTags(document: any, operations: any[]) {
-	const tagMap = new Map();
-
+function buildTags(document: Node, operations: OpenAPIOperation[]): OpenAPITag[] {
+	const tags = new Map<string, OpenAPITag>();
 	for (const tag of document.tags ?? []) {
-		tagMap.set(tag.name, {
-			name: tag.name,
-			description: tag.description,
-			operationCount: 0
-		});
+		tags.set(tag.name, { name: tag.name, description: tag.description, operationCount: 0 });
 	}
-
 	for (const operation of operations) {
-		for (const tag of operation.tags) {
-			if (!tagMap.has(tag)) {
-				tagMap.set(tag, {
-					name: tag,
-					description: undefined,
-					operationCount: 0
-				});
-			}
-
-			tagMap.get(tag).operationCount += 1;
+		for (const name of operation.tags) {
+			const tag = tags.get(name) ?? { name, operationCount: 0 };
+			tag.operationCount += 1;
+			tags.set(name, tag);
 		}
 	}
+	return [...tags.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
 
-	return Array.from(tagMap.values()).sort((a: any, b: any) => a.name.localeCompare(b.name));
+// Dereferencing shares one object per component schema, so tagging it here
+// labels every place the schema is used.
+function nameSchemas(document: Node): OpenAPISchemaEntry[] {
+	const schemas = document.components?.schemas ?? {};
+	return Object.entries(schemas)
+		.filter(([, schema]) => schema && typeof schema === 'object')
+		.map(([name, schema]) => {
+			(schema as Node)[SCHEMA_NAME_KEY] = name;
+			return {
+				name,
+				slug: slugify(name),
+				description: (schema as Node).description,
+				schema: schema as Record<string, unknown>,
+				example: sample(schema as Node, document, 'response')
+			};
+		})
+		.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export interface OpenAPILoaderSpec {
 	id: string;
 	input: string;
 	groupBy: 'tag' | 'path';
+	snippets: SnippetLanguage[];
 }
 
-export interface OpenAPILoaderOptions {
-	specs: OpenAPILoaderSpec[];
+export async function loadSpec(spec: OpenAPILoaderSpec): Promise<OpenAPIModel> {
+	const inputPath = path.resolve(spec.input);
+	let document: Node;
+	try {
+		document = (await SwaggerParser.validate(inputPath, {
+			dereference: { circular: 'ignore' }
+		})) as Node;
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		throw new Error(`[lyvo] OpenAPI spec "${spec.input}" failed to load: ${reason}`);
+	}
+
+	const schemas = nameSchemas(document);
+	const servers: OpenAPIServer[] = (document.servers ?? []).map(mapServer);
+
+	const collect = (paths: Node | undefined, isWebhook: boolean) => {
+		const operations: OpenAPIOperation[] = [];
+		for (const [key, pathItem] of Object.entries(paths ?? {})) {
+			for (const method of HTTP_METHODS) {
+				const operation = pathItem?.[method];
+				if (!operation) continue;
+				const mapped = mapOperation({
+					document,
+					apiPath: isWebhook ? `/${key}` : key,
+					method,
+					pathItem,
+					operation,
+					servers,
+					snippets: isWebhook ? [] : spec.snippets
+				});
+				if (isWebhook) {
+					mapped.event = key;
+					mapped.title = operation.summary ?? operation.operationId ?? toTitle(key);
+				}
+				operations.push(mapped);
+			}
+		}
+		return operations.sort(sortOperations);
+	};
+
+	const operations = collect(document.paths, false);
+	const webhooks = collect(document.webhooks, true);
+
+	return {
+		source: path.relative(process.cwd(), inputPath),
+		openapi: document.openapi,
+		info: {
+			title: document.info?.title ?? 'API',
+			version: document.info?.version ?? '0.0.0',
+			description: document.info?.description,
+			contact: document.info?.contact,
+			license: document.info?.license,
+			termsOfService: document.info?.termsOfService
+		},
+		servers,
+		securitySchemes: Object.entries(document.components?.securitySchemes ?? {})
+			.map(([name, scheme]) => mapScheme(name, scheme as Node))
+			.filter((item) => item !== null),
+		externalDocs: document.externalDocs
+			? { description: document.externalDocs.description, url: document.externalDocs.url }
+			: undefined,
+		tags: buildTags(document, operations),
+		navigation: buildNavigation(operations, webhooks, spec.groupBy),
+		operations,
+		webhooks,
+		schemas
+	};
 }
 
-export function openapiLoader(options: OpenAPILoaderOptions): Loader {
+export function openapiLoader(options: { specs: OpenAPILoaderSpec[] }): Loader {
 	return {
 		name: 'openapi-loader',
 		load: async ({ store, logger }) => {
 			store.clear();
 			for (const spec of options.specs) {
-				const model = await loadSpec(spec, logger);
-				if (!model) continue;
-
+				const model = await loadSpec(spec);
 				store.set({
 					id: `openapi:${spec.id}`,
-					data: model
+					data: model as unknown as Record<string, unknown>
 				});
-
 				logger.info(
-					`Loaded OpenAPI spec "${spec.id}" with ${model.operations.length} operations and ${model.webhooks.length} webhooks.`
+					`Loaded "${spec.input}": ${model.operations.length} operations, ${model.webhooks.length} webhooks, ${model.schemas.length} schemas.`
 				);
 			}
 		}
 	};
-}
-
-async function loadSpec(spec: OpenAPILoaderSpec, logger: { info: (message: string) => void }) {
-	try {
-		const inputPath = path.resolve(spec.input);
-
-		logger.info(`Validating OpenAPI document at ${spec.input}...`);
-		const document = await SwaggerParser.validate(inputPath, {
-			validate: { schema: true, spec: true },
-			dereference: { circular: 'ignore' }
-		});
-
-		const defaultServers = Array.isArray((document as any).servers)
-			? (document as any).servers.map((server: any) => ({
-					url: server.url,
-					description: server.description
-				}))
-			: [];
-
-		const rootSecurity = Array.isArray(document.security) ? document.security : [];
-
-		const operations = [];
-		for (const [apiPath, rawPathItem] of Object.entries(document.paths ?? {})) {
-			const pathItem = deepResolve(rawPathItem, document);
-			for (const method of HTTP_METHODS) {
-				const operation = pathItem?.[method];
-				if (!operation) continue;
-
-				operations.push(
-					mapOperation({
-						document,
-						apiPath,
-						method,
-						pathItem,
-						operation,
-						defaultServers,
-						rootSecurity
-					})
-				);
-			}
-		}
-
-		operations.sort((a, b) => {
-			const methodAIndex = HTTP_METHODS.indexOf(a.method);
-			const methodBIndex = HTTP_METHODS.indexOf(b.method);
-			if (methodAIndex !== methodBIndex) {
-				return methodAIndex - methodBIndex;
-			}
-			return a.path.localeCompare(b.path);
-		});
-
-		const webhooks = mapWebhooks(document, defaultServers, rootSecurity);
-
-		return {
-			source: path.relative(process.cwd(), inputPath),
-			openapi: (document as any).openapi,
-			info: {
-				title: document.info?.title ?? 'API',
-				version: document.info?.version ?? '0.0.0',
-				description: document.info?.description,
-				contact: document.info?.contact,
-				license: document.info?.license,
-				termsOfService: document.info?.termsOfService
-			},
-			servers: defaultServers,
-			securitySchemes: mapSecuritySchemes((document as any).components, document),
-			externalDocs: (document as any).externalDocs
-				? {
-						description: (document as any).externalDocs.description,
-						url: (document as any).externalDocs.url
-					}
-				: undefined,
-			tags: buildTags(document, operations),
-			navigation: buildNavigation(operations, webhooks, spec.groupBy),
-			operations,
-			webhooks
-		};
-	} catch (error) {
-		logger.info(
-			`Failed to load OpenAPI spec "${spec.id}": ${error instanceof Error ? error.message : String(error)}`
-		);
-		return null;
-	}
 }

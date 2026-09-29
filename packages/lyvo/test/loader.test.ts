@@ -36,3 +36,42 @@ describe('toTitle', () => {
 		expect(toTitle('---')).toBe('Untitled');
 	});
 });
+
+describe('loadSpec', async () => {
+	const { loadSpec } = await import('../src/lib/openapi/loader');
+	const { schemaName } = await import('../src/lib/openapi/schema');
+	const model = await loadSpec({
+		id: 'default',
+		input: new URL('../../../apps/demo/public/openapi.json', import.meta.url).pathname,
+		groupBy: 'tag',
+		snippets: ['curl']
+	});
+
+	it('names component schemas so references can link to them', () => {
+		const planet = model.schemas.find((schema) => schema.name === 'Planet');
+		expect(planet?.slug).toBe('planet');
+		expect(schemaName(planet?.schema)).toBe('Planet');
+	});
+
+	it('resolves circular top-level refs in request bodies', () => {
+		const create = model.operations.find((operation) => operation.slug === 'createplanet');
+		const schema = create?.requestBody?.content[0].schema as Record<string, unknown>;
+		expect(schema.$ref).toBeUndefined();
+		expect(schema.properties).toBeDefined();
+	});
+
+	it('sends apiKey headers under their real name', () => {
+		const scheme = model.securitySchemes.find((item) => item.name === 'apiKeyHeader');
+		expect(scheme?.paramName).toBe('X-API-Key');
+	});
+
+	it('groups webhooks last', () => {
+		expect(model.navigation.at(-1)?.title).toBe('Webhooks');
+	});
+
+	it('fails loudly on a broken spec', async () => {
+		await expect(
+			loadSpec({ id: 'x', input: 'does-not-exist.json', groupBy: 'tag', snippets: [] })
+		).rejects.toThrow(/failed to load/);
+	});
+});

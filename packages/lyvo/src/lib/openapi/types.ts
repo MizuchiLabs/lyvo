@@ -1,7 +1,8 @@
+import type { SnippetLanguage } from '../../config';
+
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options' | 'trace';
 
 export interface OpenAPIModel {
-	generatedAt: string;
 	source: string;
 	openapi?: string;
 	info: {
@@ -29,7 +30,16 @@ export interface OpenAPIModel {
 	tags: OpenAPITag[];
 	navigation: OpenAPINavigationGroup[];
 	operations: OpenAPIOperation[];
-	webhooks: OpenAPIWebhook[];
+	webhooks: OpenAPIOperation[];
+	schemas: OpenAPISchemaEntry[];
+}
+
+export interface OpenAPISchemaEntry {
+	name: string;
+	slug: string;
+	description?: string;
+	schema: Record<string, unknown>;
+	example?: unknown;
 }
 
 export interface OpenAPIServer {
@@ -75,30 +85,10 @@ export interface OpenAPIOperation {
 	responses: OpenAPIResponse[];
 	security: OpenAPISecurityRequirement[];
 	snippets: OpenAPISnippet[];
-	raw: {
-		operationId?: string;
-		externalDocsUrl?: string;
-	};
-}
-
-export interface OpenAPIWebhook {
-	id: string;
-	slug: string;
-	event: string;
-	method: HttpMethod;
-	path: string;
-	title: string;
-	summary?: string;
-	description?: string;
-	deprecated: boolean;
-	tags: string[];
-	servers: OpenAPIServer[];
-	parameters: OpenAPIParameter[];
-	requestBody?: OpenAPIRequestBody;
-	responses: OpenAPIResponse[];
-	security: OpenAPISecurityRequirement[];
-	snippets: OpenAPISnippet[];
-	raw?: { externalDocsUrl?: string };
+	operationId?: string;
+	externalDocsUrl?: string;
+	/** Set for webhooks: the event name the webhook is registered under. */
+	event?: string;
 }
 
 export interface OpenAPIParameter {
@@ -142,11 +132,13 @@ export interface OpenAPISecurityRequirement {
 	bearerFormat?: string;
 	flows?: unknown;
 	openIdConnectUrl?: string;
+	/** Header, query or cookie name an apiKey scheme is sent under. */
+	paramName?: string;
 	scopes: string[];
 }
 
 export interface OpenAPISnippet {
-	id: 'curl' | 'javascript' | 'python' | 'go' | 'csharp' | 'java';
+	id: SnippetLanguage;
 	label: string;
 	language: string;
 	code: string;

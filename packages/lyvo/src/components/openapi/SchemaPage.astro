@@ -1,0 +1,58 @@
+---
+import SchemaViewer from '@lyvo/components/openapi/SchemaViewer.astro';
+import CodeBlock from '@lyvo/components/base/CodeBlock.astro';
+import PageActions from '@lyvo/components/docs/PageActions.astro';
+import { schemaHref, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import type { OpenAPISchemaEntry } from '@lyvo/lib/openapi/types';
+import { baseType } from '@lyvo/lib/openapi/schema';
+import { markdownPath } from '@lyvo/lib/seo';
+import config from 'virtual:lyvo-config';
+
+interface Props {
+	spec: LoadedApiSpec;
+	entry: OpenAPISchemaEntry;
+}
+
+const { spec, entry } = Astro.props;
+const markdown = config.llms ? markdownPath(schemaHref(spec, entry.name)) : undefined;
+
+const example = entry.example === undefined ? undefined : JSON.stringify(entry.example, null, 2);
+---
+
+<div class="grid w-full grid-cols-1 lg:grid-cols-[1fr_420px] xl:grid-cols-[1fr_500px] 2xl:grid-cols-[1fr_640px]">
+	<div class="min-w-0 px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:px-12">
+		<div class="mx-auto max-w-4xl space-y-8">
+			<div class="space-y-3">
+				<div class="flex flex-wrap items-start justify-between gap-4">
+					<div class="flex flex-wrap items-center gap-3">
+						<h1 class="scroll-m-20 font-mono text-3xl font-bold tracking-tight md:text-4xl">
+							{entry.name}
+						</h1>
+						<span class="rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+							{baseType(entry.schema)}
+						</span>
+					</div>
+					{markdown && <PageActions markdown={markdown} />}
+				</div>
+				{entry.description && (
+					<p class="text-lg text-muted-foreground">{entry.description}</p>
+				)}
+			</div>
+
+			<section class="rounded-xl border border-border bg-card p-4 shadow-sm">
+				<SchemaViewer schema={{ ...entry.schema, description: undefined }} spec={spec} />
+			</section>
+		</div>
+	</div>
+
+	{example && (
+		<div class="border-t border-border bg-muted/10 lg:border-t-0 lg:border-l">
+			<div class="sticky top-14 p-4 sm:p-6 lg:p-8">
+				<h3 class="mb-4 text-sm font-semibold tracking-tight text-foreground/80">
+					Example
+				</h3>
+				<CodeBlock code={example} lang="json" wrap={true} class="font-mono text-sm" />
+			</div>
+		</div>
+	)}
+</div>

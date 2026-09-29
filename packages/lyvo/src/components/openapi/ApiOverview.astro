@@ -1,5 +1,9 @@
 ---
-import type { LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { apiIndexHref, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import PageActions from '@lyvo/components/docs/PageActions.astro';
+import { markdownPath } from '@lyvo/lib/seo';
+import { withBase } from '@lyvo/lib/url';
+import config from 'virtual:lyvo-config';
 import type { OpenAPISecurityRequirement } from '@lyvo/lib/openapi/types';
 import { marked } from 'marked';
 import {
@@ -23,11 +27,11 @@ const { spec } = Astro.props;
 const model = spec.model;
 
 const source = model.source;
-const downloadHref = source?.startsWith('public/')
-	? `/${source.replace(/^public\//, '')}`
-	: source
-		? `/${source}`
-		: '';
+// Only files under public/ are served, anything else has no URL to link to.
+const downloadHref = source.startsWith('public/')
+	? withBase(`/${source.slice('public/'.length)}`)
+	: '';
+const markdown = config.llms ? markdownPath(apiIndexHref(spec)) : undefined;
 
 function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 	switch (scheme.type) {
@@ -58,34 +62,29 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 					<h1 class="scroll-m-20 text-3xl font-bold tracking-tight md:text-4xl">
 						{model.info?.title ?? spec.title}
 					</h1>
-					{
-						model.info?.version && (
-							<span class="mt-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-primary uppercase">
-								v{model.info.version}
-							</span>
-						)
-					}
-					{
-						model.openapi && (
-							<span class="mt-1 rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-								OpenAPI {model.openapi}
-							</span>
-						)
-					}
+					{model.info?.version && (
+						<span class="mt-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-primary uppercase">
+							v{model.info.version}
+						</span>
+					)}
+					{model.openapi && (
+						<span class="mt-1 rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+							OpenAPI {model.openapi}
+						</span>
+					)}
 				</div>
 
-				{
-					model.info?.description && (
-						<div
-							class="prose max-w-none prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-							set:html={await marked.parse(model.info.description as string)}
-						/>
-					)
-				}
+				{model.info?.description && (
+					<div
+						class="prose max-w-none prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+						set:html={await marked.parse(model.info.description as string)}
+					/>
+				)}
 			</div>
 
-			{
-				downloadHref && (
+			<div class="flex shrink-0 items-center gap-2">
+				{markdown && <PageActions markdown={markdown} />}
+				{downloadHref && (
 					<a
 						href={downloadHref}
 						download
@@ -94,213 +93,201 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 						<Download size={16} />
 						Download OpenAPI
 					</a>
-				)
-			}
+				)}
+			</div>
 		</div>
 
 		<!-- Servers -->
-		{
-			model.servers.length > 0 && (
-				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-					<div class="mb-4 flex items-center gap-2">
-						<Server size={16} class="text-muted-foreground" />
-						<h2 class="text-base font-semibold tracking-tight">Servers</h2>
-						<span class="text-sm text-muted-foreground">({model.servers.length})</span>
-					</div>
-					<ul class="divide-y divide-border/70">
-						{model.servers.map((server) => (
-							<li class="py-3 first:pt-0 last:pb-0">
-								<code class="block rounded-md bg-muted/40 px-2 py-1 text-sm break-all text-foreground">
-									{server.url}
-								</code>
-								{server.description && (
-									<p class="mt-1.5 pl-2 text-sm text-muted-foreground">
-										{server.description}
-									</p>
-								)}
-							</li>
-						))}
-					</ul>
-				</section>
-			)
-		}
+		{model.servers.length > 0 && (
+			<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
+				<div class="mb-4 flex items-center gap-2">
+					<Server size={16} class="text-muted-foreground" />
+					<h2 class="text-base font-semibold tracking-tight">Servers</h2>
+					<span class="text-sm text-muted-foreground">({model.servers.length})</span>
+				</div>
+				<ul class="divide-y divide-border/70">
+					{model.servers.map((server) => (
+						<li class="py-3 first:pt-0 last:pb-0">
+							<code class="block rounded-md bg-muted/40 px-2 py-1 text-sm break-all text-foreground">
+								{server.url}
+							</code>
+							{server.description && (
+								<p class="mt-1.5 pl-2 text-sm text-muted-foreground">
+									{server.description}
+								</p>
+							)}
+						</li>
+					))}
+				</ul>
+			</section>
+		)}
 
 		<!-- Authentication + About -->
 		<div class="grid grid-cols-1 gap-6">
-			{
-				(model.info?.contact || model.info?.license || model.info?.termsOfService) && (
-					<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-						<div class="mb-4 flex items-center gap-2">
-							<Info size={16} class="text-muted-foreground" />
-							<h2 class="text-base font-semibold tracking-tight">About</h2>
-						</div>
-						<dl class="space-y-4 text-sm">
-							{model.info.contact && (
-								<div>
-									<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-										<Mail size={12} />
-										Contact
-									</dt>
-									<dd class="mt-1">
-										{model.info.contact.name ? (
-											<span class="font-medium">
-												{model.info.contact.name}
-											</span>
-										) : (
-											'—'
-										)}
-										{model.info.contact.email && (
-											<a
-												href={`mailto:${model.info.contact.email}`}
-												class="ml-2 text-primary hover:underline"
-											>
-												{model.info.contact.email}
-											</a>
-										)}
-										{model.info.contact.url && (
-											<a
-												href={model.info.contact.url}
-												target="_blank"
-												rel="noopener noreferrer"
-												class="ml-2 inline-flex items-center gap-1 text-primary hover:underline"
-											>
-												Website
-												<ExternalLink size={12} />
-											</a>
-										)}
-									</dd>
-								</div>
-							)}
-
-							{model.info.license && (
-								<div>
-									<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-										<Scale size={12} />
-										License
-									</dt>
-									<dd class="mt-1">
-										<a
-											href={model.info.license.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-										>
-											{model.info.license.name}
-											{model.info.license.url && <ExternalLink size={12} />}
-										</a>
-										{model.info.license.identifier && (
-											<span class="ml-2 text-muted-foreground">
-												{model.info.license.identifier}
-											</span>
-										)}
-									</dd>
-								</div>
-							)}
-
-							{model.info.termsOfService && (
-								<div>
-									<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-										<FileText size={12} />
-										Terms of Service
-									</dt>
-									<dd class="mt-1">
-										<a
-											href={model.info.termsOfService}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-										>
-											Read terms
-											<ExternalLink size={12} />
-										</a>
-									</dd>
-								</div>
-							)}
-
-							{model.externalDocs && (
-								<div>
-									<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-										<LinkIcon size={12} />
-										Documentation
-									</dt>
-									<dd class="mt-1">
-										<a
-											href={model.externalDocs.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-										>
-											{model.externalDocs.description ?? 'External docs'}
-											<ExternalLink size={12} />
-										</a>
-									</dd>
-								</div>
-							)}
-						</dl>
-					</section>
-				)
-			}
-
-			{
-				model.securitySchemes.length > 0 && (
-					<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-						<div class="mb-4 flex items-center gap-2">
-							<Shield size={16} class="text-muted-foreground" />
-							<h2 class="text-base font-semibold tracking-tight">Authentication</h2>
-						</div>
-						<ul class="space-y-3">
-							{model.securitySchemes.map((scheme) => (
-								<li class="rounded-md border border-border/70 px-3 py-2.5 transition-colors hover:bg-muted/30">
-									<div class="flex items-center justify-between gap-3">
-										<span class="truncate font-mono text-sm font-medium">
-											{scheme.name}
-										</span>
-										<span class="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] leading-4 font-semibold tracking-wide text-muted-foreground uppercase">
-											{schemeBadge(scheme)}
-										</span>
-									</div>
-									{scheme.description && (
-										<p class="mt-1 text-sm text-muted-foreground">
-											{scheme.description}
-										</p>
-									)}
-								</li>
-							))}
-						</ul>
-					</section>
-				)
-			}
-		</div>
-
-		<!-- Tags -->
-		{
-			model.tags.length > 0 && (
+			{(model.info?.contact || model.info?.license || model.info?.termsOfService) && (
 				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
 					<div class="mb-4 flex items-center gap-2">
-						<TagsIcon size={16} class="text-muted-foreground" />
-						<h2 class="text-base font-semibold tracking-tight">Groups</h2>
-						<span class="text-sm text-muted-foreground">({model.tags.length})</span>
+						<Info size={16} class="text-muted-foreground" />
+						<h2 class="text-base font-semibold tracking-tight">About</h2>
 					</div>
-					<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-						{model.tags.map((tag) => (
+					<dl class="space-y-4 text-sm">
+						{model.info.contact && (
+							<div>
+								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+									<Mail size={12} />
+									Contact
+								</dt>
+								<dd class="mt-1">
+									{model.info.contact.name ? (
+										<span class="font-medium">{model.info.contact.name}</span>
+									) : (
+										'—'
+									)}
+									{model.info.contact.email && (
+										<a
+											href={`mailto:${model.info.contact.email}`}
+											class="ml-2 text-primary hover:underline"
+										>
+											{model.info.contact.email}
+										</a>
+									)}
+									{model.info.contact.url && (
+										<a
+											href={model.info.contact.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="ml-2 inline-flex items-center gap-1 text-primary hover:underline"
+										>
+											Website
+											<ExternalLink size={12} />
+										</a>
+									)}
+								</dd>
+							</div>
+						)}
+
+						{model.info.license && (
+							<div>
+								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+									<Scale size={12} />
+									License
+								</dt>
+								<dd class="mt-1">
+									<a
+										href={model.info.license.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+									>
+										{model.info.license.name}
+										{model.info.license.url && <ExternalLink size={12} />}
+									</a>
+									{model.info.license.identifier && (
+										<span class="ml-2 text-muted-foreground">
+											{model.info.license.identifier}
+										</span>
+									)}
+								</dd>
+							</div>
+						)}
+
+						{model.info.termsOfService && (
+							<div>
+								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+									<FileText size={12} />
+									Terms of Service
+								</dt>
+								<dd class="mt-1">
+									<a
+										href={model.info.termsOfService}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+									>
+										Read terms
+										<ExternalLink size={12} />
+									</a>
+								</dd>
+							</div>
+						)}
+
+						{model.externalDocs && (
+							<div>
+								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+									<LinkIcon size={12} />
+									Documentation
+								</dt>
+								<dd class="mt-1">
+									<a
+										href={model.externalDocs.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+									>
+										{model.externalDocs.description ?? 'External docs'}
+										<ExternalLink size={12} />
+									</a>
+								</dd>
+							</div>
+						)}
+					</dl>
+				</section>
+			)}
+
+			{model.securitySchemes.length > 0 && (
+				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
+					<div class="mb-4 flex items-center gap-2">
+						<Shield size={16} class="text-muted-foreground" />
+						<h2 class="text-base font-semibold tracking-tight">Authentication</h2>
+					</div>
+					<ul class="space-y-3">
+						{model.securitySchemes.map((scheme) => (
 							<li class="rounded-md border border-border/70 px-3 py-2.5 transition-colors hover:bg-muted/30">
 								<div class="flex items-center justify-between gap-3">
-									<span class="truncate text-sm font-medium">{tag.name}</span>
-									<span class="shrink-0 text-xs text-muted-foreground">
-										{tag.operationCount}{' '}
-										{tag.operationCount === 1 ? 'endpoint' : 'endpoints'}
+									<span class="truncate font-mono text-sm font-medium">
+										{scheme.name}
+									</span>
+									<span class="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] leading-4 font-semibold tracking-wide text-muted-foreground uppercase">
+										{schemeBadge(scheme)}
 									</span>
 								</div>
-								{tag.description && (
+								{scheme.description && (
 									<p class="mt-1 text-sm text-muted-foreground">
-										{tag.description}
+										{scheme.description}
 									</p>
 								)}
 							</li>
 						))}
 					</ul>
 				</section>
-			)
-		}
+			)}
+		</div>
+
+		<!-- Tags -->
+		{model.tags.length > 0 && (
+			<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
+				<div class="mb-4 flex items-center gap-2">
+					<TagsIcon size={16} class="text-muted-foreground" />
+					<h2 class="text-base font-semibold tracking-tight">Groups</h2>
+					<span class="text-sm text-muted-foreground">({model.tags.length})</span>
+				</div>
+				<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+					{model.tags.map((tag) => (
+						<li class="rounded-md border border-border/70 px-3 py-2.5 transition-colors hover:bg-muted/30">
+							<div class="flex items-center justify-between gap-3">
+								<span class="truncate text-sm font-medium">{tag.name}</span>
+								<span class="shrink-0 text-xs text-muted-foreground">
+									{tag.operationCount}{' '}
+									{tag.operationCount === 1 ? 'endpoint' : 'endpoints'}
+								</span>
+							</div>
+							{tag.description && (
+								<p class="mt-1 text-sm text-muted-foreground">{tag.description}</p>
+							)}
+						</li>
+					))}
+				</ul>
+			</section>
+		)}
 	</div>
 </div>
