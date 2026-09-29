@@ -6,15 +6,12 @@ import Posthog from './analytics/Posthog.astro';
 import Matomo from './analytics/Matomo.astro';
 import Bridge from './analytics/Bridge.astro';
 
-const { analytics } = config;
+// Dev visits would pollute real stats. Events are logged to the console instead.
+const analytics = import.meta.env.PROD ? config.analytics : undefined;
 ---
 
 {analytics?.umami && <Umami {...analytics.umami} />}
-
 {analytics?.plausible && <Plausible {...analytics.plausible} />}
-
 {analytics?.posthog && <Posthog {...analytics.posthog} />}
-
 {analytics?.matomo && <Matomo {...analytics.matomo} />}
-
 {analytics && <Bridge />}

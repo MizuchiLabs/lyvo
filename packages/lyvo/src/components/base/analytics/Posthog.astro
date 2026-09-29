@@ -1,12 +1,13 @@
 ---
 interface Props {
 	apiKey: string;
-	host?: string;
+	host: string;
+	cookies?: boolean;
 }
-const { apiKey, host = 'https://us.i.posthog.com' } = Astro.props;
+const { apiKey, host, cookies = false } = Astro.props;
 ---
 
-<script is:inline define:vars={{ posthogKey: apiKey, posthogHost: host }}>
+<script is:inline define:vars={{ posthogKey: apiKey, posthogHost: host, posthogCookies: cookies }}>
 	// Vendored PostHog bootstrap, linters off for the minified code below.
 	// oxlint-disable
 	!(function (t, e) {
@@ -73,5 +74,15 @@ const { apiKey, host = 'https://us.i.posthog.com' } = Astro.props;
 			(e.__SV = 1));
 	})(document, window.posthog || []);
 	// oxlint-enable
-	posthog.init(posthogKey, { api_host: posthogHost, capture_pageview: 'history_change' });
+	// Private by default: nothing stored on the device, no autocapture or recordings.
+	posthog.init(posthogKey, {
+		api_host: posthogHost,
+		capture_pageview: 'history_change',
+		persistence: posthogCookies ? 'localStorage+cookie' : 'memory',
+		person_profiles: 'identified_only',
+		autocapture: false,
+		disable_session_recording: true,
+		disable_surveys: true,
+		respect_dnt: true
+	});
 </script>

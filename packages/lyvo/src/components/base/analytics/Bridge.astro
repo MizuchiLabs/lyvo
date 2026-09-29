@@ -1,25 +1,20 @@
-<!-- Maps the theme's internal lyvo events onto whatever analytics provider is configured. -->
+<!-- Forwards lyvo:track events to whichever analytics provider is loaded. -->
 <script>
-	window.addEventListener('lyvo:feedback', (e) => {
-		const { helpful, path, title, locale } = (e as CustomEvent).detail;
-		const props = { helpful: String(helpful), path, title, locale };
-		const w = window as any;
+	type Detail = { name: string; props: Record<string, string | number | boolean> };
 
-		if (w.umami?.track) w.umami.track('docs_feedback', props);
-		if (typeof w.plausible === 'function') {
-			w.plausible('docs_feedback', { props });
-		}
-		if (w.posthog?.capture) {
-			w.posthog.capture('docs_feedback', { helpful, path, title, locale });
-		}
+	window.addEventListener('lyvo:track', (event) => {
+		const { name, props } = (event as CustomEvent<Detail>).detail;
+		const w = window as any;
+		// Umami and Plausible only take string properties.
+		const strings = Object.fromEntries(
+			Object.entries(props).map(([key, value]) => [key, String(value)])
+		);
+
+		if (w.umami?.track) w.umami.track(name, strings);
+		if (typeof w.plausible === 'function') w.plausible(name, { props: strings });
+		if (w.posthog?.capture) w.posthog.capture(name, props);
 		if (w._paq?.push) {
-			w._paq.push([
-				'trackEvent',
-				'docs',
-				'feedback',
-				helpful ? 'helpful' : 'not_helpful',
-				path
-			]);
+			w._paq.push(['trackEvent', 'lyvo', name, String(props.path ?? location.pathname)]);
 		}
 	});
 </script>

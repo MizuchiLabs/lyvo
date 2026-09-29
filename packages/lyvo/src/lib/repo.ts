@@ -34,3 +34,19 @@ export function getProvider(url?: string, override?: string): string {
 	if (lowercaseUrl.includes('bitbucket.org')) return 'bitbucket';
 	return 'git'; // Fallback
 }
+
+/** Link to a new, prefilled issue, or null when the host has no known URL scheme. */
+export function getIssueURL(repoUrl: string, title: string, body: string): string | null {
+	const base = repoUrl.replace(/\/$/, '');
+	const q = encodeURIComponent;
+	switch (getProvider(repoUrl)) {
+		case 'github':
+		case 'gitea':
+		case 'forgejo':
+			return `${base}/issues/new?title=${q(title)}&body=${q(body)}`;
+		case 'gitlab':
+			return `${base}/-/issues/new?issue[title]=${q(title)}&issue[description]=${q(body)}`;
+		default:
+			return null;
+	}
+}

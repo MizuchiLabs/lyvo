@@ -2,12 +2,16 @@
 interface Props {
 	url: string;
 	siteId: string;
+	cookies?: boolean;
 }
-const { url, siteId } = Astro.props;
+const { url, siteId, cookies = false } = Astro.props;
 ---
 
-<script is:inline define:vars={{ matomoUrl: url, matomoSiteId: siteId }}>
+<script is:inline define:vars={{ matomoUrl: url, matomoSiteId: siteId, matomoCookies: cookies }}>
 	var _paq = (window._paq = window._paq || []);
+	// Private by default: no cookies and Do Not Track is honored.
+	if (!matomoCookies) _paq.push(['disableCookies']);
+	_paq.push(['setDoNotTrack', true]);
 	_paq.push(['trackPageView']);
 	_paq.push(['enableLinkTracking']);
 	(function () {
