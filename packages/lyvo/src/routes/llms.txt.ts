@@ -1,50 +1,28 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
 import config from 'virtual:lyvo-config';
-import { docsForLocale, docUrl } from '@lyvo/lib/docs';
-import { readAllApiSpecs } from '@lyvo/lib/openapi/model';
-import { apiPageHref } from '@lyvo/lib/openapi/links';
+import { listPages } from '@lyvo/lib/pages';
+import { absoluteUrl } from '@lyvo/lib/seo';
+import { withBase } from '@lyvo/lib/url';
 
+// Follows https://llmstxt.org: a title, a summary, then linked sections.
 export const GET: APIRoute = async () => {
-	const lines: string[] = [];
+	const lines = [`# ${config.title}`, ''];
+	if (config.description) lines.push(`> ${config.description}`, '');
+	lines.push(
+		'Every page below is plain Markdown. Append `.md` to any docs or API URL to get its source.',
+		`The full content in one file is at ${absoluteUrl(withBase('/llms-full.txt')) ?? withBase('/llms-full.txt')}.`
+	);
 
-	lines.push(`# ${config.title ?? 'Documentation'}`);
-	if (config.description) {
-		lines.push('', `> ${config.description}`);
+	const sections = new Map<string, string[]>();
+	for (const page of await listPages()) {
+		const url = absoluteUrl(`${page.path}.md`) ?? `${page.path}.md`;
+		const summary = page.description ? `: ${page.description.split('\n')[0]}` : '';
+		sections.set(page.section, [
+			...(sections.get(page.section) ?? []),
+			`- [${page.title}](${url})${summary}`
+		]);
 	}
-
-	const all = await getCollection('docs');
-
-	const defaultDocs = docsForLocale(all, null);
-	if (defaultDocs.length > 0) {
-		lines.push('', '## Docs', '');
-		for (const doc of defaultDocs) {
-			lines.push(
-				`- [${doc.data.title}](${docUrl(doc.id)}): ${doc.data.description ?? ''}`.trimEnd()
-			);
-		}
-	}
-
-	for (const locale of config.i18n.locales) {
-		const localeDocs = docsForLocale(all, locale.code);
-		if (localeDocs.length === 0) continue;
-		lines.push('', `## Docs (${locale.label})`, '');
-		for (const doc of localeDocs) {
-			lines.push(
-				`- [${doc.data.title}](${docUrl(doc.id)}): ${doc.data.description ?? ''}`.trimEnd()
-			);
-		}
-	}
-
-	const specs = await readAllApiSpecs();
-	for (const spec of specs) {
-		lines.push('', `## API: ${spec.model.info?.title ?? spec.title}`, '');
-		for (const operation of spec.model.operations) {
-			lines.push(
-				`- [${operation.method.toUpperCase()} ${operation.path}](${apiPageHref(spec, operation.slug)}): ${operation.summary ?? ''}`.trimEnd()
-			);
-		}
-	}
+	for (const [section, entries] of sections) lines.push('', `## ${section}`, '', ...entries);
 
 	return new Response(`${lines.join('\n')}\n`, {
 		headers: { 'Content-Type': 'text/plain; charset=utf-8' }

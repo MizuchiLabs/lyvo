@@ -1,0 +1,110 @@
+---
+import { Check, ChevronDown, Copy, FileText, ExternalLink } from '@lucide/astro';
+import { absoluteUrl } from '@lyvo/lib/seo';
+import { t } from '@lyvo/lib/i18n';
+
+interface Props {
+	markdown: string;
+	locale?: string | null;
+}
+
+const { markdown, locale = null } = Astro.props;
+
+const markdownUrl = absoluteUrl(markdown) ?? new URL(markdown, Astro.url).href;
+const prompt = encodeURIComponent(`Read ${markdownUrl}, I want to ask questions about it.`);
+const targets = [
+	{ name: 'ChatGPT', href: `https://chatgpt.com/?hints=search&q=${prompt}` },
+	{ name: 'Claude', href: `https://claude.ai/new?q=${prompt}` }
+];
+const itemClass =
+	'flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:outline-none';
+---
+
+<div
+	class="page-actions not-prose relative inline-flex shrink-0 items-center"
+	data-markdown={markdown}
+	data-copied={t('copied', locale)}
+>
+	<button
+		type="button"
+		data-copy-page
+		class="inline-flex h-8 items-center gap-1.5 rounded-l-lg border border-border bg-background px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+	>
+		<Copy size={14} data-icon="copy" />
+		<Check size={14} data-icon="check" class="hidden text-primary" />
+		<span data-label>{t('copyPage', locale)}</span>
+	</button>
+	<details class="group">
+		<summary
+			aria-label="More page actions"
+			class="inline-flex h-8 cursor-pointer list-none items-center rounded-r-lg border border-l-0 border-border bg-background px-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+		>
+			<ChevronDown size={14} class="transition-transform group-open:rotate-180" />
+		</summary>
+		<div class="absolute top-full right-0 z-40 mt-1.5 w-52 rounded-lg border border-border bg-popover p-1 shadow-lg">
+			<a href={markdown} class={itemClass} target="_blank" data-page-action="markdown">
+				<FileText size={14} />
+				{t('viewMarkdown', locale)}
+			</a>
+			{targets.map((target) => (
+				<a
+					href={target.href}
+					class={itemClass}
+					target="_blank"
+					rel="noopener noreferrer"
+					data-page-action={target.name.toLowerCase()}
+				>
+					<ExternalLink size={14} />
+					{t('openIn', locale).replace('{name}', target.name)}
+				</a>
+			))}
+		</div>
+	</details>
+</div>
+
+<script>
+	import { track } from '@lyvo/lib/track';
+
+	document.addEventListener('click', async (event) => {
+		const target = event.target as HTMLElement;
+
+		for (const open of document.querySelectorAll<HTMLDetailsElement>(
+			'.page-actions details[open]'
+		)) {
+			if (!open.contains(target)) open.open = false;
+		}
+
+		const action = target.closest<HTMLAnchorElement>('[data-page-action]');
+		if (action)
+			track('page_action', { action: action.dataset.pageAction, path: location.pathname });
+
+		const button = target.closest<HTMLButtonElement>('[data-copy-page]');
+		const root = button?.closest<HTMLElement>('.page-actions');
+		if (!button || !root?.dataset.markdown) return;
+
+		const response = await fetch(root.dataset.markdown);
+		if (!response.ok) return;
+		await navigator.clipboard.writeText(await response.text());
+		track('page_copy', { path: location.pathname });
+
+		const label = button.querySelector('[data-label]');
+		const original = label?.textContent;
+		button.querySelector('[data-icon="copy"]')?.classList.add('hidden');
+		button.querySelector('[data-icon="check"]')?.classList.remove('hidden');
+		if (label) label.textContent = root.dataset.copied ?? '';
+		setTimeout(() => {
+			button.querySelector('[data-icon="copy"]')?.classList.remove('hidden');
+			button.querySelector('[data-icon="check"]')?.classList.add('hidden');
+			if (label) label.textContent = original ?? '';
+		}, 2000);
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key !== 'Escape') return;
+		for (const open of document.querySelectorAll<HTMLDetailsElement>(
+			'.page-actions details[open]'
+		)) {
+			open.open = false;
+		}
+	});
+</script>
