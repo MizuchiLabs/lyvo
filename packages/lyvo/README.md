@@ -22,10 +22,10 @@
 
 ```bash
 pnpm create astro@latest
-pnpm add @mizuchilabs/lyvo @pagefind/component-ui
+pnpm add @mizuchilabs/lyvo @pagefind/component-ui sharp
 ```
 
-Tailwind, MDX, the sitemap and Pagefind are wired up by the integration. You don't need to install or configure them yourself.
+Tailwind, MDX, the sitemap and Pagefind are wired up by the integration. You don't need to install or configure them yourself. `sharp` is Astro's image optimizer and has to live in your project, pnpm won't let Astro reach lyvo's copy.
 
 ## Quick Start
 
