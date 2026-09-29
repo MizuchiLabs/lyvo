@@ -1,17 +1,16 @@
 ---
-import { ExternalLink } from '@lucide/astro';
 import { isExternal } from '@lyvo/lib/utils';
 
-const { href, ...props } = Astro.props;
+const { href, class: className, ...props } = Astro.props;
 const external = isExternal(href);
 ---
 
 <a
 	href={href}
 	{...props}
+	class:list={[className, external && 'external-link']}
 	target={external ? '_blank' : undefined}
 	rel={external ? 'noopener noreferrer' : undefined}
 >
 	<slot />
-	{external && <ExternalLink size={14} class="-mt-0.5 ml-1 inline-block opacity-70" />}
 </a>

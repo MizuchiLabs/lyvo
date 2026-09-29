@@ -1,0 +1,70 @@
+---
+import { Check, ChevronsUpDown } from '@lucide/astro';
+import Icon from '@lyvo/components/base/Icon.astro';
+import type { Section } from '@lyvo/lib/sections';
+
+interface Props {
+	sections: Section[];
+	active: Section;
+}
+
+const { sections, active } = Astro.props;
+const iconTile =
+	'inline-flex size-9 shrink-0 items-center justify-center rounded-lg border [&>svg]:size-4';
+---
+
+{sections.length > 1 && (
+	<details data-popover class="group relative">
+		<summary class="flex w-full cursor-pointer list-none items-center gap-3 rounded-xl border border-border bg-background/60 p-2 text-left shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+			<span class={`${iconTile} border-primary/25 bg-primary/10 text-primary`}>
+				<Icon name={active.icon} />
+			</span>
+			<span class="min-w-0 flex-1">
+				<span class="block truncate text-sm font-semibold">{active.title}</span>
+				<span class="block truncate text-xs text-muted-foreground">
+					{active.description}
+				</span>
+			</span>
+			<ChevronsUpDown size={16} class="shrink-0 text-muted-foreground" />
+		</summary>
+
+		<div
+			class="absolute inset-x-0 top-full z-40 mt-1.5 origin-top rounded-xl border border-border bg-popover p-1 shadow-xl"
+			role="menu"
+		>
+			{sections.map((section) => {
+				const current = section.id === active.id;
+				return (
+					<a
+						href={section.href}
+						role="menuitem"
+						aria-current={current ? 'true' : undefined}
+						class="group/item flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+					>
+						<span
+							class:list={[
+								iconTile,
+								current
+									? 'border-primary/25 bg-primary/10 text-primary'
+									: 'border-border bg-background text-muted-foreground group-hover/item:text-foreground'
+							]}
+						>
+							<Icon name={section.icon} />
+						</span>
+						<span class="min-w-0 flex-1">
+							<span class="block truncate text-sm font-medium">{section.title}</span>
+							<span class="block truncate text-xs text-muted-foreground">
+								{section.description}
+							</span>
+						</span>
+						{current && <Check size={14} class="shrink-0 text-primary" />}
+					</a>
+				);
+			})}
+		</div>
+	</details>
+)}
+
+<script>
+	import '@lyvo/lib/popover';
+</script>

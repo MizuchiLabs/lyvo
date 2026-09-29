@@ -2,6 +2,8 @@
 import { Pencil } from '@lucide/astro';
 import config from 'virtual:lyvo-config';
 import { getEditURL } from '@lyvo/lib/repo';
+import { t } from '@lyvo/lib/i18n';
+import { currentLocale } from '@lyvo/lib/docs';
 
 interface Props {
 	filePath?: string;
@@ -9,20 +11,18 @@ interface Props {
 const { filePath } = Astro.props;
 
 const url = config.repo?.url;
-const branch = config.repo?.branch || 'main';
+const branch = config.repo?.branch ?? 'main';
 const editUrl = url && filePath && config.docs.edit ? getEditURL(url, branch, filePath) : '';
 ---
 
-{
-	editUrl && (
-		<a
-			href={editUrl}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="hidden items-center gap-2 rounded-lg px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:inline-flex"
-		>
-			<Pencil size={14} />
-			<span>Edit page</span>
-		</a>
-	)
-}
+{editUrl && (
+	<a
+		href={editUrl}
+		target="_blank"
+		rel="noopener noreferrer"
+		class="hidden items-center gap-2 rounded-lg px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:inline-flex"
+	>
+		<Pencil size={14} />
+		<span>{t('editPage', currentLocale(Astro.url.pathname))}</span>
+	</a>
+)}

@@ -10,9 +10,11 @@ interface Heading {
 interface Props {
 	headings: Heading[];
 	title: string;
+	/** Current section, shown before the page title for context. */
+	section?: string;
 }
 
-const { headings, title } = Astro.props;
+const { headings, title, section } = Astro.props;
 const radius = 9;
 const circumference = 2 * Math.PI * radius;
 ---
@@ -36,7 +38,8 @@ const circumference = 2 * Math.PI * radius;
 					r={radius}
 					stroke="currentColor"
 					stroke-width="2"
-					fill="none"></circle>
+					fill="none"
+				></circle>
 			</svg>
 			<svg
 				class="absolute h-full w-full -rotate-90 transform text-foreground transition-all duration-150 ease-out"
@@ -53,48 +56,52 @@ const circumference = 2 * Math.PI * radius;
 					fill="none"
 					stroke-dasharray={circumference}
 					stroke-dashoffset={circumference}
-					stroke-linecap="round"></circle>
+					stroke-linecap="round"
+				></circle>
 			</svg>
 		</div>
 		<div class="flex flex-1 items-center gap-1 overflow-hidden font-medium">
-			<span data-toc-active-text class="truncate text-left">{title}</span>
-			{
-				headings.length > 0 && (
-					<ChevronRight
-						size={14}
-						class="mobile-toc-chevron shrink-0 text-muted-foreground transition-transform"
-					/>
-				)
-			}
+			{section && (
+				<span class="max-w-[40%] shrink-0 truncate font-normal text-muted-foreground/70">
+					{section} /
+				</span>
+			)}
+			<span data-toc-active-text class="truncate text-left text-foreground">
+				{title}
+			</span>
+			{headings.length > 0 && (
+				<ChevronRight
+					size={14}
+					class="mobile-toc-chevron shrink-0 text-muted-foreground transition-transform"
+				/>
+			)}
 		</div>
 	</button>
 
 	<div
 		id="mobile-toc-menu"
-		class="absolute top-14 right-0 left-0 z-50 hidden w-full rounded-b-xl border-x border-b border-border/40 bg-background/95 p-4 shadow-xl backdrop-blur-xl"
+		class="absolute top-14 right-0 left-0 z-50 hidden w-full rounded-b-xl border-b border-border/40 bg-background/80 px-3 py-3 shadow-lg backdrop-blur-md md:px-6"
 	>
 		<div class="no-scrollbar max-h-[60vh] overflow-y-auto">
 			<div class="flex flex-col space-y-1">
-				{
-					headings.length > 0 ? (
-						headings.map((heading) => (
-							<a
-								href={`#${heading.slug}`}
-								data-slug={heading.slug}
-								data-toc-link
-								data-id={heading.slug}
-								class:list={[
-									'mobile-toc-link block truncate py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
-									{ 'pl-4': heading.depth >= 3 }
-								]}
-							>
-								{heading.text}
-							</a>
-						))
-					) : (
-						<span class="text-sm text-muted-foreground">No headings found.</span>
-					)
-				}
+				{headings.length > 0 ? (
+					headings.map((heading) => (
+						<a
+							href={`#${heading.slug}`}
+							data-slug={heading.slug}
+							data-toc-link
+							data-id={heading.slug}
+							class:list={[
+								'mobile-toc-link block truncate py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground',
+								{ 'pl-4': heading.depth >= 3 }
+							]}
+						>
+							{heading.text}
+						</a>
+					))
+				) : (
+					<span class="text-sm text-muted-foreground">No headings found.</span>
+				)}
 			</div>
 		</div>
 	</div>

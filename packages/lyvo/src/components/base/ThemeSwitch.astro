@@ -1,0 +1,51 @@
+---
+import { Monitor, Moon, Sun } from '@lucide/astro';
+import { t } from '@lyvo/lib/i18n';
+
+interface Props {
+	locale?: string | null;
+}
+
+const { locale = null } = Astro.props;
+const options = [
+	{ value: 'light', label: t('themeLight', locale), Icon: Sun },
+	{ value: 'dark', label: t('themeDark', locale), Icon: Moon },
+	{ value: 'system', label: t('themeSystem', locale), Icon: Monitor }
+];
+---
+
+<div
+	role="group"
+	aria-label={t('theme', locale)}
+	class="inline-flex items-center gap-0.5 rounded-full border border-border bg-muted/50 p-0.5"
+>
+	{options.map(({ value, label, Icon }) => (
+		<button
+			type="button"
+			data-theme-value={value}
+			aria-pressed="false"
+			title={label}
+			class="inline-flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-sm"
+		>
+			<Icon size={14} />
+			<span class="sr-only">{label}</span>
+		</button>
+	))}
+</div>
+
+<script>
+	function sync() {
+		const pref = document.documentElement.dataset.themePref ?? 'system';
+		for (const button of document.querySelectorAll<HTMLElement>('[data-theme-value]')) {
+			button.setAttribute('aria-pressed', String(button.dataset.themeValue === pref));
+		}
+	}
+
+	document.addEventListener('click', (event) => {
+		const button = (event.target as Element).closest<HTMLElement>('[data-theme-value]');
+		if (!button) return;
+		window.__lyvoTheme?.set(button.dataset.themeValue as 'light' | 'dark' | 'system');
+		sync();
+	});
+	document.addEventListener('astro:page-load', sync);
+</script>

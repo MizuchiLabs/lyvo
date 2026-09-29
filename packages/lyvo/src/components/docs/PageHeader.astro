@@ -1,29 +1,35 @@
 ---
 import { Calendar } from '@lucide/astro';
+import PageActions from '@lyvo/components/docs/PageActions.astro';
 import { t } from '@lyvo/lib/i18n';
-import { currentLocale } from '@lyvo/lib/docs';
 
 interface Props {
 	title: string;
 	description?: string;
-	lastUpdated?: string;
+	lastUpdated?: Date | null;
+	lang: string;
+	markdown?: string;
 }
 
-const { title, description, lastUpdated } = Astro.props;
+const { title, description, lastUpdated, lang, markdown } = Astro.props;
 
-const locale = currentLocale(Astro.url.pathname);
+const formatted = lastUpdated
+	? new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }).format(lastUpdated)
+	: null;
 ---
 
 <div class="space-y-2">
-	<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<h1 class="scroll-m-20 text-4xl font-bold tracking-tight">{title}</h1>
+		{markdown && <PageActions markdown={markdown} locale={lang} />}
+	</div>
 	{description && <p class="text-lg text-muted-foreground">{description}</p>}
 </div>
 
-{
-	lastUpdated && (
-		<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-			<Calendar size={16} />
-			{t('lastUpdated', locale)} {lastUpdated}
-		</div>
-	)
-}
+{formatted && lastUpdated && (
+	<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+		<Calendar size={16} />
+		{t('lastUpdated', lang)}
+		<time datetime={lastUpdated.toISOString()}>{formatted}</time>
+	</div>
+)}

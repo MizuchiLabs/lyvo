@@ -1,8 +1,12 @@
 ---
 import Search from '@lyvo/components/base/Search.astro';
+import SkipLink from '@lyvo/components/base/SkipLink.astro';
 import Sidebar from '@lyvo/components/docs/Sidebar.astro';
 import MobileToC from '@lyvo/components/docs/MobileToC.astro';
-import ThemeToggle from '@lyvo/components/base/ThemeToggle.astro';
+import SearchTrigger from '@lyvo/components/base/SearchTrigger.astro';
+import { Languages, Menu } from '@lucide/astro';
+import { activeSection, getSections } from '@lyvo/lib/sections';
+import { t } from '@lyvo/lib/i18n';
 import BaseHead from '@lyvo/layouts/BaseHead.astro';
 import ToC from '@lyvo/components/docs/ToC.astro';
 import Breadcrumbs from '@lyvo/components/docs/Breadcrumbs.astro';
@@ -11,52 +15,142 @@ import Pagination from '@lyvo/components/docs/Pagination.astro';
 import { cn } from '@lyvo/lib/utils';
 import { getLastUpdated } from '@lyvo/lib/lastUpdated';
 import config from 'virtual:lyvo-config';
-import { currentLocale } from '@lyvo/lib/docs';
+import {
+	currentLocale,
+	docPageId,
+	docUrl,
+	getDocsHierarchy,
+	getTranslations,
+	localeCodes,
+	navTrail,
+	type Crumb,
+	type DocEntry
+} from '@lyvo/lib/docs';
+import { splitDocId } from '@lyvo/lib/routing';
+import { withBase } from '@lyvo/lib/url';
+import {
+	articleJsonLd,
+	breadcrumbJsonLd,
+	defaultOgImage,
+	markdownPath,
+	ogImagePath,
+	type Alternate
+} from '@lyvo/lib/seo';
 
 interface Props {
 	title: string;
 	description?: string;
 	headings?: { depth: number; slug: string; text: string }[];
-	entry?: any;
+	entry?: DocEntry;
 	isApi?: boolean;
+	notFound?: boolean;
+	/** Extra breadcrumb steps for pages outside the docs nav, e.g. API groups. */
+	crumbs?: Crumb[];
 }
 
-const { title, description, headings = [], entry, isApi = false } = Astro.props;
+const {
+	title,
+	description,
+	headings = [],
+	entry,
+	isApi = false,
+	notFound = false,
+	crumbs
+} = Astro.props;
 
 const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
+const activeLocale = lang === config.i18n.defaultLocale ? null : lang;
 
-const lastUpdatedText = entry ? await getLastUpdated(entry.filePath) : '';
-const showToc = !isApi && headings.length > 0;
+const sections = await getSections(activeLocale);
+const section = activeSection(sections, Astro.url.pathname);
+
+let canonical = Astro.url.pathname;
+let fallbackNotice: string | null = null;
+let alternates: Alternate[] = [];
+let trail: Crumb[] = crumbs ?? [];
+
+if (entry) {
+	const pageId = docPageId(entry.id);
+	const entryLocale = splitDocId(entry.id, localeCodes).locale ?? config.i18n.defaultLocale;
+	// Untranslated pages render default content under a locale prefix.
+	// Point search engines at the original instead of indexing a duplicate.
+	if (entryLocale !== lang) {
+		canonical = docUrl(entry.id);
+		fallbackNotice = t('fallbackNotice', activeLocale)
+			.replace('{language}', config.i18n.labels[lang] ?? lang)
+			.replace('{original}', config.i18n.labels[entryLocale] ?? entryLocale);
+	} else if (localeCodes.length > 0) {
+		alternates = (await getTranslations(pageId)).map((code) => ({
+			lang: code,
+			path: docUrl(code === config.i18n.defaultLocale ? pageId : `${code}/${pageId}`)
+		}));
+	}
+	const { nav } = await getDocsHierarchy(activeLocale);
+	trail = navTrail(nav, entry.id, activeLocale) ?? [];
+}
+
+const hasPage = !notFound && (Boolean(entry) || isApi);
+const image = hasPage && config.og.generate ? ogImagePath(canonical) : defaultOgImage();
+const markdown = hasPage && config.llms ? markdownPath(canonical) : undefined;
+const modified = entry ? await getLastUpdated(entry.filePath) : null;
+
+const jsonLd = hasPage
+	? [
+			articleJsonLd({ title, description, path: canonical, lang, image, modified }),
+			breadcrumbJsonLd([
+				{ name: config.title, path: withBase('/') },
+				...trail.map((crumb) => ({ name: crumb.title, path: crumb.href })),
+				{ name: title, path: canonical }
+			])
+		]
+	: [];
 ---
 
 <!doctype html>
 <html lang={lang} class="scroll-smooth">
-	<BaseHead title={title} description={description} />
+	<BaseHead
+		title={title}
+		description={description}
+		lang={lang}
+		image={image}
+		type={hasPage ? 'article' : 'website'}
+		canonical={canonical}
+		alternates={alternates}
+		markdown={markdown}
+		jsonLd={jsonLd}
+		noindex={notFound}
+	/>
 
-	<body
-		class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row"
-	>
-		<Sidebar />
+	<body class="flex h-screen w-full flex-col overflow-hidden bg-sidebar font-sans text-foreground antialiased md:flex-row">
+		<SkipLink />
+		<Sidebar sections={sections} active={section} />
+		{config.search && <Search />}
 
-		{/* Main Content */}
 		<div class="flex h-full flex-1 flex-col overflow-hidden md:rounded-xl md:py-3 md:pr-3">
 			<main
 				id="main-scroll-area"
 				class="no-scrollbar relative flex-1 overflow-y-auto bg-background md:rounded-xl md:border md:border-r-0 md:border-border/40 md:shadow-sm"
 			>
-				{/* Header */}
-				<div
-					class="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border/40 bg-sidebar/50 px-6 backdrop-blur-md md:rounded-t-xl"
-				>
-					<Breadcrumbs title={title} />
-					{!isApi && <MobileToC headings={headings} title={title} />}
-					<div class="ml-auto flex items-center gap-3">
-						{config.features.search && <Search />}
-						<ThemeToggle transition:persist />
-					</div>
+				<!-- The blur lives on ::before so the bar isn't a backdrop root, otherwise
+				     the ToC dropdown inside it can't blur the page behind. -->
+				<div class="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border/40 px-3 before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-background/80 before:backdrop-blur-md md:px-6 md:before:rounded-t-xl md:before:bg-sidebar/50">
+					<button
+						type="button"
+						data-drawer-open
+						class="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:hidden"
+					>
+						<Menu size={18} />
+						<span class="sr-only">{t('menu', activeLocale)}</span>
+					</button>
+					<Breadcrumbs title={title} trail={trail} />
+					<MobileToC headings={headings} title={title} section={section.title} />
+					{config.search && (
+						<div class="ml-auto md:hidden">
+							<SearchTrigger compact />
+						</div>
+					)}
 				</div>
 
-				{/* Content Wrapper */}
 				<div
 					class={cn(
 						'mx-auto flex w-full flex-col',
@@ -69,24 +163,34 @@ const showToc = !isApi && headings.length > 0;
 							!isApi && 'px-4 py-8 sm:px-6 md:px-8'
 						)}
 					>
-						{
-							!isApi && (
-								<PageHeader
-									title={title}
-									description={description}
-									lastUpdated={lastUpdatedText}
-								/>
-							)
-						}
+						{fallbackNotice && (
+							<div class="mb-8 flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+								<Languages size={16} class="mt-0.5 shrink-0" />
+								<p>{fallbackNotice}</p>
+							</div>
+						)}
+						{!isApi && (
+							<PageHeader
+								title={title}
+								description={description}
+								lastUpdated={modified}
+								lang={lang}
+								markdown={markdown}
+							/>
+						)}
 
 						<article
+							id="content"
+							tabindex="-1"
 							class={cn(
 								'prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-headings:tracking-tight prose-a:font-medium prose-a:underline prose-a:underline-offset-4 prose-pre:border prose-pre:border-border/50',
 								!isApi
 									? 'prose max-w-none py-8'
 									: 'flex w-full min-w-0 flex-1 flex-col text-foreground'
 							)}
-							data-pagefind-body={isApi || entry ? true : undefined}
+							data-pagefind-body={
+								hasPage && canonical === Astro.url.pathname ? true : undefined
+							}
 						>
 							<slot />
 						</article>
@@ -94,7 +198,7 @@ const showToc = !isApi && headings.length > 0;
 						{!isApi && <Pagination entry={entry} />}
 					</div>
 
-					{!isApi && <ToC headings={showToc ? headings : []} />}
+					{!isApi && <ToC headings={headings} />}
 				</div>
 			</main>
 		</div>

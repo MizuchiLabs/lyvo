@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import config from 'virtual:lyvo-config';
+import { withBase } from '@lyvo/lib/url';
 
 interface Props {
 	size?: number;
@@ -38,43 +39,41 @@ const darkLogo = darkVariant !== lightVariant ? await resolveLogo(darkVariant) :
 ---
 
 <a
-	href="/"
+	href={withBase('/')}
 	id={id}
 	class="flex items-center gap-2.5 text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
 >
-	{
-		lightLogo ? (
-			<>
-				{/* LIGHT MODE LOGO */}
+	{lightLogo ? (
+		<>
+			{/* LIGHT MODE LOGO */}
+			<Image
+				src={lightLogo}
+				alt={`${config.title} Logo`}
+				width={size}
+				densities={[1.5, 2]}
+				style={`width: ${size}px;`}
+				class={`object-contain ${darkLogo !== lightLogo ? 'block dark:hidden' : ''}`}
+			/>
+
+			{/* DARK MODE LOGO (Only renders if it's a different file) */}
+			{darkLogo !== lightLogo && darkLogo && (
 				<Image
-					src={lightLogo}
-					alt={`${config.title} Logo`}
+					src={darkLogo}
+					alt={`${config.title} Dark Logo`}
 					width={size}
 					densities={[1.5, 2]}
 					style={`width: ${size}px;`}
-					class={`object-contain ${darkLogo !== lightLogo ? 'block dark:hidden' : ''}`}
+					class="hidden object-contain dark:block"
 				/>
-
-				{/* DARK MODE LOGO (Only renders if it's a different file) */}
-				{darkLogo !== lightLogo && darkLogo && (
-					<Image
-						src={darkLogo}
-						alt={`${config.title} Dark Logo`}
-						width={size}
-						densities={[1.5, 2]}
-						style={`width: ${size}px;`}
-						class="hidden object-contain dark:block"
-					/>
-				)}
-			</>
-		) : (
-			<span
-				class="inline-flex size-7 items-center justify-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground"
-				aria-hidden="true"
-			>
-				{(config.title ?? 'D').charAt(0).toUpperCase()}
-			</span>
-		)
-	}
+			)}
+		</>
+	) : (
+		<span
+			class="inline-flex size-7 items-center justify-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground"
+			aria-hidden="true"
+		>
+			{(config.title ?? 'D').charAt(0).toUpperCase()}
+		</span>
+	)}
 	{config.title?.length ? <span>{config.title}</span> : null}
 </a>

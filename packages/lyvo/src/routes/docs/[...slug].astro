@@ -26,12 +26,10 @@ async function resolveEntry(slug: string | undefined) {
 const { redirect, entry } = await resolveEntry(slug);
 ---
 
-{
-	redirect ? (
-		<Redirect to={redirect} />
-	) : entry ? (
-		<DocsPage entry={entry} />
-	) : (
-		<DocsPage entry={undefined} notFound={true} />
-	)
-}
+{redirect ? (
+	<Redirect to={redirect} />
+) : entry ? (
+	<DocsPage entry={entry} />
+) : (
+	<DocsPage entry={undefined} notFound={true} />
+)}

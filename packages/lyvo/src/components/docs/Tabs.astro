@@ -1,37 +1,27 @@
 ---
 const html = await Astro.slots.render('default');
 
-// Extract tab values/labels from the rendered TabItem children so users don't
-// have to duplicate labels in the <Tabs> component.
+// TabItems render as marker divs. Only unclaimed markers belong to this
+// Tabs: a nested Tabs renders first and renames its own markers.
 const tabs: { value: string; label: string }[] = [];
-const panelRegex = /data-tab-panel="([^"]+)"/g;
-const labelRegex = /data-tab-label="([^"]+)"/g;
-
-let panelMatch, labelMatch;
-while (
-	(panelMatch = panelRegex.exec(html)) !== null &&
-	(labelMatch = labelRegex.exec(html)) !== null
-) {
-	tabs.push({ value: panelMatch[1], label: labelMatch[1] });
-}
-
 const instanceId = Math.random().toString(36).slice(2, 8);
 
-// Inject tabpanel semantics into the rendered panels.
-let panelIndex = 0;
-const enhanced = html.replaceAll(/data-tab-panel="([^"]+)"/g, (match, value: string) => {
-	panelIndex += 1;
-	const isFirst = panelIndex === 1;
-	return [
-		`role="tabpanel"`,
-		`id="${instanceId}-panel-${value}"`,
-		`aria-labelledby="${instanceId}-tab-${value}"`,
-		!isFirst ? 'hidden' : '',
-		match
-	]
-		.filter(Boolean)
-		.join(' ');
-});
+const enhanced = html.replaceAll(
+	/data-tab-panel="([^"]+)" data-tab-label="([^"]*)"/g,
+	(_, value: string, label: string) => {
+		const isFirst = tabs.length === 0;
+		tabs.push({ value, label });
+		return [
+			`data-tab-owned="${value}"`,
+			'role="tabpanel"',
+			`id="${instanceId}-panel-${value}"`,
+			`aria-labelledby="${instanceId}-tab-${value}"`,
+			isFirst ? '' : 'hidden'
+		]
+			.filter(Boolean)
+			.join(' ');
+	}
+);
 ---
 
 <div
@@ -39,23 +29,21 @@ const enhanced = html.replaceAll(/data-tab-panel="([^"]+)"/g, (match, value: str
 	data-tabs
 >
 	<div class="flex gap-4 border-b border-border bg-muted/40 px-4" role="tablist">
-		{
-			tabs.map((tab, index) => (
-				<button
-					type="button"
-					role="tab"
-					id={`${instanceId}-tab-${tab.value}`}
-					aria-controls={`${instanceId}-panel-${tab.value}`}
-					aria-selected={index === 0 ? 'true' : 'false'}
-					tabindex={index === 0 ? 0 : -1}
-					class="tab-btn relative py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-					data-tab={tab.value}
-				>
-					{tab.label}
-					<span class="tab-indicator absolute inset-x-0 -bottom-px h-0.5 origin-left scale-x-0 bg-primary transition-transform" />
-				</button>
-			))
-		}
+		{tabs.map((tab, index) => (
+			<button
+				type="button"
+				role="tab"
+				id={`${instanceId}-tab-${tab.value}`}
+				aria-controls={`${instanceId}-panel-${tab.value}`}
+				aria-selected={index === 0 ? 'true' : 'false'}
+				tabindex={index === 0 ? 0 : -1}
+				class="tab-btn relative py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+				data-tab={tab.value}
+			>
+				{tab.label}
+				<span class="tab-indicator absolute inset-x-0 -bottom-px h-0.5 origin-left scale-x-0 bg-primary transition-transform" />
+			</button>
+		))}
 	</div>
 
 	<div class="tabs-panels p-4 [&_pre]:-m-4 [&_pre]:rounded-none [&_pre]:border-0 [&_pre]:p-4">
@@ -69,13 +57,15 @@ const enhanced = html.replaceAll(/data-tab-panel="([^"]+)"/g, (match, value: str
 			if (root.dataset.tabsInit) return;
 			root.dataset.tabsInit = 'true';
 
-			const tablist = root.querySelector<HTMLElement>('[role="tablist"]');
-			const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
-			const panelContainer = root.querySelector('.tabs-panels');
+			const tablist = root.querySelector<HTMLElement>(':scope > [role="tablist"]');
+			const buttons = Array.from(
+				root.querySelectorAll<HTMLButtonElement>(':scope > [role="tablist"] > [role="tab"]')
+			);
+			const panelContainer = root.querySelector(':scope > .tabs-panels');
 			if (!tablist || !panelContainer || buttons.length === 0) return;
 
 			const panels = Array.from(
-				panelContainer.querySelectorAll<HTMLElement>(':scope > [data-tab-panel]')
+				panelContainer.querySelectorAll<HTMLElement>(':scope > [data-tab-owned]')
 			);
 
 			function activate(btn: HTMLButtonElement, focus = false) {
@@ -95,7 +85,7 @@ const enhanced = html.replaceAll(/data-tab-panel="([^"]+)"/g, (match, value: str
 				});
 
 				panels.forEach((p) => {
-					const active = p.dataset.tabPanel === value;
+					const active = p.dataset.tabOwned === value;
 					p.classList.toggle('hidden', !active);
 					if (active) {
 						p.removeAttribute('hidden');

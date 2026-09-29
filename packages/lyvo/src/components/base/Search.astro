@@ -1,15 +1,8 @@
 ---
 import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
-import { t } from '@lyvo/lib/i18n';
-import { currentLocale } from '@lyvo/lib/docs';
-
-const locale = currentLocale(Astro.url.pathname);
 ---
 
 <PagefindConfig />
-<div class="mt-1 hidden md:block">
-	<pagefind-modal-trigger shortcut="/" placeholder={t('search', locale)}></pagefind-modal-trigger>
-</div>
 
 <script is:inline>
 	// Fix: @pagefind/component-ui doesn't deregister components on disconnect.
@@ -51,9 +44,31 @@ const locale = currentLocale(Astro.url.pathname);
 	}
 </script>
 
-<div><pagefind-modal reset-on-close></pagefind-modal></div>
+<div>
+	<pagefind-modal reset-on-close></pagefind-modal>
+</div>
 
 <style is:global>
+	.lyvo-search-trigger {
+		display: block;
+	}
+	.lyvo-search-trigger .pf-trigger-btn {
+		width: 100% !important;
+		height: 2.25rem !important;
+		border-radius: calc(var(--radius) + 2px) !important;
+		background: color-mix(in oklch, var(--background) 60%, transparent) !important;
+		color: var(--muted-foreground) !important;
+		font-size: 0.8125rem !important;
+	}
+	.lyvo-search-trigger .pf-trigger-btn:hover {
+		background: var(--accent) !important;
+		color: var(--foreground) !important;
+	}
+	.lyvo-search-trigger .pf-trigger-text {
+		flex: 1;
+		text-align: left;
+	}
+
 	.pagefind-header-trigger .pf-trigger-btn {
 		width: 2.5rem !important;
 		height: 2.5rem !important;

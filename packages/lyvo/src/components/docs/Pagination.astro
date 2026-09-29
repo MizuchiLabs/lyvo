@@ -19,68 +19,66 @@ if (entry) {
 }
 ---
 
-{
-	entry && (
-		<div class="space-y-6">
-			<div class="border-t border-border" />
-			<div class="flex flex-wrap items-center justify-between gap-4 px-2">
-				<Feedback />
-				<EditPageLink filePath={entry.filePath} />
-			</div>
-
-			<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-				{prevDoc ? (
-					<a
-						href={docUrl(prevDoc.id, locale)}
-						class="group flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
-					>
-						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-							<ChevronLeft
-								size={16}
-								class="transition-transform duration-300 group-hover:-translate-x-1"
-							/>
-							{t('previous', locale)}
-						</div>
-						<div class="transition-colors">
-							<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
-								{prevDoc.data.title}
-							</p>
-							{prevDoc.data.description && (
-								<p class="line-clamp-1 text-sm text-muted-foreground/80">
-									{prevDoc.data.description}
-								</p>
-							)}
-						</div>
-					</a>
-				) : (
-					<div />
-				)}
-
-				{nextDoc && (
-					<a
-						href={docUrl(nextDoc.id, locale)}
-						class="group flex flex-col items-end gap-2 rounded-xl border border-border bg-card p-5 text-right text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
-					>
-						<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-							{t('next', locale)}
-							<ChevronRight
-								size={16}
-								class="transition-transform duration-300 group-hover:translate-x-1"
-							/>
-						</div>
-						<div class="transition-colors">
-							<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
-								{nextDoc.data.title}
-							</p>
-							{nextDoc.data.description && (
-								<p class="line-clamp-1 text-sm text-muted-foreground/80">
-									{nextDoc.data.description}
-								</p>
-							)}
-						</div>
-					</a>
-				)}
-			</div>
+{entry && (
+	<div class="space-y-6">
+		<div class="border-t border-border" />
+		<div class="flex flex-wrap items-center justify-between gap-4 px-2">
+			<Feedback title={entry.data.title} />
+			<EditPageLink filePath={entry.filePath} />
 		</div>
-	)
-}
+
+		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+			{prevDoc ? (
+				<a
+					href={docUrl(prevDoc.id, locale)}
+					class="group flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
+				>
+					<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+						<ChevronLeft
+							size={16}
+							class="transition-transform duration-300 group-hover:-translate-x-1"
+						/>
+						{t('previous', locale)}
+					</div>
+					<div class="transition-colors">
+						<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
+							{prevDoc.data.title}
+						</p>
+						{prevDoc.data.description && (
+							<p class="line-clamp-1 text-sm text-muted-foreground/80">
+								{prevDoc.data.description}
+							</p>
+						)}
+					</div>
+				</a>
+			) : (
+				<div />
+			)}
+
+			{nextDoc && (
+				<a
+					href={docUrl(nextDoc.id, locale)}
+					class="group flex flex-col items-end gap-2 rounded-xl border border-border bg-card p-5 text-right text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
+				>
+					<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+						{t('next', locale)}
+						<ChevronRight
+							size={16}
+							class="transition-transform duration-300 group-hover:translate-x-1"
+						/>
+					</div>
+					<div class="transition-colors">
+						<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
+							{nextDoc.data.title}
+						</p>
+						{nextDoc.data.description && (
+							<p class="line-clamp-1 text-sm text-muted-foreground/80">
+								{nextDoc.data.description}
+							</p>
+						)}
+					</div>
+				</a>
+			)}
+		</div>
+	</div>
+)}

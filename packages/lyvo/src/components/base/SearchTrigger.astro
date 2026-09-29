@@ -1,0 +1,26 @@
+---
+import { t } from '@lyvo/lib/i18n';
+import { currentLocale } from '@lyvo/lib/docs';
+
+interface Props {
+	/** Icon-only button for the mobile bar. */
+	compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+const placeholder = t('search', currentLocale(Astro.url.pathname));
+---
+
+{compact ? (
+	<pagefind-modal-trigger
+		compact
+		hide-shortcut
+		placeholder={placeholder}
+		class="pagefind-header-trigger"
+	></pagefind-modal-trigger>
+) : (
+	<pagefind-modal-trigger
+		placeholder={placeholder}
+		class="lyvo-search-trigger"
+	></pagefind-modal-trigger>
+)}

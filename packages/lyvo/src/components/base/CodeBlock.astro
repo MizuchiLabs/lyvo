@@ -24,11 +24,9 @@ const passedThemes = themes || (theme ? undefined : defaultThemes);
 		className
 	)}
 >
-	{
-		theme ? (
-			<Code theme={theme} code={code} {...props} />
-		) : (
-			<Code themes={passedThemes} code={code} {...props} />
-		)
-	}
+	{theme ? (
+		<Code theme={theme} code={code} {...props} />
+	) : (
+		<Code themes={passedThemes} code={code} {...props} />
+	)}
 </div>

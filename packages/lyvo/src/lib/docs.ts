@@ -1,5 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import config from 'virtual:lyvo-config';
+import type { SidebarInput } from '../config';
+import { stripBase, withBase } from './url';
 import {
 	docsUrl,
 	docPageId as splitPageId,
@@ -12,21 +14,15 @@ export type DocEntry = CollectionEntry<'docs'>;
 
 export type NavItem =
 	| { type: 'doc'; id: string; title: string; doc: DocEntry }
-	| { type: 'category'; title: string; items: NavItem[] }
+	| { type: 'category'; title: string; icon?: string; items: NavItem[] }
 	| { type: 'separator' }
-	| { type: 'link'; title: string; href: string };
+	| { type: 'link'; title: string; href: string; icon?: string };
 
 export interface DocsHierarchy {
 	nav: NavItem[];
 	docs: DocEntry[];
 	/** Locale docs merged with default-locale fallbacks for untranslated pages. */
 	routed: DocEntry[];
-}
-
-export interface DocsSidebarConfig {
-	items?: import('../config').SidebarInput[];
-	order?: string[];
-	labels?: Record<string, string>;
 }
 
 const routing: RoutingInfo = {
@@ -49,7 +45,7 @@ function isDev(): boolean {
 }
 
 export function docUrl(id: string, activeLocale?: string | null): string {
-	return docsUrl(routing, id, activeLocale);
+	return withBase(docsUrl(routing, id, activeLocale));
 }
 
 export function docPageId(id: string): string {
@@ -61,7 +57,7 @@ export function getRouting(): RoutingInfo {
 }
 
 export function currentLocale(pathname: string): string | null {
-	return localeFromPath(pathname, routing);
+	return localeFromPath(stripBase(pathname), routing);
 }
 
 export function docsForLocale(all: DocEntry[], locale: string | null): DocEntry[] {
@@ -79,15 +75,11 @@ function toTitleCase(value: string): string {
 		.join(' ');
 }
 
-function buildItemsNav(
-	items: NonNullable<DocsSidebarConfig['items']>,
-	docs: DocEntry[],
-	locale: string | null
-): NavItem[] {
+function buildItemsNav(items: SidebarInput[], docs: DocEntry[], locale: string | null): NavItem[] {
 	const byPageId = new Map(docs.map((doc) => [pageIdOf(doc), doc]));
 	const scope = locale ? ` (locale "${locale}")` : '';
 
-	const resolve = (input: NonNullable<DocsSidebarConfig['items']>[number]): NavItem | null => {
+	const resolve = (input: SidebarInput): NavItem | null => {
 		if (typeof input === 'string') {
 			if (input.trim() === '---') return { type: 'separator' };
 			const doc = byPageId.get(input.replace(/^\/+|\/+$/g, ''));
@@ -101,73 +93,63 @@ function buildItemsNav(
 			return {
 				type: 'category',
 				title: input.title,
+				icon: input.icon,
 				items: input.items.map(resolve).filter((item): item is NavItem => item !== null)
 			};
 		}
-		if (input.href) return { type: 'link', title: input.title, href: input.href };
+		if (input.href)
+			return { type: 'link', title: input.title, href: input.href, icon: input.icon };
 		return null;
 	};
 
 	return items.map(resolve).filter((item): item is NavItem => item !== null);
 }
 
-interface LegacyMetaConfig {
-	order?: string[];
-	labels?: Record<string, string>;
-}
-
-function buildLegacyNav(docs: DocEntry[], meta: LegacyMetaConfig | undefined): NavItem[] {
-	const orderArr = meta?.order ?? [];
-	const labelsObj = meta?.labels ?? {};
-
-	const categorized = new Map<string, DocEntry[]>();
-	for (const doc of docs) {
-		const pageId = pageIdOf(doc);
-		const category = pageId.includes('/') ? pageId.split('/')[0] : 'root';
-		if (!categorized.has(category)) categorized.set(category, []);
-		categorized.get(category)!.push(doc);
-	}
-
-	for (const entries of categorized.values()) {
-		entries.sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
-	}
-
-	const items: NavItem[] = [];
-
-	for (const doc of categorized.get('root') ?? []) {
-		items.push({ type: 'doc', id: doc.id, title: doc.data.title, doc });
-	}
-
-	const categories = [...categorized.keys()].filter((id) => id !== 'root');
-	categories.sort((a, b) => {
-		const idxA = orderArr.indexOf(a);
-		const idxB = orderArr.indexOf(b);
-		const rankA = idxA === -1 ? 9999 : idxA;
-		const rankB = idxB === -1 ? 9999 : idxB;
-		if (rankA !== rankB) return rankA - rankB;
-		return (labelsObj[a] ?? a).localeCompare(labelsObj[b] ?? b);
+// Without a configured sidebar: root pages first, then one group per folder.
+// Pages sort by frontmatter `order`, groups by their lowest page order.
+function buildAutoNav(docs: DocEntry[]): NavItem[] {
+	const byOrder = (a: DocEntry, b: DocEntry) =>
+		(a.data.order ?? Infinity) - (b.data.order ?? Infinity) ||
+		a.data.title.localeCompare(b.data.title);
+	const toItem = (doc: DocEntry): NavItem => ({
+		type: 'doc',
+		id: doc.id,
+		title: doc.data.title,
+		doc
 	});
 
-	for (const categoryId of categories) {
-		items.push({
-			type: 'category',
-			title: labelsObj[categoryId] ?? toTitleCase(categoryId),
-			items: (categorized.get(categoryId) ?? []).map((doc) => ({
-				type: 'doc' as const,
-				id: doc.id,
-				title: doc.data.title,
-				doc
-			}))
-		});
+	const root: DocEntry[] = [];
+	const folders = new Map<string, DocEntry[]>();
+	for (const doc of docs) {
+		const pageId = pageIdOf(doc);
+		if (!pageId.includes('/')) {
+			root.push(doc);
+			continue;
+		}
+		const folder = pageId.split('/')[0];
+		folders.set(folder, [...(folders.get(folder) ?? []), doc]);
 	}
 
-	return items;
+	const groups = [...folders.entries()].map(([folder, entries]) => ({
+		folder,
+		entries: entries.sort(byOrder),
+		order: Math.min(...entries.map((doc) => doc.data.order ?? Infinity))
+	}));
+	groups.sort((a, b) => a.order - b.order || a.folder.localeCompare(b.folder));
+
+	return [
+		...root.sort(byOrder).map(toItem),
+		...groups.map((group): NavItem => ({
+			type: 'category',
+			title: toTitleCase(group.folder),
+			items: group.entries.map(toItem)
+		}))
+	];
 }
 
 export function buildNav(docs: DocEntry[], locale: string | null): NavItem[] {
-	const sidebar = config.docs.sidebar as DocsSidebarConfig | undefined;
-	if (sidebar?.items) return buildItemsNav(sidebar.items, docs, locale);
-	return buildLegacyNav(docs, sidebar);
+	const sidebar = config.docs.sidebar;
+	return sidebar ? buildItemsNav(sidebar, docs, locale) : buildAutoNav(docs);
 }
 
 export function flattenNav(nav: NavItem[]): DocEntry[] {
@@ -197,7 +179,6 @@ export async function getDocsHierarchy(locale: string | null = null): Promise<Do
 	// The nav and localized routes fall back to the default locale for
 	// untranslated pages so the sidebar stays complete and nothing 404s.
 	// `docs` stays locale-only: it is the set of actually translated pages.
-	const localeDocs = docs;
 	let routed = docs;
 	if (locale) {
 		const byPageId = new Map<string, DocEntry>();
@@ -209,8 +190,7 @@ export async function getDocsHierarchy(locale: string | null = null): Promise<Do
 		routed = Array.from(byPageId.values());
 	}
 
-	const navDocs = routed;
-	const hierarchy: DocsHierarchy = { nav: buildNav(navDocs, locale), docs: localeDocs, routed };
+	const hierarchy: DocsHierarchy = { nav: buildNav(routed, locale), docs, routed };
 	hierarchyCache.set(key, hierarchy);
 	return hierarchy;
 }
@@ -232,4 +212,33 @@ export async function getPrevNextDocs(
 		prevDoc: index > 0 ? sorted[index - 1] : null,
 		nextDoc: index < sorted.length - 1 ? sorted[index + 1] : null
 	};
+}
+
+/** Locales (default included) that have an actual translation of a page. */
+export async function getTranslations(pageId: string): Promise<string[]> {
+	const all = await getCollection('docs');
+	const found = new Set<string>();
+	for (const doc of all) {
+		const split = splitDocId(doc.id, localeCodes);
+		if (split.pageId === pageId) found.add(split.locale ?? config.i18n.defaultLocale);
+	}
+	return [config.i18n.defaultLocale, ...localeCodes].filter((code) => found.has(code));
+}
+
+export interface Crumb {
+	title: string;
+	href: string;
+}
+
+/** Sidebar groups leading to a doc, each linked to its first page. */
+export function navTrail(nav: NavItem[], docId: string, locale: string | null): Crumb[] | null {
+	for (const item of nav) {
+		if (item.type === 'doc' && item.id === docId) return [];
+		if (item.type !== 'category') continue;
+		const inner = navTrail(item.items, docId, locale);
+		if (!inner) continue;
+		const first = flattenNav(item.items)[0];
+		return [{ title: item.title, href: first ? docUrl(first.id, locale) : '#' }, ...inner];
+	}
+	return null;
 }

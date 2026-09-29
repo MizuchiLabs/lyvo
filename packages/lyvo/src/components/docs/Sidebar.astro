@@ -1,113 +1,80 @@
 ---
-import { PanelRightClose, PanelRightOpen } from '@lucide/astro';
-import SidebarModeToggle from '@lyvo/components/docs/SidebarModeToggle.astro';
+import { X } from '@lucide/astro';
+import SectionPicker from '@lyvo/components/docs/SectionPicker.astro';
 import SidebarLinks from '@lyvo/components/docs/SidebarLinks.astro';
 import SidebarFooter from '@lyvo/components/docs/SidebarFooter.astro';
+import SearchTrigger from '@lyvo/components/base/SearchTrigger.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
-import { t } from '@lyvo/lib/i18n';
 import { currentLocale } from '@lyvo/lib/docs';
+import { t } from '@lyvo/lib/i18n';
+import type { Section } from '@lyvo/lib/sections';
+import config from 'virtual:lyvo-config';
 
+interface Props {
+	sections: Section[];
+	active: Section;
+}
+
+const { sections, active } = Astro.props;
 const locale = currentLocale(Astro.url.pathname);
+const showLanguage = !active.spec;
 ---
 
-<!-- Mobile Header -->
-<header
-	class="flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4 md:hidden"
->
-	<Logo id="mobile-header" />
-	<div class="flex items-center gap-1">
-		<pagefind-modal-trigger
-			compact
-			hide-shortcut
-			placeholder={t('search', locale)}
-			class="pagefind-header-trigger"></pagefind-modal-trigger>
-		<button
-			id="mobile-menu-open"
-			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
-			aria-label="Open Menu"
-		>
-			<PanelRightOpen size={20} />
-		</button>
-	</div>
-</header>
-
-<!-- Mobile Menu Overlay & Content -->
-<div
-	id="mobile-menu-overlay"
-	class="fixed inset-0 z-50 hidden bg-black/80 opacity-0 transition-opacity duration-300 data-[state=open]:opacity-100"
->
-</div>
-
-<div
-	id="mobile-menu-content"
-	class="fixed inset-y-0 right-0 z-50 flex h-full w-72 translate-x-full flex-col border-l border-border/40 bg-background shadow-lg transition-transform duration-300 data-[state=open]:translate-x-0 sm:max-w-sm"
->
-	<div
-		class="mb-6 flex h-14 shrink-0 flex-row items-center justify-between border-b border-border/40 px-6 text-left"
-	>
-		<Logo id="mobile-menu" />
-		<button
-			id="mobile-menu-close"
-			class="flex size-11 items-center justify-center opacity-50 transition-opacity hover:opacity-100"
-			aria-label="Close Menu"
-		>
-			<PanelRightClose size={20} />
-		</button>
-	</div>
-
-	<SidebarModeToggle />
-	<SidebarLinks />
-	<SidebarFooter />
-</div>
-
-<!-- Desktop Sidebar -->
 <aside class="sticky top-0 hidden h-screen w-72 shrink-0 flex-col md:flex">
-	<div class="flex shrink-0 items-center p-6">
-		<Logo id="desktop-sidebar" />
+	<div class="flex shrink-0 flex-col gap-3 px-4 pt-5 pb-1">
+		<div class="px-1 pb-1">
+			<Logo id="desktop-sidebar" />
+		</div>
+		<SectionPicker sections={sections} active={active} />
+		{config.search && <SearchTrigger />}
 	</div>
-
-	<SidebarModeToggle />
-	<SidebarLinks />
-	<SidebarFooter />
+	<SidebarLinks section={active} animate />
+	<SidebarFooter showLanguage={showLanguage} />
 </aside>
 
-<script is:inline>
-	function setupMobileMenu() {
-		const openBtn = document.getElementById('mobile-menu-open');
-		const closeBtn = document.getElementById('mobile-menu-close');
-		const overlay = document.getElementById('mobile-menu-overlay');
-		const content = document.getElementById('mobile-menu-content');
+<dialog
+	id="lyvo-drawer"
+	aria-label={t('menu', locale)}
+	class="fixed inset-y-0 left-0 m-0 h-dvh max-h-dvh w-[min(20rem,85vw)] max-w-none -translate-x-full flex-col border-r border-border bg-sidebar p-0 text-foreground shadow-2xl transition-[translate,display,overlay] transition-discrete duration-300 ease-out backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:translate-x-0 starting:open:-translate-x-full md:hidden"
+>
+	<div class="flex shrink-0 flex-col gap-3 px-4 pt-4 pb-1">
+		<div class="flex items-center justify-between pl-1">
+			<Logo id="mobile-drawer" />
+			<button
+				type="button"
+				data-drawer-close
+				class="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+			>
+				<X size={18} />
+				<span class="sr-only">{t('close', locale)}</span>
+			</button>
+		</div>
+		<SectionPicker sections={sections} active={active} />
+	</div>
+	<SidebarLinks section={active} />
+	<SidebarFooter showLanguage={showLanguage} />
+</dialog>
 
-		if (!openBtn || !closeBtn || !overlay || !content) return;
+<script>
+	const drawer = () => document.getElementById('lyvo-drawer') as HTMLDialogElement | null;
 
-		function openMenu() {
-			overlay.classList.remove('hidden');
-			content.classList.remove('hidden');
-
-			requestAnimationFrame(() => {
-				overlay.setAttribute('data-state', 'open');
-				content.setAttribute('data-state', 'open');
-			});
-			document.body.style.overflow = 'hidden';
-		}
-
-		function closeMenu() {
-			overlay.removeAttribute('data-state');
-			content.removeAttribute('data-state');
-			document.body.style.overflow = '';
-
-			setTimeout(() => {
-				if (!overlay.hasAttribute('data-state')) {
-					overlay.classList.add('hidden');
-					content.classList.add('hidden');
-				}
-			}, 300);
-		}
-
-		openBtn.addEventListener('click', openMenu);
-		closeBtn.addEventListener('click', closeMenu);
-		overlay.addEventListener('click', closeMenu);
+	function reveal(dialog: HTMLDialogElement) {
+		const current = dialog.querySelector<HTMLElement>('[aria-current="page"]');
+		current?.scrollIntoView({ block: 'center' });
 	}
 
-	document.addEventListener('astro:page-load', setupMobileMenu);
+	document.addEventListener('click', (event) => {
+		const target = event.target as Element;
+		const dialog = drawer();
+		if (!dialog) return;
+		if (target.closest('[data-drawer-open]')) {
+			dialog.showModal();
+			reveal(dialog);
+		} else if (target.closest('[data-drawer-close]') || target === dialog) {
+			// A click on the dialog itself is a click on its backdrop.
+			dialog.close();
+		}
+	});
+
+	document.addEventListener('astro:before-preparation', () => drawer()?.close());
 </script>

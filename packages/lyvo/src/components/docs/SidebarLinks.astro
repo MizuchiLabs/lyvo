@@ -1,236 +1,218 @@
 ---
-import { cn } from '@lyvo/lib/utils';
-import { Webhook } from '@lucide/astro';
+import { Webhook, LayoutGrid } from '@lucide/astro';
 import SidebarGroup from '@lyvo/components/docs/SidebarGroup.astro';
-import { getDocsHierarchy, docUrl, getRouting, currentLocale, type NavItem } from '@lyvo/lib/docs';
-import { readAllApiSpecs, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
-import { apiPageUrl } from '@lyvo/lib/routing';
+import SidebarNavItems from '@lyvo/components/docs/SidebarNavItems.astro';
+import { getDocsHierarchy, currentLocale } from '@lyvo/lib/docs';
+import { apiIndexHref, apiPageHref, schemaHref } from '@lyvo/lib/openapi/model';
+import type { Section } from '@lyvo/lib/sections';
 import { t } from '@lyvo/lib/i18n';
-import config from 'virtual:lyvo-config';
+import { cn } from '@lyvo/lib/utils';
+
+interface Props {
+	section: Section;
+	animate?: boolean;
+}
+
+const { section, animate = false } = Astro.props;
 
 const methodClassMap = {
-	get: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-	post: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20',
-	put: 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20',
-	patch: 'text-yellow-600 dark:text-yellow-300 bg-yellow-500/10 border-yellow-500/20',
-	delete: 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20',
-	head: 'text-violet-600 dark:text-violet-300 bg-violet-500/10 border-violet-500/20',
-	options: 'text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-	trace: 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-500/10 border-fuchsia-500/20'
+	get: 'text-emerald-600 dark:text-emerald-400',
+	post: 'text-blue-600 dark:text-blue-400',
+	put: 'text-amber-600 dark:text-amber-400',
+	patch: 'text-yellow-600 dark:text-yellow-300',
+	delete: 'text-rose-600 dark:text-rose-400',
+	head: 'text-violet-600 dark:text-violet-300',
+	options: 'text-cyan-600 dark:text-cyan-400',
+	trace: 'text-fuchsia-600 dark:text-fuchsia-400'
 } as const;
 
-const routing = getRouting();
-const currentPath = Astro.url.pathname;
+const currentPath = Astro.url.pathname.replace(/\/+$/, '');
 const locale = currentLocale(currentPath);
-const activeMode = currentPath.startsWith(config.api.root) ? 'api' : 'docs';
+const spec = section.spec;
+const nav = spec ? [] : (await getDocsHierarchy(locale)).nav;
 
-const { nav } = await getDocsHierarchy(locale);
-const apiSpecs = activeMode === 'api' ? await readAllApiSpecs() : [];
+const isActiveHref = (href: string) => currentPath === href.replace(/\/+$/, '');
+const vtName = animate ? 'view-transition-name: lyvo-sidebar-active' : undefined;
+const overviewHref = spec ? apiIndexHref(spec) : '';
 
-const linkClass = (isActive: boolean) =>
+const linkClass = (active: boolean) =>
 	cn(
-		'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm transition-colors select-none',
-		isActive
-			? 'bg-accent/50 font-medium text-foreground'
-			: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+		'group/link relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+		active
+			? 'font-medium text-primary'
+			: 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
 	);
-
-const isActiveHref = (href: string) => currentPath === href || currentPath === `${href}/`;
 ---
 
-<div class="no-scrollbar flex-1 overflow-y-auto p-4">
-	<div class="flex flex-col gap-1 pb-4">
-		{
-			activeMode === 'api' ? (
-				<Fragment>
-					<div class="pb-2">
-						<a
-							href={config.api.root}
-							class={cn(
-								'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
-								isActiveHref(config.api.root) || isActiveHref(`${config.api.root}/`)
-									? 'bg-accent/50 text-foreground'
-									: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-							)}
-						>
-							{t('overview', locale)}
-						</a>
-					</div>
-					{apiSpecs.map((spec: LoadedApiSpec) => (
-						<Fragment>
-							{apiSpecs.length > 1 && (
-								<p class="px-2 pt-3 pb-1 text-[11px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
-									{spec.title}
-								</p>
-							)}
-							{spec.model.navigation.map((item) => {
-								const isGroupActive = item.items.some((endpoint) => {
-									const href = apiPageUrl(routing, spec.sub, endpoint.slug);
-									return isActiveHref(href);
-								});
-
-								return (
-									<div class="pb-1">
-										<SidebarGroup
-											title={item.title}
-											dataGroupId={`api-${spec.specId}-${item.id}`}
-											isActive={isGroupActive}
-										>
-											{item.items.map((endpoint) => {
-												const href = apiPageUrl(
-													routing,
-													spec.sub,
-													endpoint.slug
-												);
-												const isActive = isActiveHref(href);
-
-												return (
-													<a
-														href={href}
-														class={cn(
-															linkClass(isActive),
-															'justify-between gap-2'
-														)}
-													>
-														<span class="line-clamp-2 flex-1 overflow-hidden leading-5 text-ellipsis">
-															{endpoint.label}
-														</span>
-
-														{endpoint.isWebhook ? (
-															<span class="ms-auto inline-flex shrink-0 items-center gap-1 rounded border border-fuchsia-500/30 bg-fuchsia-500/10 px-1 py-0 text-[10px] leading-4 font-semibold text-fuchsia-600 uppercase dark:text-fuchsia-300">
-																<Webhook size={10} />
-																{endpoint.method}
-															</span>
-														) : (
-															<span
-																class={cn(
-																	'ms-auto shrink-0 rounded border px-1 py-0 text-[10px] leading-4 font-semibold uppercase',
-																	methodClassMap[endpoint.method]
-																)}
-															>
-																{endpoint.method}
-															</span>
-														)}
-													</a>
-												);
-											})}
-										</SidebarGroup>
-									</div>
-								);
-							})}
-						</Fragment>
-					))}
-				</Fragment>
-			) : (
-				nav.map((item: NavItem) => {
-					if (item.type === 'separator') {
-						return <div class="mx-2 my-2 border-t border-border/50" role="separator" />;
-					}
-
-					if (item.type === 'link') {
-						const external = item.href.startsWith('http');
-						return (
-							<a
-								href={item.href}
-								target={external ? '_blank' : undefined}
-								rel={external ? 'noopener noreferrer' : undefined}
-								class={linkClass(false)}
-							>
-								{item.title}
-							</a>
-						);
-					}
-
-					if (item.type === 'doc') {
-						const href = docUrl(item.id, locale);
-						const isActive = isActiveHref(href);
-						return (
-							<a
-								href={href}
-								class={cn(
-									'group flex w-full items-center rounded-md border border-transparent px-2 py-1.5 text-sm font-semibold transition-colors select-none',
-									isActive
-										? 'text-foreground'
-										: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-								)}
-							>
-								{item.title}
-							</a>
-						);
-					}
-
-					const isCategoryActive = item.items.some(
-						(child) =>
-							child.type === 'doc' &&
-							isActiveHref(`${config.docs.prefix}/${child.id}`)
-					);
-
-					return (
-						<div class="pb-1">
-							<SidebarGroup
-								title={item.title}
-								dataGroupId={`docs-${item.title.toLowerCase().replaceAll(/\s+/g, '-')}`}
-								isActive={isCategoryActive}
-							>
-								{item.items.map((child) => {
-									if (child.type === 'separator') {
-										return (
-											<div
-												class="mx-2 my-2 border-t border-border/50"
-												role="separator"
-											/>
-										);
-									}
-									if (child.type !== 'doc') {
-										return null;
-									}
-									const href = `${config.docs.prefix}/${child.id}`;
-									const isActive = isActiveHref(href);
-									return (
-										<a href={href} class={linkClass(isActive)}>
-											{child.title}
-										</a>
-									);
-								})}
-							</SidebarGroup>
-						</div>
-					);
-				})
-			)
-		}
+<nav
+	class="sidebar-scroll no-scrollbar min-h-0 flex-1 overflow-y-auto px-3 py-4"
+	data-sidebar-scroll
+	aria-label={section.title}
+>
+	<div class="flex flex-col gap-0.5">
+		{spec ? (
+			<Fragment>
+				<a
+					href={overviewHref}
+					class={linkClass(isActiveHref(overviewHref))}
+					aria-current={isActiveHref(overviewHref) ? 'page' : undefined}
+				>
+					{isActiveHref(overviewHref) && (
+						<span
+							aria-hidden="true"
+							class="absolute inset-0 rounded-md bg-primary/10"
+							style={vtName}
+						/>
+					)}
+					<LayoutGrid size={16} class="relative size-4 shrink-0 opacity-80" />
+					<span class="relative">{t('overview', locale)}</span>
+				</a>
+				<div class="h-3" />
+				{spec.model.navigation.map((group) => (
+					<SidebarGroup
+						title={group.title}
+						dataGroupId={`api-${spec.specId}-${group.id}`}
+						isActive={group.items.some((endpoint) =>
+							isActiveHref(apiPageHref(spec, endpoint.slug))
+						)}
+					>
+						{group.items.map((endpoint) => {
+							const href = apiPageHref(spec, endpoint.slug);
+							const active = isActiveHref(href);
+							return (
+								<a
+									href={href}
+									class={linkClass(active)}
+									title={`${endpoint.method.toUpperCase()} ${endpoint.path}`}
+									aria-current={active ? 'page' : undefined}
+								>
+									{active && (
+										<span
+											aria-hidden="true"
+											class="absolute inset-0 rounded-md bg-primary/10"
+											style={vtName}
+										/>
+									)}
+									{active && (
+										<span
+											aria-hidden="true"
+											class="absolute inset-y-1.5 -left-[9px] w-0.5 rounded-full bg-primary"
+										/>
+									)}
+									<span
+										class={cn(
+											'relative inline-flex w-10 shrink-0 items-center font-mono text-[10px] font-semibold uppercase',
+											endpoint.isWebhook
+												? 'text-fuchsia-600 dark:text-fuchsia-300'
+												: methodClassMap[endpoint.method]
+										)}
+									>
+										{endpoint.isWebhook ? (
+											<Webhook size={12} />
+										) : endpoint.method === 'delete' ? (
+											'del'
+										) : (
+											endpoint.method
+										)}
+									</span>
+									<span
+										class={cn(
+											'relative min-w-0 flex-1 truncate',
+											endpoint.deprecated && 'line-through opacity-60'
+										)}
+									>
+										{endpoint.label}
+									</span>
+								</a>
+							);
+						})}
+					</SidebarGroup>
+				))}
+				{spec.model.schemas.length > 0 && (
+					<SidebarGroup
+						title={t('schemas', locale)}
+						dataGroupId={`api-${spec.specId}-schemas`}
+						isActive={spec.model.schemas.some((schema) =>
+							isActiveHref(schemaHref(spec, schema.name))
+						)}
+					>
+						{spec.model.schemas.map((schema) => {
+							const href = schemaHref(spec, schema.name);
+							const active = isActiveHref(href);
+							return (
+								<a
+									href={href}
+									class={linkClass(active)}
+									aria-current={active ? 'page' : undefined}
+								>
+									{active && (
+										<span
+											aria-hidden="true"
+											class="absolute inset-0 rounded-md bg-primary/10"
+											style={vtName}
+										/>
+									)}
+									{active && (
+										<span
+											aria-hidden="true"
+											class="absolute inset-y-1.5 -left-[9px] w-0.5 rounded-full bg-primary"
+										/>
+									)}
+									<span class="relative truncate font-mono text-[13px]">
+										{schema.name}
+									</span>
+								</a>
+							);
+						})}
+					</SidebarGroup>
+				)}
+			</Fragment>
+		) : (
+			<SidebarNavItems items={nav} locale={locale} animate={animate} />
+		)}
 	</div>
-</div>
+</nav>
 
-<script is:inline>
-	function setupSidebarState() {
-		const detailsElements = document.querySelectorAll('.sidebar-group-details');
+<script>
+	const read = (id: string) => {
+		try {
+			return localStorage.getItem(`sidebar-group-${id}`);
+		} catch {
+			return null;
+		}
+	};
+	const write = (id: string, value: string) => {
+		try {
+			localStorage.setItem(`sidebar-group-${id}`, value);
+		} catch {
+			// storage blocked, state just won't persist
+		}
+	};
 
-		detailsElements.forEach((details) => {
-			const id = details.getAttribute('data-group-id');
-			const isActive = details.getAttribute('data-active') === 'true';
-			const storedState = localStorage.getItem(`sidebar-group-${id}`);
+	function setupSidebar() {
+		for (const details of document.querySelectorAll<HTMLDetailsElement>(
+			'.sidebar-group-details'
+		)) {
+			const id = details.dataset.groupId ?? '';
+			if (details.dataset.active === 'true') details.open = true;
+			else if (read(id) === 'open') details.open = true;
+			else if (read(id) === 'closed') details.open = false;
+			if (details.dataset.bound) continue;
+			details.dataset.bound = 'true';
+			details.addEventListener('toggle', () => write(id, details.open ? 'open' : 'closed'));
+		}
 
-			// Initialize state
-			if (isActive) {
-				details.open = true;
-				localStorage.setItem(`sidebar-group-${id}`, 'open');
-			} else if (storedState === 'open') {
-				details.open = true;
-			} else if (storedState === 'closed') {
-				details.open = false;
+		// Bring the current page into view without jumping when it's already visible.
+		for (const scroller of document.querySelectorAll<HTMLElement>('[data-sidebar-scroll]')) {
+			const current = scroller.querySelector('[aria-current="page"]');
+			if (!current || !scroller.offsetParent) continue;
+			const box = scroller.getBoundingClientRect();
+			const item = current.getBoundingClientRect();
+			if (item.top < box.top + 24 || item.bottom > box.bottom - 24) {
+				scroller.scrollTop += item.top - box.top - box.height / 3;
 			}
-
-			// Prevent duplicate event listeners
-			if (details._toggleHandler) {
-				details.removeEventListener('toggle', details._toggleHandler);
-			}
-
-			details._toggleHandler = () => {
-				localStorage.setItem(`sidebar-group-${id}`, details.open ? 'open' : 'closed');
-			};
-			details.addEventListener('toggle', details._toggleHandler);
-		});
+		}
 	}
 
-	document.addEventListener('astro:page-load', setupSidebarState);
+	document.addEventListener('astro:page-load', setupSidebar);
 </script>

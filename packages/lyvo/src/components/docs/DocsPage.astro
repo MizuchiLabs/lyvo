@@ -45,19 +45,17 @@ const components = {
 const filteredHeadings = headings.filter((h: any) => h.depth === 2 || h.depth === 3);
 ---
 
-{
-	notFound || !entry ? (
-		<DocsLayout title="404">
-			<NotFound />
-		</DocsLayout>
-	) : (
-		<DocsLayout
-			title={entry.data.title}
-			description={entry.data.description}
-			headings={filteredHeadings}
-			entry={entry}
-		>
-			<Content components={components} />
-		</DocsLayout>
-	)
-}
+{notFound || !entry ? (
+	<DocsLayout title="404">
+		<NotFound />
+	</DocsLayout>
+) : (
+	<DocsLayout
+		title={entry.data.title}
+		description={entry.data.description}
+		headings={filteredHeadings}
+		entry={entry}
+	>
+		<Content components={components} />
+	</DocsLayout>
+)}

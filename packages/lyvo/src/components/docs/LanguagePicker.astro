@@ -1,0 +1,73 @@
+---
+import { Check, ChevronsUpDown, Globe } from '@lucide/astro';
+import config from 'virtual:lyvo-config';
+import { currentLocale, getTranslations } from '@lyvo/lib/docs';
+import { joinUrl } from '@lyvo/lib/routing';
+import { stripBase, withBase } from '@lyvo/lib/url';
+import { t } from '@lyvo/lib/i18n';
+
+const pathname = stripBase(Astro.url.pathname);
+const locale = currentLocale(pathname);
+const active = locale ?? config.i18n.defaultLocale;
+const prefix = config.docs.prefix;
+
+// Page id without locale or docs prefix, e.g. "guides/install".
+const rest = locale ? pathname.slice(locale.length + 1) : pathname;
+const pageId = rest.startsWith(`${prefix}/`)
+	? rest.slice(prefix.length + 1).replace(/\/+$/, '')
+	: '';
+const translated = new Set(pageId ? await getTranslations(pageId) : []);
+
+const languages = [config.i18n.defaultLocale, ...config.i18n.locales.map((item) => item.code)].map(
+	(code) => ({
+		code,
+		label: config.i18n.labels[code] ?? code,
+		href: withBase(joinUrl(code === config.i18n.defaultLocale ? '' : code, prefix, pageId)),
+		// Untranslated pages still work, they just show the default language.
+		fallback: pageId !== '' && !translated.has(code)
+	})
+);
+const current = languages.find((language) => language.code === active) ?? languages[0];
+---
+
+{languages.length > 1 && (
+	<details data-popover class="group relative">
+		<summary
+			aria-label={t('language', locale)}
+			class="flex h-8 cursor-pointer list-none items-center gap-2 rounded-lg border border-border bg-background/60 px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+		>
+			<Globe size={14} />
+			<span class="min-w-0 flex-1 truncate text-left">{current.label}</span>
+			<ChevronsUpDown size={12} class="opacity-60" />
+		</summary>
+		<div
+			class="absolute inset-x-0 bottom-full z-40 mb-1.5 rounded-xl border border-border bg-popover p-1 shadow-xl"
+			role="menu"
+		>
+			{languages.map((language) => (
+				<a
+					href={language.href}
+					hreflang={language.code}
+					lang={language.code}
+					role="menuitem"
+					aria-current={language.code === active ? 'true' : undefined}
+					class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+				>
+					<span class:list={['flex-1', language.fallback && 'text-muted-foreground']}>
+						{language.label}
+					</span>
+					{language.fallback && (
+						<span class="text-[10px] text-muted-foreground">
+							{t('notTranslated', locale)}
+						</span>
+					)}
+					{language.code === active && <Check size={14} class="text-primary" />}
+				</a>
+			))}
+		</div>
+	</details>
+)}
+
+<script>
+	import '@lyvo/lib/popover';
+</script>

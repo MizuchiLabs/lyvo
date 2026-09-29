@@ -1,0 +1,127 @@
+---
+import { ArrowUpRight } from '@lucide/astro';
+import Icon from '@lyvo/components/base/Icon.astro';
+import SidebarGroup from '@lyvo/components/docs/SidebarGroup.astro';
+import { docUrl, flattenNav, type NavItem } from '@lyvo/lib/docs';
+import { cn, isExternal, slugify } from '@lyvo/lib/utils';
+
+interface Props {
+	items: NavItem[];
+	locale: string | null;
+	depth?: number;
+	/** Give the active item a view-transition name so it glides between pages. */
+	animate?: boolean;
+	/** Items sit on a folder's vertical line, so the active one marks it. */
+	rail?: boolean;
+}
+
+const { items, locale, depth = 0, animate = false, rail = false } = Astro.props;
+
+const currentPath = Astro.url.pathname.replace(/\/+$/, '');
+const isActiveHref = (href: string) => currentPath === href.replace(/\/+$/, '');
+const nested = depth > 0;
+
+const linkClass = (active: boolean) =>
+	cn(
+		'group/link relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+		active
+			? 'font-medium text-primary'
+			: 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+	);
+---
+
+{items.map((item) => {
+	if (item.type === 'separator') {
+		return <div class="mx-2 my-3 h-px bg-border/70" role="separator" />;
+	}
+
+	if (item.type === 'category') {
+		if (!nested) {
+			return (
+				<div class="pt-5 first:pt-1">
+					<p class="mb-1 flex items-center gap-2 px-2 text-xs font-semibold tracking-wide text-foreground/80">
+						{item.icon && (
+							<Icon name={item.icon} size={14} class="size-3.5 opacity-70" />
+						)}
+						{item.title}
+					</p>
+					<div class="flex flex-col gap-0.5">
+						<Astro.self
+							items={item.items}
+							locale={locale}
+							depth={1}
+							animate={animate}
+						/>
+					</div>
+				</div>
+			);
+		}
+		const active = flattenNav(item.items).some((doc) => isActiveHref(docUrl(doc.id, locale)));
+		return (
+			<SidebarGroup
+				title={item.title}
+				icon={item.icon}
+				dataGroupId={`docs-${depth}-${slugify(item.title)}`}
+				isActive={active}
+			>
+				<Astro.self
+					items={item.items}
+					locale={locale}
+					depth={depth + 1}
+					animate={animate}
+				/>
+			</SidebarGroup>
+		);
+	}
+
+	if (item.type === 'link') {
+		const external = isExternal(item.href);
+		return (
+			<a
+				href={item.href}
+				target={external ? '_blank' : undefined}
+				rel={external ? 'noopener noreferrer' : undefined}
+				class={linkClass(false)}
+			>
+				{item.icon && (
+					<Icon name={item.icon} size={16} class="size-4 shrink-0 opacity-80" />
+				)}
+				<span class="min-w-0 flex-1 truncate">{item.title}</span>
+				{external && (
+					<ArrowUpRight
+						size={14}
+						class="shrink-0 opacity-50 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 group-hover/link:opacity-100"
+					/>
+				)}
+			</a>
+		);
+	}
+
+	const href = docUrl(item.id, locale);
+	const active = isActiveHref(href);
+	const { icon, badge } = item.doc.data;
+	return (
+		<a href={href} class={linkClass(active)} aria-current={active ? 'page' : undefined}>
+			{active && (
+				<span
+					aria-hidden="true"
+					class="absolute inset-0 rounded-md bg-primary/10"
+					style={animate ? 'view-transition-name: lyvo-sidebar-active' : undefined}
+				/>
+			)}
+			{active && rail && (
+				<span
+					aria-hidden="true"
+					class="absolute inset-y-1.5 -left-[9px] w-0.5 rounded-full bg-primary"
+				/>
+			)}
+			{icon && <Icon name={icon} size={16} class="relative size-4 shrink-0 opacity-80" />}
+			<span class="relative min-w-0 flex-1 truncate">{item.title}</span>
+			{badge && (
+				<span class="relative shrink-0 rounded-full border border-primary/25 bg-primary/10 px-1.5 text-[10px] leading-4 font-medium text-primary">
+					{badge}
+				</span>
+			)}
+		</a>
+	);
+})}
