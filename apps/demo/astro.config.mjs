@@ -1,14 +1,9 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 import lyvo from '@mizuchilabs/lyvo';
 
 export default defineConfig({
 	site: 'https://example.com',
-	vite: {
-		plugins: [tailwindcss()]
-	},
-
 	markdown: {
 		syntaxHighlight: 'shiki',
 		shikiConfig: {
@@ -62,6 +57,7 @@ export default defineConfig({
 			],
 			nav: [
 				{ title: 'Home', href: '/' },
+				{ title: 'Discord', href: 'https://discord.com' },
 				{ title: 'Docs', href: '/docs' },
 				{ title: 'API', href: '/api' }
 			],
@@ -94,32 +90,31 @@ export default defineConfig({
 			docs: {
 				edit: true,
 				feedback: true,
-				sidebar: {
-					items: [
-						'introduction',
-						{
-							title: 'Overview',
-							items: [
-								'overview/getting-started',
-								'overview/configuration',
-								'overview/writing-content'
-							]
-						},
-						{
-							title: 'Components',
-							items: ['components/components', 'components/markdown-reference']
-						},
-						'---',
-						'changelog',
-						{ title: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo' }
-					]
-				}
+				sidebar: [
+					'introduction',
+					{
+						title: 'Overview',
+						items: [
+							'overview/getting-started',
+							'overview/configuration',
+							'overview/writing-content'
+						]
+					},
+					{
+						title: 'Components',
+						items: ['components/components', 'components/markdown-reference']
+					},
+					'---',
+					'changelog',
+					{ title: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo', icon: 'github' }
+				]
 			},
 			openapi: [
 				{
 					input: 'public/openapi.json',
 					prefix: '/api',
-					groupBy: 'tag'
+					groupBy: 'tag',
+					snippets: ['curl', 'javascript', 'python', 'go', 'csharp', 'java']
 				},
 				{
 					input: 'public/openapi-v2.json',
@@ -128,7 +123,6 @@ export default defineConfig({
 				}
 			],
 			i18n: {
-				defaultLocale: 'en',
 				locales: [{ code: 'de', label: 'Deutsch' }],
 				ui: {
 					de: {
@@ -147,13 +141,21 @@ export default defineConfig({
 						backHome: 'Zur Startseite',
 						language: 'Sprache',
 						previous: 'Zurück',
-						next: 'Weiter'
+						next: 'Weiter',
+						guidesDescription: 'Die Grundlagen lernen',
+						fallbackNotice:
+							'Diese Seite gibt es noch nicht auf {language}. Angezeigt wird die Version auf {original}.',
+						notTranslated: 'Nicht übersetzt',
+						theme: 'Design',
+						themeLight: 'Hell',
+						themeDark: 'Dunkel',
+						themeSystem: 'System',
+						menu: 'Menü',
+						close: 'Schließen',
+						copyPage: 'Seite kopieren',
+						copied: 'Kopiert'
 					}
 				}
-			},
-			og: {
-				siteName: 'Demo Docs',
-				generate: true
 			},
 			customCss: ['/src/styles/custom.css']
 		})

@@ -7,240 +7,218 @@
 
 # Lyvo
 
-**Lyvo** is a highly polished, minimalistic, and modern documentation generator for [Astro](https://astro.build/). It provides a seamless experience for building both technical guides and rich API references.
+**Lyvo** turns an Astro project into a product site for your app: a landing page, MDX guides and an OpenAPI reference, from one integration. SEO, social images, search and LLM-friendly output are handled for you.
 
 ## Key Features
 
-- **Modern UI**: Polished, responsive design with native dark mode.
-- **MDX Guides**: First-class support for MDX with built-in components like Tabs, Callouts, and Steps.
-- **OpenAPI Support**: Automatic API reference generation from OpenAPI/Swagger definitions.
-- **Fast Search**: Lightning-fast offline search powered by [Pagefind](https://pagefind.app/).
-- **Integrated Navigation**: Automatic sidebar, breadcrumbs, and Table of Contents.
-- **Developer Experience**: Built with TypeScript and Tailwind CSS for easy customization.
+- **Landing blocks**: Hero, feature grid, split showcase, code and browser windows, logo cloud, install command and CTA.
+- **MDX guides**: Tabs, Callouts, Steps, FileTree, Accordion and more, with an auto-generated or hand-written sidebar.
+- **OpenAPI reference**: Two-column endpoint pages, linked model pages, code samples in six languages and a try-it playground.
+- **SEO by default**: Canonical URLs, hreflang, JSON-LD, sitemap, robots.txt and a generated OG image for every page.
+- **LLM friendly**: `llms.txt`, `llms-full.txt`, a Markdown twin of every page (`/docs/intro.md`) and "open in ChatGPT/Claude" buttons.
+- **Search and i18n**: Offline search with Pagefind, locale folders with translated UI strings.
 
 ## Installation
 
-Setup astro:
-
 ```bash
 pnpm create astro@latest
+pnpm add @mizuchilabs/lyvo @pagefind/component-ui
 ```
 
-Install lyvo:
-
-```bash
-pnpm add @mizuchilabs/lyvo
-```
-
-You will also need to install its peer dependencies if they aren't already in your project:
-
-```bash
-pnpm add @tailwindcss/vite tailwindcss
-```
+Tailwind, MDX, the sitemap and Pagefind are wired up by the integration. You don't need to install or configure them yourself.
 
 ## Quick Start
 
-Lyvo works with an empty `lyvo()` call. Out of the box you get: a `/docs` section with an auto-generated sidebar from your folder structure, dark mode, offline search, sitemap, `llms.txt`, and native locale labels (English, Deutsch, ...) via `Intl.DisplayNames`. Everything below is customization.
-
 ### 1. Configure Astro
-
-Add the `lyvo` integration to your `astro.config.mjs`:
 
 ```javascript
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 import lyvo from '@mizuchilabs/lyvo';
 
 export default defineConfig({
+	site: 'https://my-app.dev', // needed for canonical URLs, OG images and the sitemap
 	integrations: [
 		lyvo({
-			title: 'My Docs',
-			description: 'Documentation for my project',
-			lang: 'en',
-			logo: 'brand-logo.svg', // Resolves from src/assets/brand-logo.svg
-			repo: {
-				url: 'https://github.com/your-org/your-repo',
-				branch: 'main'
-			},
-			nav: [
-				{ title: 'Home', href: '/' },
-				{ title: 'Docs', href: '/docs' },
-				{ title: 'API', href: '/api' }
-			],
-			socials: [
-				{
-					label: 'GitHub',
-					href: 'https://github.com/your-org/your-repo',
-					icon: 'github.svg' // Resolves from src/assets/github.svg
-				}
-			],
-			docs: {
-				sidebar: {
-					items: [
-						'introduction',
-						{ title: 'Guides', items: ['guides/install', 'guides/deploy'] },
-						'---', // separator
-						{ title: 'Community', href: 'https://discord.gg/...' }
-					]
-				}
-			},
-			openapi: [
-				{ input: 'public/openapi.json', prefix: '/api', groupBy: 'tag' }
-				// add more specs with nested prefixes: { input: 'public/v2.json', prefix: '/api/v2' }
-			],
-			i18n: {
-				defaultLocale: 'en',
-				locales: [{ code: 'de', label: 'Deutsch' }],
-				ui: { de: { onThisPage: 'Auf dieser Seite' } }
-			},
-			og: {
-				siteName: 'My Docs',
-				generate: true // auto-generates per-page OG images with satori
-			},
-			customCss: ['/src/styles/custom.css']
+			title: 'My App',
+			description: 'Docs for My App',
+			openapi: { input: 'public/openapi.json' }
 		})
-	],
-	vite: {
-		plugins: [tailwindcss()]
-	}
+	]
 });
 ```
 
-### 2. Configure Custom Theme (Optional)
+That's a complete setup. Everything else is optional. A bigger example:
 
-The default theme stylesheet is always loaded, and files listed in `customCss` are appended into the same Tailwind root, so `@theme` overrides work directly:
+```javascript
+lyvo({
+	title: 'My App',
+	lang: 'en',
+	logo: 'brand-logo.svg', // src/assets/brand-logo.svg
+	repo: { url: 'https://github.com/your-org/your-repo' },
+	nav: [
+		{ title: 'Docs', href: '/docs' },
+		{ title: 'API', href: '/api' },
+		{ title: 'Blog', href: '/blog' }
+	],
+	socials: [{ label: 'GitHub', href: 'https://github.com/your-org/your-repo', icon: 'github' }],
+	docs: {
+		sidebar: [
+			'introduction',
+			{ title: 'Guides', items: ['guides/install', 'guides/deploy'] },
+			'---',
+			{ title: 'Community', href: 'https://discord.gg/...' }
+		]
+	},
+	openapi: [
+		{ input: 'public/openapi.json', prefix: '/api' },
+		{ input: 'public/v2.json', prefix: '/api/v2', title: 'API v2', snippets: ['curl', 'go'] }
+	],
+	i18n: {
+		locales: ['de'],
+		ui: { de: { onThisPage: 'Auf dieser Seite' } }
+	},
+	customCss: ['./src/styles/custom.css']
+});
+```
+
+Unknown or misspelled options fail the build with a clear message.
+
+### 2. Set up content collections
+
+```typescript
+// src/content.config.ts
+import { defineLyvoCollections } from '@mizuchilabs/lyvo/collections';
+
+export const collections = defineLyvoCollections();
+```
+
+Spread it if you have collections of your own: `{ ...defineLyvoCollections(), blog }`.
+
+### 3. Theme (optional)
+
+Files in `customCss` join the theme's Tailwind root, so token overrides work directly. Don't import `tailwindcss` in them, lyvo already does.
 
 ```css
-/* Your custom theme overrides here */
 @theme {
 	--color-primary: oklch(0.5 0.2 250);
 }
 ```
 
-An `@import 'tailwindcss'` or `@import '@mizuchilabs/lyvo/style.css'` in a custom file is stripped automatically, so configs written for earlier versions keep working. Custom CSS must live inside the project (absolute paths work too); relative `@import`/`url()` targets are rebased automatically.
+## What you get automatically
 
-### 3. Set up Content Collections
+| Output                            | Notes                                                                                                    |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| `/docs/...`, `/<locale>/docs/...` | Guides from `src/content/docs`. Untranslated pages fall back to the default locale.                      |
+| `/api/...`                        | Overview, one page per endpoint and webhook, and `/api/schemas/<model>` pages.                           |
+| `/og/*.png`                       | A 1200x630 social image per page. Pages without one use the site image.                                  |
+| `<page>.md`                       | Markdown twin of every docs and API page, linked from `<head>` and the "Copy page" menu.                 |
+| `/llms.txt`, `/llms-full.txt`     | Index and full content for LLMs, following [llmstxt.org](https://llmstxt.org).                           |
+| `/sitemap-index.xml`              | With hreflang alternates when locales are configured.                                                    |
+| `/robots.txt`                     | Skipped when you ship your own in `public/` or `src/pages/`.                                             |
+| `/404`                            | Skipped when you have `src/pages/404.astro`.                                                             |
+| `<head>`                          | Canonical, hreflang, Open Graph, Twitter cards and JSON-LD (`WebSite`, `TechArticle`, `BreadcrumbList`). |
 
-Create `src/content.config.ts` to define your documentation and API collections:
+## Navigation
 
-```typescript
-import { defineLyvoCollections } from '@mizuchilabs/lyvo/collections';
-import { defineCollection } from 'astro:content';
-
-export const collections = {
-	...defineLyvoCollections(),
-	blog: defineCollection({/* custom stuff */})
-};
-```
+- **Section picker**: Guides and every API spec show up as sections in a picker at the top of the sidebar, each with its own sidebar.
+- **Frontmatter**: `icon` (a Lucide name like `rocket` or an SVG in `src/assets`) and `badge` (like `New`) decorate a page's sidebar entry.
+- **Languages**: the sidebar footer has a language menu that marks pages without a translation. Untranslated pages show a notice and fall back to the default language.
+- **Theme**: light, dark or system, remembered per visitor.
+- **External links**: links to other sites open in a new tab and get a small arrow, in content and in the sidebar.
+- **Mobile**: one sticky bar with the menu, the current section and page, and search. The menu is a native `<dialog>` drawer.
 
 ## Configuration Options
 
-The `lyvo()` integration accepts the following options:
+| Option                 | Type                                                                      | Description                                                                                                                                                   |
+| :--------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `title`                | `string`                                                                  | Site title. Default `'Docs'`.                                                                                                                                 |
+| `description`          | `string`                                                                  | Fallback meta and OG description.                                                                                                                             |
+| `lang`                 | `string`                                                                  | Default locale. Default `'en'`.                                                                                                                               |
+| `logo`                 | `string \| {light, dark}`                                                 | File name in `src/assets/`.                                                                                                                                   |
+| `favicon`              | `{svg?, ico?}`                                                            | Override the default favicon paths.                                                                                                                           |
+| `nav`                  | `Array<{title, href}>`                                                    | Landing header links. Also listed in the docs sidebar footer. Defaults to Docs and API.                                                                       |
+| `repo`                 | `{url, branch?}`                                                          | Enables "Edit page" links. `branch` defaults to `'main'`.                                                                                                     |
+| `socials`              | `Array<{label, href, icon}>`                                              | Header and footer icons. `icon` is a file in `src/assets/` or a Lucide name.                                                                                  |
+| `footer`               | `{note?, columns?}`                                                       | Landing footer with link columns.                                                                                                                             |
+| `docs.prefix`          | `string`                                                                  | Route prefix for guides. Default `'/docs'`.                                                                                                                   |
+| `docs.edit`            | `boolean`                                                                 | Show "Edit page" links. Default `true`.                                                                                                                       |
+| `docs.feedback`        | `boolean`                                                                 | Show the feedback widget. Default `true`. Emits a `lyvo:feedback` event on `window`.                                                                          |
+| `docs.sidebar`         | `SidebarItem[]`                                                           | Doc ids, `'---'` separators, `{title, items}` groups (nestable) and `{title, href}` links. Omit it to build the sidebar from folders and frontmatter `order`. |
+| `openapi`              | `Spec \| Spec[]`                                                          | See below. Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`).                                                                            |
+| `openapi[].input`      | `string`                                                                  | Path to the spec, relative to the project root. An invalid spec fails the build.                                                                              |
+| `openapi[].prefix`     | `string`                                                                  | Route prefix. Default `'/api'`.                                                                                                                               |
+| `openapi[].groupBy`    | `'tag' \| 'path'`                                                         | Sidebar grouping. Default `'tag'`.                                                                                                                            |
+| `openapi[].snippets`   | `Array<'curl' \| 'javascript' \| 'python' \| 'go' \| 'csharp' \| 'java'>` | Code sample languages, in order. Default `curl`, `javascript`, `python`, `go`.                                                                                |
+| `openapi[].playground` | `boolean`                                                                 | Show the "Try it" panel. Default `true`. Requests run in the browser, so the API must allow CORS from your docs origin.                                       |
+| `i18n`                 | `{locales?, ui?}`                                                         | Extra locales (content in `src/content/docs/<code>/`) and translated UI strings per locale.                                                                   |
+| `og`                   | `{generate?, image?}`                                                     | `generate` (default `true`) renders per-page images. `image` sets a static site image instead.                                                                |
+| `llms`                 | `boolean`                                                                 | `llms.txt`, `llms-full.txt`, Markdown twins and page actions. Default `true`.                                                                                 |
+| `search`               | `boolean`                                                                 | Pagefind search. Default `true`.                                                                                                                              |
+| `sitemap`              | `boolean`                                                                 | Add `@astrojs/sitemap` unless you already use it. Default `true`.                                                                                             |
+| `robots`               | `boolean`                                                                 | Generate `robots.txt`. Default `true`.                                                                                                                        |
+| `analytics`            | `{umami?, plausible?, posthog?, matomo?}`                                 | See [Analytics](#analytics).                                                                                                                                  |
+| `head`                 | `string`                                                                  | Raw HTML added to every `<head>`.                                                                                                                             |
+| `customCss`            | `string[]`                                                                | CSS files merged into the theme stylesheet.                                                                                                                   |
 
-| Option                     | Type                                          | Description                                                                                                                                                                                                                            |
-| :------------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`                    | `string`                                      | The title of your documentation site. Set to `""` to hide the text.                                                                                                                                                                    |
-| `description`              | `string`                                      | Site description, used as the meta/OG description fallback.                                                                                                                                                                            |
-| `lang`                     | `string`                                      | Default locale code. Shorthand for `i18n.defaultLocale`.                                                                                                                                                                               |
-| `logo`                     | `string \| {light, dark}`                     | Filename of an image in your `src/assets/` folder.                                                                                                                                                                                     |
-| `favicon`                  | `{svg?, ico?}`                                | Override the default favicon paths.                                                                                                                                                                                                    |
-| `nav`                      | `Array<{title, href}>`                        | Override the default top navigation bar links.                                                                                                                                                                                         |
-| `repo.url` / `repo.branch` | `string`                                      | Repository URL and branch for "Edit this page" links.                                                                                                                                                                                  |
-| `socials`                  | `Array<{label, href, icon}>`                  | Social links shown in the header and footer. `icon` resolves from `src/assets/`.                                                                                                                                                       |
-| `extraLinks`               | `Array<{title, href}>`                        | Additional text links shown in the sidebar footer.                                                                                                                                                                                     |
-| `footer`                   | `{note?, columns?}`                           | Landing page footer with link columns.                                                                                                                                                                                                 |
-| `docs.prefix`              | `string`                                      | Route prefix for guides. Default `'/docs'`.                                                                                                                                                                                            |
-| `docs.edit`                | `boolean`                                     | Whether to show "Edit this page" links. Default `true`.                                                                                                                                                                                |
-| `docs.feedback`            | `boolean`                                     | Whether to show the feedback widget. Default `true`. Feedback is emitted as a `lyvo:feedback` CustomEvent on `window` with `{ helpful, path, title, locale }`.                                                                         |
-| `docs.sidebar`             | `{items?}` or `{order?, labels?}`             | Sidebar structure. `items` supports strings (doc slugs or `'---'` separators), nested categories and external links. The legacy `order`/`labels` shape still works.                                                                    |
-| `openapi`                  | `{input, prefix?, groupBy?, title?}` or array | OpenAPI spec(s). Multiple specs need nested prefixes sharing a root (`/api`, `/api/v2`).                                                                                                                                               |
-| `i18n`                     | `{defaultLocale?, locales?, ui?}`             | Locale subfolder-based i18n. Default locale content lives at the content root, other locales in subfolders (`src/content/docs/de/`). `ui` maps locale codes to translated UI strings.                                                  |
-| `og`                       | `boolean \| {siteName?, image?, generate?}`   | Open Graph meta tags are always on. `og: true` or `og.generate: true` also generates a per-page OG image at build time. Requires `sharp` (Astro already depends on it, but pnpm users may need `pnpm add sharp` for image generation). |
-| `llms`                     | `boolean`                                     | Generate `/llms.txt` and `/llms-full.txt` endpoints. Default `true`.                                                                                                                                                                   |
-| `search`                   | `boolean`                                     | Enable Pagefind search. Default `true`.                                                                                                                                                                                                |
-| `sitemap`                  | `boolean`                                     | Inject the sitemap integration (skipped if you already use one). Default `true`.                                                                                                                                                       |
-| `cacheHeaders`             | `boolean`                                     | Append Cloudflare `_headers` rules with `no-cache` for the docs prefix. Default `false`.                                                                                                                                               |
-| `analytics`                | `{umami?, plausible?, posthog?, matomo?}`     | Load an analytics provider and forward built-in events to it. See [Analytics](#analytics).                                                                                                                                             |
-| `head`                     | `string`                                      | Raw HTML injected into `<head>` on every page. Great for analytics snippets.                                                                                                                                                           |
-| `customCss`                | `string[]`                                    | CSS files appended after the default theme stylesheet.                                                                                                                                                                                 |
+Canonical URLs follow Astro's `trailingSlash` and `build.format` settings, so they match the sitemap.
 
-Unknown options are reported as build warnings, so typos don't fail silently.
+### Serving from a subpath
+
+Astro's `base` option works out of the box, for example `base: '/my-app'` for GitHub Pages. Every generated link, the sitemap, `robots.txt`, `llms.txt` and OG images include it. Links in your config, in landing blocks and in Markdown content can be written as plain site paths (`/docs/intro`), lyvo adds the base for you. Links that already include it are left alone.
 
 ## Analytics
 
-Set the `analytics` option to load a supported provider and forward the docs feedback event to it. Providers included: Umami, Plausible, PostHog and Matomo.
+Analytics are self-hosted only and private by default, so the docs work for EU sites without a consent banner. Every provider needs the URL of your own instance. Nothing is sent to a vendor cloud, and scripts only load in production builds. In `astro dev`, events are logged to the browser console instead.
 
 ```js
 lyvo({
 	analytics: {
-		umami: {
-			websiteId: 'your-website-id',
-			// optional, defaults to the Umami Cloud script
-			src: 'https://eu.umami.is/script.js',
-			// optional, comma-separated list of domains
-			domains: 'docs.example.com'
-		}
+		umami: { websiteId: 'your-id', src: 'https://stats.example.eu/script.js' }
+		// plausible: { domain: 'docs.example.eu', src: 'https://plausible.example.eu/js/script.js' }
+		// posthog: { apiKey: 'phc_...', host: 'https://posthog.example.eu' }
+		// matomo: { url: 'https://matomo.example.eu', siteId: '1' }
 	}
 });
 ```
 
+| Provider  | Private defaults                                                                                                                                               |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Umami     | Cookieless, honors Do Not Track, drops query strings and hashes.                                                                                               |
+| Plausible | Cookieless by design.                                                                                                                                          |
+| PostHog   | In-memory persistence (no cookies or storage), no autocapture, no session recording, honors Do Not Track. `cookies: true` opts back in to persistent visitors. |
+| Matomo    | Cookies disabled, honors Do Not Track. `cookies: true` opts back in.                                                                                           |
+
+### Events
+
+Lyvo reports these interactions to the configured provider:
+
+| Event                   | Properties                                         |
+| :---------------------- | :------------------------------------------------- |
+| `docs_feedback`         | `helpful`, `path`, `locale`                        |
+| `docs_feedback_comment` | `helpful`, `path`, `locale`, `comment`             |
+| `page_copy`             | `path`                                             |
+| `page_action`           | `action` (`markdown`, `chatgpt`, `claude`), `path` |
+| `code_copy`             | `path`                                             |
+| `playground_request`    | `endpoint`, `status` (never the payload)           |
+| `not_found`             | `path`                                             |
+
+Umami and Plausible receive every property as a string. Plausible needs a goal per event name before it shows them. Matomo gets them as events with category `lyvo`, the event name as action and the path as label.
+
+Every event is also dispatched on `window` as `lyvo:track` with `{ name, props }`, so you can forward it anywhere yourself:
+
 ```js
-lyvo({
-	analytics: {
-		plausible: {
-			domain: 'docs.example.com',
-			// optional, defaults to https://plausible.io/js/script.js
-			src: 'https://plausible.example.com/js/script.js'
-		}
-	}
+window.addEventListener('lyvo:track', (e) => {
+	const { name, props } = e.detail;
 });
 ```
 
-```js
-lyvo({
-	analytics: {
-		posthog: {
-			apiKey: 'phc_your_project_token',
-			// optional, defaults to https://us.i.posthog.com
-			host: 'https://eu.i.posthog.com'
-		}
-	}
-});
-```
+### Feedback
 
-```js
-lyvo({
-	analytics: {
-		matomo: {
-			url: 'https://analytics.example.com',
-			siteId: '1'
-		}
-	}
-});
-```
-
-When a provider is configured, clicking Yes or No on the feedback widget sends a `docs_feedback` event with the properties `helpful`, `path`, `title` and `locale`. Umami and Plausible only accept string event properties, so `helpful` arrives as `"true"`/`"false"` there. Matomo uses its native `trackEvent` API with category `docs` and action `feedback`.
-
-Pageview tracking for client-side navigation works out of the box for Umami, Plausible and PostHog. Matomo gets replayed pageviews via Astro's view transitions router.
-
-To use a different provider or send custom events, listen for the `lyvo:feedback` event yourself through the `head` option:
-
-```js
-lyvo({
-	head: `
-		<script>
-			window.addEventListener('lyvo:feedback', (e) => {
-				const { helpful, path, title, locale } = e.detail;
-				// send to your tracker of choice
-			});
-		</script>
-	`
-});
-```
+The "Was this page helpful?" widget remembers the vote per page. After a "No", it asks what was missing when analytics are configured, and links to a prefilled issue when `repo` is set (GitHub, GitLab, Gitea and Forgejo). The `lyvo:feedback` event on `window` keeps firing with `{ helpful, path, title, locale, comment? }` for custom handlers.
 
 ## Customizing the Landing Header
 
-The default top navigation bar (logo, nav links, socials, theme toggle) is generated by Lyvo. If you're building your own landing page and want full control over the header, you can replace it by passing a `header` slot to the `<Layout>` component. The docs and OpenAPI pages keep their own generated chrome — only the landing layout is overridable.
+The default top navigation bar (logo, nav links, socials, theme toggle) is generated by Lyvo. If you're building your own landing page and want full control over the header, you can replace it by passing a `header` slot to the `<Layout>` component. The docs and OpenAPI pages keep their own generated chrome. Only the landing layout is overridable.
 
 ```astro
 ---
@@ -253,7 +231,9 @@ import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
 		class="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur"
 	>
 		<div class="container mx-auto flex h-14 items-center justify-between">
-			<a href="/" class="font-bold">My Brand</a>
+			<a href="/" class="font-bold">
+				My Brand
+			</a>
 			<nav class="flex items-center gap-4">
 				<a href="/pricing">Pricing</a>
 				<a href="/docs">Docs</a>
@@ -265,46 +245,50 @@ import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
 </Layout>
 ```
 
-When no `header` slot is provided, the generated navigation bar is used as a fallback. A `<slot name="header-actions">` lets you add items (e.g. search) to the generated header without replacing it, and `<slot name="footer">` replaces the generated footer.
+When no `header` slot is provided, the generated navigation bar is used. A `<slot name="header-actions">` lets you add items (e.g. search) to the generated header without replacing it, and `<slot name="footer">` replaces the generated footer.
 
 ### Landing Building Blocks
 
-Lyvo ships a few props-driven blocks for landing pages under `@mizuchilabs/lyvo/components/landing/*`:
+Props-driven blocks live under `@mizuchilabs/lyvo/components/landing/*`. They only use theme tokens, so they follow your colors and dark mode.
+
+| Block            | What it does                                                                                           |
+| :--------------- | :----------------------------------------------------------------------------------------------------- |
+| `Hero`           | Title with gradient highlight, badge (optionally a link), buttons, install command and a `media` slot. |
+| `FeatureGrid`    | Cards with Lucide icons (`icon: 'zap'`) or your own SVGs.                                              |
+| `FeatureSplit`   | Text with check points next to any media. `reverse` flips the sides.                                   |
+| `CodeWindow`     | Highlighted code in a window frame with a file name.                                                   |
+| `BrowserFrame`   | Screenshot (`src`) or any content in a browser window with a URL bar.                                  |
+| `LogoCloud`      | Logos or names of users, sponsors or integrations.                                                     |
+| `InstallCommand` | Copyable command, with tabs when you pass `{ pnpm, npm, bun }`.                                        |
+| `CTA`            | Closing call to action.                                                                                |
+| `LinkButton`     | The primary and secondary buttons used above.                                                          |
 
 ```astro
 ---
 import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
 import Hero from '@mizuchilabs/lyvo/components/landing/Hero.astro';
-import FeatureGrid from '@mizuchilabs/lyvo/components/landing/FeatureGrid.astro';
-import CTA from '@mizuchilabs/lyvo/components/landing/CTA.astro';
+import FeatureSplit from '@mizuchilabs/lyvo/components/landing/FeatureSplit.astro';
+import BrowserFrame from '@mizuchilabs/lyvo/components/landing/BrowserFrame.astro';
+import screenshot from '../assets/dashboard.png';
 ---
 
-<Layout>
+<Layout description="My App keeps your deploys boring.">
 	<Hero
-		badge="Open Source"
-		title="Docs that feel"
-		highlight="effortless."
-		description="Guides, API reference and landing page in one setup."
-		primary={{ label: 'Get Started', href: '/docs' }}
-		secondary={{ label: 'GitHub', href: 'https://github.com/...' }}
-	/>
-	<FeatureGrid
-		title="Everything included"
-		features={[
-			{ title: 'Search', description: 'Offline search via Pagefind.', icon: 'search.svg' }
-		]}
+		badge={{ label: 'v2 is out', href: '/docs/changelog' }}
+		title="Deploys,"
+		highlight="without the drama."
+		primary={{ label: 'Get started', href: '/docs' }}
+		install={{ pnpm: 'pnpm add my-app', npm: 'npm i my-app' }}
 	>
-		<!-- optional: extra content below the grid -->
-	</FeatureGrid>
-	<CTA
-		title="Ready to build?"
-		description="Clone and ship."
-		primary={{ label: 'Get Started', href: '/docs' }}
-	/>
+		<BrowserFrame slot="media" src={screenshot} alt="Dashboard" url="app.my-app.dev" />
+	</Hero>
+	<FeatureSplit title="Rollbacks in one click" points={['Instant', 'Audited']}>
+		<BrowserFrame src={screenshot} alt="Rollbacks" />
+	</FeatureSplit>
 </Layout>
 ```
 
-`Footer` (`@mizuchilabs/lyvo/components/base/Footer.astro`) renders automatically from the `footer` config option; a footer config is optional, and the footer is omitted when empty.
+`Layout` takes `title`, `description`, `image` and `noindex` for SEO. `Footer` renders from the `footer` option and is left out when empty.
 
 ## Internationalization
 
@@ -319,7 +303,7 @@ src/content/docs/
 
 UI strings ("On this page", "Was this page helpful?", etc.) come from the `i18n.ui` config. A language switcher appears in the sidebar footer when locales are configured. API reference pages are language-neutral.
 
-Note: editing the OpenAPI spec requires a dev server restart in dev; the sidebar and docs content hot-reload as usual.
+Editing the OpenAPI spec needs a dev server restart. Docs content hot-reloads as usual.
 
 ## Built-in MDX Components
 

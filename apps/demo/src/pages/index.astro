@@ -2,57 +2,149 @@
 import Layout from '@mizuchilabs/lyvo/layouts/Layout.astro';
 import Hero from '@mizuchilabs/lyvo/components/landing/Hero.astro';
 import FeatureGrid from '@mizuchilabs/lyvo/components/landing/FeatureGrid.astro';
+import FeatureSplit from '@mizuchilabs/lyvo/components/landing/FeatureSplit.astro';
+import CodeWindow from '@mizuchilabs/lyvo/components/landing/CodeWindow.astro';
+import BrowserFrame from '@mizuchilabs/lyvo/components/landing/BrowserFrame.astro';
+import LogoCloud from '@mizuchilabs/lyvo/components/landing/LogoCloud.astro';
 import CTA from '@mizuchilabs/lyvo/components/landing/CTA.astro';
-import FeaturePreview from '@/components/marketing/FeaturePreview.astro';
+import { configExample, mdxExample } from '../examples';
+
+const install = {
+	pnpm: 'pnpm add @mizuchilabs/lyvo',
+	npm: 'npm install @mizuchilabs/lyvo',
+	bun: 'bun add @mizuchilabs/lyvo'
+};
 ---
 
-<Layout>
+<Layout description="Docs, API reference and a landing page for your app, from one Astro integration.">
 	<Hero
-		badge="Open Source Documentation Template"
-		title="Professional docs,"
-		highlight="built for developers."
-		description="A structured, highly-extensible documentation framework for Astro. Landing page, guides, and OpenAPI reference in one setup."
-		primary={{ label: 'Get Started', href: '/docs' }}
-		secondary={{ label: 'API Reference', href: '/api' }}
+		badge={{ label: 'Now with an API playground', href: '/api' }}
+		title="Show off your app."
+		highlight="Docs included."
+		description="Landing page, MDX guides and an OpenAPI reference in one Astro integration. SEO, social images, search and llms.txt are handled for you."
+		primary={{ label: 'Get started', href: '/docs' }}
+		secondary={{ label: 'API reference', href: '/api' }}
+		install={install}
+	>
+		<CodeWindow
+			slot="media"
+			title="astro.config.mjs"
+			code={configExample}
+			lang="js"
+			class="mx-auto max-w-2xl"
+		/>
+	</Hero>
+
+	<LogoCloud
+		title="Built on tools you already know"
+		logos={[
+			{ name: 'Astro' },
+			{ name: 'Tailwind CSS' },
+			{ name: 'MDX' },
+			{ name: 'OpenAPI' },
+			{ name: 'Pagefind' }
+		]}
 	/>
-	<FeaturePreview />
+
 	<FeatureGrid
-		title="Everything included"
-		subtitle="One integration wires up guides, API references, search, i18n and social images."
+		eyebrow="Batteries included"
+		title="Everything a dev product site needs"
+		subtitle="One integration wires up guides, API reference, search, i18n and social images."
 		features={[
 			{
+				icon: 'book-open',
 				title: 'MDX guides',
-				description: 'Rich built-in components: Tabs, Callouts, Steps, FileTree and more.'
+				description:
+					'Tabs, callouts, steps, file trees and more, ready to use in every page.'
 			},
 			{
+				icon: 'braces',
 				title: 'OpenAPI reference',
 				description:
-					'Scalar-style two-column API docs generated straight from your spec, multiple versions supported.'
+					'Two-column docs, models, code samples and a try-it playground from your spec.'
 			},
 			{
+				icon: 'search',
 				title: 'Offline search',
-				description:
-					'Lightning-fast full-text search powered by Pagefind, styled to match the theme.'
+				description: 'Full-text search powered by Pagefind, styled to match the theme.'
 			},
 			{
+				icon: 'globe',
+				title: 'SEO on autopilot',
+				description:
+					'Canonicals, hreflang, JSON-LD, sitemap, robots.txt and per-page OG images.'
+			},
+			{
+				icon: 'languages',
 				title: 'i18n',
-				description: 'Locale subfolders with translated UI strings and a language switcher.'
+				description: 'Locale folders, translated UI strings and a language switcher.'
 			},
 			{
-				title: 'OG images',
-				description: 'Social images auto-generated per page at build time with satori.'
-			},
-			{
-				title: 'AI-ready',
+				icon: 'bot',
+				title: 'LLM friendly',
 				description:
-					'llms.txt and llms-full.txt endpoints for LLM consumption out of the box.'
+					'llms.txt, a Markdown twin of every page and one-click "open in ChatGPT".'
 			}
 		]}
 	/>
+
+	<FeatureSplit
+		eyebrow="Write"
+		title="Plain MDX, rich components"
+		description="Drop files in src/content/docs. The sidebar builds itself from your folders, or define it by hand."
+		points={[
+			'Auto-generated or hand-written sidebar',
+			'Last-updated dates from git',
+			'Edit-on-GitHub and feedback built in'
+		]}
+	>
+		<CodeWindow title="getting-started.mdx" code={mdxExample} lang="mdx" />
+	</FeatureSplit>
+
+	<FeatureSplit
+		eyebrow="Reference"
+		title="Your API, documented from the spec"
+		description="Point lyvo at an OpenAPI file. Every endpoint gets its own page, code samples and a playground."
+		points={[
+			'Linked model pages for every schema',
+			'Multiple spec versions side by side',
+			'Endpoints exported as Markdown for LLMs'
+		]}
+		reverse
+	>
+		<BrowserFrame url="my-app.dev/api/createplanet">
+			<div class="space-y-4 p-6 text-sm">
+				<div class="flex items-center gap-2">
+					<span class="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
+						POST
+					</span>
+					<code class="font-mono text-sm">/planets</code>
+				</div>
+				<p class="text-muted-foreground">Time to play god and create a new planet.</p>
+				<div class="space-y-2 rounded-lg border border-border p-3 font-mono text-xs">
+					<p>
+						<span class="font-semibold">name</span>
+						<span class="text-muted-foreground">string · required</span>
+					</p>
+					<p>
+						<span class="font-semibold">type</span>
+						<span class="text-muted-foreground">enum</span>
+					</p>
+					<p>
+						<span class="font-semibold">satellites</span>
+						<span class="text-primary underline decoration-dotted">
+							array&lt;Satellite&gt;
+						</span>
+					</p>
+				</div>
+			</div>
+		</BrowserFrame>
+	</FeatureSplit>
+
 	<CTA
-		title="Ready to build your docs?"
-		description="Clone the repo, point the integration at your content and ship."
-		primary={{ label: 'Get Started', href: '/docs' }}
+		title="Ship docs your users will read"
+		description="Point the integration at your content and your spec. That's the setup."
+		primary={{ label: 'Get started', href: '/docs' }}
 		secondary={{ label: 'GitHub', href: 'https://github.com/mizuchilabs/lyvo' }}
 	/>
 </Layout>

@@ -1,116 +1,99 @@
 ---
 title: Getting Started
-description: How to install, run, and start building with Lyvo Docs.
+description: Install lyvo, add your first page and build the site.
 order: 1
+icon: rocket
 ---
 
-Getting up and running with Lyvo Docs is incredibly straightforward. Since you have access to the raw source code, there are no complicated abstractions to fight against.
-
 <Callout type="default" title="Requirements">
-	Ensure you have **Node.js 20+** and your preferred package manager installed before you begin.
+	Node.js 22+ and an Astro 7 project. Run `pnpm create astro@latest` if you don't have one yet.
 </Callout>
 
 ## Quick Start
 
 <Steps>
-  <Step title="Clone the template">
-    Start by cloning the repository to your local machine and navigating into the directory:
-
-    ```bash
-    git clone https://github.com/mizuchilabs/lyvo.git my-docs
-    cd my-docs
-    ```
-
-  </Step>
-
-  <Step title="Install dependencies">
-    Install the project dependencies using your preferred package manager. We recommend `pnpm` for the fastest experience.
+  <Step title="Install the package">
 
 <Tabs>
 	<TabItem value="pnpm">
-		<Code code="pnpm install" lang="bash" />
+		<Code code="pnpm add @mizuchilabs/lyvo @pagefind/component-ui" lang="bash" />
 	</TabItem>
 	<TabItem value="npm">
-		<Code code="npm install" lang="bash" />
-	</TabItem>
-	<TabItem value="yarn">
-		<Code code="yarn install" lang="bash" />
+		<Code code="npm install @mizuchilabs/lyvo @pagefind/component-ui" lang="bash" />
 	</TabItem>
 	<TabItem value="bun">
-		<Code code="bun install" lang="bash" />
+		<Code code="bun add @mizuchilabs/lyvo @pagefind/component-ui" lang="bash" />
 	</TabItem>
 </Tabs>
+
+    Tailwind, MDX, the sitemap and Pagefind are set up by the integration.
 
   </Step>
 
-  <Step title="Start the development server">
-    Fire up the local development server to see your documentation live.
+  <Step title="Add the integration">
 
-<Tabs>
-	<TabItem value="pnpm">
-		<Code code="pnpm dev" lang="bash" />
-	</TabItem>
-	<TabItem value="npm">
-		<Code code="npm run dev" lang="bash" />
-	</TabItem>
-	<TabItem value="yarn">
-		<Code code="yarn dev" lang="bash" />
-	</TabItem>
-	<TabItem value="bun">
-		<Code code="bun run dev" lang="bash" />
-	</TabItem>
-</Tabs>
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import lyvo from '@mizuchilabs/lyvo';
 
-    Your site is now running at [http://localhost:4321](http://localhost:4321). Any changes you make to the `.mdx` files will instantly reflect in your browser!
+export default defineConfig({
+	site: 'https://my-app.dev',
+	integrations: [lyvo({ title: 'My App' })]
+});
+```
 
+  </Step>
+
+  <Step title="Register the content collections">
+
+```ts title="src/content.config.ts"
+import { defineLyvoCollections } from '@mizuchilabs/lyvo/collections';
+
+export const collections = defineLyvoCollections();
+```
+
+  </Step>
+
+  <Step title="Write your first page">
+    Create `src/content/docs/introduction.mdx` with a `title` in the frontmatter, then run `pnpm dev`. The page is live at [http://localhost:4321/docs/introduction](http://localhost:4321/docs/introduction).
   </Step>
 </Steps>
 
 ## Project Structure
-
-Lyvo Docs keeps its structure extremely minimal, utilizing Astro's standard routing and layout paradigms so you can easily understand where everything lives.
 
 <FileTree>
 	<Folder name="src" defaultOpen>
 		<Folder name="assets">
 			<File name="logo.svg" />
 		</Folder>
-		<Folder name="components" defaultOpen>
-			<Folder name="ui">
-				<File name="accordion.tsx" />
-				<File name="button.tsx" />
-			</Folder>
-			<File name="Callout.tsx" />
-			<File name="Sidebar.tsx" />
-		</Folder>
 		<Folder name="content" defaultOpen>
 			<Folder name="docs" defaultOpen>
-				<File name="getting-started.mdx" />
+				<File name="introduction.mdx" />
+				<Folder name="guides">
+					<File name="install.mdx" />
+				</Folder>
 			</Folder>
-		</Folder>
-		<Folder name="layouts">
-			<File name="DocsLayout.astro" />
 		</Folder>
 		<Folder name="pages">
 			<File name="index.astro" />
 		</Folder>
-		<File name="config.ts" />
+		<Folder name="styles">
+			<File name="custom.css" />
+		</Folder>
+		<File name="content.config.ts" />
+	</Folder>
+	<Folder name="public">
+		<File name="openapi.json" />
 	</Folder>
 	<File name="astro.config.mjs" />
-	<File name="package.json" />
-	<File name="tailwind.config.mjs" />
 </FileTree>
 
-## Building for Production
+Your landing page is a normal Astro page in `src/pages/index.astro` built from the landing blocks. Docs, the API reference, OG images, `llms.txt`, `robots.txt` and the 404 page are generated.
 
-When you are ready to deploy your site, build it for production. This generates a highly optimized static version of your site in the `dist` directory, and runs **Pagefind** to generate the offline search index.
+## Building for Production
 
 ```bash
 pnpm build
 ```
 
-Preview the final production build using:
-
-```bash
-pnpm preview
-```
+This writes a static site to `dist` and runs Pagefind to build the search index. Preview it with `pnpm preview`.

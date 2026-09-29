@@ -1,6 +1,4 @@
-@import 'tailwindcss';
-
-/* Custom theme overrides */
+/* Theme overrides. lyvo already imports Tailwind, so only tokens go here. */
 @theme {
 	--color-primary: oklch(0.5 0.2 250);
 }

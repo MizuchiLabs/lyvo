@@ -1,77 +1,87 @@
 ---
 title: Configuration
-description: Learn how to customize the theme, sidebar, and site metadata.
+description: Configure the site, sidebar, API reference, SEO and theme from astro.config.mjs.
 order: 2
+icon: settings-2
+badge: New
 ---
 
-Lyvo Docs is designed to be easily customized. Since you have full access to the source code, you can tweak anything, but the most common configuration options are consolidated in one easy-to-read file.
+Everything is configured through the `lyvo()` integration in `astro.config.mjs`. Every option is optional, and unknown options fail the build with a clear message.
 
-## Site Metadata (`src/config.ts`)
+```js title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import lyvo from '@mizuchilabs/lyvo';
 
-The primary configuration file for your site is `src/config.ts`. Here you can configure the global properties, navigation, and sidebar ordering.
-
-```ts title="src/config.ts"
-export const SITE = {
-	title: 'Lyvo Docs',
-	description: 'A modern, minimalistic documentation theme for Astro.',
-	repo: {
-		url: 'https://github.com/mizuchilabs/lyvo',
-		type: 'github' // Supports: github, gitlab, gitea
-	},
-	openapi: {
-		url: '/openapi.json' // Auto-generates an API reference page!
-	},
-	social: {
-		discord: 'https://discord.gg/...',
-		x: 'https://x.com/...'
-	},
-	nav: [{ title: 'Documentation', href: '/docs/introduction' }],
-	logo: {
-		type: 'both', // "text", "logo", or "both"
-		src: 'logo.svg', // Loaded from src/assets/
-		width: 28,
-		height: 28
-	},
-	enableEdit: true, // Enables the "Edit Page" button on docs
-	categoryOrder: ['introduction', 'overview', 'components', 'changelog'] // Sidebar sorting
-};
+export default defineConfig({
+	site: 'https://my-app.dev',
+	integrations: [
+		lyvo({
+			title: 'My App',
+			description: 'Docs for My App',
+			repo: { url: 'https://github.com/my-org/my-app' },
+			openapi: { input: 'public/openapi.json' }
+		})
+	]
+});
 ```
 
-### Sidebar Ordering
+<Callout type="warning" title="Set site">
+	Canonical URLs, OG images, the sitemap and `robots.txt` all need Astro's `site` option. The
+	build warns when it's missing.
+</Callout>
 
-The `categoryOrder` array is the easiest way to manage your sidebar. It allows you to freely intermix both single files (like `introduction.mdx`) and folders (like the `overview` folder) to create exactly the navigation flow you want.
+## Sidebar
 
-Items not listed in the array will automatically fall back to alphabetical sorting at the bottom.
+Leave `docs.sidebar` out and the sidebar is built from your folders, sorted by frontmatter `order`. To define it yourself, list doc ids, separators, groups and links:
 
-### Repository Links
-
-By providing a `repo.url` and setting the `repo.type` to either `"github"`, `"gitlab"`, or `"gitea"`, Lyvo Docs will automatically:
-
-1. Display the correct icon link in the top navigation bar.
-2. Enable the **"Edit Page"** button (if `enableEdit: true`) on every documentation page, pointing directly to the corresponding `.mdx` file in your remote repository!
-
-## Theming & Colors
-
-Lyvo Docs uses standard Shadcn CSS variables for theming, located in `src/styles/global.css`.
-
-You can easily change the primary accent colors, background colors, and border styles by modifying these HSL variables. The theme natively supports both light and dark modes!
-
-```css title="src/styles/global.css"
-:root {
-	--background: 0 0% 100%;
-	--foreground: 0 0% 3.9%;
-	/* ... */
-}
-
-.dark {
-	--background: 0 0% 3.9%;
-	--foreground: 0 0% 98%;
-	/* ... */
-}
-
-@theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	/* ... */
+```js
+docs: {
+	sidebar: [
+		'introduction',
+		{
+			title: 'Guides',
+			items: ['guides/install', { title: 'Advanced', items: ['guides/tuning'] }]
+		},
+		'---',
+		{ title: 'GitHub', href: 'https://github.com/my-org/my-app' }
+	];
 }
 ```
+
+## API reference
+
+```js
+openapi: [
+	{ input: 'public/openapi.json', prefix: '/api' },
+	{ input: 'public/v2.json', prefix: '/api/v2', title: 'API v2', snippets: ['curl', 'python'] }
+];
+```
+
+- Every endpoint gets its own page, every schema in `components.schemas` gets a model page under `/api/schemas/`.
+- `snippets` picks the code sample languages: `curl`, `javascript`, `python`, `go`, `csharp`, `java`.
+- `playground: false` hides the "Try it" panel. Requests run in the browser, so your API must allow CORS from the docs origin.
+- An invalid spec fails the build instead of silently dropping the reference.
+
+## SEO and social images
+
+There's nothing to configure. Every page gets a canonical URL, Open Graph and Twitter tags, JSON-LD and a generated 1200x630 image. With locales, pages get hreflang links and untranslated fallbacks point their canonical at the original.
+
+Use `og: { image: '/social.png' }` for one static image instead, or `og: { generate: false }` to skip images.
+
+## LLMs
+
+Every docs and API page has a Markdown twin: add `.md` to the URL, like [/docs/introduction.md](/docs/introduction.md). `/llms.txt` lists them all and `/llms-full.txt` has the full content in one file. The "Copy page" button at the top of each page copies the Markdown or opens it in ChatGPT or Claude.
+
+Turn it all off with `llms: false`.
+
+## Theme
+
+Colors come from CSS variables. Add a file to `customCss` and override tokens:
+
+```css title="src/styles/custom.css"
+@theme {
+	--color-primary: oklch(0.5 0.2 250);
+}
+```
+
+The file joins the theme's Tailwind root, so don't import `tailwindcss` in it.

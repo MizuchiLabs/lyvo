@@ -8,7 +8,7 @@
 
 # Lyvo
 
-Lyvo is a highly polished, minimalistic, and modern documentation generator package for [Astro](https://astro.build/). It provides a solid foundation to build custom documentation sites and rich API references quickly.
+Lyvo is an [Astro](https://astro.build/) integration that gives your app a landing page, docs and an API reference in one site, with SEO and LLM-friendly output handled for you.
 
 ## Project Structure
 
@@ -35,39 +35,27 @@ To get started with development:
 
 ## Features
 
-- **Unified Layout:** Seamlessly switch between Markdown guides (`/docs`) and API references (`/api`) with a smooth, morphing transition.
-- **Scalar-like API Docs:** A dedicated, fully responsive two-column grid layout for OpenAPI references. Multiple specs with nested prefixes are supported (`/api`, `/api/v2`).
-- **MDX Support:** Write content using MDX with rich built-in components (`Tabs`, `Callout`, `Steps`, etc.).
-- **Built-in Search:** Lightning-fast offline search powered by Pagefind.
-- **i18n:** Locale subfolders with translated UI strings and a sidebar language switcher.
-- **SEO:** Canonical URLs, Open Graph tags, and per-page OG images generated at build time.
-- **AI-ready:** `llms.txt` and `llms-full.txt` endpoints generated from your content.
-- **Landing Blocks:** Props-driven Hero, FeatureGrid, CTA and Footer components for combining a landing page with docs.
-- **Dark Mode:** Native dark mode with a toggle.
+- **One site for your app:** Landing page, MDX guides (`/docs`) and API reference (`/api`) share one theme and one config.
+- **OpenAPI reference:** Two-column endpoint pages, linked model pages, code samples and a try-it playground. Multiple specs with nested prefixes (`/api`, `/api/v2`).
+- **SEO on autopilot:** Canonicals, hreflang, JSON-LD, sitemap, robots.txt and a generated OG image per page.
+- **LLM friendly:** `llms.txt`, `llms-full.txt`, a Markdown twin of every page and "open in ChatGPT/Claude" page actions.
+- **Landing blocks:** Hero, FeatureGrid, FeatureSplit, CodeWindow, BrowserFrame, LogoCloud, InstallCommand and CTA.
+- **Search and i18n:** Offline Pagefind search, locale folders and translated UI strings.
 
-## Configuration Options
-
-The `lyvo()` integration accepts the following main options:
+## Configuration
 
 ```javascript
 lyvo({
-	title: 'My Docs', // Set to "" to hide text
-	logo: 'logo.svg', // Resolves to src/assets/logo.svg automatically
-	nav: [{ title: 'Home', href: '/' }],
-	socials: [{ label: 'GitHub', href: 'https://...', icon: 'github.svg' }],
-	repo: { url: 'https://github.com/...', branch: 'main' },
-	docs: {
-		sidebar: {
-			items: ['introduction', { title: 'Guides', items: ['install'] }, '---']
-		}
-	},
-	openapi: [{ input: 'public/openapi.json', prefix: '/api' }],
-	i18n: { defaultLocale: 'en', locales: [{ code: 'de', label: 'Deutsch' }] },
-	og: { siteName: 'My Docs', generate: true }
+	title: 'My App',
+	logo: 'logo.svg', // src/assets/logo.svg
+	repo: { url: 'https://github.com/...' },
+	docs: { sidebar: ['introduction', { title: 'Guides', items: ['install'] }, '---'] },
+	openapi: { input: 'public/openapi.json' },
+	i18n: { locales: ['de'] }
 });
 ```
 
-For a full list of configuration options, check the [Package README](./packages/lyvo/README.md).
+All options are in the [package README](./packages/lyvo/README.md).
 
 ## Building the Demo
 

@@ -2,6 +2,7 @@
 title: Writing Content
 description: Learn how to author and organize your documentation pages using MDX and Frontmatter.
 order: 3
+icon: pen-line
 ---
 
 Lyvo Docs utilizes Astro's built-in Content Collections to manage your documentation. This provides type-safe frontmatter, automatic routing, and excellent performance.
@@ -15,14 +16,18 @@ Every `.mdx` file inside the `src/content/docs` directory requires a simple fron
 title: My Page Title
 description: A short summary of what this page covers.
 order: 3
+icon: rocket
+badge: New
 ---
 ```
 
-| Property      | Type     | Description                                                                                                         |
-| :------------ | :------- | :------------------------------------------------------------------------------------------------------------------ |
-| `title`       | `string` | **Required.** The main title of the page, displayed at the top and in the sidebar.                                  |
-| `description` | `string` | _Optional._ A brief subtitle displayed below the title and used for the meta `<meta name="description">` tag.       |
-| `order`       | `number` | _Optional._ Determines the sorting order of the pages **within their specific folder**. Lower numbers appear first. |
+| Property      | Type     | Description                                                                                                   |
+| :------------ | :------- | :------------------------------------------------------------------------------------------------------------ |
+| `title`       | `string` | **Required.** The main title of the page, displayed at the top and in the sidebar.                            |
+| `description` | `string` | _Optional._ A brief subtitle displayed below the title and used for the meta `<meta name="description">` tag. |
+| `order`       | `number` | _Optional._ Sort order within the folder. Lower numbers come first. Only used by the auto-generated sidebar.  |
+| `icon`        | `string` | _Optional._ Lucide icon name like `rocket`, or an SVG file in `src/assets`, shown in the sidebar.             |
+| `badge`       | `string` | _Optional._ Short label next to the sidebar entry, like `New` or `Beta`.                                      |
 
 ## Folders & Routing
 
@@ -41,7 +46,7 @@ The URL and Sidebar placement of your documentation page is determined directly 
 - `introduction.mdx` becomes `/docs/introduction` and appears at the root of your Sidebar.
 - `components/callout.mdx` becomes `/docs/components/callout` and appears grouped under a "Components" category dropdown in the Sidebar.
 
-If you want to control the order of the top-level categories, simply update the `categoryOrder` array in your `src/config.ts` file!
+Folders are ordered by the lowest `order` of their pages. For full control, list the pages yourself with the `docs.sidebar` option (see [Configuration](/docs/overview/configuration)).
 
 ## Using MDX Components
 
