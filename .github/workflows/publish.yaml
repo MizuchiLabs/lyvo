@@ -1,40 +1,49 @@
-name: Publish Package
+name: Publish
 
 on:
     push:
-        tags:
-            - 'v*'
+        tags: ['v*']
+
+concurrency:
+    group: publish
+    cancel-in-progress: false
 
 permissions:
-    id-token: write
     contents: read
 
 jobs:
     publish:
+        name: Publish to npm
         runs-on: ubuntu-latest
+        timeout-minutes: 20
+        permissions:
+            contents: read
+            id-token: write
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
               with:
-                  fetch-depth: 0
+                  persist-credentials: false
 
-            - uses: actions/setup-node@v7
+            - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+
+            - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
               with:
-                  node-version: 'lts/*'
+                  node-version: lts/*
+                  # No cache here, a poisoned cache would end up in the published package.
+                  package-manager-cache: false
 
-            - uses: pnpm/action-setup@v6
+            - run: pnpm install --frozen-lockfile
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Bump package version
-              if: startsWith(github.ref, 'refs/tags/v')
+            - name: Test
               run: |
-                  VERSION=${GITHUB_REF#refs/tags/v}
-                  echo "Bumping @mizuchilabs/lyvo to $VERSION"
-                  pnpm --filter @mizuchilabs/lyvo exec npm version "$VERSION" --no-git-tag-version
+                  pnpm exec oxlint
+                  pnpm test
 
-            - name: Build package
+            - name: Set version from tag
+              run: pnpm --filter @mizuchilabs/lyvo exec npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version
+
+            - name: Build
               run: pnpm --filter @mizuchilabs/lyvo build
 
-            - name: Publish to npm
+            - name: Publish
               run: pnpm --filter @mizuchilabs/lyvo publish --access public --no-git-checks --provenance
