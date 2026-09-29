@@ -1,0 +1,34 @@
+---
+import { Code } from 'astro:components';
+import type { ComponentProps } from 'astro/types';
+import { cn } from '@lyvo/lib/utils';
+
+interface Props {
+	code: string;
+	lang?: ComponentProps<typeof Code>['lang'];
+	/** File name shown in the title bar. */
+	title?: string;
+	class?: string;
+}
+
+const { code, lang = 'ts', title, class: className } = Astro.props;
+---
+
+<div
+	class={cn(
+		'not-prose overflow-hidden rounded-xl border border-border bg-card shadow-xl ring-1 ring-foreground/5',
+		className
+	)}
+>
+	<div class="flex h-10 items-center gap-3 border-b border-border bg-muted/40 px-4">
+		<div class="flex gap-1.5" aria-hidden="true">
+			<span class="size-2.5 rounded-full bg-foreground/15"></span>
+			<span class="size-2.5 rounded-full bg-foreground/15"></span>
+			<span class="size-2.5 rounded-full bg-foreground/15"></span>
+		</div>
+		{title && <span class="font-mono text-xs text-muted-foreground">{title}</span>}
+	</div>
+	<div class="text-sm [&_pre]:!m-0 [&_pre]:!rounded-none [&_pre]:!border-0 [&_pre]:!bg-transparent [&_pre]:overflow-x-auto [&_pre]:p-4">
+		<Code code={code} lang={lang} themes={{ light: 'github-light', dark: 'github-dark' }} />
+	</div>
+</div>

@@ -1,0 +1,49 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { cn } from '@lyvo/lib/utils';
+
+interface Props {
+	/** Screenshot to show. Leave out and use the slot for custom content. */
+	src?: ImageMetadata | string;
+	alt?: string;
+	/** Address shown in the fake URL bar. */
+	url?: string;
+	glow?: boolean;
+	class?: string;
+}
+
+const { src, alt = '', url, glow = true, class: className } = Astro.props;
+---
+
+<div class={cn('relative', className)}>
+	{glow && (
+		<div
+			aria-hidden="true"
+			class="pointer-events-none absolute -inset-x-8 -inset-y-6 -z-10 rounded-[2rem] bg-primary/15 blur-3xl"
+		/>
+	)}
+	<div class="overflow-hidden rounded-xl border border-border bg-card shadow-2xl ring-1 ring-foreground/5">
+		<div class="flex h-10 items-center gap-3 border-b border-border bg-muted/40 px-4">
+			<div class="flex gap-1.5" aria-hidden="true">
+				<span class="size-2.5 rounded-full bg-foreground/15"></span>
+				<span class="size-2.5 rounded-full bg-foreground/15"></span>
+				<span class="size-2.5 rounded-full bg-foreground/15"></span>
+			</div>
+			{url && (
+				<div class="mx-auto w-full max-w-sm truncate rounded-md border border-border bg-background/70 px-3 py-0.5 text-center font-mono text-xs text-muted-foreground">
+					{url}
+				</div>
+			)}
+		</div>
+		{src ? (
+			typeof src === 'string' ? (
+				<img src={src} alt={alt} class="block w-full" loading="lazy" decoding="async" />
+			) : (
+				<Image src={src} alt={alt} class="block h-auto w-full" />
+			)
+		) : (
+			<slot />
+		)}
+	</div>
+</div>

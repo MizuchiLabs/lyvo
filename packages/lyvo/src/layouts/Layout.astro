@@ -1,79 +1,126 @@
 ---
+import { Menu, X } from '@lucide/astro';
 import ThemeToggle from '@lyvo/components/base/ThemeToggle.astro';
 import BaseHead from '@lyvo/layouts/BaseHead.astro';
+import SkipLink from '@lyvo/components/base/SkipLink.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
 import Icon from '@lyvo/components/base/Icon.astro';
 import Footer from '@lyvo/components/base/Footer.astro';
 import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
 import { currentLocale } from '@lyvo/lib/docs';
+import { websiteJsonLd } from '@lyvo/lib/seo';
+import { stripBase, withBase } from '@lyvo/lib/url';
+
+interface Props {
+	title?: string;
+	description?: string;
+	/** Social image path or URL. Defaults to the generated site image. */
+	image?: string;
+	noindex?: boolean;
+}
+
+const { title, description, image, noindex } = Astro.props;
 
 const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
+const isHome = stripBase(Astro.url.pathname).replace(/\/+$/, '') === '';
 
-const navItems = config.nav ?? [
-	{ title: 'Docs', href: config.docs.prefix },
-	...(config.api.specs.length > 0 ? [{ title: 'API', href: config.api.root }] : [])
-];
+const navItems =
+	config.nav.length > 0
+		? config.nav
+		: [
+				{ title: 'Docs', href: withBase(config.docs.prefix) },
+				...(config.api.specs.length > 0
+					? [{ title: 'API', href: withBase(config.api.root) }]
+					: [])
+			];
 ---
 
 <!doctype html>
 <html lang={lang} class="scroll-smooth">
-	<BaseHead />
+	<BaseHead
+		title={title}
+		description={description}
+		lang={lang}
+		image={image}
+		noindex={noindex}
+		jsonLd={isHome ? [websiteJsonLd()] : []}
+	/>
 
 	<body class="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased">
+		<SkipLink />
 		<slot name="header">
-			<header
-				class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
-			>
-				<div
-					class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8"
-				>
+			<header class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+				<div class="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8">
 					<div class="flex items-center gap-6">
 						<Logo id="header" />
-						<div class="hidden items-center gap-1 md:flex">
-							{
-								navItems.map((item) => {
-									const external = isExternal(item.href);
-									return (
+						<nav class="hidden items-center gap-1 md:flex">
+							{navItems.map((item) => {
+								const external = isExternal(item.href);
+								return (
+									<a
+										href={item.href}
+										target={external ? '_blank' : undefined}
+										rel={external ? 'noopener noreferrer' : undefined}
+										class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+									>
+										{item.title}
+									</a>
+								);
+							})}
+						</nav>
+					</div>
+					<div class="flex items-center space-x-2">
+						<slot name="header-actions" />
+						{navItems.length > 0 && (
+							<details class="group relative md:hidden">
+								<summary
+									aria-label="Menu"
+									class="flex size-9 cursor-pointer list-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+								>
+									<Menu size={18} class="group-open:hidden" />
+									<X size={18} class="hidden group-open:block" />
+								</summary>
+								<nav class="absolute top-full right-0 mt-2 flex w-48 flex-col rounded-lg border border-border bg-popover p-1 shadow-lg">
+									{navItems.map((item) => (
 										<a
 											href={item.href}
-											target={external ? '_blank' : undefined}
-											rel={external ? 'noopener noreferrer' : undefined}
+											target={isExternal(item.href) ? '_blank' : undefined}
+											rel={
+												isExternal(item.href)
+													? 'noopener noreferrer'
+													: undefined
+											}
 											class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 										>
 											{item.title}
 										</a>
-									);
-								})
-							}
-						</div>
-					</div>
-					<div class="flex items-center space-x-2">
-						<slot name="header-actions" />
-						{
-							config.socials.map((social) => (
-								<a
-									href={social.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-									title={social.label}
-								>
-									<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
-										<Icon name={social.icon} />
-									</span>
-									<span class="sr-only">{social.label}</span>
-								</a>
-							))
-						}
+									))}
+								</nav>
+							</details>
+						)}
+						{config.socials.map((social) => (
+							<a
+								href={social.href}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+								title={social.label}
+							>
+								<span class="flex items-center justify-center [&>svg]:size-5 [&>svg]:dark:invert">
+									<Icon name={social.icon} />
+								</span>
+								<span class="sr-only">{social.label}</span>
+							</a>
+						))}
 						<ThemeToggle />
 					</div>
 				</div>
 			</header>
 		</slot>
-		<div class="flex-1">
+		<main id="content" class="flex-1">
 			<slot />
-		</div>
+		</main>
 		<slot name="footer">
 			<Footer />
 		</slot>

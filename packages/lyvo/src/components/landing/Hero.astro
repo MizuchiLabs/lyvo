@@ -1,6 +1,8 @@
 ---
 import { ArrowRight } from '@lucide/astro';
-import { isExternal } from '@lyvo/lib/utils';
+import LinkButton from '@lyvo/components/landing/LinkButton.astro';
+import InstallCommand from '@lyvo/components/landing/InstallCommand.astro';
+import { withBase } from '@lyvo/lib/url';
 
 interface Action {
 	label: string;
@@ -8,65 +10,87 @@ interface Action {
 }
 
 interface Props {
-	badge?: string;
+	/** Small pill above the title. Pass an object to make it a link, e.g. to a release. */
+	badge?: string | Action;
 	title: string;
+	/** Rendered after the title with the accent gradient. */
 	highlight?: string;
 	description?: string;
 	primary?: Action;
 	secondary?: Action;
+	install?: string | Record<string, string>;
 }
 
-const { badge, title, highlight, description, primary, secondary } = Astro.props;
+const { badge, title, highlight, description, primary, secondary, install } = Astro.props;
+const badgeLabel = typeof badge === 'string' ? badge : badge?.label;
+const badgeHref = typeof badge === 'object' ? withBase(badge.href) : undefined;
+const BadgeTag = badgeHref ? 'a' : 'div';
 ---
 
-<section class="flex flex-1 flex-col items-center justify-center px-4 pt-12 pb-8 text-center">
-	{
-		badge && (
-			<div class="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary backdrop-blur-sm md:text-sm">
-				<span class="flex h-2 w-2 animate-pulse rounded-full bg-primary" />
-				{badge}
-			</div>
-		)
-	}
-	<h1
-		class="mb-4 max-w-4xl text-4xl font-extrabold tracking-tighter text-balance sm:text-5xl md:text-6xl lg:text-7xl"
-	>
-		{title}
-		{highlight && <span class="text-primary italic"> {highlight}</span>}
-	</h1>
-	{
-		description && (
-			<p class="mb-8 max-w-2xl text-base text-balance text-muted-foreground sm:text-lg">
+<section class="relative isolate overflow-hidden px-4 pt-20 pb-16 sm:pt-28">
+	<div
+		aria-hidden="true"
+		class="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] mask-[radial-gradient(ellipse_70%_60%_at_50%_0%,black_30%,transparent_100%)] bg-size-[56px_56px] opacity-70"
+	></div>
+	<div
+		aria-hidden="true"
+		class="pointer-events-none absolute top-0 left-1/2 -z-10 h-96 w-[min(56rem,100%)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl"
+	></div>
+
+	<div class="mx-auto flex max-w-4xl flex-col items-center text-center">
+		{badgeLabel && (
+			<BadgeTag
+				href={badgeHref}
+				class="group mb-8 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs font-medium text-primary backdrop-blur-sm transition-colors hover:bg-primary/10 md:text-sm"
+			>
+				<span class="size-1.5 animate-pulse rounded-full bg-primary" />
+				{badgeLabel}
+				{badgeHref && (
+					<ArrowRight
+						size={14}
+						class="transition-transform group-hover:translate-x-0.5"
+					/>
+				)}
+			</BadgeTag>
+		)}
+
+		<h1 class="text-4xl font-bold tracking-tighter text-balance sm:text-5xl md:text-6xl lg:text-7xl">
+			{title}
+			{highlight && (
+				<span class="block bg-linear-to-br from-primary via-primary to-primary/40 bg-clip-text pb-2 text-transparent">
+					{highlight}
+				</span>
+			)}
+		</h1>
+
+		{description && (
+			<p class="mt-6 max-w-2xl text-base text-balance text-muted-foreground sm:text-lg">
 				{description}
 			</p>
-		)
-	}
-	<div class="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
-		<slot />
-		{
-			primary && (
-				<a
-					href={primary.href}
-					target={isExternal(primary.href) ? '_blank' : undefined}
-					rel={isExternal(primary.href) ? 'noopener noreferrer' : undefined}
-					class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-8 font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:w-auto"
-				>
-					{primary.label}
-					<ArrowRight size={16} />
-				</a>
-			)
-		}
-		{
-			secondary && (
-				<a
-					href={secondary.href}
-					target={isExternal(secondary.href) ? '_blank' : undefined}
-					rel={isExternal(secondary.href) ? 'noopener noreferrer' : undefined}
-					class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-6 font-semibold text-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none sm:w-auto"
-				>
-					{secondary.label}
-				</a>
-			)
-		}
+		)}
+
+		{(primary || secondary || Astro.slots.has('default')) && (
+			<div class="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
+				{primary && (
+					<LinkButton href={primary.href} arrow class="w-full sm:w-auto">
+						{primary.label}
+					</LinkButton>
+				)}
+				{secondary && (
+					<LinkButton href={secondary.href} variant="secondary" class="w-full sm:w-auto">
+						{secondary.label}
+					</LinkButton>
+				)}
+				<slot />
+			</div>
+		)}
+
+		{install && <InstallCommand command={install} class="mt-8" />}
 	</div>
+
+	{Astro.slots.has('media') && (
+		<div class="mx-auto mt-16 max-w-6xl">
+			<slot name="media" />
+		</div>
+	)}
 </section>

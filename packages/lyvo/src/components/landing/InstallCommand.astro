@@ -1,0 +1,81 @@
+---
+import { Check, Copy } from '@lucide/astro';
+import { cn } from '@lyvo/lib/utils';
+
+interface Props {
+	/** One command, or several keyed by label, e.g. { pnpm: 'pnpm add x', npm: 'npm i x' }. */
+	command: string | Record<string, string>;
+	class?: string;
+}
+
+const { command, class: className } = Astro.props;
+const commands = typeof command === 'string' ? { '': command } : command;
+const entries = Object.entries(commands);
+const [firstLabel, firstCommand] = entries[0];
+---
+
+<div
+	data-install
+	class={cn(
+		'not-prose inline-flex max-w-full flex-col overflow-hidden rounded-xl border border-border bg-card/80 text-left shadow-sm backdrop-blur',
+		className
+	)}
+>
+	{entries.length > 1 && (
+		<div class="flex gap-1 border-b border-border px-2 pt-1.5" role="tablist">
+			{entries.map(([label, value]) => (
+				<button
+					type="button"
+					role="tab"
+					data-command={value}
+					aria-selected={label === firstLabel ? 'true' : 'false'}
+					class="rounded-t-md border-b-2 border-transparent px-2.5 pb-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground aria-selected:border-primary aria-selected:text-foreground"
+				>
+					{label}
+				</button>
+			))}
+		</div>
+	)}
+	<div class="flex items-center gap-3 py-2 pr-2 pl-4">
+		<code class="!border-0 !bg-transparent !p-0 font-mono text-sm whitespace-nowrap">
+			<span class="text-muted-foreground select-none">$ </span>
+			<span data-value>{firstCommand}</span>
+		</code>
+		<button
+			type="button"
+			data-copy
+			aria-label="Copy command"
+			class="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+		>
+			<Copy size={14} data-icon="copy" />
+			<Check size={14} data-icon="check" class="hidden text-primary" />
+		</button>
+	</div>
+</div>
+
+<script>
+	document.addEventListener('click', async (event) => {
+		const target = event.target as HTMLElement;
+		const root = target.closest<HTMLElement>('[data-install]');
+		if (!root) return;
+
+		const tab = target.closest<HTMLButtonElement>('[data-command]');
+		if (tab) {
+			for (const other of root.querySelectorAll('[data-command]')) {
+				other.setAttribute('aria-selected', String(other === tab));
+			}
+			root.querySelector('[data-value]')!.textContent = tab.dataset.command ?? '';
+			return;
+		}
+
+		const copy = target.closest<HTMLButtonElement>('[data-copy]');
+		if (!copy) return;
+		await navigator.clipboard.writeText(root.querySelector('[data-value]')?.textContent ?? '');
+		copy.querySelector('[data-icon="copy"]')?.classList.add('hidden');
+		copy.querySelector('[data-icon="check"]')?.classList.remove('hidden');
+		setTimeout(() => {
+			copy.querySelector('[data-icon="copy"]')?.classList.remove('hidden');
+			copy.querySelector('[data-icon="check"]')?.classList.add('hidden');
+		}, 2000);
+	});
+</script>

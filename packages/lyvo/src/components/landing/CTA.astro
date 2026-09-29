@@ -1,5 +1,6 @@
 ---
-import { isExternal } from '@lyvo/lib/utils';
+import LinkButton from '@lyvo/components/landing/LinkButton.astro';
+import InstallCommand from '@lyvo/components/landing/InstallCommand.astro';
 
 interface Action {
 	label: string;
@@ -11,50 +12,40 @@ interface Props {
 	description?: string;
 	primary?: Action;
 	secondary?: Action;
+	install?: string | Record<string, string>;
 }
 
-const { title, description, primary, secondary } = Astro.props;
+const { title, description, primary, secondary, install } = Astro.props;
 ---
 
-<section class="container mx-auto max-w-screen-2xl px-4 pb-20 md:px-8">
-	<div
-		class="relative overflow-hidden rounded-2xl border border-border bg-card px-6 py-16 text-center shadow-sm md:px-12"
-	>
+<section class="container mx-auto max-w-6xl px-4 py-20 md:px-8">
+	<div class="relative isolate overflow-hidden rounded-3xl border border-border bg-card px-6 py-16 text-center shadow-sm md:px-12 md:py-20">
 		<div
-			class="pointer-events-none absolute inset-0"
 			aria-hidden="true"
-			style="background: radial-gradient(60% 80% at 50% 0%, color-mix(in oklch, var(--primary) 12%, transparent), transparent);"
-		>
-		</div>
-		<div class="relative mx-auto max-w-2xl">
+			class="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] mask-[radial-gradient(ellipse_60%_70%_at_50%_100%,black,transparent)] bg-size-[40px_40px] opacity-60"
+		></div>
+		<div
+			aria-hidden="true"
+			class="pointer-events-none absolute bottom-0 left-1/2 -z-10 h-64 w-2/3 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary/25 blur-3xl"
+		></div>
+		<div class="mx-auto max-w-2xl">
 			<h2 class="text-3xl font-bold tracking-tight text-balance md:text-4xl">{title}</h2>
 			{description && <p class="mt-4 text-balance text-muted-foreground">{description}</p>}
-			{
-				(primary || secondary) && (
-					<div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-						{primary && (
-							<a
-								href={primary.href}
-								target={isExternal(primary.href) ? '_blank' : undefined}
-								rel={isExternal(primary.href) ? 'noopener noreferrer' : undefined}
-								class="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-8 font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-							>
-								{primary.label}
-							</a>
-						)}
-						{secondary && (
-							<a
-								href={secondary.href}
-								target={isExternal(secondary.href) ? '_blank' : undefined}
-								rel={isExternal(secondary.href) ? 'noopener noreferrer' : undefined}
-								class="inline-flex h-11 items-center justify-center rounded-lg border border-border bg-background px-6 font-semibold text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-							>
-								{secondary.label}
-							</a>
-						)}
-					</div>
-				)
-			}
+			{(primary || secondary) && (
+				<div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+					{primary && (
+						<LinkButton href={primary.href} arrow>
+							{primary.label}
+						</LinkButton>
+					)}
+					{secondary && (
+						<LinkButton href={secondary.href} variant="secondary">
+							{secondary.label}
+						</LinkButton>
+					)}
+				</div>
+			)}
+			{install && <InstallCommand command={install} class="mt-8" />}
 		</div>
 	</div>
 </section>

@@ -1,0 +1,43 @@
+---
+import { Check } from '@lucide/astro';
+import { cn } from '@lyvo/lib/utils';
+
+interface Props {
+	eyebrow?: string;
+	title: string;
+	description?: string;
+	points?: string[];
+	/** Put the media on the left. */
+	reverse?: boolean;
+}
+
+const { eyebrow, title, description, points = [], reverse = false } = Astro.props;
+---
+
+<section class="container mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
+	<div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+		<div class={cn('space-y-5', reverse && 'lg:order-2')}>
+			{eyebrow && (
+				<p class="text-sm font-semibold tracking-wide text-primary uppercase">{eyebrow}</p>
+			)}
+			<h2 class="text-3xl font-bold tracking-tight text-balance md:text-4xl">{title}</h2>
+			{description && <p class="text-lg text-muted-foreground">{description}</p>}
+			{points.length > 0 && (
+				<ul class="space-y-3 pt-2">
+					{points.map((point) => (
+						<li class="flex items-start gap-3 text-sm">
+							<span class="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+								<Check size={12} />
+							</span>
+							{point}
+						</li>
+					))}
+				</ul>
+			)}
+			<slot name="actions" />
+		</div>
+		<div class={cn('min-w-0', reverse && 'lg:order-1')}>
+			<slot />
+		</div>
+	</div>
+</section>

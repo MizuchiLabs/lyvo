@@ -1,0 +1,31 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import { cn, isExternal } from '@lyvo/lib/utils';
+import { withBase } from '@lyvo/lib/url';
+
+interface Props {
+	href: string;
+	variant?: 'primary' | 'secondary';
+	arrow?: boolean;
+	class?: string;
+}
+
+const { href, variant = 'primary', arrow = false, class: className } = Astro.props;
+const external = isExternal(href);
+---
+
+<a
+	href={withBase(href)}
+	target={external ? '_blank' : undefined}
+	rel={external ? 'noopener noreferrer' : undefined}
+	class={cn(
+		'group inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none',
+		variant === 'primary'
+			? 'bg-primary text-primary-foreground shadow-lg ring-1 shadow-primary/25 ring-primary/60 hover:bg-primary/90'
+			: 'border border-border bg-background/60 text-foreground backdrop-blur hover:bg-accent',
+		className
+	)}
+>
+	<slot />
+	{arrow && <ArrowRight size={16} class="transition-transform group-hover:translate-x-0.5" />}
+</a>

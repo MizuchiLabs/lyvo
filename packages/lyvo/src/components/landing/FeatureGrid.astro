@@ -1,51 +1,60 @@
 ---
 import Icon from '@lyvo/components/base/Icon.astro';
+import { withBase } from '@lyvo/lib/url';
 
 interface Feature {
 	title: string;
 	description?: string;
+	/** Lucide icon name like "zap", or an SVG file name from src/assets. */
 	icon?: string;
+	href?: string;
 }
 
 interface Props {
+	eyebrow?: string;
 	title?: string;
 	subtitle?: string;
 	features: Feature[];
 }
 
-const { title, subtitle, features } = Astro.props;
+const { eyebrow, title, subtitle, features } = Astro.props;
 ---
 
-<section class="container mx-auto max-w-screen-2xl px-4 py-16 md:px-8">
-	{
-		(title || subtitle) && (
-			<div class="mb-12 text-center">
-				{title && <h2 class="text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>}
-				{subtitle && (
-					<p class="mx-auto mt-3 max-w-2xl text-balance text-muted-foreground">
-						{subtitle}
-					</p>
-				)}
-			</div>
-		)
-	}
-	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-		{
-			features.map((feature) => (
-				<div class="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md">
+<section class="container mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24">
+	{(title || subtitle) && (
+		<div class="mx-auto mb-14 max-w-2xl text-center">
+			{eyebrow && (
+				<p class="mb-3 text-sm font-semibold tracking-wide text-primary uppercase">
+					{eyebrow}
+				</p>
+			)}
+			{title && (
+				<h2 class="text-3xl font-bold tracking-tight text-balance md:text-4xl">{title}</h2>
+			)}
+			{subtitle && <p class="mt-4 text-balance text-muted-foreground">{subtitle}</p>}
+		</div>
+	)}
+	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		{features.map((feature) => {
+			const Tag = feature.href ? 'a' : 'div';
+			return (
+				<Tag
+					href={feature.href && withBase(feature.href)}
+					class="group relative overflow-hidden rounded-2xl border border-border bg-card p-7 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+				>
 					{feature.icon && (
-						<div class="mb-4 inline-flex rounded-lg border border-border bg-muted/40 p-2.5 text-foreground transition-colors group-hover:text-primary [&>svg]:size-5">
+						<div class="mb-5 inline-flex size-10 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground shadow-sm transition-colors group-hover:border-primary/40 group-hover:text-primary [&>svg]:size-5">
 							<Icon name={feature.icon} />
 						</div>
 					)}
-					<h3 class="mb-2 text-base font-semibold tracking-tight">{feature.title}</h3>
+					<h3 class="mb-2 font-semibold tracking-tight">{feature.title}</h3>
 					{feature.description && (
 						<p class="text-sm leading-relaxed text-muted-foreground">
 							{feature.description}
 						</p>
 					)}
-				</div>
-			))
-		}
+				</Tag>
+			);
+		})}
 	</div>
 </section>
