@@ -170,14 +170,23 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 			const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
 
 			document.querySelectorAll('pre').forEach((block) => {
-				if (block.hasAttribute('data-no-copy') || block.querySelector('.copy-button'))
+				if (
+					block.hasAttribute('data-no-copy') ||
+					block.parentElement?.classList.contains('copy-wrapper')
+				)
 					return;
+
+				// The button lives outside the <pre> so it stays put when the code scrolls.
+				const wrapper = document.createElement('div');
+				wrapper.className = 'copy-wrapper';
+				block.before(wrapper);
+				wrapper.appendChild(block);
 
 				const button = document.createElement('button');
 				button.className = 'copy-button';
 				button.innerHTML = copyIcon;
 				button.setAttribute('aria-label', 'Copy code to clipboard');
-				block.appendChild(button);
+				wrapper.appendChild(button);
 
 				button.addEventListener('click', async () => {
 					const codeText = block.querySelector('code')?.innerText || '';

@@ -214,8 +214,7 @@
 		content: counter(step);
 	}
 
-	/* Ensure the pre block can contain the absolute positioned button */
-	pre {
+	.copy-wrapper {
 		position: relative;
 	}
 
@@ -236,7 +235,8 @@
 		transition: all 0.2s ease-in-out;
 	}
 
-	pre:hover .copy-button {
+	.copy-wrapper:hover .copy-button,
+	.copy-button:focus-visible {
 		opacity: 1;
 	}
 

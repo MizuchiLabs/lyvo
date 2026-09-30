@@ -7,26 +7,26 @@ type Props = ComponentProps<typeof Code> & {
 	wrap?: boolean;
 };
 
-const { theme, themes, code, wrap = false, class: className, ...props } = Astro.props;
+const { theme, themes, code, wrap = false, inline, class: className, ...props } = Astro.props;
 
 const defaultThemes = {
 	light: 'github-light',
 	dark: 'github-dark'
 } as const;
 
-const passedThemes = themes || (theme ? undefined : defaultThemes);
+const themeProps = theme ? { theme } : { themes: themes ?? defaultThemes };
 ---
 
-<div
-	class={cn(
-		'not-prose relative rounded-lg border border-border/50 bg-muted/40',
-		wrap && '[&>pre]:whitespace-pre-wrap [&>pre]:wrap-break-word',
-		className
-	)}
->
-	{theme ? (
-		<Code theme={theme} code={code} {...props} />
-	) : (
-		<Code themes={passedThemes} code={code} {...props} />
-	)}
-</div>
+{inline ? (
+	<Code code={code} inline class={className} {...themeProps} {...props} />
+) : (
+	<div
+		class={cn(
+			'not-prose relative overflow-hidden rounded-lg border border-border/50 bg-muted/40 text-sm [.prose>&]:my-6 [&_pre]:p-4',
+			wrap && '[&_pre]:whitespace-pre-wrap [&_pre]:wrap-break-word',
+			className
+		)}
+	>
+		<Code code={code} {...themeProps} {...props} />
+	</div>
+)}
