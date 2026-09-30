@@ -104,6 +104,7 @@ export const LyvoOptionsSchema = z.strictObject({
 		})
 		.optional(),
 	llms: z.boolean().optional(),
+	mermaid: z.boolean().optional(),
 	search: z.boolean().optional(),
 	sitemap: z.boolean().optional(),
 	robots: z.boolean().optional(),
@@ -177,6 +178,7 @@ export interface LyvoConfig {
 		modules: { satori: string; sharp: string } | null;
 	};
 	llms: boolean;
+	mermaid: boolean;
 	search: boolean;
 	sitemap: boolean;
 	robots: boolean;
@@ -393,6 +395,7 @@ export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike)
 			modules: generateOg ? resolveOgModules() : null
 		},
 		llms: raw.llms ?? true,
+		mermaid: raw.mermaid ?? true,
 		search: raw.search ?? true,
 		sitemap: raw.sitemap ?? true,
 		robots: raw.robots ?? true,

@@ -251,6 +251,40 @@
 		opacity: 1;
 	}
 
+	.lyvo-mermaid {
+		margin-block: 1.5rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		overflow-x: auto;
+	}
+	.lyvo-mermaid[data-state='loading'] {
+		min-height: 12rem;
+		background-color: var(--muted);
+		@apply animate-pulse;
+	}
+	.lyvo-mermaid:not([data-state='error']) .lyvo-mermaid-source {
+		display: none;
+	}
+	.lyvo-mermaid[data-state='error'] {
+		border-color: var(--destructive);
+	}
+	.lyvo-mermaid-source {
+		margin: 0;
+		padding: 1rem;
+		font-family: var(--font-mono);
+		font-size: 0.875rem;
+		white-space: pre;
+	}
+	.lyvo-mermaid-diagram {
+		display: flex;
+		justify-content: center;
+		padding: 1rem;
+	}
+	.lyvo-mermaid-diagram svg {
+		max-width: 100%;
+		height: auto;
+	}
+
 	/* Off-site links get a small arrow that nudges on hover */
 	.prose a.external-link::after {
 		content: '';

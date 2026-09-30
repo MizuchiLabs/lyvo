@@ -9,6 +9,7 @@ import tailwindcss from '@tailwindcss/vite';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeExternalLinks from './lib/rehype-external-links';
+import remarkMermaid from './lib/remark-mermaid';
 import { unified } from '@astrojs/markdown-remark';
 import { LyvoOptionsSchema, normalizeOptions, type LyvoConfig, type LyvoOptions } from './config';
 
@@ -120,7 +121,10 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 					// on their own are ignored, so merge the user's into unified().
 					markdown: {
 						processor: unified({
-							remarkPlugins: [...(userMarkdown.remarkPlugins ?? [])],
+							remarkPlugins: [
+								...(userMarkdown.remarkPlugins ?? []),
+								...(options.mermaid ? [remarkMermaid] : [])
+							],
 							rehypePlugins: [
 								...(userMarkdown.rehypePlugins ?? []),
 								rehypeSlug,
@@ -182,6 +186,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 				}
 
 				injectScript('page-ssr', `import "${VIRTUAL_STYLES_ID}";`);
+				if (options.mermaid) injectScript('page', `import "@lyvo/lib/mermaid-client";`);
 			}
 		}
 	};

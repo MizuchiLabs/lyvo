@@ -88,6 +88,28 @@ export default function Counter() {
 </p>
 ---
 
+## Diagrams
+
+Fence a block with `mermaid` and it renders as a diagram that follows the theme.
+
+```mermaid
+flowchart LR
+	A[Markdown] --> B{remark}
+	B -->|mermaid fence| C[Placeholder]
+	B -->|other code| D[Shiki]
+	C --> E[Client render]
+```
+
+```mermaid
+sequenceDiagram
+	participant Browser
+	participant API
+	Browser->>API: GET /users
+	API-->>Browser: 200 OK
+```
+
+---
+
 ## Tables
 
 | Feature   | Support | Note                         |
