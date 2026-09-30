@@ -6,15 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.3.2] - 2026-09-30
 
-### Added
-- Mermaid diagrams: ` ```mermaid ` code blocks render as themed diagrams that follow light and dark mode. Mermaid is only loaded on pages that use it. Turn it off with `mermaid: false`.
-
 ### Changed
 - Added homepage (lyvo.mizuchi.dev) to package metadata
+
+## [0.3.1] - 2026-09-30
+
+### Added
+- Mermaid diagrams: ` ```mermaid ` code blocks render as themed diagrams that follow light and dark mode. Mermaid is only loaded on pages that use it. Turn it off with `mermaid: false`.
 
 ### Fixed
 - `<Code>` blocks in MDX had no padding and showed a scrollbar next to the copy button. `<Code inline>` no longer renders as a block.
 - The copy button stays in place when a code block scrolls sideways, and shows on keyboard focus.
+
 ## [0.3.0] - 2026-09-29
 
 ### Migrating from 0.2
