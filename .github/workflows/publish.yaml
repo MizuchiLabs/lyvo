@@ -45,8 +45,8 @@ jobs:
       - name: Build
         run: pnpm --filter @mizuchilabs/lyvo build
 
-      # pnpm packs, npm uploads. pnpm 12's own publish reported success for 0.3.1
-      # but the version never reached the registry.
+      # pnpm packs, npm uploads. pnpm 12's publish staged 0.3.1 instead of
+      # publishing it, which also burned that version number.
       - name: Publish
         run: |
           pnpm --filter @mizuchilabs/lyvo pack --pack-destination "$RUNNER_TEMP"
