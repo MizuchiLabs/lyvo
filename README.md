@@ -10,6 +10,8 @@
 
 Lyvo is an [Astro](https://astro.build/) integration that gives your app a landing page, docs and an API reference in one site, with SEO and LLM-friendly output handled for you.
 
+**Live demo:** [lyvo.mizuchi.dev](https://lyvo.mizuchi.dev)
+
 ## Project Structure
 
 This project is a monorepo managed with `pnpm` workspaces:
@@ -23,15 +25,15 @@ To get started with development:
 
 1. **Install dependencies:**
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   pnpm install
+   ```
 
 2. **Start the dev server:**
-    ```bash
-    pnpm dev
-    ```
-    This will spin up the `apps/demo` site where you can preview changes to the package.
+   ```bash
+   pnpm dev
+   ```
+   This will spin up the `apps/demo` site where you can preview changes to the package.
 
 ## Features
 
@@ -46,12 +48,12 @@ To get started with development:
 
 ```javascript
 lyvo({
-	title: 'My App',
-	logo: 'logo.svg', // src/assets/logo.svg
-	repo: { url: 'https://github.com/...' },
-	docs: { sidebar: ['introduction', { title: 'Guides', items: ['install'] }, '---'] },
-	openapi: { input: 'public/openapi.json' },
-	i18n: { locales: ['de'] }
+  title: "My App",
+  logo: "logo.svg", // src/assets/logo.svg
+  repo: { url: "https://github.com/..." },
+  docs: { sidebar: ["introduction", { title: "Guides", items: ["install"] }, "---"] },
+  openapi: { input: "public/openapi.json" },
+  i18n: { locales: ["de"] },
 });
 ```
 

@@ -9,6 +9,8 @@
 
 **Lyvo** turns an Astro project into a product site for your app: a landing page, MDX guides and an OpenAPI reference, from one integration. SEO, social images, search and LLM-friendly output are handled for you.
 
+**Live demo:** [lyvo.mizuchi.dev](https://lyvo.mizuchi.dev)
+
 ## Key Features
 
 - **Landing blocks**: Hero, feature grid, split showcase, code and browser windows, logo cloud, install command and CTA.

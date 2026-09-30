@@ -3,7 +3,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 import lyvo from '@mizuchilabs/lyvo';
 
 export default defineConfig({
-	site: 'https://example.com',
+	site: 'https://lyvo.mizuchi.dev',
 	markdown: {
 		syntaxHighlight: 'shiki',
 		shikiConfig: {
