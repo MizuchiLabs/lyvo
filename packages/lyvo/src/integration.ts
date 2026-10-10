@@ -173,6 +173,12 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 					route('/llms.txt', 'llms.txt.ts');
 					route('/llms-full.txt', 'llms-full.txt.ts');
 					route('/[...path].md', 'markdown.ts');
+					if (options.api.specs.length > 0) {
+						route(
+							`${options.api.root}/[...spec]/llms-full.txt`,
+							'api/llms-full.txt.ts'
+						);
+					}
 				}
 				if (
 					options.robots &&

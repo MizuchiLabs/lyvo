@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { schemaToMarkdown } from '../src/lib/markdown';
+import { schemaToMarkdown, summarize } from '../src/lib/markdown';
 
 describe('schemaToMarkdown', () => {
 	const tag = { 'x-lyvo-schema': 'Tag', type: 'object', properties: { id: { type: 'string' } } };
@@ -28,5 +28,19 @@ describe('schemaToMarkdown', () => {
 
 	it('nests inline objects', () => {
 		expect(schemaToMarkdown(schema)).toContain('  - `size` (integer)');
+	});
+});
+
+describe('summarize', () => {
+	it('joins the first paragraph and skips headings', () => {
+		expect(summarize('# Intro\n\nA test\nAPI.\n\n## More\n\nDetails.')).toBe('A test API.');
+	});
+
+	it('cuts long text at a word', () => {
+		expect(summarize('one two three four', 9)).toBe('one two...');
+	});
+
+	it('handles a missing description', () => {
+		expect(summarize(undefined)).toBe('');
 	});
 });

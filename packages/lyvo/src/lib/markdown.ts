@@ -2,21 +2,19 @@ import type { DocEntry } from './docs';
 import type { LoadedApiSpec } from './openapi/model';
 import type { OpenAPIOperation, OpenAPISchemaEntry } from './openapi/types';
 import { baseType, objectShape, schemaName, typeLabel } from './openapi/schema';
+import { mdxToMarkdown } from './mdx-markdown';
 
 type Schema = Record<string, any>;
 
 const MAX_DEPTH = 6;
 
-/** MDX body with module syntax dropped, components stay as readable tags. */
+/** Doc body as plain Markdown, MDX components converted. */
 export function docToMarkdown(doc: DocEntry): string {
-	const body = (doc.body ?? '')
-		.split('\n')
-		.filter((line: string) => !/^(import|export)\s/.test(line.trim()))
-		.join('\n')
-		.trim();
+	const source = (doc.body ?? '').trim();
+	const body = doc.filePath?.endsWith('.mdx') ? mdxToMarkdown(source) : source;
 	const header = [
 		`# ${doc.data.title}`,
-		doc.data.description ? `\n> ${doc.data.description}` : ''
+		doc.data.description ? `\n> ${oneLine(doc.data.description)}` : ''
 	];
 	return `${header.join('\n')}\n\n${body}\n`;
 }
@@ -27,6 +25,19 @@ function inlineCode(value: unknown): string {
 
 function oneLine(text: string | undefined): string {
 	return text ? text.replaceAll(/\s*\n\s*/g, ' ').trim() : '';
+}
+
+/** First paragraph on one line, headings skipped, cut at a word past `max`. */
+export function summarize(text: string | undefined, max = 200): string {
+	const paragraph =
+		(text ?? '')
+			.replaceAll(/^#+\s.*$/gm, '')
+			.split(/\n\s*\n/)
+			.map(oneLine)
+			.find(Boolean) ?? '';
+	if (paragraph.length <= max) return paragraph;
+	const cut = paragraph.lastIndexOf(' ', max);
+	return `${paragraph.slice(0, cut > 0 ? cut : max)}...`;
 }
 
 /**
@@ -167,9 +178,14 @@ export function schemaPageToMarkdown(entry: OpenAPISchemaEntry): string {
 	return `${lines.join('\n').trim()}\n`;
 }
 
-export function apiOverviewToMarkdown(spec: LoadedApiSpec, href: (slug: string) => string): string {
+export function apiOverviewToMarkdown(
+	spec: LoadedApiSpec,
+	href: (slug: string) => string,
+	full?: string
+): string {
 	const { info, servers, operations, webhooks, schemas } = spec.model;
 	const lines = [`# ${info.title}`, '', `Version: ${info.version}`, ''];
+	if (full) lines.push(`Full reference in one file: ${full}`, '');
 	if (info.description) lines.push(info.description.trim(), '');
 	if (servers.length > 0) {
 		lines.push(
@@ -193,7 +209,10 @@ export function apiOverviewToMarkdown(spec: LoadedApiSpec, href: (slug: string) 
 		lines.push(
 			'## Models',
 			'',
-			...schemas.map((schema) => `- [${schema.name}](${href(`schemas/${schema.slug}`)}.md)`),
+			...schemas.map((schema) => {
+				const summary = summarize(schema.description);
+				return `- [${schema.name}](${href(`schemas/${schema.slug}`)}.md)${summary ? `: ${summary}` : ''}`;
+			}),
 			''
 		);
 	}

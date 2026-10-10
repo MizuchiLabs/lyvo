@@ -70,7 +70,7 @@ Use `og: { image: '/social.png' }` for one static image instead, or `og: { gener
 
 ## LLMs
 
-Every docs and API page has a Markdown twin: add `.md` to the URL, like [/docs/introduction.md](/docs/introduction.md). `/llms.txt` lists them all and `/llms-full.txt` has the full content in one file. The "Copy page" button at the top of each page copies the Markdown or opens it in ChatGPT or Claude.
+Every docs and API page has a Markdown twin: add `.md` to the URL, like [/docs/introduction.md](/docs/introduction.md). `/llms.txt` lists the docs pages and one overview per API spec, which links to its endpoints and models. `/llms-full.txt` has all docs in one file, and each API spec has its own at `<prefix>/llms-full.txt`, like [/api/llms-full.txt](/api/llms-full.txt). Components like `<Steps>` and `<Callout>` are converted to plain Markdown. The "Copy page" button at the top of each page copies the Markdown or opens it in ChatGPT or Claude.
 
 Turn it all off with `llms: false`.
 

@@ -1,19 +1,11 @@
 import type { APIRoute } from 'astro';
 import config from 'virtual:lyvo-config';
-import { listPages } from '@lyvo/lib/pages';
-import { absoluteUrl } from '@lyvo/lib/seo';
+import { joinPages, listPages } from '@lyvo/lib/pages';
 
+// Docs only. Each API spec has its own file, see routes/api/llms-full.txt.
 export const GET: APIRoute = async () => {
-	const parts = [`# ${config.title}`];
-	if (config.description) parts.push(`> ${config.description}`);
-
-	for (const page of await listPages()) {
-		parts.push(
-			`---\nSource: ${absoluteUrl(page.path) ?? page.path}\n\n${page.markdown().trim()}`
-		);
-	}
-
-	return new Response(`${parts.join('\n\n')}\n`, {
+	const pages = (await listPages()).filter((page) => !page.spec);
+	return new Response(joinPages(config.title, config.description, pages), {
 		headers: { 'Content-Type': 'text/plain; charset=utf-8' }
 	});
 };

@@ -108,17 +108,18 @@ Files in `customCss` join the theme's Tailwind root, so token overrides work dir
 
 ## What you get automatically
 
-| Output                            | Notes                                                                                                    |
-| :-------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| `/docs/...`, `/<locale>/docs/...` | Guides from `src/content/docs`. Untranslated pages fall back to the default locale.                      |
-| `/api/...`                        | Overview, one page per endpoint and webhook, and `/api/schemas/<model>` pages.                           |
-| `/og/*.png`                       | A 1200x630 social image per page. Pages without one use the site image.                                  |
-| `<page>.md`                       | Markdown twin of every docs and API page, linked from `<head>` and the "Copy page" menu.                 |
-| `/llms.txt`, `/llms-full.txt`     | Index and full content for LLMs, following [llmstxt.org](https://llmstxt.org).                           |
-| `/sitemap-index.xml`              | With hreflang alternates when locales are configured.                                                    |
-| `/robots.txt`                     | Skipped when you ship your own in `public/` or `src/pages/`.                                             |
-| `/404`                            | Skipped when you have `src/pages/404.astro`.                                                             |
-| `<head>`                          | Canonical, hreflang, Open Graph, Twitter cards and JSON-LD (`WebSite`, `TechArticle`, `BreadcrumbList`). |
+| Output                            | Notes                                                                                                                                                       |
+| :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/docs/...`, `/<locale>/docs/...` | Guides from `src/content/docs`. Untranslated pages fall back to the default locale.                                                                         |
+| `/api/...`                        | Overview, one page per endpoint and webhook, and `/api/schemas/<model>` pages.                                                                              |
+| `/og/*.png`                       | A 1200x630 social image per page. Pages without one use the site image.                                                                                     |
+| `<page>.md`                       | Markdown twin of every docs and API page, linked from `<head>` and the "Copy page" menu. MDX components are converted to plain Markdown.                    |
+| `/llms.txt`, `/llms-full.txt`     | Index and all docs in one file for LLMs, following [llmstxt.org](https://llmstxt.org). The index links one overview per API spec instead of every endpoint. |
+| `<prefix>/llms-full.txt`          | Full reference of one API spec in one file, like `/api/llms-full.txt`.                                                                                      |
+| `/sitemap-index.xml`              | With hreflang alternates when locales are configured.                                                                                                       |
+| `/robots.txt`                     | Skipped when you ship your own in `public/` or `src/pages/`.                                                                                                |
+| `/404`                            | Skipped when you have `src/pages/404.astro`.                                                                                                                |
+| `<head>`                          | Canonical, hreflang, Open Graph, Twitter cards and JSON-LD (`WebSite`, `TechArticle`, `BreadcrumbList`).                                                    |
 
 ## Navigation
 
