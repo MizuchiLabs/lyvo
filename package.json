@@ -8,8 +8,8 @@
     "deploy": "pnpm --filter demo exec wrangler deploy",
     "format": "prettier --write .",
     "lint": "oxlint --fix",
-    "update-deps": "pnpm up -r -i -L",
-    "update:all": "pnpm up --latest -r",
+    "bump": "pnpm self-update && pnpm up -r --latest",
+    "bump:pick": "pnpm up -r --latest -i",
     "test": "vitest run --root packages/lyvo"
   },
   "devDependencies": {
