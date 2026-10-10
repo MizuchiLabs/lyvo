@@ -1,21 +1,25 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import config from 'virtual:lyvo-config';
+import { currentLocale } from '@lyvo/lib/docs';
+import { absoluteUrl } from '@lyvo/lib/seo';
 
 interface Props {
 	to: string;
 }
 
 const { to } = Astro.props;
+const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
 ---
 
 <!doctype html>
-<html>
+<html lang={lang}>
 	<head>
 		<meta charset="utf-8" />
 		<ClientRouter />
 		<title>Redirecting...</title>
 		<meta name="robots" content="noindex" />
-		<link rel="canonical" href={to} />
+		<link rel="canonical" href={absoluteUrl(to) ?? to} />
 	</head>
 	<body>
 		<meta name="lyvo-redirect" content={to} />

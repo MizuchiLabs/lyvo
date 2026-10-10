@@ -1,6 +1,6 @@
 import config from 'virtual:lyvo-config';
 import { joinUrl } from './routing';
-import { withBase } from './url';
+import { pageHref } from './url';
 import { readAllApiSpecs, type LoadedApiSpec } from './openapi/model';
 import { t } from './i18n';
 
@@ -18,8 +18,8 @@ export interface Section {
 export async function getSections(locale: string | null): Promise<Section[]> {
 	const docsHome =
 		locale && locale !== config.i18n.defaultLocale
-			? withBase(joinUrl(locale, config.docs.prefix))
-			: withBase(joinUrl(config.docs.prefix));
+			? pageHref(joinUrl(locale, config.docs.prefix))
+			: pageHref(joinUrl(config.docs.prefix));
 
 	const sections: Section[] = [
 		{
@@ -39,7 +39,7 @@ export async function getSections(locale: string | null): Promise<Section[]> {
 			title: spec.title,
 			description: `v${spec.model.info.version} · ${t('endpointCount', locale).replace('{count}', String(endpoints))}`,
 			icon: 'braces',
-			href: withBase(joinUrl(config.api.root, spec.sub)),
+			href: pageHref(joinUrl(config.api.root, spec.sub)),
 			spec
 		});
 	}
@@ -52,7 +52,10 @@ export function activeSection(sections: Section[], pathname: string): Section {
 	const path = pathname.replace(/\/+$/, '') || '/';
 	const matches = sections
 		.filter((section) => section.spec)
-		.filter((section) => path === section.href || path.startsWith(`${section.href}/`))
+		.filter((section) => {
+			const href = section.href.replace(/\/+$/, '');
+			return path === href || path.startsWith(`${href}/`);
+		})
 		.sort((a, b) => b.href.length - a.href.length);
 	return matches[0] ?? sections[0];
 }

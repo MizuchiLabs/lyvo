@@ -11,6 +11,7 @@ import ApiOverview from '@lyvo/components/openapi/ApiOverview.astro';
 import ApiEndpoint from '@lyvo/components/openapi/ApiEndpoint.astro';
 import SchemaPage from '@lyvo/components/openapi/SchemaPage.astro';
 import { joinUrl } from '@lyvo/lib/routing';
+import { endpointDescription, summarize } from '@lyvo/lib/markdown';
 import { t } from '@lyvo/lib/i18n';
 
 type Page =
@@ -48,12 +49,9 @@ const endpoint = page.kind === 'endpoint' ? findEndpoint(spec.model, page.slug) 
 const schema = page.kind === 'schema' ? findSchema(spec.model, page.slug) : null;
 
 const title = endpoint?.title ?? schema?.name ?? info.title ?? spec.title;
-const description =
-	endpoint?.summary ??
-	(endpoint ? `${endpoint.method.toUpperCase()} ${endpoint.path}` : undefined) ??
-	schema?.description ??
-	info.description ??
-	'API reference.';
+const description = endpoint
+	? endpointDescription(endpoint)
+	: summarize(schema?.description ?? info.description) || 'API reference.';
 const crumbs =
 	page.kind === 'overview'
 		? []
@@ -62,7 +60,7 @@ const crumbs =
 			: [specCrumb];
 ---
 
-<DocsLayout title={title} description={description.split('\n')[0]} isApi={true} crumbs={crumbs}>
+<DocsLayout title={title} description={description} isApi={true} crumbs={crumbs}>
 	{page.kind === 'overview' && <ApiOverview spec={spec} />}
 	{page.kind === 'endpoint' && <ApiEndpoint spec={spec} slug={page.slug} />}
 	{page.kind === 'schema' && schema && <SchemaPage spec={spec} entry={schema} />}

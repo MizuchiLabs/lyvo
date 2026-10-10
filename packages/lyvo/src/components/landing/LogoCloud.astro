@@ -1,6 +1,6 @@
 ---
 import Icon from '@lyvo/components/base/Icon.astro';
-import { withBase } from '@lyvo/lib/url';
+import { pageHref } from '@lyvo/lib/url';
 import { isExternal } from '@lyvo/lib/utils';
 
 interface Logo {
@@ -37,7 +37,7 @@ const { title, logos } = Astro.props;
 				<li class="text-muted-foreground opacity-70 grayscale transition hover:text-foreground hover:opacity-100 hover:grayscale-0">
 					{logo.href ? (
 						<a
-							href={withBase(logo.href)}
+							href={pageHref(logo.href)}
 							target={isExternal(logo.href) ? '_blank' : undefined}
 							rel={isExternal(logo.href) ? 'noopener noreferrer' : undefined}
 						>

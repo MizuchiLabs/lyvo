@@ -40,6 +40,11 @@ export function summarize(text: string | undefined, max = 200): string {
 	return `${paragraph.slice(0, cut > 0 ? cut : max)}...`;
 }
 
+/** One line about an endpoint for meta tags, social images and link lists. */
+export function endpointDescription(endpoint: OpenAPIOperation): string {
+	return summarize(endpoint.description) || `${endpoint.method.toUpperCase()} ${endpoint.path}`;
+}
+
 /**
  * Schema as a nested bullet list. Named component schemas are only expanded at
  * the top, elsewhere they're referenced by name to keep output small.
@@ -201,7 +206,7 @@ export function apiOverviewToMarkdown(
 	const list = (items: OpenAPIOperation[]) =>
 		items.map(
 			(item) =>
-				`- [${item.method.toUpperCase()} ${item.path}](${href(item.slug)}.md)${item.summary ? `: ${item.summary}` : ''}`
+				`- [${item.method.toUpperCase()} ${item.path}](${href(item.slug)})${item.summary ? `: ${item.summary}` : ''}`
 		);
 	if (operations.length > 0) lines.push('## Endpoints', '', ...list(operations), '');
 	if (webhooks.length > 0) lines.push('## Webhooks', '', ...list(webhooks), '');
@@ -211,7 +216,7 @@ export function apiOverviewToMarkdown(
 			'',
 			...schemas.map((schema) => {
 				const summary = summarize(schema.description);
-				return `- [${schema.name}](${href(`schemas/${schema.slug}`)}.md)${summary ? `: ${summary}` : ''}`;
+				return `- [${schema.name}](${href(`schemas/${schema.slug}`)})${summary ? `: ${summary}` : ''}`;
 			}),
 			''
 		);

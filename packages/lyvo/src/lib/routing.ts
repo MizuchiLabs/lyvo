@@ -67,6 +67,20 @@ export function applyBase(base: string, path: string): string {
 	return path === '/' ? `${base}/` : `${base}${path}`;
 }
 
+/**
+ * Page link with the trailing slash a directory build serves it at, so hosts
+ * don't redirect every click. Files, external URLs and hash links are kept.
+ */
+export function withTrailingSlash(path: string): string {
+	if (!path.startsWith('/') || path.startsWith('//')) return path;
+	const end = path.search(/[?#]/);
+	const pathname = end === -1 ? path : path.slice(0, end);
+	if (pathname.endsWith('/') || pathname.slice(pathname.lastIndexOf('/')).includes('.')) {
+		return path;
+	}
+	return `${pathname}/${path.slice(pathname.length)}`;
+}
+
 /** Inverse of applyBase, for parsing the current URL. */
 export function removeBase(base: string, pathname: string): string {
 	if (!base) return pathname;

@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import config from 'virtual:lyvo-config';
 import { listPages } from '@lyvo/lib/pages';
 import { summarize } from '@lyvo/lib/markdown';
-import { absoluteUrl } from '@lyvo/lib/seo';
+import { absoluteUrl, markdownPath } from '@lyvo/lib/seo';
 import { withBase } from '@lyvo/lib/url';
 
 // Follows https://llmstxt.org: a title, a summary, then linked sections.
@@ -23,7 +23,7 @@ export const GET: APIRoute = async () => {
 	const sections = new Map<string, string[]>();
 	for (const page of pages) {
 		if (page.nested) continue;
-		const url = absoluteUrl(`${page.path}.md`) ?? `${page.path}.md`;
+		const url = absoluteUrl(markdownPath(page.path)) ?? markdownPath(page.path);
 		const description = summarize(page.description);
 		const summary = description ? `: ${description}` : '';
 		sections.set(page.section, [

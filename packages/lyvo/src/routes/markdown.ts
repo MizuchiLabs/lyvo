@@ -4,7 +4,7 @@ import { stripBase } from '@lyvo/lib/url';
 
 export const getStaticPaths: GetStaticPaths = async () =>
 	(await listPages()).map((page) => ({
-		params: { path: stripBase(page.path).replace(/^\//, '') },
+		params: { path: stripBase(page.path).replace(/^\/|\/$/g, '') },
 		props: { page }
 	}));
 

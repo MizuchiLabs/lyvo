@@ -3,7 +3,7 @@ import { getEntry } from 'astro:content';
 import config from 'virtual:lyvo-config';
 import { joinUrl } from '../routing';
 import { slugify } from '../utils';
-import { withBase } from '../url';
+import { pageHref } from '../url';
 
 const cache = new Map<string, OpenAPIModel>();
 
@@ -60,11 +60,11 @@ export function findSchema(model: OpenAPIModel, slug: string): OpenAPISchemaEntr
 }
 
 export function apiIndexHref(spec: LoadedApiSpec): string {
-	return withBase(joinUrl(config.api.root, spec.sub));
+	return pageHref(joinUrl(config.api.root, spec.sub));
 }
 
 export function apiPageHref(spec: LoadedApiSpec, slug: string): string {
-	return withBase(joinUrl(config.api.root, spec.sub, slug));
+	return pageHref(joinUrl(config.api.root, spec.sub, slug));
 }
 
 export function schemaHref(spec: LoadedApiSpec, name: string): string {

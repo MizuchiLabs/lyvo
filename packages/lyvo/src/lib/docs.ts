@@ -1,7 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import config from 'virtual:lyvo-config';
 import type { SidebarInput } from '../config';
-import { stripBase, withBase } from './url';
+import { pageHref, stripBase } from './url';
 import {
 	docsUrl,
 	docPageId as splitPageId,
@@ -45,7 +45,7 @@ function isDev(): boolean {
 }
 
 export function docUrl(id: string, activeLocale?: string | null): string {
-	return withBase(docsUrl(routing, id, activeLocale));
+	return pageHref(docsUrl(routing, id, activeLocale));
 }
 
 export function docPageId(id: string): string {

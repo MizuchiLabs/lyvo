@@ -10,7 +10,7 @@ import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
 import { currentLocale } from '@lyvo/lib/docs';
 import { websiteJsonLd } from '@lyvo/lib/seo';
-import { stripBase, withBase } from '@lyvo/lib/url';
+import { pageHref, stripBase } from '@lyvo/lib/url';
 
 interface Props {
 	title?: string;
@@ -29,9 +29,9 @@ const navItems =
 	config.nav.length > 0
 		? config.nav
 		: [
-				{ title: 'Docs', href: withBase(config.docs.prefix) },
+				{ title: 'Docs', href: pageHref(config.docs.prefix) },
 				...(config.api.specs.length > 0
-					? [{ title: 'API', href: withBase(config.api.root) }]
+					? [{ title: 'API', href: pageHref(config.api.root) }]
 					: [])
 			];
 ---
@@ -118,7 +118,7 @@ const navItems =
 				</div>
 			</header>
 		</slot>
-		<main id="content" class="flex-1">
+		<main id="content" class="flex-1 overflow-x-clip">
 			<slot />
 		</main>
 		<slot name="footer">

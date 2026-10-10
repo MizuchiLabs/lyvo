@@ -168,7 +168,7 @@ Canonical URLs follow Astro's `trailingSlash` and `build.format` settings, so th
 
 ### Serving from a subpath
 
-Astro's `base` option works out of the box, for example `base: '/my-app'` for GitHub Pages. Every generated link, the sitemap, `robots.txt`, `llms.txt` and OG images include it. Links in your config, in landing blocks and in Markdown content can be written as plain site paths (`/docs/intro`), lyvo adds the base for you. Links that already include it are left alone.
+Astro's `base` option works out of the box, for example `base: '/my-app'` for GitHub Pages. Every generated link, the sitemap, `robots.txt`, `llms.txt` and OG images include it. Links in your config, in landing blocks and in Markdown content can be written as plain site paths (`/docs/intro`), lyvo adds the base and the trailing slash your build uses. Links that already include it are left alone.
 
 ## Analytics
 

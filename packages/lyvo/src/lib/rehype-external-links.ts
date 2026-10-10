@@ -1,4 +1,4 @@
-import { applyBase } from './routing';
+import { applyBase, withTrailingSlash } from './routing';
 
 interface Node {
 	type: string;
@@ -14,9 +14,12 @@ function walk(node: Node, visit: (node: Node) => void) {
 
 /**
  * Opens off-site links in a new tab and marks them for the ↗ indicator.
- * Site-absolute links ("/docs/x") get Astro's `base` so content works under a subpath.
+ * Site-absolute links ("/docs/x") get Astro's `base` so content works under a subpath,
+ * and the trailing slash the site is served with.
  */
-export default function rehypeExternalLinks(options: { site?: string; base?: string } = {}) {
+export default function rehypeExternalLinks(
+	options: { site?: string; base?: string; trailingSlash?: boolean } = {}
+) {
 	const ownOrigin = options.site ? new URL(options.site).origin : null;
 	const base = options.base ?? '';
 
@@ -26,7 +29,8 @@ export default function rehypeExternalLinks(options: { site?: string; base?: str
 			const href = node.properties.href;
 			if (typeof href !== 'string') return;
 			if (href.startsWith('/')) {
-				node.properties.href = applyBase(base, href);
+				const based = applyBase(base, href);
+				node.properties.href = options.trailingSlash ? withTrailingSlash(based) : based;
 				return;
 			}
 			if (!/^https?:\/\//.test(href)) return;

@@ -1,11 +1,14 @@
 import { getCollection } from 'astro:content';
 import config from 'virtual:lyvo-config';
 import { docUrl, docsForLocale } from './docs';
-import { absoluteUrl } from './seo';
+import { absoluteUrl, markdownPath } from './seo';
+import { joinUrl } from './routing';
+import { withBase } from './url';
 import { apiIndexHref, apiPageHref, readAllApiSpecs } from './openapi/model';
 import {
 	apiOverviewToMarkdown,
 	docToMarkdown,
+	endpointDescription,
 	endpointToMarkdown,
 	schemaPageToMarkdown
 } from './markdown';
@@ -56,21 +59,26 @@ async function collectPages(): Promise<SitePage[]> {
 	for (const spec of await readAllApiSpecs()) {
 		const section = 'API';
 		const href = (slug: string) => apiPageHref(spec, slug);
-		const link = (slug: string) => absoluteUrl(href(slug)) ?? href(slug);
+		const absolute = (path: string) => absoluteUrl(path) ?? path;
+		const full = withBase(joinUrl(config.api.root, spec.sub, 'llms-full.txt'));
 		pages.push({
 			path: apiIndexHref(spec),
 			title: spec.model.info.title,
 			description: spec.model.info.description,
 			section,
 			spec: spec.specId,
-			markdown: () => apiOverviewToMarkdown(spec, link, link('llms-full.txt'))
+			markdown: () =>
+				apiOverviewToMarkdown(
+					spec,
+					(slug) => absolute(markdownPath(href(slug))),
+					absolute(full)
+				)
 		});
 		for (const endpoint of [...spec.model.operations, ...spec.model.webhooks]) {
 			pages.push({
 				path: href(endpoint.slug),
 				title: endpoint.title,
-				description:
-					endpoint.summary ?? `${endpoint.method.toUpperCase()} ${endpoint.path}`,
+				description: endpointDescription(endpoint),
 				section,
 				nested: true,
 				spec: spec.specId,

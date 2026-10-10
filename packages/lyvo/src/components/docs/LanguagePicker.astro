@@ -3,7 +3,7 @@ import { Check, ChevronsUpDown, Globe } from '@lucide/astro';
 import config from 'virtual:lyvo-config';
 import { currentLocale, getTranslations } from '@lyvo/lib/docs';
 import { joinUrl } from '@lyvo/lib/routing';
-import { stripBase, withBase } from '@lyvo/lib/url';
+import { pageHref, stripBase } from '@lyvo/lib/url';
 import { t } from '@lyvo/lib/i18n';
 
 const pathname = stripBase(Astro.url.pathname);
@@ -22,7 +22,7 @@ const languages = [config.i18n.defaultLocale, ...config.i18n.locales.map((item) 
 	(code) => ({
 		code,
 		label: config.i18n.labels[code] ?? code,
-		href: withBase(joinUrl(code === config.i18n.defaultLocale ? '' : code, prefix, pageId)),
+		href: pageHref(joinUrl(code === config.i18n.defaultLocale ? '' : code, prefix, pageId)),
 		// Untranslated pages still work, they just show the default language.
 		fallback: pageId !== '' && !translated.has(code)
 	})

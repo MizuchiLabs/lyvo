@@ -8,6 +8,7 @@ import {
 	localeFromPath,
 	stripLocaleFromPath,
 	applyBase,
+	withTrailingSlash,
 	removeBase,
 	type RoutingInfo
 } from '../src/lib/routing';
@@ -116,5 +117,26 @@ describe('removeBase', () => {
 		expect(removeBase('/lyvo', '/lyvo')).toBe('/');
 		expect(removeBase('/lyvo', '/lyvo/')).toBe('/');
 		expect(removeBase('', '/docs')).toBe('/docs');
+	});
+});
+
+describe('withTrailingSlash', () => {
+	it('adds a slash to page paths', () => {
+		expect(withTrailingSlash('/docs/intro')).toBe('/docs/intro/');
+		expect(withTrailingSlash('/docs/intro/')).toBe('/docs/intro/');
+		expect(withTrailingSlash('/')).toBe('/');
+	});
+
+	it('keeps hashes and queries after the slash', () => {
+		expect(withTrailingSlash('/docs/intro#setup')).toBe('/docs/intro/#setup');
+		expect(withTrailingSlash('/docs/intro?tab=a#setup')).toBe('/docs/intro/?tab=a#setup');
+	});
+
+	it('leaves files and other links alone', () => {
+		expect(withTrailingSlash('/openapi.json')).toBe('/openapi.json');
+		expect(withTrailingSlash('/docs/intro.md')).toBe('/docs/intro.md');
+		expect(withTrailingSlash('https://example.com/x')).toBe('https://example.com/x');
+		expect(withTrailingSlash('//cdn.example.com/x')).toBe('//cdn.example.com/x');
+		expect(withTrailingSlash('#intro')).toBe('#intro');
 	});
 });

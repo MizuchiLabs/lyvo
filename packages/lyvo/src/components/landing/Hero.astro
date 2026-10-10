@@ -2,7 +2,7 @@
 import { ArrowRight } from '@lucide/astro';
 import LinkButton from '@lyvo/components/landing/LinkButton.astro';
 import InstallCommand from '@lyvo/components/landing/InstallCommand.astro';
-import { withBase } from '@lyvo/lib/url';
+import { pageHref } from '@lyvo/lib/url';
 
 interface Action {
 	label: string;
@@ -23,7 +23,7 @@ interface Props {
 
 const { badge, title, highlight, description, primary, secondary, install } = Astro.props;
 const badgeLabel = typeof badge === 'string' ? badge : badge?.label;
-const badgeHref = typeof badge === 'object' ? withBase(badge.href) : undefined;
+const badgeHref = typeof badge === 'object' ? pageHref(badge.href) : undefined;
 const BadgeTag = badgeHref ? 'a' : 'div';
 ---
 

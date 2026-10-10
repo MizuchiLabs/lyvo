@@ -2,7 +2,7 @@ import { z } from 'astro/zod';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { applyBase } from './lib/routing';
+import { applyBase, withTrailingSlash } from './lib/routing';
 
 const linkSchema = z.strictObject({
 	title: z.string(),
@@ -315,21 +315,31 @@ function normalizeSpecs(raw: LyvoOptions['openapi']): ApiSpecConfig[] {
 	});
 }
 
-// Config links are written as site paths ("/blog"). Prefix them with `base` once here.
-function baseSidebar(items: SidebarInput[] | undefined, base: string): SidebarInput[] | undefined {
+// Config links are written as site paths ("/blog"). Prefix them with `base` and
+// add the trailing slash once here.
+function linkSidebar(
+	items: SidebarInput[] | undefined,
+	link: (href: string) => string
+): SidebarInput[] | undefined {
 	return items?.map((item) =>
 		typeof item === 'string'
 			? item
 			: {
 					...item,
-					href: item.href ? applyBase(base, item.href) : undefined,
-					items: baseSidebar(item.items, base)
+					href: item.href ? link(item.href) : undefined,
+					items: linkSidebar(item.items, link)
 				}
 	);
 }
 
 export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike): LyvoConfig {
 	const base = (astroConfig.base ?? '').replace(/\/+$/, '');
+	const trailingSlash =
+		astroConfig.trailingSlash === 'always' ||
+		(astroConfig.trailingSlash !== 'never' &&
+			(astroConfig.build?.format ?? 'directory') === 'directory');
+	const link = (href: string) =>
+		trailingSlash ? withTrailingSlash(applyBase(base, href)) : applyBase(base, href);
 	const defaultLocale = raw.lang ?? 'en';
 	const locales: LocaleConfig[] = (raw.i18n?.locales ?? [])
 		.map((locale) =>
@@ -361,27 +371,24 @@ export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike)
 		description: raw.description,
 		site: astroConfig.site,
 		base,
-		trailingSlash:
-			astroConfig.trailingSlash === 'always' ||
-			(astroConfig.trailingSlash !== 'never' &&
-				(astroConfig.build?.format ?? 'directory') === 'directory'),
+		trailingSlash,
 		logo: raw.logo,
 		favicon: raw.favicon,
 		repo: raw.repo ? { url: raw.repo.url, branch: raw.repo.branch ?? 'main' } : undefined,
 		socials: raw.socials ?? [],
-		nav: (raw.nav ?? []).map((link) => ({ ...link, href: applyBase(base, link.href) })),
+		nav: (raw.nav ?? []).map((item) => ({ ...item, href: link(item.href) })),
 		footer: raw.footer && {
 			...raw.footer,
 			columns: raw.footer.columns?.map((column) => ({
 				...column,
-				links: column.links.map((link) => ({ ...link, href: applyBase(base, link.href) }))
+				links: column.links.map((item) => ({ ...item, href: link(item.href) }))
 			}))
 		},
 		docs: {
 			prefix: normalizePrefix(raw.docs?.prefix ?? '/docs'),
 			edit: raw.docs?.edit ?? true,
 			feedback: raw.docs?.feedback ?? true,
-			sidebar: baseSidebar(raw.docs?.sidebar, base)
+			sidebar: linkSidebar(raw.docs?.sidebar, link)
 		},
 		api: {
 			root: specs[0]?.root ?? '/api',

@@ -56,6 +56,22 @@ function hasUserFile(dir: string, pattern: RegExp): boolean {
 	}
 }
 
+// The sitemap only lists pages that are indexable and their own canonical.
+// That drops redirect stubs and untranslated locale pages, which point at the original.
+function isIndexable(outDir: string, base: string, url: string): boolean {
+	const pathname = decodeURIComponent(new URL(url).pathname).slice(base.length);
+	const file = [
+		path.join(outDir, pathname, 'index.html'),
+		path.join(outDir, `${pathname.replace(/\/+$/, '')}.html`)
+	].find((candidate) => fs.existsSync(candidate));
+	if (!file) return true;
+
+	const html = fs.readFileSync(file, 'utf-8');
+	if (html.includes('<meta name="robots" content="noindex"')) return false;
+	const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+	return !canonical || canonical.replace(/\/+$/, '') === url.replace(/\/+$/, '');
+}
+
 function hasTailwindPlugin(plugins: unknown[] = []): boolean {
 	return plugins.flat(Infinity).some((plugin) => {
 		const name = (plugin as { name?: string } | null)?.name;
@@ -79,6 +95,9 @@ function checkCustomCss(root: string, files: string[], logger: AstroIntegrationL
 }
 
 export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
+	// Set once the pages are written, before the sitemap integration filters them.
+	let outDir: string | null = null;
+
 	return {
 		name: 'lyvo',
 		hooks: {
@@ -128,7 +147,14 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 							rehypePlugins: [
 								...(userMarkdown.rehypePlugins ?? []),
 								rehypeSlug,
-								[rehypeExternalLinks, { site: options.site, base: options.base }],
+								[
+									rehypeExternalLinks,
+									{
+										site: options.site,
+										base: options.base,
+										trailingSlash: options.trailingSlash
+									}
+								],
 								[
 									rehypeAutolinkHeadings,
 									{
@@ -146,7 +172,7 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 							smartypants: userMarkdown.smartypants
 						})
 					},
-					integrations: buildIntegrations(astroConfig, options),
+					integrations: buildIntegrations(astroConfig, options, () => outDir),
 					vite: {
 						resolve: { alias: [{ find: '@lyvo', replacement: srcDir }] },
 						plugins: vitePlugins as never
@@ -193,6 +219,9 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 
 				injectScript('page-ssr', `import "${VIRTUAL_STYLES_ID}";`);
 				if (options.mermaid) injectScript('page', `import "@lyvo/lib/mermaid-client";`);
+			},
+			'astro:build:done': ({ dir }) => {
+				outDir = fileURLToPath(dir);
 			}
 		}
 	};
@@ -200,7 +229,8 @@ export default function lyvo(userOptions: LyvoOptions = {}): AstroIntegration {
 
 function buildIntegrations(
 	astroConfig: { integrations?: Array<{ name: string }> },
-	options: LyvoConfig
+	options: LyvoConfig,
+	outDir: () => string | null
 ) {
 	const existing = new Set(astroConfig.integrations?.map((integration) => integration.name));
 	const extra = [];
@@ -211,7 +241,11 @@ function buildIntegrations(
 		const { defaultLocale, locales } = options.i18n;
 		extra.push(
 			sitemap({
-				filter: (page) => !/\/404\/?$/.test(page),
+				filter: (page) => {
+					if (/\/404\/?$/.test(page)) return false;
+					const dir = outDir();
+					return dir ? isIndexable(dir, options.base, page) : true;
+				},
 				i18n:
 					locales.length > 0
 						? {
