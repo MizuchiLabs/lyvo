@@ -10,15 +10,15 @@
 		"astro": "astro"
 	},
 	"dependencies": {
-		"@lucide/astro": "^1.48.0",
+		"@lucide/astro": "^1.54.0",
 		"@mizuchilabs/lyvo": "workspace:*",
 		"@pagefind/component-ui": "^1.5.2",
-		"astro": "^7.3.5",
+		"astro": "^7.3.8",
 		"sharp": "^0.35.5"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.10",
 		"typescript": "^6.0.3",
-		"wrangler": "^4.143.0"
+		"wrangler": "^4.149.0"
 	}
 }
