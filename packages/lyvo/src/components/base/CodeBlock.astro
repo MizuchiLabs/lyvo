@@ -22,7 +22,7 @@ const themeProps = theme ? { theme } : { themes: themes ?? defaultThemes };
 ) : (
 	<div
 		class={cn(
-			'not-prose relative overflow-hidden rounded-lg border border-border/50 bg-muted/40 text-sm [.prose>&]:my-6 [&_pre]:p-4',
+			'code-block not-prose relative overflow-hidden rounded-lg border border-border/50 bg-muted/40 text-sm [.prose>&]:my-6 [&_pre]:p-4',
 			wrap && '[&_pre]:whitespace-pre-wrap [&_pre]:wrap-break-word',
 			className
 		)}

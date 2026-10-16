@@ -46,7 +46,7 @@ const enhanced = html.replaceAll(
 		))}
 	</div>
 
-	<div class="tabs-panels p-4 [&_pre]:-m-4 [&_pre]:rounded-none [&_pre]:border-0 [&_pre]:p-4">
+	<div class="tabs-panels p-4 [&_pre]:p-4">
 		<Fragment set:html={enhanced} />
 	</div>
 </div>
@@ -128,3 +128,12 @@ const enhanced = html.replaceAll(
 	initTabs();
 	document.addEventListener('astro:page-load', initTabs);
 </script>
+
+<style>
+	/* A lone code block fills its panel edge to edge */
+	.tabs-panels > :global([role='tabpanel'] > :is(pre, .code-block):only-child) {
+		margin: -1rem;
+		border: 0;
+		border-radius: 0;
+	}
+</style>
