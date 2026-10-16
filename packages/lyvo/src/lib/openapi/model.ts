@@ -68,5 +68,6 @@ export function apiPageHref(spec: LoadedApiSpec, slug: string): string {
 }
 
 export function schemaHref(spec: LoadedApiSpec, name: string): string {
-	return apiPageHref(spec, `schemas/${slugify(name)}`);
+	const slug = spec.model.schemas.find((schema) => schema.name === name)?.slug ?? slugify(name);
+	return apiPageHref(spec, `schemas/${slug}`);
 }

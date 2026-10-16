@@ -37,6 +37,48 @@ describe('buildSnippets', () => {
 		expect(code('java')).toContain(`.header("X-Key", "it's \\"quoted\\"")`);
 	});
 
+	it('opens Java text blocks and C# raw strings on their own line', () => {
+		expect(code('java')).toContain('ofString("""\n{\n');
+		expect(code('csharp')).toContain('new StringContent("""\n{\n');
+		expect(code('csharp')).toContain(
+			'\n}\n""", System.Text.Encoding.UTF8, "application/json")'
+		);
+	});
+
+	it('doubles backslashes inside Java text blocks', () => {
+		const java = buildSnippets({ ...request, body: { path: 'C:\\tmp' } }, ['java'])[0].code;
+		expect(java).toContain('"C:\\\\\\\\tmp"');
+	});
+
+	it('sends form bodies as form fields', () => {
+		const form = { ...request, mediaType: 'application/x-www-form-urlencoded' };
+		const [curl, js, python, go] = buildSnippets(form, ['curl', 'javascript', 'python', 'go']);
+		expect(curl.code).toContain(`--data-urlencode 'active=true'`);
+		expect(curl.code).not.toContain('application/json');
+		expect(js.code).toContain('new URLSearchParams(');
+		expect(python.code).toContain('data={');
+		expect(go.code).toContain('name=O%27Brien&active=true');
+		expect(go.code).toContain('"application/x-www-form-urlencoded"');
+	});
+
+	it('sends multipart bodies as form data', () => {
+		const multipart = { ...request, mediaType: 'multipart/form-data' };
+		const [curl, js, python, go, csharp, java] = buildSnippets(multipart, [
+			'curl',
+			'javascript',
+			'python',
+			'go',
+			'csharp',
+			'java'
+		]);
+		expect(curl.code).toContain(`-F 'name=O'\\''Brien'`);
+		expect(js.code).toContain('form.append("name", "O\'Brien");');
+		expect(python.code).toContain('"name": (None, "O\'Brien"),');
+		expect(go.code).toContain('form.WriteField("name", "O\'Brien")');
+		expect(csharp.code).toContain('new MultipartFormDataContent');
+		expect(java.code).toContain('multipart/form-data; boundary=lyvo-boundary');
+	});
+
 	it('omits the body when there is none', () => {
 		const get = buildSnippets({ ...request, method: 'get', body: undefined }, ['curl', 'go']);
 		expect(get[0].code).not.toContain('-d');

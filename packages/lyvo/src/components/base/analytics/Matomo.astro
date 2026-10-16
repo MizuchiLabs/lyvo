@@ -8,28 +8,33 @@ const { url, siteId, cookies = false } = Astro.props;
 ---
 
 <script is:inline define:vars={{ matomoUrl: url, matomoSiteId: siteId, matomoCookies: cookies }}>
-	var _paq = (window._paq = window._paq || []);
-	// Private by default: no cookies and Do Not Track is honored.
-	if (!matomoCookies) _paq.push(['disableCookies']);
-	_paq.push(['setDoNotTrack', true]);
-	_paq.push(['trackPageView']);
-	_paq.push(['enableLinkTracking']);
-	(function () {
-		var u = matomoUrl.endsWith('/') ? matomoUrl : matomoUrl + '/';
-		_paq.push(['setTrackerUrl', u + 'matomo.php']);
-		_paq.push(['setSiteId', String(matomoSiteId)]);
-		var d = document,
-			g = d.createElement('script'),
-			s = d.getElementsByTagName('script')[0];
-		g.async = true;
-		g.src = u + 'matomo.js';
-		s.parentNode.insertBefore(g, s);
-	})();
-
-	// Matomo has no built-in SPA support, replay pageviews on client-side navigation.
-	document.addEventListener('astro:after-swap', () => {
-		_paq.push(['setCustomUrl', window.location.pathname]);
-		_paq.push(['setDocumentTitle', document.title]);
+	// Head scripts can run again after a swap, don't track twice.
+	if (!window.__lyvoMatomo) {
+		window.__lyvoMatomo = true;
+		var _paq = (window._paq = window._paq || []);
+		// Private by default: no cookies and Do Not Track is honored.
+		if (!matomoCookies) _paq.push(['disableCookies']);
+		_paq.push(['setDoNotTrack', true]);
 		_paq.push(['trackPageView']);
-	});
+		_paq.push(['enableLinkTracking']);
+		(function () {
+			var u = matomoUrl.endsWith('/') ? matomoUrl : matomoUrl + '/';
+			_paq.push(['setTrackerUrl', u + 'matomo.php']);
+			_paq.push(['setSiteId', String(matomoSiteId)]);
+			var d = document,
+				g = d.createElement('script'),
+				s = d.getElementsByTagName('script')[0];
+			g.async = true;
+			g.src = u + 'matomo.js';
+			s.parentNode.insertBefore(g, s);
+		})();
+
+		// Matomo has no built-in SPA support, replay pageviews on client-side navigation.
+		// matomo.js swaps window._paq for its own object, so don't hold the queue array.
+		document.addEventListener('astro:after-swap', () => {
+			window._paq.push(['setCustomUrl', window.location.pathname]);
+			window._paq.push(['setDocumentTitle', document.title]);
+			window._paq.push(['trackPageView']);
+		});
+	}
 </script>

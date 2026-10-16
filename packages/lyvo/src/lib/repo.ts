@@ -30,7 +30,7 @@ export function getProvider(url?: string, override?: string): string {
 	if (lowercaseUrl.includes('github.com')) return 'github';
 	if (lowercaseUrl.includes('gitlab.com')) return 'gitlab';
 	if (lowercaseUrl.includes('gitea')) return 'gitea';
-	if (lowercaseUrl.includes('forgejo')) return 'forgejo';
+	if (lowercaseUrl.includes('forgejo') || lowercaseUrl.includes('codeberg.org')) return 'forgejo';
 	if (lowercaseUrl.includes('bitbucket.org')) return 'bitbucket';
 	return 'git'; // Fallback
 }

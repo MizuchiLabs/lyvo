@@ -75,14 +75,18 @@ const { apiKey, host, cookies = false } = Astro.props;
 	})(document, window.posthog || []);
 	// oxlint-enable
 	// Private by default: nothing stored on the device, no autocapture or recordings.
-	posthog.init(posthogKey, {
-		api_host: posthogHost,
-		capture_pageview: 'history_change',
-		persistence: posthogCookies ? 'localStorage+cookie' : 'memory',
-		person_profiles: 'identified_only',
-		autocapture: false,
-		disable_session_recording: true,
-		disable_surveys: true,
-		respect_dnt: true
-	});
+	// Head scripts can run again after a swap, init only once.
+	if (!window.__lyvoPosthog) {
+		window.__lyvoPosthog = true;
+		posthog.init(posthogKey, {
+			api_host: posthogHost,
+			capture_pageview: 'history_change',
+			persistence: posthogCookies ? 'localStorage+cookie' : 'memory',
+			person_profiles: 'identified_only',
+			autocapture: false,
+			disable_session_recording: true,
+			disable_surveys: true,
+			respect_dnt: true
+		});
+	}
 </script>

@@ -4,6 +4,24 @@ All notable changes to `@mizuchilabs/lyvo` are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Java and C# code samples with a request body didn't compile.
+- Code samples send form and multipart bodies as such, not as JSON.
+- The localized docs index dropped the locale when its first page wasn't translated.
+- Two operations or models with the same slug no longer share one page. The second gets a `-2` suffix and the build warns.
+- OpenAPI `input` paths resolve against the project root, not the working directory.
+- A spec prefix like `/apiv2` is rejected instead of being routed as `/api/v2`.
+- "Copy page" works in Safari.
+- A malformed external link no longer fails the build.
+- Matomo tracks client-side navigations after its script has loaded.
+- Codeberg repos get edit and issue links.
+
+### Changed
+- More UI strings are translatable: `copyCode`, `moreActions`, `server`, `authorization`, `username`, `password`, `body`.
+- `.mdoc` files are no longer picked up by the docs collection.
+
 ## [0.3.2] - 2026-09-30
 
 ### Changed

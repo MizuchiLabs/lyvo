@@ -6,7 +6,7 @@ import lyvoConfig from 'virtual:lyvo-config';
 export function defineLyvoCollections() {
 	const collections: Record<string, any> = {
 		docs: defineCollection({
-			loader: glob({ pattern: '**/*.{md,mdx,mdoc}', base: './src/content/docs' }),
+			loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
 			schema: docsSchema
 		})
 	};

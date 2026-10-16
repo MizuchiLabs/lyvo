@@ -5,6 +5,7 @@ import Analytics from '@lyvo/components/base/Analytics.astro';
 import config from 'virtual:lyvo-config';
 import { stripBase, withBase } from '@lyvo/lib/url';
 import { absoluteUrl, defaultOgImage, normalizePath, type Alternate } from '@lyvo/lib/seo';
+import { t } from '@lyvo/lib/i18n';
 
 interface Props {
 	title?: string;
@@ -61,6 +62,7 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="generator" content={Astro.generator} />
 	<meta name="description" content={resolvedDescription} />
+	<meta name="lyvo-copy-label" content={t('copyCode', lang)} />
 	{noindex && <meta name="robots" content="noindex" />}
 
 	<link rel="icon" type="image/svg+xml" href={withBase(config.favicon?.svg ?? '/favicon.svg')} />
@@ -185,7 +187,10 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 				const button = document.createElement('button');
 				button.className = 'copy-button';
 				button.innerHTML = copyIcon;
-				button.setAttribute('aria-label', 'Copy code to clipboard');
+				button.setAttribute(
+					'aria-label',
+					document.querySelector('meta[name="lyvo-copy-label"]')?.content ?? 'Copy code'
+				);
 				wrapper.appendChild(button);
 
 				button.addEventListener('click', async () => {
@@ -210,8 +215,12 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 			});
 		}
 
+		// Head scripts can run again after a swap from a page without them.
+		if (!window.__lyvoCopyButtons) {
+			window.__lyvoCopyButtons = true;
+			document.addEventListener('astro:page-load', setupCopyButtons);
+		}
 		setupCopyButtons();
-		document.addEventListener('astro:page-load', setupCopyButtons);
 	</script>
 	<!-- Scroll restoration for the inner scroll container -->
 	<script>

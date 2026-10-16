@@ -57,7 +57,7 @@ function placeholder(parameter: OpenAPIParameter): string {
 		{endpoint.servers.length > 1 ? (
 			<div class="space-y-1.5">
 				<label for={fieldId('server')} class={labelClass}>
-					Server
+					{t('server', locale)}
 				</label>
 				<select id={fieldId('server')} name="server" class={inputClass}>
 					{endpoint.servers.map((server) => (
@@ -71,20 +71,22 @@ function placeholder(parameter: OpenAPIParameter): string {
 
 		{authKind && auth && (
 			<fieldset class="space-y-1.5">
-				<legend class={labelClass}>Authorization ({auth.name})</legend>
+				<legend class={labelClass}>
+					{t('authorization', locale)} ({auth.name})
+				</legend>
 				{authKind === 'basic' ? (
 					<div class="grid grid-cols-2 gap-2">
 						<input
-							aria-label="Username"
-							placeholder="username"
+							aria-label={t('username', locale)}
+							placeholder={t('username', locale)}
 							data-auth="basic-user"
 							data-auth-key={auth.name}
 							class={inputClass}
 							autocomplete="off"
 						/>
 						<input
-							aria-label="Password"
-							placeholder="password"
+							aria-label={t('password', locale)}
+							placeholder={t('password', locale)}
 							type="password"
 							data-auth="basic-pass"
 							data-auth-key={auth.name}
@@ -140,7 +142,7 @@ function placeholder(parameter: OpenAPIParameter): string {
 		{jsonBody && (
 			<div class="space-y-1.5">
 				<label for={fieldId('body')} class={labelClass}>
-					Body ({jsonBody.mediaType})
+					{t('body', locale)} ({jsonBody.mediaType})
 				</label>
 				<textarea
 					id={fieldId('body')}

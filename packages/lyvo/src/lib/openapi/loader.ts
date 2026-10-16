@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import OpenAPISampler from 'openapi-sampler';
 import type { Loader } from 'astro/loaders';
@@ -65,7 +66,8 @@ export function normalizePathForSlug(value: string) {
 }
 
 export function makeSlug(method: string, apiPath: string, operationId?: string) {
-	if (operationId?.trim()) return slugify(operationId);
+	const fromId = operationId ? slugify(operationId) : '';
+	if (fromId) return fromId;
 	const pathPart = normalizePathForSlug(apiPath).replaceAll('/', '-');
 	return `${method}-${pathPart || 'root'}`;
 }
@@ -256,9 +258,9 @@ function mapOperation(ctx: OperationContext): OpenAPIOperation {
 			? (operation.servers ?? pathItem.servers).map(mapServer)
 			: ctx.servers;
 
-	const body =
-		requestBody?.content.find((item) => item.mediaType.includes('json'))?.example ??
-		requestBody?.content[0]?.example;
+	const bodyContent =
+		requestBody?.content.find((item) => item.mediaType.includes('json')) ??
+		requestBody?.content[0];
 
 	return {
 		id: `${method.toUpperCase()} ${apiPath}`,
@@ -283,7 +285,8 @@ function mapOperation(ctx: OperationContext): OpenAPIOperation {
 				method,
 				url: exampleUrl(servers[0]?.url ?? 'https://api.example.com', apiPath, parameters),
 				headers: exampleHeaders(security),
-				body
+				body: bodyContent?.example,
+				mediaType: bodyContent?.mediaType
 			},
 			ctx.snippets
 		),
@@ -357,13 +360,25 @@ function nameSchemas(document: Node): OpenAPISchemaEntry[] {
 			(schema as Node)[SCHEMA_NAME_KEY] = name;
 			return {
 				name,
-				slug: slugify(name),
+				slug: slugify(name) || 'schema',
 				description: (schema as Node).description,
 				schema: schema as Record<string, unknown>,
 				example: sample(schema as Node, document, 'response')
 			};
 		})
 		.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Slugs become page URLs, so a collision would silently drop a page.
+function dedupeSlugs(items: Array<{ slug: string }>, warn: (message: string) => void) {
+	const seen = new Set<string>();
+	for (const item of items) {
+		let slug = item.slug;
+		for (let n = 2; seen.has(slug); n++) slug = `${item.slug}-${n}`;
+		if (slug !== item.slug) warn(`Slug "${item.slug}" is used twice, renamed to "${slug}".`);
+		item.slug = slug;
+		seen.add(slug);
+	}
 }
 
 export interface OpenAPILoaderSpec {
@@ -373,8 +388,12 @@ export interface OpenAPILoaderSpec {
 	snippets: SnippetLanguage[];
 }
 
-export async function loadSpec(spec: OpenAPILoaderSpec): Promise<OpenAPIModel> {
-	const inputPath = path.resolve(spec.input);
+export async function loadSpec(
+	spec: OpenAPILoaderSpec,
+	root = process.cwd(),
+	warn: (message: string) => void = console.warn
+): Promise<OpenAPIModel> {
+	const inputPath = path.resolve(root, spec.input);
 	let document: Node;
 	try {
 		document = (await SwaggerParser.validate(inputPath, {
@@ -415,9 +434,11 @@ export async function loadSpec(spec: OpenAPILoaderSpec): Promise<OpenAPIModel> {
 
 	const operations = collect(document.paths, false);
 	const webhooks = collect(document.webhooks, true);
+	dedupeSlugs([...operations, ...webhooks], warn);
+	dedupeSlugs(schemas, warn);
 
 	return {
-		source: path.relative(process.cwd(), inputPath),
+		source: path.relative(root, inputPath),
 		openapi: document.openapi,
 		info: {
 			title: document.info?.title ?? 'API',
@@ -445,10 +466,12 @@ export async function loadSpec(spec: OpenAPILoaderSpec): Promise<OpenAPIModel> {
 export function openapiLoader(options: { specs: OpenAPILoaderSpec[] }): Loader {
 	return {
 		name: 'openapi-loader',
-		load: async ({ store, logger }) => {
+		load: async ({ store, logger, config }) => {
 			store.clear();
 			for (const spec of options.specs) {
-				const model = await loadSpec(spec);
+				const model = await loadSpec(spec, fileURLToPath(config.root), (message) =>
+					logger.warn(`"${spec.input}": ${message}`)
+				);
 				store.set({
 					id: `openapi:${spec.id}`,
 					data: model as unknown as Record<string, unknown>

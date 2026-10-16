@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { makeSlug, normalizePathForSlug, toTitle } from '../src/lib/openapi/loader';
 
@@ -67,6 +70,45 @@ describe('loadSpec', async () => {
 
 	it('groups webhooks last', () => {
 		expect(model.navigation.at(-1)?.title).toBe('Webhooks');
+	});
+
+	it('resolves the input against the given root', async () => {
+		const root = new URL('../../../apps/demo/', import.meta.url).pathname;
+		const fromRoot = await loadSpec(
+			{ id: 'x', input: 'public/openapi.json', groupBy: 'tag', snippets: [] },
+			root
+		);
+		expect(fromRoot.source).toBe('public/openapi.json');
+	});
+
+	it('renames colliding slugs instead of dropping pages', async () => {
+		const dir = mkdtempSync(path.join(tmpdir(), 'lyvo-'));
+		const input = path.join(dir, 'spec.json');
+		const ok = { responses: { '200': { description: 'ok' } } };
+		writeFileSync(
+			input,
+			JSON.stringify({
+				openapi: '3.1.0',
+				info: { title: 'T', version: '1' },
+				paths: {
+					'/a': { get: { ...ok, operationId: 'getThing' } },
+					'/b': { get: { ...ok, operationId: 'GetThing' } }
+				},
+				components: { schemas: { User: { type: 'object' }, user: { type: 'object' } } }
+			})
+		);
+		const warnings: string[] = [];
+		const spec = await loadSpec(
+			{ id: 'x', input, groupBy: 'tag', snippets: [] },
+			dir,
+			(message) => warnings.push(message)
+		);
+		expect(spec.operations.map((operation) => operation.slug)).toEqual([
+			'getthing',
+			'getthing-2'
+		]);
+		expect(spec.schemas.map((schema) => schema.slug).sort()).toEqual(['user', 'user-2']);
+		expect(warnings).toHaveLength(2);
 	});
 
 	it('fails loudly on a broken spec', async () => {

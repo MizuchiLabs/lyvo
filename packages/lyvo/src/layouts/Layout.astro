@@ -10,6 +10,7 @@ import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
 import { currentLocale } from '@lyvo/lib/docs';
 import { websiteJsonLd } from '@lyvo/lib/seo';
+import { t } from '@lyvo/lib/i18n';
 import { pageHref, stripBase } from '@lyvo/lib/url';
 
 interface Props {
@@ -75,7 +76,7 @@ const navItems =
 						{navItems.length > 0 && (
 							<details class="group relative md:hidden">
 								<summary
-									aria-label="Menu"
+									aria-label={t('menu', lang)}
 									class="flex size-9 cursor-pointer list-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
 								>
 									<Menu size={18} class="group-open:hidden" />

@@ -36,7 +36,7 @@ const itemClass =
 	</button>
 	<details class="group">
 		<summary
-			aria-label="More page actions"
+			aria-label={t('moreActions', locale)}
 			class="inline-flex h-8 cursor-pointer list-none items-center rounded-r-lg border border-l-0 border-border bg-background px-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
 		>
 			<ChevronDown size={14} class="transition-transform group-open:rotate-180" />
@@ -82,9 +82,21 @@ const itemClass =
 		const root = button?.closest<HTMLElement>('.page-actions');
 		if (!button || !root?.dataset.markdown) return;
 
-		const response = await fetch(root.dataset.markdown);
-		if (!response.ok) return;
-		await navigator.clipboard.writeText(await response.text());
+		// Safari drops user activation across an await, so pass a pending blob.
+		const text = fetch(root.dataset.markdown).then(async (response) => {
+			if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+			return new Blob([await response.text()], { type: 'text/plain' });
+		});
+		try {
+			if (typeof ClipboardItem !== 'undefined') {
+				await navigator.clipboard.write([new ClipboardItem({ 'text/plain': text })]);
+			} else {
+				await navigator.clipboard.writeText(await (await text).text());
+			}
+		} catch (error) {
+			console.error('[lyvo] copying the page failed', error);
+			return;
+		}
 		track('page_copy', { path: location.pathname });
 
 		const label = button.querySelector('[data-label]');

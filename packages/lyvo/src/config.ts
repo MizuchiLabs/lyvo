@@ -240,11 +240,18 @@ const UI_DEFAULTS: Record<string, string> = {
 	codeSamples: 'Code Samples',
 	exampleResponses: 'Example Responses',
 	copyPage: 'Copy page',
+	copyCode: 'Copy code to clipboard',
+	moreActions: 'More page actions',
 	copied: 'Copied',
 	viewMarkdown: 'View as Markdown',
 	openIn: 'Open in {name}',
 	schemas: 'Models',
 	tryIt: 'Try it',
+	server: 'Server',
+	authorization: 'Authorization',
+	username: 'Username',
+	password: 'Password',
+	body: 'Body',
 	send: 'Send',
 	sending: 'Sending...',
 	response: 'Response',
@@ -295,7 +302,7 @@ function normalizeSpecs(raw: LyvoOptions['openapi']): ApiSpecConfig[] {
 	const root = normalizePrefix(rawSpecs[0].prefix ?? '/api');
 	return rawSpecs.map((spec, index) => {
 		const prefix = normalizePrefix(spec.prefix ?? '/api');
-		if (!prefix.startsWith(root)) {
+		if (prefix !== root && !prefix.startsWith(`${root}/`)) {
 			throw new LyvoConfigError(
 				`All OpenAPI spec prefixes must share the root "${root}", got "${prefix}". ` +
 					`Use nested prefixes like "${root}" and "${root}/v2".`

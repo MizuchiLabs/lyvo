@@ -2,7 +2,7 @@ interface Node {
 	type: string;
 	lang?: string | null;
 	value?: string;
-	data?: Record<string, unknown>;
+	data?: unknown;
 	children?: Node[];
 }
 

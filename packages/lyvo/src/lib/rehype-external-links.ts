@@ -7,6 +7,14 @@ interface Node {
 	children?: Node[];
 }
 
+function originOf(href: string): string | null {
+	try {
+		return new URL(href).origin;
+	} catch {
+		return null;
+	}
+}
+
 function walk(node: Node, visit: (node: Node) => void) {
 	visit(node);
 	for (const child of node.children ?? []) walk(child, visit);
@@ -34,7 +42,8 @@ export default function rehypeExternalLinks(
 				return;
 			}
 			if (!/^https?:\/\//.test(href)) return;
-			if (ownOrigin && new URL(href).origin === ownOrigin) return;
+			const origin = originOf(href);
+			if (!origin || origin === ownOrigin) return;
 
 			const classes = node.properties.className;
 			node.properties.className = [

@@ -23,7 +23,7 @@ const { locale, slug } = Astro.params;
 async function resolveEntry(locale: string | null, slug: string | undefined) {
 	if (slug === undefined) {
 		const first = await getFirstDoc(locale);
-		if (first) return { redirect: docUrl(first.id), entry: null };
+		if (first) return { redirect: docUrl(first.id, locale), entry: null };
 	}
 	const { routed } = await getDocsHierarchy(locale);
 	return { redirect: null, entry: routed.find((doc) => docPageId(doc.id) === slug) ?? null };

@@ -42,8 +42,8 @@ jobs:
       - name: Set version from tag
         run: pnpm --filter @mizuchilabs/lyvo exec npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version
 
-      - name: Build
-        run: pnpm --filter @mizuchilabs/lyvo build
+      - name: Check
+        run: pnpm --filter @mizuchilabs/lyvo check
 
       - name: Publish
         run: pnpm --filter @mizuchilabs/lyvo publish --access public --no-git-checks --provenance

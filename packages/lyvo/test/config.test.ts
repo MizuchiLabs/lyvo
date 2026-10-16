@@ -97,6 +97,17 @@ describe('normalizeOptions', () => {
 		).toThrow(LyvoConfigError);
 	});
 
+	it('rejects prefixes that only share the root as a string prefix', () => {
+		expect(() =>
+			normalize({
+				openapi: [
+					{ input: 'a.json', prefix: '/api' },
+					{ input: 'b.json', prefix: '/apiv2' }
+				]
+			})
+		).toThrow(LyvoConfigError);
+	});
+
 	it('normalizes prefixes without leading slashes', () => {
 		expect(normalize({ docs: { prefix: 'reference/' } }).docs.prefix).toBe('/reference');
 	});
