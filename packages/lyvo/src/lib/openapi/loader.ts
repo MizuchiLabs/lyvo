@@ -351,13 +351,15 @@ function buildTags(document: Node, operations: OpenAPIOperation[]): OpenAPITag[]
 }
 
 // Dereferencing shares one object per component schema, so tagging it here
-// labels every place the schema is used.
-function nameSchemas(document: Node): OpenAPISchemaEntry[] {
+// labels every place the schema is used. An alias (a bare $ref to another
+// component) shares its target's object, so only the target is tagged.
+function nameSchemas(document: Node, raw: Node): OpenAPISchemaEntry[] {
 	const schemas = document.components?.schemas ?? {};
+	const rawSchemas: Node = raw.components?.schemas ?? {};
 	return Object.entries(schemas)
 		.filter(([, schema]) => schema && typeof schema === 'object')
 		.map(([name, schema]) => {
-			(schema as Node)[SCHEMA_NAME_KEY] = name;
+			if (!isComponentAlias(rawSchemas[name])) (schema as Node)[SCHEMA_NAME_KEY] = name;
 			return {
 				name,
 				slug: slugify(name) || 'schema',
@@ -367,6 +369,14 @@ function nameSchemas(document: Node): OpenAPISchemaEntry[] {
 			};
 		})
 		.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function isComponentAlias(schema: Node | undefined): boolean {
+	return (
+		typeof schema?.$ref === 'string' &&
+		schema.$ref.startsWith('#/components/schemas/') &&
+		Object.keys(schema).length === 1
+	);
 }
 
 // Slugs become page URLs, so a collision would silently drop a page.
@@ -394,8 +404,10 @@ export async function loadSpec(
 	warn: (message: string) => void = console.warn
 ): Promise<OpenAPIModel> {
 	const inputPath = path.resolve(root, spec.input);
+	let raw: Node;
 	let document: Node;
 	try {
+		raw = (await SwaggerParser.parse(inputPath)) as Node;
 		document = (await SwaggerParser.validate(inputPath, {
 			dereference: { circular: 'ignore' }
 		})) as Node;
@@ -404,7 +416,7 @@ export async function loadSpec(
 		throw new Error(`[lyvo] OpenAPI spec "${spec.input}" failed to load: ${reason}`);
 	}
 
-	const schemas = nameSchemas(document);
+	const schemas = nameSchemas(document, raw);
 	const servers: OpenAPIServer[] = (document.servers ?? []).map(mapServer);
 
 	const collect = (paths: Node | undefined, isWebhook: boolean) => {

@@ -56,6 +56,44 @@ describe('loadSpec', async () => {
 		expect(schemaName(planet?.schema)).toBe('Planet');
 	});
 
+	it('names an aliased schema after its target, not the alias', async () => {
+		const dir = mkdtempSync(path.join(tmpdir(), 'lyvo-'));
+		const input = path.join(dir, 'spec.json');
+		const ref = (name: string) => ({ $ref: `#/components/schemas/${name}` });
+		writeFileSync(
+			input,
+			JSON.stringify({
+				openapi: '3.0.0',
+				info: { title: 'T', version: '1' },
+				paths: {
+					'/pets': {
+						get: {
+							responses: {
+								'200': {
+									description: 'ok',
+									content: { 'application/json': { schema: ref('Pet') } }
+								}
+							}
+						}
+					}
+				},
+				components: {
+					schemas: {
+						// Aliases on both sides of the target, so neither order hides the bug.
+						Dog: ref('Animal'),
+						Animal: { type: 'object', properties: { name: { type: 'string' } } },
+						Pet: ref('Dog')
+					}
+				}
+			})
+		);
+		const spec = await loadSpec({ id: 'x', input, groupBy: 'tag', snippets: [] }, dir);
+
+		expect(spec.schemas.map((schema) => schema.name)).toEqual(['Animal', 'Dog', 'Pet']);
+		for (const schema of spec.schemas) expect(schemaName(schema.schema)).toBe('Animal');
+		expect(schemaName(spec.operations[0].responses[0].content[0].schema)).toBe('Animal');
+	});
+
 	it('resolves circular top-level refs in request bodies', () => {
 		const create = model.operations.find((operation) => operation.slug === 'createplanet');
 		const schema = create?.requestBody?.content[0].schema as Record<string, unknown>;
