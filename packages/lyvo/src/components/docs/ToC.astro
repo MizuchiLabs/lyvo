@@ -1,7 +1,6 @@
 ---
 import { TextAlignStart } from '@lucide/astro';
-import { t } from '@lyvo/lib/i18n';
-import { currentLocale } from '@lyvo/lib/docs';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	headings: { depth: number; slug: string; text: string }[];
@@ -9,14 +8,14 @@ interface Props {
 
 const { headings } = Astro.props;
 
-const locale = currentLocale(Astro.url.pathname);
+const { t } = getI18n(Astro.url);
 ---
 
 {headings.length > 0 && (
 	<div class="toc-desktop sticky top-20 z-10 hidden max-h-[calc(100vh-8rem)] w-64 shrink-0 overflow-y-auto text-muted-foreground select-none xl:block">
 		<p class="mb-2 flex items-center gap-2 text-foreground">
 			<TextAlignStart size={16} />
-			{t('onThisPage', locale)}
+			{t('onThisPage')}
 		</p>
 		<div class="relative flex px-2">
 			<div class="toc-mask pointer-events-none absolute top-0 left-1 h-full w-10">

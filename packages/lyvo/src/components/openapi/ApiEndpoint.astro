@@ -14,7 +14,7 @@ import Responses from '@lyvo/components/openapi/Responses.astro';
 import Authorization from '@lyvo/components/openapi/Authorization.astro';
 import EndpointPath from '@lyvo/components/openapi/EndpointPath.astro';
 import { ExternalLink } from '@lucide/astro';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	spec: LoadedApiSpec;
@@ -22,6 +22,7 @@ interface Props {
 }
 
 const { spec, slug } = Astro.props;
+const { t } = getI18n(Astro.url);
 const model = spec.model;
 
 const endpoint = findEndpoint(model, slug);

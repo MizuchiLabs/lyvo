@@ -17,9 +17,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A malformed external link no longer fails the build.
 - Matomo tracks client-side navigations after its script has loaded.
 - Codeberg repos get edit and issue links.
+- The notice on untranslated pages names the original language in the page's language ("Englisch", not "English").
+- API reference pages, the theme toggle, breadcrumbs, the footer and a few other places no longer have hardcoded English. Every UI string goes through `i18n.ui`.
+- Changelog dates follow the page language instead of always `en-US`.
+- Counts use plural forms, so a spec with one endpoint says "1 endpoint".
 
 ### Changed
-- More UI strings are translatable: `copyCode`, `moreActions`, `server`, `authorization`, `username`, `password`, `body`.
+- More UI strings are translatable: `copyCode`, `moreActions`, `server`, `authorization`, `username`, `password`, `body`, plus new keys for the API reference. All keys are listed in `src/lib/ui-strings.ts`.
+- Unknown `i18n.ui` keys fail the build. The unused `reference` key is gone.
+- `i18n.ui` strings can take plural forms, like `{ one: '{count} Endpunkt', other: '{count} Endpunkte' }`.
+- `lastUpdated` takes a `{date}` placeholder. Old values without it still render, with the date after the text.
+- Invalid locale codes like `pt_BR` fail the build instead of crashing pages that format dates.
+- Components read the locale from the URL. `PageHeader` and `BaseHead` no longer take `lang`, `ThemeSwitch` and `PageActions` no longer take `locale`.
 - `.mdoc` files are no longer picked up by the docs collection.
 
 ## [0.3.2] - 2026-09-30

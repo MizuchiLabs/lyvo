@@ -3,6 +3,7 @@ import { ChevronDown } from '@lucide/astro';
 import SchemaViewer from '@lyvo/components/openapi/SchemaViewer.astro';
 import type { OpenAPIMediaType, OpenAPIRequestBody } from '@lyvo/lib/openapi/types';
 import type { LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	requestBody?: OpenAPIRequestBody;
@@ -10,16 +11,17 @@ interface Props {
 }
 
 const { requestBody, spec } = Astro.props;
+const { t } = getI18n(Astro.url);
 
 if (!requestBody) return null;
 ---
 
 <section>
 	<div class="mb-4 flex items-center gap-2">
-		<h2 class="text-xl font-semibold tracking-tight">Request Body</h2>
+		<h2 class="text-xl font-semibold tracking-tight">{t('requestBody')}</h2>
 		{requestBody.required && (
 			<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
-				required
+				{t('required')}
 			</span>
 		)}
 	</div>
@@ -33,7 +35,7 @@ if (!requestBody) return null;
 			{requestBody.content.length > 1 ? (
 				<div class="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-3">
 					<span class="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-						Media Type
+						{t('mediaType')}
 					</span>
 					<div class="relative">
 						<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pr-8 pl-3 text-xs font-medium text-foreground ring-offset-background transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
@@ -60,7 +62,7 @@ if (!requestBody) return null;
 						{item.schema !== undefined ? (
 							<SchemaViewer schema={item.schema} spec={spec} />
 						) : (
-							<p class="text-xs text-muted-foreground italic">No schema defined.</p>
+							<p class="text-xs text-muted-foreground italic">{t('noSchema')}</p>
 						)}
 					</div>
 				))}

@@ -7,6 +7,7 @@ import type { OpenAPISchemaEntry } from '@lyvo/lib/openapi/types';
 import { baseType } from '@lyvo/lib/openapi/schema';
 import { markdownPath } from '@lyvo/lib/seo';
 import config from 'virtual:lyvo-config';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	spec: LoadedApiSpec;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const { spec, entry } = Astro.props;
+const { t } = getI18n(Astro.url);
 const markdown = config.llms ? markdownPath(schemaHref(spec, entry.name)) : undefined;
 
 const example = entry.example === undefined ? undefined : JSON.stringify(entry.example, null, 2);
@@ -49,7 +51,7 @@ const example = entry.example === undefined ? undefined : JSON.stringify(entry.e
 		<div class="border-t border-border bg-muted/10 lg:border-t-0 lg:border-l">
 			<div class="sticky top-14 p-4 sm:p-6 lg:p-8">
 				<h3 class="mb-4 text-sm font-semibold tracking-tight text-foreground/80">
-					Example
+					{t('example')}
 				</h3>
 				<CodeBlock code={example} lang="json" wrap={true} class="font-mono text-sm" />
 			</div>

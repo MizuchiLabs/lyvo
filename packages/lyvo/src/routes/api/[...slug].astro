@@ -12,7 +12,7 @@ import ApiEndpoint from '@lyvo/components/openapi/ApiEndpoint.astro';
 import SchemaPage from '@lyvo/components/openapi/SchemaPage.astro';
 import { joinUrl } from '@lyvo/lib/routing';
 import { endpointDescription, summarize } from '@lyvo/lib/markdown';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 
 type Page =
 	| { kind: 'overview'; spec: LoadedApiSpec }
@@ -41,6 +41,7 @@ export async function getStaticPaths() {
 }
 
 const { page } = Astro.props as { page: Page };
+const { t } = getI18n(Astro.url);
 const { spec } = page;
 const info = spec.model.info;
 const specCrumb = { title: info.title ?? spec.title, href: apiIndexHref(spec) };
@@ -51,7 +52,7 @@ const schema = page.kind === 'schema' ? findSchema(spec.model, page.slug) : null
 const title = endpoint?.title ?? schema?.name ?? info.title ?? spec.title;
 const description = endpoint
 	? endpointDescription(endpoint)
-	: summarize(schema?.description ?? info.description) || 'API reference.';
+	: summarize(schema?.description ?? info.description) || t('apiDescription');
 const crumbs =
 	page.kind === 'overview'
 		? []

@@ -5,12 +5,11 @@ import Analytics from '@lyvo/components/base/Analytics.astro';
 import config from 'virtual:lyvo-config';
 import { stripBase, withBase } from '@lyvo/lib/url';
 import { absoluteUrl, defaultOgImage, normalizePath, type Alternate } from '@lyvo/lib/seo';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	title?: string;
 	description?: string;
-	lang?: string;
 	/** Path or URL of the social image. Falls back to the site image. */
 	image?: string;
 	type?: 'website' | 'article';
@@ -26,7 +25,6 @@ interface Props {
 const {
 	title,
 	description,
-	lang = config.i18n.defaultLocale,
 	image = defaultOgImage(),
 	type = 'website',
 	canonical = Astro.url.pathname,
@@ -35,6 +33,8 @@ const {
 	jsonLd = [],
 	noindex = false
 } = Astro.props;
+
+const { lang, t } = getI18n(Astro.url);
 
 function pageTitle(): string {
 	let page = title;
@@ -50,7 +50,7 @@ function pageTitle(): string {
 
 const fullTitle = pageTitle();
 const resolvedDescription =
-	description ?? config.description ?? `Documentation for ${config.title}.`;
+	description ?? config.description ?? t('defaultDescription', { title: config.title });
 const canonicalUrl = absoluteUrl(normalizePath(canonical));
 const imageUrl = image ? absoluteUrl(image) : undefined;
 const ogLocale = lang.replace('-', '_');
@@ -62,7 +62,7 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="generator" content={Astro.generator} />
 	<meta name="description" content={resolvedDescription} />
-	<meta name="lyvo-copy-label" content={t('copyCode', lang)} />
+	<meta name="lyvo-copy-label" content={t('copyCode')} />
 	{noindex && <meta name="robots" content="noindex" />}
 
 	<link rel="icon" type="image/svg+xml" href={withBase(config.favicon?.svg ?? '/favicon.svg')} />

@@ -1,5 +1,6 @@
 ---
 import { ChevronRight } from '@lucide/astro';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Heading {
 	depth: number;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const { headings, title, section } = Astro.props;
+const { t } = getI18n(Astro.url);
 const radius = 9;
 const circumference = 2 * Math.PI * radius;
 ---
@@ -100,7 +102,7 @@ const circumference = 2 * Math.PI * radius;
 						</a>
 					))
 				) : (
-					<span class="text-sm text-muted-foreground">No headings found.</span>
+					<span class="text-sm text-muted-foreground">{t('noHeadings')}</span>
 				)}
 			</div>
 		</div>

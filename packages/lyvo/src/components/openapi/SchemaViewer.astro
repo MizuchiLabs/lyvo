@@ -2,6 +2,7 @@
 import { baseType, objectShape, schemaName, typeLabel } from '@lyvo/lib/openapi/schema';
 import type { LoadedApiSpec } from '@lyvo/lib/openapi/model';
 import { schemaHref } from '@lyvo/lib/openapi/model';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	schema: any;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const { schema, spec, name, required = false, level = 0 } = Astro.props;
+const { t } = getI18n(Astro.url);
 
 if (!schema) return null;
 
@@ -38,7 +40,7 @@ const showItems = Boolean(
 
 function optionLabel(option: any, index: number): string {
 	const label = typeLabel(option);
-	return label && label !== 'any' && label !== 'object' ? label : `Option ${index + 1}`;
+	return label && label !== 'any' && label !== 'object' ? label : t('option', { n: index + 1 });
 }
 
 const typeColor = {
@@ -83,12 +85,12 @@ const badgeColor = typeColor[kind] || typeColor.any;
 
 				{required && (
 					<span class="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
-						Required
+						{t('required')}
 					</span>
 				)}
 				{schema.default !== undefined && (
 					<span class="rounded border border-border bg-muted/30 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-muted-foreground">
-						Default: {String(schema.default)}
+						{t('defaultValue', { value: String(schema.default) })}
 					</span>
 				)}
 			</div>
@@ -108,7 +110,7 @@ const badgeColor = typeColor[kind] || typeColor.any;
 
 	{schema.enum && (
 		<div class="flex flex-wrap items-center gap-1 text-xs">
-			<span class="mr-1 font-medium text-muted-foreground">Enum:</span>
+			<span class="mr-1 font-medium text-muted-foreground">{t('enumValues')}</span>
 			{schema.enum.map((v: any) => (
 				<span class="rounded border border-border bg-muted/50 px-1.5 py-0.5">
 					{typeof v === 'string' ? `"${v}"` : String(v)}
@@ -119,7 +121,7 @@ const badgeColor = typeColor[kind] || typeColor.any;
 
 	{schema.const !== undefined && (
 		<div class="flex flex-wrap gap-1 text-xs">
-			<span class="mr-1 font-medium text-muted-foreground">Const:</span>
+			<span class="mr-1 font-medium text-muted-foreground">{t('constValue')}</span>
 			<code class="rounded border border-border bg-emerald-500/10 px-1.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400">
 				{String(schema.const)}
 			</code>
@@ -129,7 +131,7 @@ const badgeColor = typeColor[kind] || typeColor.any;
 	{expand && (schema.oneOf || schema.anyOf) && (
 		<div class="space-y-1.5">
 			<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-				{schema.oneOf ? 'One of' : 'Any of'}
+				{t(schema.oneOf ? 'oneOf' : 'anyOf')}
 			</p>
 			{(schema.oneOf ?? schema.anyOf).map((option: any, i: number) => (
 				<Astro.self
@@ -146,7 +148,7 @@ const badgeColor = typeColor[kind] || typeColor.any;
 	{expand && schema.additionalProperties && typeof schema.additionalProperties === 'object' && (
 		<div class="space-y-1.5">
 			<p class="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-				Map value
+				{t('mapValue')}
 			</p>
 			<Astro.self
 				schema={schema.additionalProperties}

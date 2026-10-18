@@ -2,7 +2,7 @@ import config from 'virtual:lyvo-config';
 import { joinUrl } from './routing';
 import { pageHref } from './url';
 import { readAllApiSpecs, type LoadedApiSpec } from './openapi/model';
-import { t } from './i18n';
+import { translator } from './i18n';
 
 /** A top-level area of the docs, switched with the section picker. */
 export interface Section {
@@ -16,6 +16,7 @@ export interface Section {
 }
 
 export async function getSections(locale: string | null): Promise<Section[]> {
+	const t = translator(locale ?? config.i18n.defaultLocale);
 	const docsHome =
 		locale && locale !== config.i18n.defaultLocale
 			? pageHref(joinUrl(locale, config.docs.prefix))
@@ -24,8 +25,8 @@ export async function getSections(locale: string | null): Promise<Section[]> {
 	const sections: Section[] = [
 		{
 			id: 'docs',
-			title: t('guides', locale),
-			description: t('guidesDescription', locale),
+			title: t('guides'),
+			description: t('guidesDescription'),
 			icon: 'book-open',
 			href: docsHome
 		}
@@ -37,7 +38,7 @@ export async function getSections(locale: string | null): Promise<Section[]> {
 		sections.push({
 			id: `api-${spec.specId}`,
 			title: spec.title,
-			description: `v${spec.model.info.version} · ${t('endpointCount', locale).replace('{count}', String(endpoints))}`,
+			description: `v${spec.model.info.version} · ${t('endpointCount', { count: endpoints })}`,
 			icon: 'braces',
 			href: pageHref(joinUrl(config.api.root, spec.sub)),
 			spec

@@ -1,12 +1,14 @@
 ---
 import fs from 'node:fs';
 import path from 'node:path';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	url?: string;
 }
 
 const { url } = Astro.props;
+const { lang, t } = getI18n(Astro.url);
 
 let changelog = '';
 
@@ -34,7 +36,7 @@ while ((match = versionRegex.exec(changelog)) !== null) {
 	let date = '';
 	if (match[2]) {
 		try {
-			date = new Date(match[2]).toLocaleDateString('en-US', {
+			date = new Date(match[2]).toLocaleDateString(lang, {
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric'
@@ -120,7 +122,5 @@ function parseInlineCode(text: string) {
 		</div>
 	))}
 
-	{releases.length === 0 && (
-		<div class="pl-8 text-muted-foreground">No releases found in CHANGELOG.md</div>
-	)}
+	{releases.length === 0 && <div class="pl-8 text-muted-foreground">{t('noReleases')}</div>}
 </div>

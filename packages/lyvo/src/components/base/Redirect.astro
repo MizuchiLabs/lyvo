@@ -1,7 +1,6 @@
 ---
 import { ClientRouter } from 'astro:transitions';
-import config from 'virtual:lyvo-config';
-import { currentLocale } from '@lyvo/lib/docs';
+import { getI18n } from '@lyvo/lib/i18n';
 import { absoluteUrl } from '@lyvo/lib/seo';
 
 interface Props {
@@ -9,7 +8,7 @@ interface Props {
 }
 
 const { to } = Astro.props;
-const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
+const { lang, t } = getI18n(Astro.url);
 ---
 
 <!doctype html>
@@ -17,7 +16,7 @@ const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
 	<head>
 		<meta charset="utf-8" />
 		<ClientRouter />
-		<title>Redirecting...</title>
+		<title>{t('redirecting')}</title>
 		<meta name="robots" content="noindex" />
 		<link rel="canonical" href={absoluteUrl(to) ?? to} />
 	</head>

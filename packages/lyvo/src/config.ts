@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { applyBase, withTrailingSlash } from './lib/routing';
+import { UI_DEFAULTS, type UiKey, type UiStrings } from './lib/ui-strings';
 
 const linkSchema = z.strictObject({
 	title: z.string(),
@@ -54,6 +55,25 @@ const analyticsSchema = z.strictObject({
 		.optional()
 });
 
+const uiStringSchema = z.union([
+	z.string(),
+	z.strictObject({
+		zero: z.string().optional(),
+		one: z.string().optional(),
+		two: z.string().optional(),
+		few: z.string().optional(),
+		many: z.string().optional(),
+		other: z.string()
+	})
+]);
+
+// Built from the defaults so a misspelled key fails the build like any other option.
+const uiStringsSchema = z.strictObject(
+	Object.fromEntries(
+		Object.keys(UI_DEFAULTS).map((key) => [key, uiStringSchema.optional()])
+	) as Record<UiKey, z.ZodOptional<typeof uiStringSchema>>
+);
+
 export const LyvoOptionsSchema = z.strictObject({
 	title: z.string().optional(),
 	description: z.string().optional(),
@@ -94,7 +114,7 @@ export const LyvoOptionsSchema = z.strictObject({
 					z.union([z.string(), z.strictObject({ code: z.string(), label: z.string() })])
 				)
 				.optional(),
-			ui: z.record(z.string(), z.record(z.string(), z.string())).optional()
+			ui: z.record(z.string(), uiStringsSchema).optional()
 		})
 		.optional(),
 	og: z
@@ -164,7 +184,7 @@ export interface LyvoConfig {
 		defaultLocale: string;
 		locales: LocaleConfig[];
 		labels: Record<string, string>;
-		ui: Record<string, Record<string, string>>;
+		ui: Record<string, UiStrings>;
 	};
 	og: {
 		generate: boolean;
@@ -202,61 +222,15 @@ function localeLabel(code: string, configured?: string): string {
 	}
 }
 
-const UI_DEFAULTS: Record<string, string> = {
-	search: 'Search',
-	onThisPage: 'On this page',
-	lastUpdated: 'Last updated on',
-	helpful: 'Was this page helpful?',
-	yes: 'Yes',
-	no: 'No',
-	thanks: 'Thank you for your feedback!',
-	feedbackQuestion: 'What was missing or unclear?',
-	feedbackPlaceholder: 'Optional. Please leave out personal data.',
-	skip: 'Skip',
-	openIssue: 'Open an issue',
-	orOpenIssue: 'Or open an issue',
-	editPage: 'Edit page',
-	previous: 'Previous',
-	next: 'Next',
-	guides: 'Guides',
-	guidesDescription: 'Learn the concepts',
-	endpointCount: '{count} endpoints',
-	fallbackNotice: 'This page is not available in {language} yet. Showing the {original} version.',
-	notTranslated: 'Not translated',
-	theme: 'Theme',
-	themeLight: 'Light',
-	themeDark: 'Dark',
-	themeSystem: 'System',
-	menu: 'Menu',
-	skipToContent: 'Skip to content',
-	close: 'Close',
-	reference: 'Reference',
-	overview: 'Overview',
-	notFoundTitle: 'Page not found',
-	notFoundText: 'This page does not exist or has been moved.',
-	backHome: 'Back to home',
-	language: 'Language',
-	externalDocs: 'Read external documentation',
-	codeSamples: 'Code Samples',
-	exampleResponses: 'Example Responses',
-	copyPage: 'Copy page',
-	copyCode: 'Copy code to clipboard',
-	moreActions: 'More page actions',
-	copied: 'Copied',
-	viewMarkdown: 'View as Markdown',
-	openIn: 'Open in {name}',
-	schemas: 'Models',
-	tryIt: 'Try it',
-	server: 'Server',
-	authorization: 'Authorization',
-	username: 'Username',
-	password: 'Password',
-	body: 'Body',
-	send: 'Send',
-	sending: 'Sending...',
-	response: 'Response',
-	requestFailed: 'Request failed. The API may not allow cross-origin requests from this site.'
-};
+// Intl throws on invalid tags at render time, so catch them here instead.
+function isLanguageTag(code: string): boolean {
+	try {
+		Intl.getCanonicalLocales(code);
+		return true;
+	} catch {
+		return false;
+	}
+}
 
 function resolveOgFontPaths(): string[] {
 	try {
@@ -356,17 +330,20 @@ export function normalizeOptions(raw: LyvoOptions, astroConfig: AstroConfigLike)
 		)
 		.filter((locale) => locale.code !== defaultLocale);
 
-	for (const locale of locales) {
-		if (locale.code.includes('/')) {
-			throw new LyvoConfigError(`Locale code "${locale.code}" must not contain slashes.`);
+	const codes = [defaultLocale, ...locales.map((locale) => locale.code)];
+	for (const code of codes) {
+		if (!isLanguageTag(code)) {
+			throw new LyvoConfigError(
+				`Locale code "${code}" is not a valid language tag. Use codes like "de" or "pt-BR".`
+			);
 		}
 	}
 
 	const labels: Record<string, string> = { [defaultLocale]: localeLabel(defaultLocale) };
 	for (const locale of locales) labels[locale.code] = locale.label;
 
-	const ui: Record<string, Record<string, string>> = {};
-	for (const code of [defaultLocale, ...locales.map((locale) => locale.code)]) {
+	const ui: Record<string, UiStrings> = {};
+	for (const code of codes) {
 		ui[code] = { ...UI_DEFAULTS, ...raw.i18n?.ui?.[code] };
 	}
 

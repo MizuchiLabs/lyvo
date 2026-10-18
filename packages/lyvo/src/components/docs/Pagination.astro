@@ -2,8 +2,8 @@
 import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import Feedback from '@lyvo/components/docs/Feedback.astro';
 import EditPageLink from '@lyvo/components/docs/EditPageLink.astro';
-import { getPrevNextDocs, docUrl, currentLocale } from '@lyvo/lib/docs';
-import { t } from '@lyvo/lib/i18n';
+import { getPrevNextDocs, docUrl } from '@lyvo/lib/docs';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	entry?: any;
@@ -11,7 +11,7 @@ interface Props {
 const { entry } = Astro.props;
 
 let prevDoc, nextDoc;
-const locale = currentLocale(Astro.url.pathname);
+const { locale, t } = getI18n(Astro.url);
 if (entry) {
 	const res = await getPrevNextDocs(entry.id, locale);
 	prevDoc = res.prevDoc;
@@ -38,7 +38,7 @@ if (entry) {
 							size={16}
 							class="transition-transform duration-300 group-hover:-translate-x-1"
 						/>
-						{t('previous', locale)}
+						{t('previous')}
 					</div>
 					<div class="transition-colors">
 						<p class="line-clamp-1 text-base font-semibold transition-colors group-hover:text-primary">
@@ -61,7 +61,7 @@ if (entry) {
 					class="group flex flex-col items-end gap-2 rounded-xl border border-border bg-card p-5 text-right text-card-foreground transition-all duration-300 hover:border-primary/30 hover:bg-accent/50 hover:shadow-md dark:hover:bg-muted/20"
 				>
 					<div class="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-						{t('next', locale)}
+						{t('next')}
 						<ChevronRight
 							size={16}
 							class="transition-transform duration-300 group-hover:translate-x-1"

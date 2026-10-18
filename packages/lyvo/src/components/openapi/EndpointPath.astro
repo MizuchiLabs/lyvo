@@ -1,6 +1,7 @@
 ---
 import { Webhook, Copy, Check } from '@lucide/astro';
 import type { HttpMethod, OpenAPIOperation } from '@lyvo/lib/openapi/types';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	endpoint: OpenAPIOperation;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const { endpoint, isWebhook } = Astro.props;
+const { t } = getI18n(Astro.url);
 
 const methodColor = {
 	get: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5',
@@ -55,8 +57,8 @@ const fullUrl = `${baseUrl}${endpoint.path}`;
 			type="button"
 			class="api-copy-btn inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted-foreground/20 hover:text-foreground"
 			data-url={fullUrl}
-			aria-label="Copy endpoint URL"
-			title="Copy URL"
+			aria-label={t('copyUrl')}
+			title={t('copyUrl')}
 		>
 			<Copy size={14} class="copy-icon" />
 			<Check size={14} class="check-icon hidden text-emerald-500" />

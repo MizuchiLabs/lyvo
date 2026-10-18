@@ -1,15 +1,14 @@
 ---
 import { Play, LoaderCircle } from '@lucide/astro';
 import type { OpenAPIOperation, OpenAPIParameter } from '@lyvo/lib/openapi/types';
-import { t } from '@lyvo/lib/i18n';
-import { currentLocale } from '@lyvo/lib/docs';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	endpoint: OpenAPIOperation;
 }
 
 const { endpoint } = Astro.props;
-const locale = currentLocale(Astro.url.pathname);
+const { t } = getI18n(Astro.url);
 
 // Browsers can't set cookies on cross-origin fetches, so cookie params are left out.
 const parameters = endpoint.parameters.filter((parameter) => parameter.in !== 'cookie');
@@ -42,7 +41,7 @@ function placeholder(parameter: OpenAPIParameter): string {
 <details class="playground group rounded-xl border border-border bg-card shadow-sm">
 	<summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold select-none hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
 		<Play size={14} class="text-primary" />
-		{t('tryIt', locale)}
+		{t('tryIt')}
 	</summary>
 
 	<form
@@ -50,14 +49,16 @@ function placeholder(parameter: OpenAPIParameter): string {
 		data-astro-reload
 		data-method={endpoint.method.toUpperCase()}
 		data-path={endpoint.path}
-		data-sending={t('sending', locale)}
-		data-failed={t('requestFailed', locale)}
+		data-sending={t('sending')}
+		data-failed={t('requestFailed')}
+		data-error={t('error')}
+		data-empty={t('emptyBody')}
 		class="space-y-4 border-t border-border p-4"
 	>
 		{endpoint.servers.length > 1 ? (
 			<div class="space-y-1.5">
 				<label for={fieldId('server')} class={labelClass}>
-					{t('server', locale)}
+					{t('server')}
 				</label>
 				<select id={fieldId('server')} name="server" class={inputClass}>
 					{endpoint.servers.map((server) => (
@@ -72,21 +73,21 @@ function placeholder(parameter: OpenAPIParameter): string {
 		{authKind && auth && (
 			<fieldset class="space-y-1.5">
 				<legend class={labelClass}>
-					{t('authorization', locale)} ({auth.name})
+					{t('authorization')} ({auth.name})
 				</legend>
 				{authKind === 'basic' ? (
 					<div class="grid grid-cols-2 gap-2">
 						<input
-							aria-label={t('username', locale)}
-							placeholder={t('username', locale)}
+							aria-label={t('username')}
+							placeholder={t('username')}
 							data-auth="basic-user"
 							data-auth-key={auth.name}
 							class={inputClass}
 							autocomplete="off"
 						/>
 						<input
-							aria-label={t('password', locale)}
-							placeholder={t('password', locale)}
+							aria-label={t('password')}
+							placeholder={t('password')}
 							type="password"
 							data-auth="basic-pass"
 							data-auth-key={auth.name}
@@ -96,9 +97,11 @@ function placeholder(parameter: OpenAPIParameter): string {
 					</div>
 				) : (
 					<input
-						aria-label={authKind === 'apikey' ? (auth.paramName ?? auth.name) : 'Token'}
+						aria-label={
+							authKind === 'apikey' ? (auth.paramName ?? auth.name) : t('token')
+						}
 						placeholder={
-							authKind === 'apikey' ? (auth.paramName ?? auth.name) : 'token'
+							authKind === 'apikey' ? (auth.paramName ?? auth.name) : t('token')
 						}
 						type="password"
 						data-auth={authKind}
@@ -123,7 +126,7 @@ function placeholder(parameter: OpenAPIParameter): string {
 							<span class="font-mono text-foreground">{parameter.name}</span>
 							<span class="ml-1 opacity-70">
 								{parameter.in}
-								{parameter.required && ' · required'}
+								{parameter.required && ` · ${t('required')}`}
 							</span>
 						</label>
 						<input
@@ -142,7 +145,7 @@ function placeholder(parameter: OpenAPIParameter): string {
 		{jsonBody && (
 			<div class="space-y-1.5">
 				<label for={fieldId('body')} class={labelClass}>
-					{t('body', locale)} ({jsonBody.mediaType})
+					{t('body')} ({jsonBody.mediaType})
 				</label>
 				<textarea
 					id={fieldId('body')}
@@ -160,12 +163,12 @@ function placeholder(parameter: OpenAPIParameter): string {
 		>
 			<Play size={14} data-icon="idle" />
 			<LoaderCircle size={14} data-icon="busy" class="hidden animate-spin" />
-			<span data-label>{t('send', locale)}</span>
+			<span data-label>{t('send')}</span>
 		</button>
 
 		<div data-result hidden class="space-y-2">
 			<div class="flex items-center gap-3 text-xs">
-				<span class="font-medium text-muted-foreground">{t('response', locale)}</span>
+				<span class="font-medium text-muted-foreground">{t('response')}</span>
 				<span
 					data-status
 					class="rounded-md border px-2 py-0.5 font-mono font-semibold"
@@ -275,13 +278,13 @@ function placeholder(parameter: OpenAPIParameter): string {
 					? 'border-primary/30 text-primary'
 					: 'border-destructive/40 text-destructive'
 			}`;
-			output.textContent = pretty || '(empty body)';
+			output.textContent = pretty || (form.dataset.empty ?? '');
 			track('playground_request', {
 				endpoint: `${form.dataset.method} ${form.dataset.path}`,
 				status: response.status
 			});
 		} catch (error) {
-			status.textContent = 'Error';
+			status.textContent = form.dataset.error ?? '';
 			status.className =
 				'rounded-md border border-destructive/40 px-2 py-0.5 font-mono font-semibold text-destructive';
 			output.textContent = `${form.dataset.failed}\n\n${error instanceof Error ? error.message : String(error)}`;

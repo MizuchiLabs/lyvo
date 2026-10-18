@@ -2,6 +2,7 @@
 import { ChevronRight, Slash } from '@lucide/astro';
 import type { Crumb } from '@lyvo/lib/docs';
 import { withBase } from '@lyvo/lib/url';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	title?: string;
@@ -9,13 +10,14 @@ interface Props {
 }
 
 const { title, trail = [] } = Astro.props;
+const { t } = getI18n(Astro.url);
 ---
 
 <nav
-	aria-label="Breadcrumb"
+	aria-label={t('breadcrumb')}
 	class="hidden items-center gap-2 text-sm text-muted-foreground xl:flex"
 >
-	<a href={withBase('/')} class="transition-colors hover:text-foreground" aria-label="Home">
+	<a href={withBase('/')} class="transition-colors hover:text-foreground" aria-label={t('home')}>
 		<Slash size={14} class="mr-2" />
 	</a>
 	{trail.map((crumb) => (

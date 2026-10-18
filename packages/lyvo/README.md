@@ -153,7 +153,7 @@ Files in `customCss` join the theme's Tailwind root, so token overrides work dir
 | `openapi[].groupBy`    | `'tag' \| 'path'`                                                         | Sidebar grouping. Default `'tag'`.                                                                                                                            |
 | `openapi[].snippets`   | `Array<'curl' \| 'javascript' \| 'python' \| 'go' \| 'csharp' \| 'java'>` | Code sample languages, in order. Default `curl`, `javascript`, `python`, `go`.                                                                                |
 | `openapi[].playground` | `boolean`                                                                 | Show the "Try it" panel. Default `true`. Requests run in the browser, so the API must allow CORS from your docs origin.                                       |
-| `i18n`                 | `{locales?, ui?}`                                                         | Extra locales (content in `src/content/docs/<code>/`) and translated UI strings per locale.                                                                   |
+| `i18n`                 | `{locales?, ui?}`                                                         | Extra locales (content in `src/content/docs/<code>/`) and translated UI strings per locale. See [UI strings](#ui-strings).                                    |
 | `og`                   | `{generate?, image?}`                                                     | `generate` (default `true`) renders per-page images. `image` sets a static site image instead.                                                                |
 | `llms`                 | `boolean`                                                                 | `llms.txt`, `llms-full.txt`, Markdown twins and page actions. Default `true`.                                                                                 |
 | `mermaid`              | `boolean`                                                                 | Render ` ```mermaid ` code blocks as diagrams. Mermaid only loads on pages that have one. Default `true`.                                                     |
@@ -305,7 +305,26 @@ src/content/docs/
     └── introduction.mdx    ← German, served at /de/docs/introduction
 ```
 
-UI strings ("On this page", "Was this page helpful?", etc.) come from the `i18n.ui` config. A language switcher appears in the sidebar footer when locales are configured. API reference pages are language-neutral.
+A language switcher appears in the sidebar footer when locales are configured. API reference pages are language-neutral and use the default locale.
+
+### UI strings
+
+UI strings ("On this page", "Was this page helpful?", etc.) come from `i18n.ui`, keyed by locale. The default locale works too, so a German-only site sets `lang: 'de'` and translates `ui.de`. Keys you leave out stay English. All keys and their English text are in [`src/lib/ui-strings.ts`](./src/lib/ui-strings.ts). An unknown key fails the build.
+
+```js
+i18n: {
+	locales: ['de'],
+	ui: {
+		de: {
+			lastUpdated: 'Zuletzt aktualisiert am {date}',
+			endpointCount: { one: '{count} Endpunkt', other: '{count} Endpunkte' }
+		}
+	}
+}
+```
+
+- `{name}` placeholders get filled in when the page renders. Keep them in your translation, but move them wherever the language needs them.
+- Strings with a `{count}` can take plural forms (`zero`, `one`, `two`, `few`, `many`, `other`), picked with `Intl.PluralRules`. `other` is required, a plain string works too.
 
 Editing the OpenAPI spec needs a dev server restart. Docs content hot-reloads as usual.
 

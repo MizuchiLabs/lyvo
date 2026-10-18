@@ -1,14 +1,14 @@
 ---
 import { Check, ChevronDown, Copy, FileText, ExternalLink } from '@lucide/astro';
 import { absoluteUrl } from '@lyvo/lib/seo';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	markdown: string;
-	locale?: string | null;
 }
 
-const { markdown, locale = null } = Astro.props;
+const { markdown } = Astro.props;
+const { t } = getI18n(Astro.url);
 
 const markdownUrl = absoluteUrl(markdown) ?? new URL(markdown, Astro.url).href;
 const prompt = encodeURIComponent(`Read ${markdownUrl}, I want to ask questions about it.`);
@@ -23,7 +23,7 @@ const itemClass =
 <div
 	class="page-actions not-prose relative inline-flex shrink-0 items-center"
 	data-markdown={markdown}
-	data-copied={t('copied', locale)}
+	data-copied={t('copied')}
 >
 	<button
 		type="button"
@@ -32,11 +32,11 @@ const itemClass =
 	>
 		<Copy size={14} data-icon="copy" />
 		<Check size={14} data-icon="check" class="hidden text-primary" />
-		<span data-label>{t('copyPage', locale)}</span>
+		<span data-label>{t('copyPage')}</span>
 	</button>
 	<details class="group">
 		<summary
-			aria-label={t('moreActions', locale)}
+			aria-label={t('moreActions')}
 			class="inline-flex h-8 cursor-pointer list-none items-center rounded-r-lg border border-l-0 border-border bg-background px-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
 		>
 			<ChevronDown size={14} class="transition-transform group-open:rotate-180" />
@@ -44,7 +44,7 @@ const itemClass =
 		<div class="absolute top-full right-0 z-40 mt-1.5 w-52 rounded-lg border border-border bg-popover p-1 shadow-lg">
 			<a href={markdown} class={itemClass} target="_blank" data-page-action="markdown">
 				<FileText size={14} />
-				{t('viewMarkdown', locale)}
+				{t('viewMarkdown')}
 			</a>
 			{targets.map((target) => (
 				<a
@@ -55,7 +55,7 @@ const itemClass =
 					data-page-action={target.name.toLowerCase()}
 				>
 					<ExternalLink size={14} />
-					{t('openIn', locale).replace('{name}', target.name)}
+					{t('openIn', { name: target.name })}
 				</a>
 			))}
 		</div>

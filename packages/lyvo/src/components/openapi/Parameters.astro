@@ -1,11 +1,13 @@
 ---
 import type { OpenAPIParameter } from '@lyvo/lib/openapi/types';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	parameters: OpenAPIParameter[];
 }
 
 const { parameters } = Astro.props;
+const { t } = getI18n(Astro.url);
 
 if (!parameters || parameters.length === 0) return null;
 
@@ -45,6 +47,12 @@ const parameterGroups = {
 };
 
 const groupOrder: Array<keyof typeof parameterGroups> = ['path', 'query', 'header', 'cookie'];
+const groupTitles = {
+	path: t('pathParameters'),
+	query: t('queryParameters'),
+	header: t('headerParameters'),
+	cookie: t('cookieParameters')
+};
 ---
 
 <>
@@ -54,9 +62,7 @@ const groupOrder: Array<keyof typeof parameterGroups> = ['path', 'query', 'heade
 
 		return (
 			<section>
-				<h2 class="mb-4 text-xl font-semibold tracking-tight capitalize">
-					{groupKey} Parameters
-				</h2>
+				<h2 class="mb-4 text-xl font-semibold tracking-tight">{groupTitles[groupKey]}</h2>
 				<div class="divide-y divide-border border-y border-border">
 					{groupParams.map((parameter: OpenAPIParameter) => (
 						<div class="space-y-2 py-4">
@@ -80,7 +86,7 @@ const groupOrder: Array<keyof typeof parameterGroups> = ['path', 'query', 'heade
 								)}
 								{parameter.required && (
 									<span class="rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-0.5 text-[10px] font-medium tracking-wider text-amber-600 uppercase dark:text-amber-300">
-										required
+										{t('required')}
 									</span>
 								)}
 							</div>
@@ -92,12 +98,14 @@ const groupOrder: Array<keyof typeof parameterGroups> = ['path', 'query', 'heade
 							<div class="flex flex-wrap gap-2">
 								{parameter.example !== undefined && (
 									<span class="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
-										Example {formatExample(parameter.example)}
+										{t('exampleValue', {
+											value: formatExample(parameter.example)
+										})}
 									</span>
 								)}
 								{parameter.examples && parameter.examples.length > 1 && (
 									<span class="rounded-md border border-border bg-muted/30 px-2 py-1 text-xs font-medium text-muted-foreground">
-										{parameter.examples.length} examples
+										{t('exampleCount', { count: parameter.examples.length })}
 									</span>
 								)}
 							</div>

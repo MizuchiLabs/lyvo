@@ -8,9 +8,8 @@ import Icon from '@lyvo/components/base/Icon.astro';
 import Footer from '@lyvo/components/base/Footer.astro';
 import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
-import { currentLocale } from '@lyvo/lib/docs';
 import { websiteJsonLd } from '@lyvo/lib/seo';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 import { pageHref, stripBase } from '@lyvo/lib/url';
 
 interface Props {
@@ -23,16 +22,16 @@ interface Props {
 
 const { title, description, image, noindex } = Astro.props;
 
-const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
+const { lang, t } = getI18n(Astro.url);
 const isHome = stripBase(Astro.url.pathname).replace(/\/+$/, '') === '';
 
 const navItems =
 	config.nav.length > 0
 		? config.nav
 		: [
-				{ title: 'Docs', href: pageHref(config.docs.prefix) },
+				{ title: t('docs'), href: pageHref(config.docs.prefix) },
 				...(config.api.specs.length > 0
-					? [{ title: 'API', href: pageHref(config.api.root) }]
+					? [{ title: t('api'), href: pageHref(config.api.root) }]
 					: [])
 			];
 ---
@@ -42,7 +41,6 @@ const navItems =
 	<BaseHead
 		title={title}
 		description={description}
-		lang={lang}
 		image={image}
 		noindex={noindex}
 		jsonLd={isHome ? [websiteJsonLd()] : []}
@@ -76,7 +74,7 @@ const navItems =
 						{navItems.length > 0 && (
 							<details class="group relative md:hidden">
 								<summary
-									aria-label={t('menu', lang)}
+									aria-label={t('menu')}
 									class="flex size-9 cursor-pointer list-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
 								>
 									<Menu size={18} class="group-open:hidden" />

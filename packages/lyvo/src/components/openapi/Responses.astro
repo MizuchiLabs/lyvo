@@ -3,6 +3,7 @@ import { ChevronDown } from '@lucide/astro';
 import SchemaViewer from '@lyvo/components/openapi/SchemaViewer.astro';
 import type { OpenAPIResponse, OpenAPIMediaType } from '@lyvo/lib/openapi/types';
 import type { LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	responses: OpenAPIResponse[];
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const { responses, spec } = Astro.props;
+const { t } = getI18n(Astro.url);
 
 if (!responses || responses.length === 0) return null;
 
@@ -25,7 +27,7 @@ function responseTone(status: string): string {
 ---
 
 <section>
-	<h2 class="mb-4 text-xl font-semibold tracking-tight">Responses</h2>
+	<h2 class="mb-4 text-xl font-semibold tracking-tight">{t('responses')}</h2>
 	<div class="space-y-3">
 		{responses.map((response: OpenAPIResponse) => (
 			<details class="group overflow-hidden rounded-xl border border-border bg-card shadow-sm">
@@ -48,7 +50,7 @@ function responseTone(status: string): string {
 							{response.content.length > 1 ? (
 								<div class="mb-4 flex items-center justify-between">
 									<span class="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-										Media Type
+										{t('mediaType')}
 									</span>
 									<div class="relative">
 										<select class="media-select w-40 cursor-pointer appearance-none rounded-md border border-border bg-background py-1.5 pr-8 pl-3 text-xs font-medium text-foreground ring-offset-background transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2">
@@ -80,9 +82,7 @@ function responseTone(status: string): string {
 							))}
 						</>
 					) : (
-						<p class="text-sm text-muted-foreground italic">
-							No content schema provided.
-						</p>
+						<p class="text-sm text-muted-foreground italic">{t('noContentSchema')}</p>
 					)}
 				</div>
 			</details>

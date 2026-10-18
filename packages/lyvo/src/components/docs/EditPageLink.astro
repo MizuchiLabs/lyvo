@@ -2,8 +2,7 @@
 import { Pencil } from '@lucide/astro';
 import config from 'virtual:lyvo-config';
 import { getEditURL } from '@lyvo/lib/repo';
-import { t } from '@lyvo/lib/i18n';
-import { currentLocale } from '@lyvo/lib/docs';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	filePath?: string;
@@ -12,6 +11,7 @@ const { filePath } = Astro.props;
 
 const url = config.repo?.url;
 const branch = config.repo?.branch ?? 'main';
+const { t } = getI18n(Astro.url);
 const editUrl = url && filePath && config.docs.edit ? getEditURL(url, branch, filePath) : '';
 ---
 
@@ -23,6 +23,6 @@ const editUrl = url && filePath && config.docs.edit ? getEditURL(url, branch, fi
 		class="hidden items-center gap-2 rounded-lg px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:inline-flex"
 	>
 		<Pencil size={14} />
-		<span>{t('editPage', currentLocale(Astro.url.pathname))}</span>
+		<span>{t('editPage')}</span>
 	</a>
 )}

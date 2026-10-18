@@ -2,10 +2,10 @@
 import { Webhook, LayoutGrid } from '@lucide/astro';
 import SidebarGroup from '@lyvo/components/docs/SidebarGroup.astro';
 import SidebarNavItems from '@lyvo/components/docs/SidebarNavItems.astro';
-import { getDocsHierarchy, currentLocale } from '@lyvo/lib/docs';
+import { getDocsHierarchy } from '@lyvo/lib/docs';
 import { apiIndexHref, apiPageHref, schemaHref } from '@lyvo/lib/openapi/model';
 import type { Section } from '@lyvo/lib/sections';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 import { cn } from '@lyvo/lib/utils';
 
 interface Props {
@@ -27,7 +27,7 @@ const methodClassMap = {
 } as const;
 
 const currentPath = Astro.url.pathname.replace(/\/+$/, '');
-const locale = currentLocale(currentPath);
+const { locale, t } = getI18n(Astro.url);
 const spec = section.spec;
 const nav = spec ? [] : (await getDocsHierarchy(locale)).nav;
 
@@ -65,7 +65,7 @@ const linkClass = (active: boolean) =>
 						/>
 					)}
 					<LayoutGrid size={16} class="relative size-4 shrink-0 opacity-80" />
-					<span class="relative">{t('overview', locale)}</span>
+					<span class="relative">{t('overview')}</span>
 				</a>
 				<div class="h-3" />
 				{spec.model.navigation.map((group) => (
@@ -130,7 +130,7 @@ const linkClass = (active: boolean) =>
 				))}
 				{spec.model.schemas.length > 0 && (
 					<SidebarGroup
-						title={t('schemas', locale)}
+						title={t('schemas')}
 						dataGroupId={`api-${spec.specId}-schemas`}
 						isActive={spec.model.schemas.some((schema) =>
 							isActiveHref(schemaHref(spec, schema.name))

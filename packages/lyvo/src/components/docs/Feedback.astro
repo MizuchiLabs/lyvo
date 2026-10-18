@@ -1,8 +1,7 @@
 ---
 import { ThumbsUp, ThumbsDown, Check, ArrowUpRight } from '@lucide/astro';
 import config from 'virtual:lyvo-config';
-import { t } from '@lyvo/lib/i18n';
-import { currentLocale } from '@lyvo/lib/docs';
+import { getI18n } from '@lyvo/lib/i18n';
 import { getIssueURL } from '@lyvo/lib/repo';
 import { absoluteUrl } from '@lyvo/lib/seo';
 
@@ -11,7 +10,7 @@ interface Props {
 }
 
 const { title = '' } = Astro.props;
-const locale = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
+const { lang, t } = getI18n(Astro.url);
 const pageUrl = absoluteUrl(Astro.url.pathname) ?? Astro.url.pathname;
 const issueUrl = config.repo
 	? getIssueURL(config.repo.url, `Docs feedback: ${title}`, `Page: ${pageUrl}\n\n`)
@@ -24,17 +23,17 @@ const buttonClass =
 ---
 
 {config.docs.feedback && (
-	<div class="feedback-widget min-w-0" data-locale={locale} data-state="ask">
+	<div class="feedback-widget min-w-0" data-locale={lang} data-state="ask">
 		<div class="feedback-ask flex flex-wrap items-center gap-3">
-			<span class="text-sm font-medium text-muted-foreground">{t('helpful', locale)}</span>
+			<span class="text-sm font-medium text-muted-foreground">{t('helpful')}</span>
 			<div class="flex items-center gap-2">
 				<button type="button" data-helpful="true" class={buttonClass}>
 					<ThumbsUp size={15} />
-					{t('yes', locale)}
+					{t('yes')}
 				</button>
 				<button type="button" data-helpful="false" class={buttonClass}>
 					<ThumbsDown size={15} />
-					{t('no', locale)}
+					{t('no')}
 				</button>
 			</div>
 		</div>
@@ -43,14 +42,14 @@ const buttonClass =
 			{askComment && (
 				<>
 					<label for="feedback-text" class="block text-sm font-medium">
-						{t('feedbackQuestion', locale)}
+						{t('feedbackQuestion')}
 					</label>
 					<textarea
 						id="feedback-text"
 						name="comment"
 						rows="3"
 						maxlength="500"
-						placeholder={t('feedbackPlaceholder', locale)}
+						placeholder={t('feedbackPlaceholder')}
 						class="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 					></textarea>
 				</>
@@ -62,14 +61,14 @@ const buttonClass =
 							type="submit"
 							class="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
 						>
-							{t('send', locale)}
+							{t('send')}
 						</button>
 						<button
 							type="button"
 							data-skip
 							class="inline-flex h-8 items-center rounded-md px-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 						>
-							{t('skip', locale)}
+							{t('skip')}
 						</button>
 					</>
 				)}
@@ -81,7 +80,7 @@ const buttonClass =
 						data-issue
 						class="group/issue inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
 					>
-						{t(askComment ? 'orOpenIssue' : 'openIssue', locale)}
+						{t(askComment ? 'orOpenIssue' : 'openIssue')}
 						<ArrowUpRight
 							size={14}
 							class="transition-transform group-hover/issue:translate-x-0.5 group-hover/issue:-translate-y-0.5"
@@ -93,7 +92,7 @@ const buttonClass =
 
 		<p class="feedback-thanks hidden items-center gap-2 text-sm text-muted-foreground">
 			<Check size={16} class="text-primary" />
-			{t('thanks', locale)}
+			{t('thanks')}
 		</p>
 	</div>
 )}

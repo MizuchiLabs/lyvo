@@ -5,8 +5,7 @@ import SidebarLinks from '@lyvo/components/docs/SidebarLinks.astro';
 import SidebarFooter from '@lyvo/components/docs/SidebarFooter.astro';
 import SearchTrigger from '@lyvo/components/base/SearchTrigger.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
-import { currentLocale } from '@lyvo/lib/docs';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 import type { Section } from '@lyvo/lib/sections';
 import config from 'virtual:lyvo-config';
 
@@ -16,7 +15,7 @@ interface Props {
 }
 
 const { sections, active } = Astro.props;
-const locale = currentLocale(Astro.url.pathname);
+const { t } = getI18n(Astro.url);
 const showLanguage = !active.spec;
 ---
 
@@ -34,7 +33,7 @@ const showLanguage = !active.spec;
 
 <dialog
 	id="lyvo-drawer"
-	aria-label={t('menu', locale)}
+	aria-label={t('menu')}
 	class="fixed inset-y-0 left-0 m-0 h-dvh max-h-dvh w-[min(20rem,85vw)] max-w-none -translate-x-full flex-col border-r border-border bg-sidebar p-0 text-foreground shadow-2xl transition-[translate,display,overlay] transition-discrete duration-300 ease-out backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:translate-x-0 starting:open:-translate-x-full md:hidden"
 >
 	<div class="flex shrink-0 flex-col gap-3 px-4 pt-4 pb-1">
@@ -46,7 +45,7 @@ const showLanguage = !active.spec;
 				class="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			>
 				<X size={18} />
-				<span class="sr-only">{t('close', locale)}</span>
+				<span class="sr-only">{t('close')}</span>
 			</button>
 		</div>
 		<SectionPicker sections={sections} active={active} />

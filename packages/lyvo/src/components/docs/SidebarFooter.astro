@@ -3,7 +3,6 @@ import { ArrowUpRight } from '@lucide/astro';
 import Icon from '@lyvo/components/base/Icon.astro';
 import ThemeSwitch from '@lyvo/components/base/ThemeSwitch.astro';
 import LanguagePicker from '@lyvo/components/docs/LanguagePicker.astro';
-import { currentLocale } from '@lyvo/lib/docs';
 import { isExternal } from '@lyvo/lib/utils';
 import { stripBase } from '@lyvo/lib/url';
 import config from 'virtual:lyvo-config';
@@ -14,7 +13,6 @@ interface Props {
 }
 
 const { showLanguage = true } = Astro.props;
-const locale = currentLocale(Astro.url.pathname);
 
 // Docs and API are reachable through the section picker already.
 const links = config.nav.filter(
@@ -66,7 +64,7 @@ const links = config.nav.filter(
 			</a>
 		))}
 		<div class="ml-auto">
-			<ThemeSwitch locale={locale} />
+			<ThemeSwitch />
 		</div>
 	</div>
 </div>

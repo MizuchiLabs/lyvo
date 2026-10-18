@@ -128,13 +128,12 @@ export default defineConfig({
 					de: {
 						search: 'Suche',
 						onThisPage: 'Auf dieser Seite',
-						lastUpdated: 'Zuletzt aktualisiert am',
+						lastUpdated: 'Zuletzt aktualisiert am {date}',
 						helpful: 'War diese Seite hilfreich?',
 						yes: 'Ja',
 						no: 'Nein',
 						thanks: 'Danke für dein Feedback!',
 						guides: 'Anleitungen',
-						reference: 'Referenz',
 						overview: 'Übersicht',
 						notFoundTitle: 'Seite nicht gefunden',
 						notFoundText: 'Diese Seite existiert nicht oder wurde verschoben.',
@@ -143,6 +142,7 @@ export default defineConfig({
 						previous: 'Zurück',
 						next: 'Weiter',
 						guidesDescription: 'Die Grundlagen lernen',
+						endpointCount: { one: '{count} Endpunkt', other: '{count} Endpunkte' },
 						fallbackNotice:
 							'Diese Seite gibt es noch nicht auf {language}. Angezeigt wird die Version auf {original}.',
 						notTranslated: 'Nicht übersetzt',
@@ -153,7 +153,10 @@ export default defineConfig({
 						menu: 'Menü',
 						close: 'Schließen',
 						copyPage: 'Seite kopieren',
-						copied: 'Kopiert'
+						copied: 'Kopiert',
+						skipToContent: 'Zum Inhalt springen',
+						viewMarkdown: 'Als Markdown ansehen',
+						openIn: 'In {name} öffnen'
 					}
 				}
 			},

@@ -58,6 +58,33 @@ describe('normalizeOptions', () => {
 		expect(config.i18n.ui.fr).toBeUndefined();
 	});
 
+	it('rejects unknown UI string keys', () => {
+		const result = LyvoOptionsSchema.safeParse({
+			i18n: { ui: { de: { onThisPgae: 'Auf dieser Seite' } } }
+		});
+		expect(result.success).toBe(false);
+		expect(result.error?.issues[0].path).toEqual(['i18n', 'ui', 'de']);
+	});
+
+	it('accepts plural forms and requires other', () => {
+		const forms = { one: '{count} Endpunkt', other: '{count} Endpunkte' };
+		const config = normalize({
+			i18n: { locales: ['de'], ui: { de: { endpointCount: forms } } }
+		});
+		expect(config.i18n.ui.de.endpointCount).toEqual(forms);
+		expect(
+			LyvoOptionsSchema.safeParse({
+				i18n: { ui: { de: { endpointCount: { one: '{count} Endpunkt' } } } }
+			}).success
+		).toBe(false);
+	});
+
+	it('rejects invalid locale codes', () => {
+		expect(() => normalize({ i18n: { locales: ['de/at'] } })).toThrow(LyvoConfigError);
+		expect(() => normalize({ lang: 'pt_BR' })).toThrow(LyvoConfigError);
+		expect(normalize({ lang: 'pt-BR' }).i18n.defaultLocale).toBe('pt-BR');
+	});
+
 	it('normalizes a single OpenAPI spec into an array with defaults', () => {
 		const config = normalize({ openapi: { input: 'spec.json' } });
 		expect(config.api.specs).toHaveLength(1);

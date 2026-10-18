@@ -1,22 +1,18 @@
 ---
 import { Monitor, Moon, Sun } from '@lucide/astro';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n } from '@lyvo/lib/i18n';
 
-interface Props {
-	locale?: string | null;
-}
-
-const { locale = null } = Astro.props;
+const { t } = getI18n(Astro.url);
 const options = [
-	{ value: 'light', label: t('themeLight', locale), Icon: Sun },
-	{ value: 'dark', label: t('themeDark', locale), Icon: Moon },
-	{ value: 'system', label: t('themeSystem', locale), Icon: Monitor }
+	{ value: 'light', label: t('themeLight'), Icon: Sun },
+	{ value: 'dark', label: t('themeDark'), Icon: Moon },
+	{ value: 'system', label: t('themeSystem'), Icon: Monitor }
 ];
 ---
 
 <div
 	role="group"
-	aria-label={t('theme', locale)}
+	aria-label={t('theme')}
 	class="inline-flex items-center gap-0.5 rounded-full border border-border bg-muted/50 p-0.5"
 >
 	{options.map(({ value, label, Icon }) => (

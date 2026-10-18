@@ -3,7 +3,9 @@ import Logo from '@lyvo/components/base/Logo.astro';
 import Icon from '@lyvo/components/base/Icon.astro';
 import config from 'virtual:lyvo-config';
 import { isExternal } from '@lyvo/lib/utils';
+import { getI18n } from '@lyvo/lib/i18n';
 
+const { t } = getI18n(Astro.url);
 const year = new Date().getFullYear();
 const columns = config.footer?.columns ?? [];
 const hasContent = columns.length > 0 || config.socials.length > 0;
@@ -70,7 +72,7 @@ const hasContent = columns.length > 0 || config.socials.length > 0;
 
 			<div class="mt-10 border-t border-border/40 pt-6 text-xs text-muted-foreground">
 				© {year}
-				{config.title ? ` ${config.title}` : ''}. All rights reserved.
+				{config.title ? ` ${config.title}` : ''}. {t('allRightsReserved')}
 			</div>
 		</div>
 	</footer>

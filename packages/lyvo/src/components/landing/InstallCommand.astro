@@ -1,6 +1,7 @@
 ---
 import { Check, Copy } from '@lucide/astro';
 import { cn } from '@lyvo/lib/utils';
+import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
 	/** One command, or several keyed by label, e.g. { pnpm: 'pnpm add x', npm: 'npm i x' }. */
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const { command, class: className } = Astro.props;
+const { t } = getI18n(Astro.url);
 const commands = typeof command === 'string' ? { '': command } : command;
 const entries = Object.entries(commands);
 const [firstLabel, firstCommand] = entries[0];
@@ -44,7 +46,7 @@ const [firstLabel, firstCommand] = entries[0];
 		<button
 			type="button"
 			data-copy
-			aria-label="Copy command"
+			aria-label={t('copyCommand')}
 			class="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 		>
 			<Copy size={14} data-icon="copy" />

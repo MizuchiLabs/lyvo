@@ -3,6 +3,7 @@ import { apiIndexHref, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
 import PageActions from '@lyvo/components/docs/PageActions.astro';
 import { markdownPath } from '@lyvo/lib/seo';
 import { withBase } from '@lyvo/lib/url';
+import { getI18n } from '@lyvo/lib/i18n';
 import config from 'virtual:lyvo-config';
 import type { OpenAPISecurityRequirement } from '@lyvo/lib/openapi/types';
 import { marked } from 'marked';
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const { spec } = Astro.props;
+const { t } = getI18n(Astro.url);
 const model = spec.model;
 
 const source = model.source;
@@ -91,7 +93,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 						class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
 					>
 						<Download size={16} />
-						Download OpenAPI
+						{t('downloadSpec')}
 					</a>
 				)}
 			</div>
@@ -102,7 +104,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 			<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
 				<div class="mb-4 flex items-center gap-2">
 					<Server size={16} class="text-muted-foreground" />
-					<h2 class="text-base font-semibold tracking-tight">Servers</h2>
+					<h2 class="text-base font-semibold tracking-tight">{t('servers')}</h2>
 					<span class="text-sm text-muted-foreground">({model.servers.length})</span>
 				</div>
 				<ul class="divide-y divide-border/70">
@@ -128,14 +130,14 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
 					<div class="mb-4 flex items-center gap-2">
 						<Info size={16} class="text-muted-foreground" />
-						<h2 class="text-base font-semibold tracking-tight">About</h2>
+						<h2 class="text-base font-semibold tracking-tight">{t('about')}</h2>
 					</div>
 					<dl class="space-y-4 text-sm">
 						{model.info.contact && (
 							<div>
 								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 									<Mail size={12} />
-									Contact
+									{t('contact')}
 								</dt>
 								<dd class="mt-1">
 									{model.info.contact.name ? (
@@ -158,7 +160,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 											rel="noopener noreferrer"
 											class="ml-2 inline-flex items-center gap-1 text-primary hover:underline"
 										>
-											Website
+											{t('website')}
 											<ExternalLink size={12} />
 										</a>
 									)}
@@ -170,7 +172,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 							<div>
 								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 									<Scale size={12} />
-									License
+									{t('license')}
 								</dt>
 								<dd class="mt-1">
 									<a
@@ -195,7 +197,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 							<div>
 								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 									<FileText size={12} />
-									Terms of Service
+									{t('termsOfService')}
 								</dt>
 								<dd class="mt-1">
 									<a
@@ -204,7 +206,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 										rel="noopener noreferrer"
 										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
 									>
-										Read terms
+										{t('readTerms')}
 										<ExternalLink size={12} />
 									</a>
 								</dd>
@@ -215,7 +217,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 							<div>
 								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
 									<LinkIcon size={12} />
-									Documentation
+									{t('documentation')}
 								</dt>
 								<dd class="mt-1">
 									<a
@@ -224,7 +226,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 										rel="noopener noreferrer"
 										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
 									>
-										{model.externalDocs.description ?? 'External docs'}
+										{model.externalDocs.description ?? t('externalDocs')}
 										<ExternalLink size={12} />
 									</a>
 								</dd>
@@ -238,7 +240,9 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
 					<div class="mb-4 flex items-center gap-2">
 						<Shield size={16} class="text-muted-foreground" />
-						<h2 class="text-base font-semibold tracking-tight">Authentication</h2>
+						<h2 class="text-base font-semibold tracking-tight">
+							{t('authentication')}
+						</h2>
 					</div>
 					<ul class="space-y-3">
 						{model.securitySchemes.map((scheme) => (
@@ -268,7 +272,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 			<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
 				<div class="mb-4 flex items-center gap-2">
 					<TagsIcon size={16} class="text-muted-foreground" />
-					<h2 class="text-base font-semibold tracking-tight">Groups</h2>
+					<h2 class="text-base font-semibold tracking-tight">{t('groups')}</h2>
 					<span class="text-sm text-muted-foreground">({model.tags.length})</span>
 				</div>
 				<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -277,8 +281,7 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 							<div class="flex items-center justify-between gap-3">
 								<span class="truncate text-sm font-medium">{tag.name}</span>
 								<span class="shrink-0 text-xs text-muted-foreground">
-									{tag.operationCount}{' '}
-									{tag.operationCount === 1 ? 'endpoint' : 'endpoints'}
+									{t('endpointCount', { count: tag.operationCount })}
 								</span>
 							</div>
 							{tag.description && (

@@ -6,7 +6,7 @@ import MobileToC from '@lyvo/components/docs/MobileToC.astro';
 import SearchTrigger from '@lyvo/components/base/SearchTrigger.astro';
 import { Languages, Menu } from '@lucide/astro';
 import { activeSection, getSections } from '@lyvo/lib/sections';
-import { t } from '@lyvo/lib/i18n';
+import { getI18n, languageName } from '@lyvo/lib/i18n';
 import BaseHead from '@lyvo/layouts/BaseHead.astro';
 import ToC from '@lyvo/components/docs/ToC.astro';
 import Breadcrumbs from '@lyvo/components/docs/Breadcrumbs.astro';
@@ -16,7 +16,6 @@ import { cn } from '@lyvo/lib/utils';
 import { getLastUpdated } from '@lyvo/lib/lastUpdated';
 import config from 'virtual:lyvo-config';
 import {
-	currentLocale,
 	docPageId,
 	docUrl,
 	getDocsHierarchy,
@@ -58,10 +57,9 @@ const {
 	crumbs
 } = Astro.props;
 
-const lang = currentLocale(Astro.url.pathname) ?? config.i18n.defaultLocale;
-const activeLocale = lang === config.i18n.defaultLocale ? null : lang;
+const { lang, locale, t } = getI18n(Astro.url);
 
-const sections = await getSections(activeLocale);
+const sections = await getSections(locale);
 const section = activeSection(sections, Astro.url.pathname);
 
 let canonical = Astro.url.pathname;
@@ -76,17 +74,18 @@ if (entry) {
 	// Point search engines at the original instead of indexing a duplicate.
 	if (entryLocale !== lang) {
 		canonical = docUrl(entry.id);
-		fallbackNotice = t('fallbackNotice', activeLocale)
-			.replace('{language}', config.i18n.labels[lang] ?? lang)
-			.replace('{original}', config.i18n.labels[entryLocale] ?? entryLocale);
+		fallbackNotice = t('fallbackNotice', {
+			language: languageName(lang, lang),
+			original: languageName(entryLocale, lang)
+		});
 	} else if (localeCodes.length > 0) {
 		alternates = (await getTranslations(pageId)).map((code) => ({
 			lang: code,
 			path: docUrl(code === config.i18n.defaultLocale ? pageId : `${code}/${pageId}`)
 		}));
 	}
-	const { nav } = await getDocsHierarchy(activeLocale);
-	trail = navTrail(nav, entry.id, activeLocale) ?? [];
+	const { nav } = await getDocsHierarchy(locale);
+	trail = navTrail(nav, entry.id, locale) ?? [];
 }
 
 const hasPage = !notFound && (Boolean(entry) || isApi);
@@ -111,7 +110,6 @@ const jsonLd = hasPage
 	<BaseHead
 		title={title}
 		description={description}
-		lang={lang}
 		image={image}
 		type={hasPage ? 'article' : 'website'}
 		canonical={canonical}
@@ -140,7 +138,7 @@ const jsonLd = hasPage
 						class="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:hidden"
 					>
 						<Menu size={18} />
-						<span class="sr-only">{t('menu', activeLocale)}</span>
+						<span class="sr-only">{t('menu')}</span>
 					</button>
 					<Breadcrumbs title={title} trail={trail} />
 					<MobileToC headings={headings} title={title} section={section.title} />
@@ -174,7 +172,6 @@ const jsonLd = hasPage
 								title={title}
 								description={description}
 								lastUpdated={modified}
-								lang={lang}
 								markdown={markdown}
 							/>
 						)}
