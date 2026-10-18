@@ -13,11 +13,11 @@
     "test": "vitest run --root packages/lyvo"
   },
   "devDependencies": {
-    "oxlint": "^1.87.0",
+    "oxlint": "^1.88.0",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "1.1.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
-  "packageManager": "pnpm@12.13.0+sha512.1e55719bf26e809dce5c5084fdebaa64efb3da9038ae5d68a9f8a68311f1a45841c8c3b76a37298c3b66f6bcc80409a9b7f33c78a7168a3e90fb65a5d8235ae4"
+  "packageManager": "pnpm@12.14.0"
 }
