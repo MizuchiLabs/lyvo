@@ -78,7 +78,7 @@
 		"astro": "^7.4.0",
 		"oxlint": "^1.88.0",
 		"prettier": "3.9.10",
-		"prettier-plugin-astro": "1.1.1",
+		"prettier-plugin-astro": "1.1.2",
 		"prettier-plugin-tailwindcss": "^0.8.1",
 		"typescript": "^6.0.3"
 	},
