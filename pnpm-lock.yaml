@@ -192,7 +192,7 @@ importers:
         version: link:../../packages/lyvo
       '@pagefind/component-ui':
         specifier: ^1.5.2
-        version: 1.5.2
+        version: 1.6.0
       astro:
         specifier: ^7.4.0
         version: 7.4.4(@astrojs/markdown-remark@7.3.5(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
@@ -232,7 +232,7 @@ importers:
         version: 1.66.0(astro@7.4.4(@astrojs/markdown-remark@7.3.5(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@pagefind/component-ui':
         specifier: ^1.5.0
-        version: 1.5.2
+        version: 1.6.0
       '@tailwindcss/typography':
         specifier: ^0.5.20
         version: 0.5.20(tailwindcss@4.3.3)
@@ -1155,8 +1155,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@pagefind/component-ui@1.5.2':
-    resolution: {integrity: sha512-t8/aE0tan4JiKa6cyhhSt/5qrEVwAK/qlYBHFpnRoq+qaFFVrhmXFFMY+r6n4GJtVIFCN2A5nUpeLN68cYjEjw==}
+  '@pagefind/component-ui@1.6.0':
+    resolution: {integrity: sha512-Y1DGghiGTdPNzuXphHginp45/3wVUXiwRdfAPSGTBTEBnrj8VnAEC2mgFuy2RzVwBf4reqanPvJVwxPoLI89Ww==}
 
   '@pagefind/darwin-arm64@1.5.2':
     resolution: {integrity: sha512-MXpI+7HsAdPkvJ0gk9xj9g541BCqBZOBbdwj9g6lB5LCj6kSV6nqDSjzcAJwvOsfu0fjwvC8hQU+ecfhp+MpiQ==}
@@ -4420,7 +4420,7 @@ snapshots:
   '@oxlint/binding-win32-x64-msvc@1.90.0':
     optional: true
 
-  '@pagefind/component-ui@1.5.2':
+  '@pagefind/component-ui@1.6.0':
     dependencies:
       adequate-little-templates: 1.0.2
       bcp-47: 2.1.2
@@ -4935,7 +4935,7 @@ snapshots:
 
   astro-pagefind@2.0.1(astro@7.4.4(@astrojs/markdown-remark@7.3.5(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)):
     dependencies:
-      '@pagefind/component-ui': 1.5.2
+      '@pagefind/component-ui': 1.6.0
       astro: 7.4.4(@astrojs/markdown-remark@7.3.5(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
       pagefind: 1.5.2
       sirv: 3.0.2
