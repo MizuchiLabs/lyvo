@@ -186,7 +186,7 @@ importers:
     dependencies:
       '@lucide/astro':
         specifier: ^1.69.0
-        version: 1.69.0(astro@7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        version: 1.70.0(astro@7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@mizuchilabs/lyvo':
         specifier: workspace:*
         version: link:../../packages/lyvo
@@ -229,7 +229,7 @@ importers:
         version: 5.3.0
       '@lucide/astro':
         specifier: ^1.69.0
-        version: 1.69.0(astro@7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+        version: 1.70.0(astro@7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       '@pagefind/component-ui':
         specifier: ^1.5.0
         version: 1.6.0
@@ -1008,8 +1008,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@lucide/astro@1.69.0':
-    resolution: {integrity: sha512-A7oaxQD112/bHrWJpQ8uRnuNazI+z36sY8lZAng4foFS/IJneSiw3KAfMe7eX44KD+ehIRHwBkbucw5IcvmoyA==}
+  '@lucide/astro@1.70.0':
+    resolution: {integrity: sha512-GkD59zeFP350rqF+Rc/k1Yc92tuSTG8duXZ1d5BK5xT3wLPiMqKpqFtosQxopYvP/tBHW9D1mqdhzGjoRSLsYA==}
     peerDependencies:
       astro: ^4 || ^5 || ^6 || ^7
 
@@ -4226,7 +4226,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lucide/astro@1.69.0(astro@7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
+  '@lucide/astro@1.70.0(astro@7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
       astro: 7.4.7(@astrojs/markdown-remark@7.3.6(supports-color@10.2.2))(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
