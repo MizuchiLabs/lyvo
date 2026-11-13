@@ -83,6 +83,13 @@ describe('mdxToMarkdown', () => {
 		expect(out).toBe('**Why?**\n\nBecause.');
 	});
 
+	it('labels details with their title', () => {
+		const out = mdxToMarkdown(
+			'<Details title="Under the hood">\n\n- One `thing`.\n- Two.\n\n</Details>'
+		);
+		expect(out).toBe('**Under the hood**\n\n- One `thing`.\n- Two.');
+	});
+
 	it('unwraps unknown components and keeps html', () => {
 		const out = mdxToMarkdown('<Fancy>\n\nSome *text*{curly} with a <kbd>K</kbd>.\n\n</Fancy>');
 		expect(out).toBe('Some *text* with a <kbd>K</kbd>.');

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+- `<Details title="...">` for a collapsible block with Markdown inside. Takes `icon` and `open`.
+
 ### Fixed
 - Java and C# code samples with a request body didn't compile.
 - Code samples send form and multipart bodies as such, not as JSON.

@@ -164,6 +164,8 @@ function component(node: Node): Node[] {
 				...heading(text(node, 'label') || text(node, 'value')),
 				...convert(node.children)
 			];
+		case 'Details':
+			return [...heading(text(node, 'title')), ...convert(node.children)];
 		case 'FileTree':
 			return [{ type: 'code', lang: null, value: treeLines(node.children).join('\n') }];
 		case 'Accordion': {

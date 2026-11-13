@@ -208,3 +208,29 @@ Use accordions to display a list of high-level options that can expand/collapse 
 		}
 	]}
 />
+
+---
+
+## Details
+
+Use details for one collapsible block with Markdown inside, like a deep dive most readers can skip. Set `open` to start expanded, and `icon` for a Lucide name or an SVG in `src/assets`.
+
+```mdx
+<Details title="Under the hood" icon="wrench">
+
+The copy button is added by a small script, so it also works in plain `.md` files.
+
+- Markdown works in here.
+- Lists, `code` and links too.
+
+</Details>
+```
+
+<Details title="Under the hood" icon="wrench">
+
+The copy button is added by a small script, so it also works in plain `.md` files.
+
+- Markdown works in here.
+- Lists, `code` and links too.
+
+</Details>

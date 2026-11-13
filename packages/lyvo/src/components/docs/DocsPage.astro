@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import DocsLayout from '@lyvo/layouts/DocsLayout.astro';
 import Accordion from '@lyvo/components/docs/Accordion.astro';
+import Details from '@lyvo/components/docs/Details.astro';
 import Tabs from '@lyvo/components/docs/Tabs.astro';
 import TabItem from '@lyvo/components/docs/TabItem.astro';
 import CodeBlock from '@lyvo/components/base/CodeBlock.astro';
@@ -39,7 +40,8 @@ const components = {
 	FileTree,
 	Folder,
 	File,
-	Accordion
+	Accordion,
+	Details
 };
 
 const filteredHeadings = headings.filter((h: any) => h.depth === 2 || h.depth === 3);

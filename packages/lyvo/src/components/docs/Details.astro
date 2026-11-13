@@ -1,0 +1,30 @@
+---
+import { ChevronDown } from '@lucide/astro';
+import Icon from '@lyvo/components/base/Icon.astro';
+
+interface Props {
+	title: string;
+	/** File name in src/assets or a Lucide icon name like "wrench". */
+	icon?: string;
+	open?: boolean;
+}
+
+const { title, icon, open = false } = Astro.props;
+---
+
+<details
+	class="group/details my-6 overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+	open={open}
+>
+	<summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-muted-foreground transition-colors select-none group-open/details:bg-muted/40 group-open/details:text-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset [&::-webkit-details-marker]:hidden">
+		{icon && <Icon name={icon} size={16} class="size-4 shrink-0 opacity-80" />}
+		<span class="min-w-0 flex-1">{title}</span>
+		<ChevronDown
+			size={16}
+			class="shrink-0 opacity-60 transition-transform duration-200 group-open/details:rotate-180"
+		/>
+	</summary>
+	<div class="border-t border-border p-4 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+		<slot />
+	</div>
+</details>

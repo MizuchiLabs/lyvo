@@ -357,6 +357,7 @@ Lyvo includes several components to help you write better documentation:
 - `<Callout>`: For highlighting important information (info, warning, error, etc.).
 - `<Steps>` and `<Step>`: For step-by-step tutorials.
 - `<Accordion>`: For collapsible content.
+- `<Details title="...">`: For one collapsible block with Markdown inside, like a deep dive readers can skip. Takes `icon` and `open`.
 - `<FileTree>`: For illustrating project structures.
 
 ## License
