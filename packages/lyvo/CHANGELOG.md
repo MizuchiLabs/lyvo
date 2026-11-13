@@ -21,6 +21,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - API reference pages, the theme toggle, breadcrumbs, the footer and a few other places no longer have hardcoded English. Every UI string goes through `i18n.ui`.
 - Changelog dates follow the page language instead of always `en-US`.
 - Counts use plural forms, so a spec with one endpoint says "1 endpoint".
+- A clicked link opens the page at the top, not at the scroll position from an earlier visit. Back and forward still restore it.
+- Text and code fences inside tabs, steps and callouts no longer get extra space around them. A lone code fence fills its tab panel.
+- Tab labels with `&` or quotes render as written.
+- Two accordions on one page no longer close each other's items.
+- Changelog dates no longer shift by a day in timezones behind UTC. A date that can't be parsed shows as written, and `[Unreleased]` gets no `v` prefix.
+- Nested docs folders mark the active page on their line, like the API sidebar.
+- The docs layout fits the visible screen on phones.
+- The copy button on code blocks shows on touch screens.
+- Social icons are no longer dimmed in dark mode and match the theme toggle.
 
 ### Changed
 - More UI strings are translatable: `copyCode`, `moreActions`, `server`, `authorization`, `username`, `password`, `body`, plus new keys for the API reference. All keys are listed in `src/lib/ui-strings.ts`.
@@ -30,6 +39,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Invalid locale codes like `pt_BR` fail the build instead of crashing pages that format dates.
 - Components read the locale from the URL. `PageHeader` and `BaseHead` no longer take `lang`, `ThemeSwitch` and `PageActions` no longer take `locale`.
 - `.mdoc` files are no longer picked up by the docs collection.
+- Callouts and changelog badges take their colors from the new `--info`, `--success`, `--warning` and `--tip` tokens, so a theme can recolor them. Danger follows `--destructive`, and `question` now shares the info color.
+- Docs pages lost a doubled side padding, so the text column is wider.
+- Blockquotes render without quote marks and italics.
+- Social icons from `src/assets` are no longer inverted in dark mode. Use `currentColor` in the SVG so it follows the theme.
 
 ## [0.3.2] - 2026-09-30
 

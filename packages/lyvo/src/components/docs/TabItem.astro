@@ -7,6 +7,10 @@ interface Props {
 const { value, label = value } = Astro.props;
 ---
 
-<div data-tab-panel={value} data-tab-label={label}>
+<div
+	class="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+	data-tab-panel={value}
+	data-tab-label={label}
+>
 	<slot />
 </div>

@@ -6,11 +6,15 @@ const html = await Astro.slots.render('default');
 const tabs: { value: string; label: string }[] = [];
 const instanceId = Math.random().toString(36).slice(2, 8);
 
+// Astro escaped these in the attribute and escapes the label again on render.
+const unescape = (text: string) =>
+	text.replaceAll(/&(?:#34|quot);/g, '"').replaceAll(/&(?:#38|amp);/g, '&');
+
 const enhanced = html.replaceAll(
 	/data-tab-panel="([^"]+)" data-tab-label="([^"]*)"/g,
 	(_, value: string, label: string) => {
 		const isFirst = tabs.length === 0;
-		tabs.push({ value, label });
+		tabs.push({ value, label: unescape(label) });
 		return [
 			`data-tab-owned="${value}"`,
 			'role="tabpanel"',
@@ -37,11 +41,19 @@ const enhanced = html.replaceAll(
 				aria-controls={`${instanceId}-panel-${tab.value}`}
 				aria-selected={index === 0 ? 'true' : 'false'}
 				tabindex={index === 0 ? 0 : -1}
-				class="tab-btn relative py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+				class:list={[
+					'tab-btn relative py-2.5 text-sm font-medium transition-colors hover:text-foreground',
+					index === 0 ? 'text-foreground' : 'text-muted-foreground'
+				]}
 				data-tab={tab.value}
 			>
 				{tab.label}
-				<span class="tab-indicator absolute inset-x-0 -bottom-px h-0.5 origin-left scale-x-0 bg-primary transition-transform" />
+				<span
+					class:list={[
+						'tab-indicator absolute inset-x-0 -bottom-px h-0.5 origin-left bg-primary transition-transform',
+						index === 0 ? 'scale-x-100' : 'scale-x-0'
+					]}
+				/>
 			</button>
 		))}
 	</div>
@@ -130,9 +142,12 @@ const enhanced = html.replaceAll(
 </script>
 
 <style>
-	/* A lone code block fills its panel edge to edge */
-	.tabs-panels > :global([role='tabpanel'] > :is(pre, .code-block):only-child) {
+	/* A lone code block fills its panel edge to edge. Fences get wrapped by the copy button script. */
+	.tabs-panels > :global([role='tabpanel'] > :is(pre, .copy-wrapper, .code-block):only-child) {
 		margin: -1rem;
+	}
+	.tabs-panels > :global([role='tabpanel'] > :is(pre, .code-block):only-child),
+	.tabs-panels > :global([role='tabpanel'] > .copy-wrapper:only-child > pre) {
 		border: 0;
 		border-radius: 0;
 	}

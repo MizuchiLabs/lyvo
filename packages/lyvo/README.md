@@ -106,6 +106,17 @@ Files in `customCss` join the theme's Tailwind root, so token overrides work dir
 }
 ```
 
+Callouts and changelog badges take their colors from `--info`, `--success`, `--warning` and `--tip`. Danger uses `--destructive`. Set them on `:root` and `.dark` to recolor them.
+
+```css
+:root {
+	--info: oklch(0.55 0.12 190);
+}
+.dark {
+	--info: oklch(0.75 0.12 190);
+}
+```
+
 ## What you get automatically
 
 | Output                            | Notes                                                                                                                                                       |

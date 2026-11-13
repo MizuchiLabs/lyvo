@@ -31,8 +31,10 @@ const [beforeDate, afterDate] = t('lastUpdated').split('{date}');
 {formatted && lastUpdated && (
 	<div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
 		<Calendar size={16} />
-		{beforeDate}
-		<time datetime={lastUpdated.toISOString()}>{formatted}</time>
-		{afterDate}
+		<span>
+			{beforeDate}
+			<time datetime={lastUpdated.toISOString()}>{formatted}</time>
+			{afterDate}
+		</span>
 	</div>
 )}

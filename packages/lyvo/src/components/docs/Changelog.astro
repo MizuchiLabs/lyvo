@@ -27,24 +27,24 @@ try {
 
 const versionRegex = /##\s+\[(.*?)\](?:\s*-\s*(.*))?\n([\s\S]*?)(?=\n##\s+\[|$)/g;
 
+function formatDate(raw: string) {
+	const parsed = new Date(raw);
+	if (Number.isNaN(parsed.getTime())) return raw;
+	return parsed.toLocaleDateString(lang, {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		// A plain YYYY-MM-DD parses as UTC, format it there or the day can shift.
+		timeZone: /^\d{4}-\d{2}-\d{2}$/.test(raw) ? 'UTC' : undefined
+	});
+}
+
 const releases = [];
 let match;
 while ((match = versionRegex.exec(changelog)) !== null) {
-	const version = match[1];
-
-	// Format date nicely
-	let date = '';
-	if (match[2]) {
-		try {
-			date = new Date(match[2]).toLocaleDateString(lang, {
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric'
-			});
-		} catch (e) {
-			date = match[2];
-		}
-	}
+	// Headings like "Unreleased" are not versions.
+	const version = /^\d/.test(match[1]) ? `v${match[1]}` : match[1];
+	const date = match[2] ? formatDate(match[2].trim()) : '';
 
 	const content = match[3];
 	const categories = [];
@@ -65,12 +65,12 @@ while ((match = versionRegex.exec(changelog)) !== null) {
 }
 
 const categoryColors: Record<string, string> = {
-	Added: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-	Fixed: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
-	Changed: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-	Deprecated: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
-	Removed: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
-	Security: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+	Added: 'bg-success/10 text-success border-success/20',
+	Fixed: 'bg-destructive/10 text-destructive border-destructive/20',
+	Changed: 'bg-info/10 text-info border-info/20',
+	Deprecated: 'bg-warning/10 text-warning border-warning/20',
+	Removed: 'bg-destructive/10 text-destructive border-destructive/20',
+	Security: 'bg-tip/10 text-tip border-tip/20'
 };
 
 // Very basic inline markdown code backtick parser
@@ -91,7 +91,7 @@ function parseInlineCode(text: string) {
 			{/* Release Header */}
 			<div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-baseline">
 				<h2 class="m-0 text-2xl font-bold tracking-tight text-foreground">
-					v{release.version}
+					{release.version}
 				</h2>
 				{release.date && (
 					<span class="text-sm font-medium text-muted-foreground">{release.date}</span>

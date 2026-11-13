@@ -1,5 +1,4 @@
 ---
-import { cn } from '@lyvo/lib/utils';
 import {
 	Info,
 	TriangleAlert,
@@ -20,49 +19,15 @@ interface Props {
 
 const { type = 'default', title } = Astro.props;
 
+// Each variant takes its color from one theme token.
 const variants = {
-	default: {
-		Icon: Info,
-		container:
-			'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200',
-		icon: 'text-blue-600 dark:text-blue-400'
-	},
-	warning: {
-		Icon: TriangleAlert,
-		container:
-			'border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-200',
-		icon: 'text-orange-600 dark:text-orange-400'
-	},
-	danger: {
-		Icon: CircleX,
-		container:
-			'border-red-200 bg-red-50 text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200',
-		icon: 'text-red-600 dark:text-red-400'
-	},
-	success: {
-		Icon: CircleCheck,
-		container:
-			'border-green-200 bg-green-50 text-green-900 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-200',
-		icon: 'text-green-600 dark:text-green-400'
-	},
-	tip: {
-		Icon: Lightbulb,
-		container:
-			'border-purple-200 bg-purple-50 text-purple-900 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-200',
-		icon: 'text-purple-600 dark:text-purple-400'
-	},
-	note: {
-		Icon: StickyNote,
-		container:
-			'border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-500/30 dark:bg-zinc-500/10 dark:text-zinc-200',
-		icon: 'text-zinc-600 dark:text-zinc-400'
-	},
-	question: {
-		Icon: CircleQuestionMark,
-		container:
-			'border-indigo-200 bg-indigo-50 text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200',
-		icon: 'text-indigo-600 dark:text-indigo-400'
-	}
+	default: { Icon: Info, token: 'info' },
+	warning: { Icon: TriangleAlert, token: 'warning' },
+	danger: { Icon: CircleX, token: 'destructive' },
+	success: { Icon: CircleCheck, token: 'success' },
+	tip: { Icon: Lightbulb, token: 'tip' },
+	note: { Icon: StickyNote, token: 'muted-foreground' },
+	question: { Icon: CircleQuestionMark, token: 'info' }
 } as const;
 
 const aliases: Partial<Record<CalloutType, keyof typeof variants>> = {
@@ -71,11 +36,14 @@ const aliases: Partial<Record<CalloutType, keyof typeof variants>> = {
 };
 
 const resolvedType = aliases[type] || (type as keyof typeof variants);
-const { Icon, container, icon } = variants[resolvedType] || variants.default;
+const { Icon, token } = variants[resolvedType] || variants.default;
 ---
 
-<div class={cn('my-6 flex items-start rounded-xl border p-4 shadow-sm', container)}>
-	<Icon class={cn('mt-0.5 mr-3 h-5 w-5 shrink-0', icon)} />
+<div
+	class="callout my-6 flex items-start rounded-xl border p-4 shadow-sm"
+	style={`--callout: var(--${token})`}
+>
+	<Icon class="callout-icon mt-0.5 mr-3 h-5 w-5 shrink-0" />
 	<div class="w-full min-w-0">
 		{title && <h5 class="mb-1 leading-none font-semibold tracking-tight">{title}</h5>}
 		<div class="text-sm leading-relaxed opacity-90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
@@ -83,3 +51,14 @@ const { Icon, container, icon } = variants[resolvedType] || variants.default;
 		</div>
 	</div>
 </div>
+
+<style>
+	.callout {
+		border-color: color-mix(in oklab, var(--callout) 30%, transparent);
+		background-color: color-mix(in oklab, var(--callout) 10%, transparent);
+		color: color-mix(in oklab, var(--callout) 50%, var(--foreground));
+	}
+	.callout > :global(.callout-icon) {
+		color: var(--callout);
+	}
+</style>

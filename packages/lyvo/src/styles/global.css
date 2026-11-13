@@ -26,6 +26,10 @@
 	--ring: oklch(0.55 0.12 255);
 	--destructive: oklch(0.6 0.15 20);
 	--destructive-foreground: oklch(1 0 0);
+	--info: oklch(0.546 0.245 262.881);
+	--success: oklch(0.627 0.194 149.214);
+	--warning: oklch(0.646 0.222 41.116);
+	--tip: oklch(0.558 0.288 302.321);
 	--chart-1: oklch(0.6 0.12 255);
 	--chart-2: oklch(0.65 0.12 180);
 	--chart-3: oklch(0.7 0.14 45);
@@ -75,6 +79,10 @@
 	--accent-foreground: oklch(0.95 0.01 250);
 	--destructive: oklch(0.6 0.15 20);
 	--destructive-foreground: oklch(1 0 0);
+	--info: oklch(0.707 0.165 254.624);
+	--success: oklch(0.792 0.209 151.711);
+	--warning: oklch(0.75 0.183 55.934);
+	--tip: oklch(0.714 0.203 305.504);
 	--border: oklch(0.25 0.01 250);
 	--input: oklch(0.25 0.01 250);
 	--ring: oklch(0.65 0.12 255);
@@ -125,6 +133,10 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-info: var(--info);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-tip: var(--tip);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -218,6 +230,11 @@
 		position: relative;
 	}
 
+	/* The wrapper carries the code block's margin, so first/last-child resets still reach it */
+	.prose .copy-wrapper:not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+		margin-block: 1.5em;
+	}
+
 	.copy-button {
 		position: absolute;
 		top: 0.5rem;
@@ -249,6 +266,13 @@
 		background-color: rgba(16, 185, 129, 0.1);
 		transform: scale(1.1);
 		opacity: 1;
+	}
+
+	/* No hover on touch screens, so the button stays visible there */
+	@media (hover: none) {
+		.copy-button {
+			opacity: 1;
+		}
 	}
 
 	.lyvo-mermaid {
@@ -355,6 +379,15 @@
 		content: '' !important;
 	}
 
+	/* Blockquotes read as plain notes, without the quote marks and italics */
+	.prose :where(blockquote):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+		font-style: normal !important;
+	}
+	.prose :where(blockquote p):not(:where([class~='not-prose'], [class~='not-prose'] *))::before,
+	.prose :where(blockquote p):not(:where([class~='not-prose'], [class~='not-prose'] *))::after {
+		content: none !important;
+	}
+
 	/* Card background for inline code */
 	code:not(pre code) {
 		@apply rounded-md border border-border bg-muted/60 px-1.5 py-0.5 text-[0.85em] font-medium text-foreground;
@@ -397,6 +430,11 @@
 		font-weight: var(--shiki-dark-font-weight) !important;
 		text-decoration: var(--shiki-dark-text-decoration) !important;
 	}
+}
+
+/* Unlayered so it beats the typography margin, the wrapper has it now */
+.copy-wrapper > pre {
+	margin-block: 0;
 }
 
 /* The active sidebar item glides to its new spot on navigation */
