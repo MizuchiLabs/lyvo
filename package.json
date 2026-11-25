@@ -19,5 +19,5 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "vitest": "^5.1.0"
   },
-  "packageManager": "pnpm@12.22.0"
+  "packageManager": "pnpm@12.23.0"
 }
