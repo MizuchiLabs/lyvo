@@ -1,24 +1,16 @@
 ---
-import { apiIndexHref, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { apiIndexHref, apiPageHref, type LoadedApiSpec } from '@lyvo/lib/openapi/model';
+import { methodColor } from '@lyvo/lib/openapi/methods';
 import PageActions from '@lyvo/components/docs/PageActions.astro';
+import CopyButton from '@lyvo/components/base/CopyButton.astro';
 import { markdownPath } from '@lyvo/lib/seo';
 import { withBase } from '@lyvo/lib/url';
 import { getI18n } from '@lyvo/lib/i18n';
+import { isExternal, slugify } from '@lyvo/lib/utils';
 import config from 'virtual:lyvo-config';
 import type { OpenAPISecurityRequirement } from '@lyvo/lib/openapi/types';
 import { marked } from 'marked';
-import {
-	Download,
-	Server,
-	Shield,
-	Tags as TagsIcon,
-	Mail,
-	Scale,
-	FileText,
-	ExternalLink,
-	Link as LinkIcon,
-	Info
-} from '@lucide/astro';
+import { Download, ExternalLink, Search, Webhook } from '@lucide/astro';
 
 interface Props {
 	spec: LoadedApiSpec;
@@ -27,6 +19,7 @@ interface Props {
 const { spec } = Astro.props;
 const { t } = getI18n(Astro.url);
 const model = spec.model;
+const info = model.info;
 
 const source = model.source;
 // Only files under public/ are served, anything else has no URL to link to.
@@ -53,244 +46,259 @@ function schemeBadge(scheme: OpenAPISecurityRequirement): string {
 			return scheme.type ?? 'Scheme';
 	}
 }
+
+type InfoLink = { label: string; href?: string };
+const about: InfoLink[] = [
+	...(model.openapi ? [{ label: `OpenAPI ${model.openapi}` }] : []),
+	...(info?.license ? [{ label: info.license.name, href: info.license.url }] : []),
+	...(info?.contact?.email
+		? [{ label: info.contact.email, href: `mailto:${info.contact.email}` }]
+		: []),
+	...(info?.contact?.url
+		? [{ label: info.contact.name ?? t('website'), href: info.contact.url }]
+		: []),
+	...(info?.termsOfService ? [{ label: t('termsOfService'), href: info.termsOfService }] : []),
+	...(model.externalDocs
+		? [
+				{
+					label: model.externalDocs.description ?? t('documentation'),
+					href: model.externalDocs.url
+				}
+			]
+		: [])
+];
+
+const tagDescriptions = new Map(model.tags.map((tag) => [slugify(tag.name), tag.description]));
+const labelClass = 'text-xs font-medium tracking-wide text-muted-foreground uppercase';
 ---
 
-<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:px-12">
-	<div class="mb-10 space-y-6">
-		<!-- Header -->
-		<div class="flex flex-wrap items-start justify-between gap-4">
-			<div class="min-w-0 space-y-3">
-				<div class="flex flex-wrap items-center gap-3">
-					<h1 class="scroll-m-20 text-3xl font-bold tracking-tight md:text-4xl">
-						{model.info?.title ?? spec.title}
-					</h1>
-					{model.info?.version && (
-						<span class="mt-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-primary uppercase">
-							v{model.info.version}
-						</span>
-					)}
-					{model.openapi && (
-						<span class="mt-1 rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-							OpenAPI {model.openapi}
-						</span>
-					)}
-				</div>
-
-				{model.info?.description && (
+<div class="@container mx-auto w-full max-w-4xl space-y-8 px-4 py-8 sm:px-6 md:py-12 lg:px-8 xl:px-12">
+	<header class="flex flex-wrap items-start justify-between gap-4">
+		<div class="min-w-0 flex-1 basis-96 space-y-3">
+			<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+				<h1 class="scroll-m-20 text-3xl font-bold tracking-tight md:text-4xl">
+					{info?.title ?? spec.title}
+				</h1>
+				{info?.version && (
+					<span class="font-mono text-sm text-muted-foreground">v{info.version}</span>
+				)}
+			</div>
+			{info?.description && (
+				<div data-collapsible class="group/desc relative">
 					<div
-						class="prose max-w-none prose-slate dark:prose-invert prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-						set:html={await marked.parse(model.info.description as string)}
+						data-collapsible-body
+						class="prose max-h-64 max-w-none overflow-hidden prose-slate group-data-open/desc:max-h-none dark:prose-invert prose-headings:scroll-m-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+						set:html={await marked.parse(info.description)}
 					/>
-				)}
-			</div>
-
-			<div class="flex shrink-0 items-center gap-2">
-				{markdown && <PageActions markdown={markdown} />}
-				{downloadHref && (
-					<a
-						href={downloadHref}
-						download
-						class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+					<div
+						aria-hidden="true"
+						class="pointer-events-none absolute inset-x-0 bottom-7 hidden h-16 bg-linear-to-t from-background group-data-clamped/desc:block group-data-open/desc:hidden"
+					/>
+					<button
+						type="button"
+						data-collapsible-toggle
+						aria-expanded="false"
+						class="mt-2 hidden text-sm font-medium text-primary hover:underline group-data-clamped/desc:inline-flex"
 					>
-						<Download size={16} />
-						{t('downloadSpec')}
-					</a>
-				)}
-			</div>
+						<span class="group-data-open/desc:hidden">{t('readMore')}</span>
+						<span class="hidden group-data-open/desc:inline">{t('showLess')}</span>
+					</button>
+				</div>
+			)}
 		</div>
 
-		<!-- Servers -->
-		{model.servers.length > 0 && (
-			<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-				<div class="mb-4 flex items-center gap-2">
-					<Server size={16} class="text-muted-foreground" />
-					<h2 class="text-base font-semibold tracking-tight">{t('servers')}</h2>
-					<span class="text-sm text-muted-foreground">({model.servers.length})</span>
-				</div>
-				<ul class="divide-y divide-border/70">
-					{model.servers.map((server) => (
-						<li class="py-3 first:pt-0 last:pb-0">
-							<code class="block rounded-md bg-muted/40 px-2 py-1 text-sm break-all text-foreground">
-								{server.url}
-							</code>
-							{server.description && (
-								<p class="mt-1.5 pl-2 text-sm text-muted-foreground">
-									{server.description}
-								</p>
-							)}
-						</li>
-					))}
-				</ul>
-			</section>
-		)}
-
-		<!-- Authentication + About -->
-		<div class="grid grid-cols-1 gap-6">
-			{(model.info?.contact || model.info?.license || model.info?.termsOfService) && (
-				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-					<div class="mb-4 flex items-center gap-2">
-						<Info size={16} class="text-muted-foreground" />
-						<h2 class="text-base font-semibold tracking-tight">{t('about')}</h2>
-					</div>
-					<dl class="space-y-4 text-sm">
-						{model.info.contact && (
-							<div>
-								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-									<Mail size={12} />
-									{t('contact')}
-								</dt>
-								<dd class="mt-1">
-									{model.info.contact.name ? (
-										<span class="font-medium">{model.info.contact.name}</span>
-									) : (
-										'—'
-									)}
-									{model.info.contact.email && (
-										<a
-											href={`mailto:${model.info.contact.email}`}
-											class="ml-2 text-primary hover:underline"
-										>
-											{model.info.contact.email}
-										</a>
-									)}
-									{model.info.contact.url && (
-										<a
-											href={model.info.contact.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="ml-2 inline-flex items-center gap-1 text-primary hover:underline"
-										>
-											{t('website')}
-											<ExternalLink size={12} />
-										</a>
-									)}
-								</dd>
-							</div>
-						)}
-
-						{model.info.license && (
-							<div>
-								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-									<Scale size={12} />
-									{t('license')}
-								</dt>
-								<dd class="mt-1">
-									<a
-										href={model.info.license.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-									>
-										{model.info.license.name}
-										{model.info.license.url && <ExternalLink size={12} />}
-									</a>
-									{model.info.license.identifier && (
-										<span class="ml-2 text-muted-foreground">
-											{model.info.license.identifier}
-										</span>
-									)}
-								</dd>
-							</div>
-						)}
-
-						{model.info.termsOfService && (
-							<div>
-								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-									<FileText size={12} />
-									{t('termsOfService')}
-								</dt>
-								<dd class="mt-1">
-									<a
-										href={model.info.termsOfService}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-									>
-										{t('readTerms')}
-										<ExternalLink size={12} />
-									</a>
-								</dd>
-							</div>
-						)}
-
-						{model.externalDocs && (
-							<div>
-								<dt class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-									<LinkIcon size={12} />
-									{t('documentation')}
-								</dt>
-								<dd class="mt-1">
-									<a
-										href={model.externalDocs.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-									>
-										{model.externalDocs.description ?? t('externalDocs')}
-										<ExternalLink size={12} />
-									</a>
-								</dd>
-							</div>
-						)}
-					</dl>
-				</section>
+		<div class="not-prose flex shrink-0 items-center gap-2">
+			{markdown && <PageActions markdown={markdown} />}
+			{downloadHref && (
+				<a
+					href={downloadHref}
+					download
+					title={t('downloadSpec')}
+					class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+				>
+					<Download size={14} />
+					{source.split('/').pop()}
+				</a>
 			)}
+		</div>
+	</header>
 
+	{(model.servers.length > 0 || model.securitySchemes.length > 0 || about.length > 0) && (
+		<section class="not-prose grid divide-y divide-border rounded-xl border border-border bg-card text-card-foreground @2xl:flex @2xl:divide-x @2xl:divide-y-0">
+			{model.servers.length > 0 && (
+				<div class="min-w-0 space-y-2 p-4 @2xl:max-w-1/2 @2xl:shrink-0">
+					<h2 class={labelClass}>{t('servers')}</h2>
+					<ul class="space-y-1">
+						{model.servers.map((server) => (
+							<li class="flex min-w-0 items-center gap-1" title={server.description}>
+								<span class="truncate font-mono text-sm">{server.url}</span>
+								<CopyButton
+									text={server.url}
+									label={t('copyUrl')}
+									class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+								/>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
 			{model.securitySchemes.length > 0 && (
-				<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-					<div class="mb-4 flex items-center gap-2">
-						<Shield size={16} class="text-muted-foreground" />
-						<h2 class="text-base font-semibold tracking-tight">
-							{t('authentication')}
-						</h2>
-					</div>
-					<ul class="space-y-3">
+				<div class="min-w-0 flex-1 space-y-2 p-4">
+					<h2 class={labelClass}>{t('authentication')}</h2>
+					<ul class="flex flex-wrap gap-1.5">
 						{model.securitySchemes.map((scheme) => (
-							<li class="rounded-md border border-border/70 px-3 py-2.5 transition-colors hover:bg-muted/30">
-								<div class="flex items-center justify-between gap-3">
-									<span class="truncate font-mono text-sm font-medium">
-										{scheme.name}
-									</span>
-									<span class="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] leading-4 font-semibold tracking-wide text-muted-foreground uppercase">
-										{schemeBadge(scheme)}
-									</span>
-								</div>
-								{scheme.description && (
-									<p class="mt-1 text-sm text-muted-foreground">
-										{scheme.description}
-									</p>
+							<li
+								class="rounded-md border border-border px-1.5 py-0.5 font-mono text-xs"
+								title={[schemeBadge(scheme), scheme.description]
+									.filter(Boolean)
+									.join(' · ')}
+							>
+								{scheme.name}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+			{about.length > 0 && (
+				<div class="min-w-0 flex-1 space-y-2 p-4">
+					<h2 class={labelClass}>{t('about')}</h2>
+					<ul class="flex flex-wrap gap-x-3 gap-y-1 text-sm">
+						{about.map((link) => (
+							<li>
+								{link.href ? (
+									<a
+										href={link.href}
+										target={isExternal(link.href) ? '_blank' : undefined}
+										rel={
+											isExternal(link.href)
+												? 'noopener noreferrer'
+												: undefined
+										}
+										class="inline-flex items-center gap-1 text-primary hover:underline"
+									>
+										{link.label}
+										{isExternal(link.href) && <ExternalLink size={12} />}
+									</a>
+								) : (
+									link.label
 								)}
 							</li>
 						))}
 					</ul>
-				</section>
-			)}
-		</div>
-
-		<!-- Tags -->
-		{model.tags.length > 0 && (
-			<section class="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-				<div class="mb-4 flex items-center gap-2">
-					<TagsIcon size={16} class="text-muted-foreground" />
-					<h2 class="text-base font-semibold tracking-tight">{t('groups')}</h2>
-					<span class="text-sm text-muted-foreground">({model.tags.length})</span>
 				</div>
-				<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-					{model.tags.map((tag) => (
-						<li class="rounded-md border border-border/70 px-3 py-2.5 transition-colors hover:bg-muted/30">
-							<div class="flex items-center justify-between gap-3">
-								<span class="truncate text-sm font-medium">{tag.name}</span>
-								<span class="shrink-0 text-xs text-muted-foreground">
-									{t('endpointCount', { count: tag.operationCount })}
-								</span>
-							</div>
-							{tag.description && (
-								<p class="mt-1 text-sm text-muted-foreground">{tag.description}</p>
+			)}
+		</section>
+	)}
+
+	{model.navigation.length > 0 && (
+		<section class="not-prose space-y-4">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				<h2 class="text-lg font-semibold tracking-tight">
+					{t('endpointCount', { count: model.operations.length })}
+				</h2>
+				<label class="flex h-9 w-full items-center gap-2 rounded-lg border border-border bg-background px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-ring sm:w-72">
+					<Search size={14} />
+					<span class="sr-only">{t('search')}</span>
+					<input
+						type="search"
+						data-endpoint-filter
+						placeholder={t('search')}
+						class="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+					/>
+				</label>
+			</div>
+
+			{model.navigation.map((group) => {
+				const description = tagDescriptions.get(group.id);
+				return (
+					<div
+						data-endpoint-group
+						class="overflow-hidden rounded-xl border border-border"
+					>
+						<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border bg-muted/40 px-4 py-3">
+							<h3 class="text-sm font-semibold">{group.title}</h3>
+							{description && (
+								<p
+									class="line-clamp-2 text-sm text-muted-foreground"
+									set:html={marked.parseInline(description)}
+								/>
 							)}
-						</li>
-					))}
-				</ul>
-			</section>
-		)}
-	</div>
+						</div>
+						<ul class="divide-y divide-border/60">
+							{group.items.map((item) => (
+								<li
+									data-endpoint={`${item.method} ${item.path} ${item.label}`.toLowerCase()}
+								>
+									<a
+										href={apiPageHref(spec, item.slug)}
+										class="flex flex-col gap-1 px-4 py-2.5 transition-colors hover:bg-accent/50 focus-visible:bg-accent/50 focus-visible:outline-none sm:flex-row sm:items-center sm:gap-4"
+									>
+										<span class="flex min-w-0 items-center gap-3">
+											<span
+												class:list={[
+													'inline-flex w-12 shrink-0 justify-center rounded border py-0.5 font-mono text-[11px] font-semibold uppercase',
+													item.isWebhook
+														? 'border-fuchsia-500/30 bg-fuchsia-500/5 text-fuchsia-600 dark:text-fuchsia-300'
+														: methodColor[item.method]
+												]}
+											>
+												{item.isWebhook ? (
+													<Webhook size={13} />
+												) : item.method === 'delete' ? (
+													'del'
+												) : (
+													item.method
+												)}
+											</span>
+											<span
+												class:list={[
+													'truncate font-mono text-sm',
+													item.deprecated && 'line-through opacity-60'
+												]}
+											>
+												{item.path}
+											</span>
+										</span>
+										<span class="pl-15 text-sm text-muted-foreground sm:ml-auto sm:truncate sm:pl-0">
+											{item.label}
+										</span>
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				);
+			})}
+		</section>
+	)}
 </div>
+
+<script>
+	function clampDescriptions() {
+		for (const root of document.querySelectorAll<HTMLElement>('[data-collapsible]')) {
+			const body = root.querySelector<HTMLElement>('[data-collapsible-body]')!;
+			root.toggleAttribute('data-clamped', body.scrollHeight > body.clientHeight + 1);
+		}
+	}
+	document.addEventListener('astro:page-load', clampDescriptions);
+
+	document.addEventListener('click', (event) => {
+		const toggle = (event.target as HTMLElement).closest('[data-collapsible-toggle]');
+		const open = toggle?.closest('[data-collapsible]')?.toggleAttribute('data-open');
+		toggle?.setAttribute('aria-expanded', String(open));
+	});
+
+	document.addEventListener('input', (event) => {
+		const input = event.target as HTMLInputElement;
+		if (!input.matches('[data-endpoint-filter]')) return;
+		const query = input.value.trim().toLowerCase();
+		for (const group of document.querySelectorAll<HTMLElement>('[data-endpoint-group]')) {
+			let visible = 0;
+			for (const row of group.querySelectorAll<HTMLElement>('[data-endpoint]')) {
+				row.hidden = !row.dataset.endpoint!.includes(query);
+				if (!row.hidden) visible++;
+			}
+			group.hidden = visible === 0;
+		}
+	});
+</script>

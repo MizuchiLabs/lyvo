@@ -21,18 +21,16 @@ const hasContent = columns.length > 0 || config.socials.length > 0;
 						<p class="text-sm text-muted-foreground">{config.footer.note}</p>
 					)}
 					{config.socials.length > 0 && (
-						<div class="flex items-center gap-1">
+						<div class="flex items-center gap-2">
 							{config.socials.map((social) => (
 								<a
 									href={social.href}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+									class="inline-flex size-9 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&>svg]:size-4"
 									title={social.label}
 								>
-									<span class="flex items-center justify-center [&>svg]:size-5">
-										<Icon name={social.icon} />
-									</span>
+									<Icon name={social.icon} size={16} />
 									<span class="sr-only">{social.label}</span>
 								</a>
 							))}
@@ -70,7 +68,7 @@ const hasContent = columns.length > 0 || config.socials.length > 0;
 				)}
 			</div>
 
-			<div class="mt-10 border-t border-border/40 pt-6 text-xs text-muted-foreground">
+			<div class="mt-10 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground md:text-left">
 				© {year}
 				{config.title ? ` ${config.title}` : ''}. {t('allRightsReserved')}
 			</div>

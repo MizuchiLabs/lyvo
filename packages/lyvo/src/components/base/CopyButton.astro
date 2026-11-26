@@ -1,0 +1,35 @@
+---
+import { Check, Copy } from '@lucide/astro';
+import { getI18n } from '@lyvo/lib/i18n';
+
+interface Props {
+	/** Text to copy. */
+	text?: string;
+	/** URL whose response body is copied instead of `text`. */
+	src?: string;
+	label: string;
+	/** Show `label` next to the icon, and "Copied" after a copy. */
+	showLabel?: boolean;
+	/** Event name reported through `lyvo:track` after a copy. */
+	track?: string;
+	class?: string;
+}
+
+const { text, src, label, showLabel = false, track, class: className } = Astro.props;
+const { t } = getI18n(Astro.url);
+---
+
+<button
+	type="button"
+	data-copy={text}
+	data-copy-src={src}
+	data-track={track}
+	aria-label={showLabel ? undefined : label}
+	title={showLabel ? undefined : label}
+	class={className}
+>
+	<Copy size={14} data-idle />
+	<Check size={14} data-done class="text-primary" />
+	{showLabel && <span data-idle>{label}</span>}
+	{showLabel && <span data-done>{t('copied')}</span>}
+</button>

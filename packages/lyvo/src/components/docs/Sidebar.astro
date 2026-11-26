@@ -1,11 +1,10 @@
 ---
-import { X } from '@lucide/astro';
 import SectionPicker from '@lyvo/components/docs/SectionPicker.astro';
 import SidebarLinks from '@lyvo/components/docs/SidebarLinks.astro';
 import SidebarFooter from '@lyvo/components/docs/SidebarFooter.astro';
 import SearchTrigger from '@lyvo/components/base/SearchTrigger.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
-import { getI18n } from '@lyvo/lib/i18n';
+import Drawer from '@lyvo/components/base/Drawer.astro';
 import type { Section } from '@lyvo/lib/sections';
 import config from 'virtual:lyvo-config';
 
@@ -15,7 +14,6 @@ interface Props {
 }
 
 const { sections, active } = Astro.props;
-const { t } = getI18n(Astro.url);
 const showLanguage = !active.spec;
 ---
 
@@ -31,49 +29,10 @@ const showLanguage = !active.spec;
 	<SidebarFooter showLanguage={showLanguage} />
 </aside>
 
-<dialog
-	id="lyvo-drawer"
-	aria-label={t('menu')}
-	class="fixed inset-y-0 left-0 m-0 h-dvh max-h-dvh w-[min(20rem,85vw)] max-w-none -translate-x-full flex-col border-r border-border bg-sidebar p-0 text-foreground shadow-2xl transition-[translate,display,overlay] transition-discrete duration-300 ease-out backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:translate-x-0 starting:open:-translate-x-full md:hidden"
->
-	<div class="flex shrink-0 flex-col gap-3 px-4 pt-4 pb-1">
-		<div class="flex items-center justify-between pl-1">
-			<Logo id="mobile-drawer" />
-			<button
-				type="button"
-				data-drawer-close
-				class="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-			>
-				<X size={18} />
-				<span class="sr-only">{t('close')}</span>
-			</button>
-		</div>
+<Drawer side="left">
+	<div class="shrink-0 px-4 pt-3 pb-1">
 		<SectionPicker sections={sections} active={active} />
 	</div>
 	<SidebarLinks section={active} />
 	<SidebarFooter showLanguage={showLanguage} />
-</dialog>
-
-<script>
-	const drawer = () => document.getElementById('lyvo-drawer') as HTMLDialogElement | null;
-
-	function reveal(dialog: HTMLDialogElement) {
-		const current = dialog.querySelector<HTMLElement>('[aria-current="page"]');
-		current?.scrollIntoView({ block: 'center' });
-	}
-
-	document.addEventListener('click', (event) => {
-		const target = event.target as Element;
-		const dialog = drawer();
-		if (!dialog) return;
-		if (target.closest('[data-drawer-open]')) {
-			dialog.showModal();
-			reveal(dialog);
-		} else if (target.closest('[data-drawer-close]') || target === dialog) {
-			// A click on the dialog itself is a click on its backdrop.
-			dialog.close();
-		}
-	});
-
-	document.addEventListener('astro:before-preparation', () => drawer()?.close());
-</script>
+</Drawer>

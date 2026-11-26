@@ -262,7 +262,12 @@
 		color: var(--foreground);
 	}
 
-	.copy-button.copied {
+	:where([data-copy], [data-copy-src]):not([data-copied]) [data-done],
+	:where([data-copy], [data-copy-src])[data-copied] [data-idle] {
+		display: none;
+	}
+
+	.copy-button[data-copied] {
 		background-color: rgba(16, 185, 129, 0.1);
 		transform: scale(1.1);
 		opacity: 1;

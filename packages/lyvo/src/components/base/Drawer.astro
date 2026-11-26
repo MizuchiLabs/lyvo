@@ -1,0 +1,63 @@
+---
+import { X } from '@lucide/astro';
+import Logo from '@lyvo/components/base/Logo.astro';
+import { getI18n } from '@lyvo/lib/i18n';
+
+interface Props {
+	side: 'left' | 'right';
+}
+
+const { side } = Astro.props;
+const { t } = getI18n(Astro.url);
+
+const sides = {
+	left: 'left-0 -translate-x-full border-r starting:open:-translate-x-full',
+	right: 'right-0 left-auto translate-x-full border-l starting:open:translate-x-full'
+};
+---
+
+<dialog
+	id="lyvo-drawer"
+	aria-label={t('menu')}
+	class:list={[
+		'fixed inset-y-0 m-0 h-dvh max-h-dvh w-[min(20rem,85vw)] max-w-none flex-col border-border bg-sidebar p-0 text-foreground shadow-2xl transition-[translate,display,overlay] transition-discrete duration-300 ease-out backdrop:bg-black/50 backdrop:backdrop-blur-sm open:flex open:translate-x-0 md:hidden',
+		sides[side]
+	]}
+>
+	<div class="flex shrink-0 items-center justify-between pt-4 pr-4 pl-5">
+		<Logo id="mobile-drawer" />
+		<button
+			type="button"
+			data-drawer-close
+			class="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+		>
+			<X size={18} />
+			<span class="sr-only">{t('close')}</span>
+		</button>
+	</div>
+	<slot />
+</dialog>
+
+<script>
+	const drawer = () => document.getElementById('lyvo-drawer') as HTMLDialogElement | null;
+
+	function reveal(dialog: HTMLDialogElement) {
+		const current = dialog.querySelector<HTMLElement>('[aria-current="page"]');
+		current?.scrollIntoView({ block: 'center' });
+	}
+
+	document.addEventListener('click', (event) => {
+		const target = event.target as Element;
+		const dialog = drawer();
+		if (!dialog) return;
+		if (target.closest('[data-drawer-open]')) {
+			dialog.showModal();
+			reveal(dialog);
+		} else if (target.closest('[data-drawer-close]') || target === dialog) {
+			// A click on the dialog itself is a click on its backdrop.
+			dialog.close();
+		}
+	});
+
+	document.addEventListener('astro:before-preparation', () => drawer()?.close());
+</script>

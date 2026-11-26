@@ -1,6 +1,8 @@
 ---
-import { Menu, X } from '@lucide/astro';
+import { Menu } from '@lucide/astro';
 import ThemeToggle from '@lyvo/components/base/ThemeToggle.astro';
+import ThemeSwitch from '@lyvo/components/base/ThemeSwitch.astro';
+import Drawer from '@lyvo/components/base/Drawer.astro';
 import BaseHead from '@lyvo/layouts/BaseHead.astro';
 import SkipLink from '@lyvo/components/base/SkipLink.astro';
 import Logo from '@lyvo/components/base/Logo.astro';
@@ -71,39 +73,12 @@ const navItems =
 					</div>
 					<div class="flex items-center space-x-2">
 						<slot name="header-actions" />
-						{navItems.length > 0 && (
-							<details class="group relative md:hidden">
-								<summary
-									aria-label={t('menu')}
-									class="flex size-9 cursor-pointer list-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden"
-								>
-									<Menu size={18} class="group-open:hidden" />
-									<X size={18} class="hidden group-open:block" />
-								</summary>
-								<nav class="absolute top-full right-0 mt-2 flex w-48 flex-col rounded-lg border border-border bg-popover p-1 shadow-lg">
-									{navItems.map((item) => (
-										<a
-											href={item.href}
-											target={isExternal(item.href) ? '_blank' : undefined}
-											rel={
-												isExternal(item.href)
-													? 'noopener noreferrer'
-													: undefined
-											}
-											class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-										>
-											{item.title}
-										</a>
-									))}
-								</nav>
-							</details>
-						)}
 						{config.socials.map((social) => (
 							<a
 								href={social.href}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+								class="hidden rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:block"
 								title={social.label}
 							>
 								<span class="flex items-center justify-center [&>svg]:size-5">
@@ -112,10 +87,54 @@ const navItems =
 								<span class="sr-only">{social.label}</span>
 							</a>
 						))}
-						<ThemeToggle />
+						<div class="hidden md:block">
+							<ThemeToggle />
+						</div>
+						<button
+							type="button"
+							data-drawer-open
+							class="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:hidden"
+						>
+							<Menu size={18} />
+							<span class="sr-only">{t('menu')}</span>
+						</button>
 					</div>
 				</div>
 			</header>
+			<Drawer side="right">
+				<nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+					{navItems.map((item) => {
+						const external = isExternal(item.href);
+						return (
+							<a
+								href={item.href}
+								target={external ? '_blank' : undefined}
+								rel={external ? 'noopener noreferrer' : undefined}
+								class="rounded-md px-3 py-2.5 text-base font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+							>
+								{item.title}
+							</a>
+						);
+					})}
+				</nav>
+				<div class="flex shrink-0 items-center gap-1 border-t border-border/60 p-3">
+					{config.socials.map((social) => (
+						<a
+							href={social.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							title={social.label}
+							class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground [&>svg]:size-4"
+						>
+							<Icon name={social.icon} size={16} />
+							<span class="sr-only">{social.label}</span>
+						</a>
+					))}
+					<div class="ml-auto">
+						<ThemeSwitch />
+					</div>
+				</div>
+			</Drawer>
 		</slot>
 		<main id="content" class="flex-1 overflow-x-clip">
 			<slot />

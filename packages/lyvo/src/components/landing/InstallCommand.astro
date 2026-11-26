@@ -1,5 +1,5 @@
 ---
-import { Check, Copy } from '@lucide/astro';
+import CopyButton from '@lyvo/components/base/CopyButton.astro';
 import { cn } from '@lyvo/lib/utils';
 import { getI18n } from '@lyvo/lib/i18n';
 
@@ -43,41 +43,24 @@ const [firstLabel, firstCommand] = entries[0];
 			<span class="text-muted-foreground select-none">$ </span>
 			<span data-value>{firstCommand}</span>
 		</code>
-		<button
-			type="button"
-			data-copy
-			aria-label={t('copyCommand')}
+		<CopyButton
+			text={firstCommand}
+			label={t('copyCommand')}
 			class="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-		>
-			<Copy size={14} data-icon="copy" />
-			<Check size={14} data-icon="check" class="hidden text-primary" />
-		</button>
+		/>
 	</div>
 </div>
 
 <script>
-	document.addEventListener('click', async (event) => {
-		const target = event.target as HTMLElement;
-		const root = target.closest<HTMLElement>('[data-install]');
-		if (!root) return;
-
-		const tab = target.closest<HTMLButtonElement>('[data-command]');
-		if (tab) {
-			for (const other of root.querySelectorAll('[data-command]')) {
-				other.setAttribute('aria-selected', String(other === tab));
-			}
-			root.querySelector('[data-value]')!.textContent = tab.dataset.command ?? '';
-			return;
+	document.addEventListener('click', (event) => {
+		const tab = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-command]');
+		const root = tab?.closest<HTMLElement>('[data-install]');
+		if (!tab || !root) return;
+		for (const other of root.querySelectorAll('[data-command]')) {
+			other.setAttribute('aria-selected', String(other === tab));
 		}
-
-		const copy = target.closest<HTMLButtonElement>('[data-copy]');
-		if (!copy) return;
-		await navigator.clipboard.writeText(root.querySelector('[data-value]')?.textContent ?? '');
-		copy.querySelector('[data-icon="copy"]')?.classList.add('hidden');
-		copy.querySelector('[data-icon="check"]')?.classList.remove('hidden');
-		setTimeout(() => {
-			copy.querySelector('[data-icon="copy"]')?.classList.remove('hidden');
-			copy.querySelector('[data-icon="check"]')?.classList.add('hidden');
-		}, 2000);
+		const command = tab.dataset.command ?? '';
+		root.querySelector('[data-value]')!.textContent = command;
+		root.querySelector<HTMLElement>('[data-copy]')!.dataset.copy = command;
 	});
 </script>

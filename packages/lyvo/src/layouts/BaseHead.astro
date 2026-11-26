@@ -165,11 +165,11 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 		}
 		window.__lyvoTheme.apply();
 	</script>
-	<!-- Code Copy Button -->
+	<!-- Copy buttons: code blocks get one, and every [data-copy] or [data-copy-src] copies -->
 	<script is:inline>
 		function setupCopyButtons() {
-			const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
-			const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+			const icon = (paths, state) =>
+				`<svg ${state} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 
 			document.querySelectorAll('pre').forEach((block) => {
 				if (
@@ -187,39 +187,62 @@ const defaultAlternate = alternates.find((alt) => alt.lang === config.i18n.defau
 				const button = document.createElement('button');
 				button.type = 'button';
 				button.className = 'copy-button';
-				button.innerHTML = copyIcon;
+				button.dataset.copy = block.querySelector('code')?.textContent ?? '';
+				button.dataset.track = 'code_copy';
+				button.innerHTML =
+					icon(
+						'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+						'data-idle'
+					) + icon('<path d="M20 6 9 17l-5-5"/>', 'data-done');
 				button.setAttribute(
 					'aria-label',
 					document.querySelector('meta[name="lyvo-copy-label"]')?.content ?? 'Copy code'
 				);
 				wrapper.appendChild(button);
-
-				button.addEventListener('click', async () => {
-					const codeText = block.querySelector('code')?.innerText || '';
-					try {
-						await navigator.clipboard.writeText(codeText);
-						window.dispatchEvent(
-							new CustomEvent('lyvo:track', {
-								detail: { name: 'code_copy', props: { path: location.pathname } }
-							})
-						);
-						button.innerHTML = checkIcon;
-						button.classList.add('copied');
-						setTimeout(() => {
-							button.innerHTML = copyIcon;
-							button.classList.remove('copied');
-						}, 2000);
-					} catch (err) {
-						console.error('Failed to copy text: ', err);
-					}
-				});
 			});
+		}
+
+		async function writeClipboard(button) {
+			const src = button.dataset.copySrc;
+			if (src && typeof ClipboardItem !== 'undefined') {
+				// Safari drops user activation across an await, so pass a pending blob.
+				const blob = fetch(src).then(async (response) => {
+					if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+					return new Blob([await response.text()], { type: 'text/plain' });
+				});
+				await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]);
+			} else {
+				const text = src ? await (await fetch(src)).text() : (button.dataset.copy ?? '');
+				await navigator.clipboard.writeText(text);
+			}
 		}
 
 		// Head scripts can run again after a swap from a page without them.
 		if (!window.__lyvoCopyButtons) {
 			window.__lyvoCopyButtons = true;
 			document.addEventListener('astro:page-load', setupCopyButtons);
+			document.addEventListener('click', async (event) => {
+				const button = event.target.closest('[data-copy], [data-copy-src]');
+				if (!button) return;
+				try {
+					await writeClipboard(button);
+				} catch (error) {
+					console.error('[lyvo] copying failed', error);
+					return;
+				}
+				if (button.dataset.track) {
+					window.dispatchEvent(
+						new CustomEvent('lyvo:track', {
+							detail: {
+								name: button.dataset.track,
+								props: { path: location.pathname }
+							}
+						})
+					);
+				}
+				button.setAttribute('data-copied', '');
+				setTimeout(() => button.removeAttribute('data-copied'), 2000);
+			});
 		}
 		setupCopyButtons();
 	</script>

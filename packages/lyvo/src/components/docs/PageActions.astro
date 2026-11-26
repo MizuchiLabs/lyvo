@@ -1,5 +1,6 @@
 ---
-import { Check, ChevronDown, Copy, FileText, ExternalLink } from '@lucide/astro';
+import { ChevronDown, FileText, ExternalLink } from '@lucide/astro';
+import CopyButton from '@lyvo/components/base/CopyButton.astro';
 import { absoluteUrl } from '@lyvo/lib/seo';
 import { getI18n } from '@lyvo/lib/i18n';
 
@@ -20,20 +21,14 @@ const itemClass =
 	'flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:outline-none';
 ---
 
-<div
-	class="page-actions not-prose relative inline-flex shrink-0 items-center"
-	data-markdown={markdown}
-	data-copied={t('copied')}
->
-	<button
-		type="button"
-		data-copy-page
+<div class="page-actions not-prose relative inline-flex shrink-0 items-center">
+	<CopyButton
+		src={markdown}
+		label={t('copyPage')}
+		showLabel
+		track="page_copy"
 		class="inline-flex h-8 items-center gap-1.5 rounded-l-lg border border-border bg-background px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-	>
-		<Copy size={14} data-icon="copy" />
-		<Check size={14} data-icon="check" class="hidden text-primary" />
-		<span data-label>{t('copyPage')}</span>
-	</button>
+	/>
 	<details class="group">
 		<summary
 			aria-label={t('moreActions')}
@@ -65,7 +60,7 @@ const itemClass =
 <script>
 	import { track } from '@lyvo/lib/track';
 
-	document.addEventListener('click', async (event) => {
+	document.addEventListener('click', (event) => {
 		const target = event.target as HTMLElement;
 
 		for (const open of document.querySelectorAll<HTMLDetailsElement>(
@@ -77,38 +72,6 @@ const itemClass =
 		const action = target.closest<HTMLAnchorElement>('[data-page-action]');
 		if (action)
 			track('page_action', { action: action.dataset.pageAction, path: location.pathname });
-
-		const button = target.closest<HTMLButtonElement>('[data-copy-page]');
-		const root = button?.closest<HTMLElement>('.page-actions');
-		if (!button || !root?.dataset.markdown) return;
-
-		// Safari drops user activation across an await, so pass a pending blob.
-		const text = fetch(root.dataset.markdown).then(async (response) => {
-			if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-			return new Blob([await response.text()], { type: 'text/plain' });
-		});
-		try {
-			if (typeof ClipboardItem !== 'undefined') {
-				await navigator.clipboard.write([new ClipboardItem({ 'text/plain': text })]);
-			} else {
-				await navigator.clipboard.writeText(await (await text).text());
-			}
-		} catch (error) {
-			console.error('[lyvo] copying the page failed', error);
-			return;
-		}
-		track('page_copy', { path: location.pathname });
-
-		const label = button.querySelector('[data-label]');
-		const original = label?.textContent;
-		button.querySelector('[data-icon="copy"]')?.classList.add('hidden');
-		button.querySelector('[data-icon="check"]')?.classList.remove('hidden');
-		if (label) label.textContent = root.dataset.copied ?? '';
-		setTimeout(() => {
-			button.querySelector('[data-icon="copy"]')?.classList.remove('hidden');
-			button.querySelector('[data-icon="check"]')?.classList.add('hidden');
-			if (label) label.textContent = original ?? '';
-		}, 2000);
 	});
 
 	document.addEventListener('keydown', (event) => {

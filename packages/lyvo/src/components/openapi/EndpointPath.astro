@@ -1,6 +1,8 @@
 ---
-import { Webhook, Copy, Check } from '@lucide/astro';
-import type { HttpMethod, OpenAPIOperation } from '@lyvo/lib/openapi/types';
+import { Webhook } from '@lucide/astro';
+import CopyButton from '@lyvo/components/base/CopyButton.astro';
+import type { OpenAPIOperation } from '@lyvo/lib/openapi/types';
+import { methodColor } from '@lyvo/lib/openapi/methods';
 import { getI18n } from '@lyvo/lib/i18n';
 
 interface Props {
@@ -10,17 +12,6 @@ interface Props {
 
 const { endpoint, isWebhook } = Astro.props;
 const { t } = getI18n(Astro.url);
-
-const methodColor = {
-	get: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5',
-	post: 'text-blue-600 dark:text-blue-400 border-blue-500/30 bg-blue-500/5',
-	put: 'text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/5',
-	patch: 'text-yellow-600 dark:text-yellow-300 border-yellow-500/30 bg-yellow-500/5',
-	delete: 'text-rose-600 dark:text-rose-400 border-rose-500/30 bg-rose-500/5',
-	head: 'text-violet-600 dark:text-violet-300 border-violet-500/30 bg-violet-500/5',
-	options: 'text-cyan-600 dark:text-cyan-400 border-cyan-500/30 bg-cyan-500/5',
-	trace: 'text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30 bg-fuchsia-500/5'
-} as const;
 
 const methodLabel = endpoint.method.toUpperCase();
 const baseUrl =
@@ -40,7 +31,7 @@ const fullUrl = `${baseUrl}${endpoint.path}`;
 		<span
 			class:list={[
 				'rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide uppercase',
-				methodColor[endpoint.method as HttpMethod]
+				methodColor[endpoint.method]
 			]}
 		>
 			{methodLabel}
@@ -53,45 +44,10 @@ const fullUrl = `${baseUrl}${endpoint.path}`;
 			<span class="ml-0.5 text-foreground">{endpoint.path}</span>
 		</code>
 
-		<button
-			type="button"
-			class="api-copy-btn inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted-foreground/20 hover:text-foreground"
-			data-url={fullUrl}
-			aria-label={t('copyUrl')}
-			title={t('copyUrl')}
-		>
-			<Copy size={14} class="copy-icon" />
-			<Check size={14} class="check-icon hidden text-emerald-500" />
-		</button>
+		<CopyButton
+			text={fullUrl}
+			label={t('copyUrl')}
+			class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted-foreground/20 hover:text-foreground"
+		/>
 	</div>
 </div>
-
-<script>
-	document.addEventListener('astro:page-load', () => {
-		document.querySelectorAll('.api-copy-btn').forEach((btn) => {
-			if (btn.getAttribute('data-copy-bound') === 'true') return;
-			btn.setAttribute('data-copy-bound', 'true');
-
-			btn.addEventListener('click', async () => {
-				const url = btn.getAttribute('data-url');
-				if (!url) return;
-
-				try {
-					await navigator.clipboard.writeText(url);
-					const copyIcon = btn.querySelector('.copy-icon');
-					const checkIcon = btn.querySelector('.check-icon');
-
-					copyIcon?.classList.add('hidden');
-					checkIcon?.classList.remove('hidden');
-
-					setTimeout(() => {
-						copyIcon?.classList.remove('hidden');
-						checkIcon?.classList.add('hidden');
-					}, 2000);
-				} catch (err) {
-					console.error('Failed to copy: ', err);
-				}
-			});
-		});
-	});
-</script>

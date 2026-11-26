@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - `<Details title="...">` for a collapsible block with Markdown inside. Takes `icon` and `open`.
+- `CopyButton` copies a `text`, or the body of a `src` URL. Code blocks, "Copy page", install commands and endpoint URLs all use it and share one script.
+- Long API descriptions on the overview fold behind "Read more". New UI keys `readMore` and `showLess`.
 
 ### Fixed
 - Java and C# code samples with a request body didn't compile.
@@ -33,10 +35,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The docs layout fits the visible screen on phones.
 - The copy button on code blocks shows on touch screens.
 - Social icons are no longer dimmed in dark mode and match the theme toggle.
+- The landing header fits on phones. Below `md` its menu is a drawer like the docs one, with the social links and theme switch inside.
+- Footer social links are round icon buttons, and the copyright line is centered on phones.
+- API code samples and JSON examples scroll sideways instead of wrapping, so nested JSON keeps its indent.
+- The mobile docs bar shows the full section name when there is room for it.
 
 ### Changed
+- The API overview page is an endpoint index: every endpoint grouped by tag with a filter, under one strip for servers, auth and spec info. "Copy page" and the spec download share one button style.
 - More UI strings are translatable: `copyCode`, `moreActions`, `server`, `authorization`, `username`, `password`, `body`, plus new keys for the API reference. All keys are listed in `src/lib/ui-strings.ts`.
-- Unknown `i18n.ui` keys fail the build. The unused `reference` key is gone.
+- Unknown `i18n.ui` keys fail the build. The unused `reference`, `contact`, `license`, `readTerms` and `groups` keys are gone.
+- `copyUrl` reads "Copy URL", since it also copies server URLs now.
 - `i18n.ui` strings can take plural forms, like `{ one: '{count} Endpunkt', other: '{count} Endpunkte' }`.
 - `lastUpdated` takes a `{date}` placeholder. Old values without it still render, with the date after the text.
 - Invalid locale codes like `pt_BR` fail the build instead of crashing pages that format dates.
